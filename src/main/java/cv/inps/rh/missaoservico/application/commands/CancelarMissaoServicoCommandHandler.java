@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.commands;
 
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.missaoservico.application.services.MissaoServicoServiceWrite;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class CancelarMissaoServicoCommandHandler implements CommandHandler<CancelarMissaoServicoCommand, ResponseEntity<String>> {
+public class CancelarMissaoServicoCommandHandler implements CommandHandler<CancelarMissaoServicoCommand, ResponseEntity<SuccessResponseDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(CancelarMissaoServicoCommandHandler.class);
 
@@ -21,7 +22,7 @@ public class CancelarMissaoServicoCommandHandler implements CommandHandler<Cance
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<String> handle(CancelarMissaoServicoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(CancelarMissaoServicoCommand command) {
 
       LOGGER.debug("CancelarMissaoServicoCommand : {}", command);
 

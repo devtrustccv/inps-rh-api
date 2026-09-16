@@ -1,5 +1,7 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.missaoservico.application.dto.AvaliacaoPrestadorGravadaResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.ProcessoEtapaGravadaResponseDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -94,7 +96,7 @@ public class MissaoProcessoServiceWrite {
    * nesta gravação são notificados — os restantes já receberam o pedido.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarPrestadores(SaveProcessoPrestadoresCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarPrestadores(SaveProcessoPrestadoresCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getProcessoprestadoresrequest();
     if (dto == null) {
@@ -165,9 +167,8 @@ public class MissaoProcessoServiceWrite {
       notificarPedidoProposta(missao, processo, aNotificar, dto.getNotificacao());
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), null, null));
   }
 
   private LinkedHashMap<Long, ParamPrestadorEntity> resolverPrestadoresParam(List<UUID> uuids) {
@@ -225,7 +226,7 @@ public class MissaoProcessoServiceWrite {
    * correio (sipsv0.SEND_MAIL_V1) não suporta anexos.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarRequisicoes(SaveProcessoRequisicoesCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarRequisicoes(SaveProcessoRequisicoesCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getProcessorequisicoesrequest();
     if (dto == null) {
@@ -336,9 +337,8 @@ public class MissaoProcessoServiceWrite {
       }
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), null, null));
   }
 
   private LinkedHashMap<Long, RequisicaoPedida> resolverRequisicoesPedidas(
@@ -524,7 +524,7 @@ public class MissaoProcessoServiceWrite {
    * <p>NEXT exige pelo menos uma linha, avança para Validação UGAL e avisa os colaboradores.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarLogistica(SaveProcessoLogisticaCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarLogistica(SaveProcessoLogisticaCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getProcessologisticarequest();
     if (dto == null) {
@@ -565,9 +565,8 @@ public class MissaoProcessoServiceWrite {
       }
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), null, null));
   }
 
   private void validarSeccoes(ProcessoLogisticaRequestDTO dto, TipoProcesso tipo) {
@@ -981,7 +980,7 @@ public class MissaoProcessoServiceWrite {
    * é vinculativo.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarParecer(SaveProcessoParecerCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarParecer(SaveProcessoParecerCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getParecerrequest();
     if (dto == null) {
@@ -1047,10 +1046,8 @@ public class MissaoProcessoServiceWrite {
       missaoProcessoRepository.save(processo);
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa(),
-        "parecer", det.getUuid().toString()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), det.getUuid().toString(), null));
   }
 
   private ResponsavelParecer responsavelDoParecer(EtapaProcesso etapa, String responsavel) {
@@ -1085,6 +1082,12 @@ public class MissaoProcessoServiceWrite {
    * Cabimento automático pedido pela spec no fim da Aprovação RH. A integração com o SGAL continua sem
    * contrato (endpoint, payload, origem do nº de cabimento): as linhas seguem para a etapa Cabimento
    * sem CAB_ID, onde o cabimento é confirmado.
+   *
+   * <p>TODO: para integrar, obter do financeiro/SGAL: o endpoint de cabimento aplicável a uma linha de
+   * RH_T_MISSAO_LOGISTICA; o contrato do payload (1 cabimento por tipo de serviço, individual por
+   * colaborador na ajuda de custo); o campo da resposta com o CAB_ID; e a direcção (somos nós a chamar
+   * o SGAL, ou é o SGAL a escrever o CAB_ID). O único precedente, {@code ProcessarSalarioApi#processarCabimento},
+   * recebe {@code p_proc_sal_id} e não devolve nº de cabimento — não serve aqui.
    */
   private void gerarCabimentoAutomatico(MissaoProcessoEntity processo) {
     LOGGER.warn("Integração SGAL pendente: cabimento automático não gerado para o processo {}", processo.getUuid());
@@ -1100,7 +1103,7 @@ public class MissaoProcessoServiceWrite {
    * avaliação existente.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarAvaliacao(SaveAvaliacaoPrestadorCommand command) {
+  public ResponseEntity<AvaliacaoPrestadorGravadaResponseDTO> salvarAvaliacao(SaveAvaliacaoPrestadorCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getAvaliacaoprestadorrequest();
     if (dto == null) {
@@ -1160,10 +1163,8 @@ public class MissaoProcessoServiceWrite {
     avaliacao.setDesignacao(AvaliacaoPrestadorCalculo.designacao(total));
     missaoPrestadorAvalRepository.save(avaliacao);
 
-    return ResponseEntity.ok(Map.of(
-        "id", avaliacao.getUuid().toString(),
-        "total", total,
-        "designacao", avaliacao.getDesignacao()));
+    return ResponseEntity.ok(new AvaliacaoPrestadorGravadaResponseDTO(
+        avaliacao.getUuid().toString(), total, avaliacao.getDesignacao()));
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -1183,7 +1184,7 @@ public class MissaoProcessoServiceWrite {
    * internacionais podem enviar o {@code cabId}.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarCabimento(SaveProcessoCabimentoCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarCabimento(SaveProcessoCabimentoCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getProcessocabimentorequest();
     if (dto == null) {
@@ -1245,9 +1246,8 @@ public class MissaoProcessoServiceWrite {
       missaoProcessoRepository.save(processo);
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), null, null));
   }
 
   /**
@@ -1256,7 +1256,7 @@ public class MissaoProcessoServiceWrite {
    * FINALIZADO (spec). SAVE não altera nada — o ecrã não tem campos.
    */
   @Transactional
-  public ResponseEntity<Map<String, ?>> salvarAutorizacao(SaveProcessoAutorizacaoCommand command) {
+  public ResponseEntity<ProcessoEtapaGravadaResponseDTO> salvarAutorizacao(SaveProcessoAutorizacaoCommand command) {
     var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getProcessoetapaactionrequest();
 
@@ -1282,10 +1282,8 @@ public class MissaoProcessoServiceWrite {
       finalizarMissaoSeConcluida(missao);
     }
 
-    return ResponseEntity.ok(Map.of(
-        "id", processo.getUuid().toString(),
-        "etapa", processo.getEtapa(),
-        "estadoMissao", missao.getEstado()));
+    return ResponseEntity.ok(new ProcessoEtapaGravadaResponseDTO(
+        processo.getUuid().toString(), processo.getEtapa(), null, missao.getEstado()));
   }
 
   private List<MissaoLogisticaEntity> linhasAtivas(MissaoProcessoEntity processo) {

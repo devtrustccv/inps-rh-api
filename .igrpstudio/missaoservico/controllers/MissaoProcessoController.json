@@ -59,8 +59,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -133,8 +136,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -241,8 +247,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -315,8 +324,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -389,8 +401,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -468,8 +483,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "AvaliacaoPrestadorGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -547,8 +565,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -621,8 +642,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "collectionType": "map"
+                "type": "ProcessoEtapaGravadaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }

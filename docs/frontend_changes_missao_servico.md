@@ -1,6 +1,6 @@
 # Missão de Serviço — guia de implementação para o front-end
 
-**Última actualização:** 2026-09-15 · **Base de todos os endpoints:** `/api/v1/missao-servico`
+**Última actualização:** 2026-09-16 · **Base de todos os endpoints:** `/api/v1/missao-servico`
 
 > Versão em HTML para partilhar: [evidencias_missao.html](evidencias_missao.html) — gerada a partir
 > deste ficheiro; em caso de divergência, vale o Markdown.
@@ -37,12 +37,19 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 4. `AUTORIZACAO` é agora uma **etapa própria**. Acabou o artifício de distinguir Cabimentação de
    Autorização pelo `estadoCabimento`.
 
-### Migração dos endpoints antigos
+### Alterações de 2026-09-16
 
-Os dez endpoints do modelo anterior continuam a responder, marcados `deprecated` no Swagger, e serão
-removidos assim que o front-end migrar.
+| Alteração | Impacto no front-end | Detalhe |
+|---|---|---|
+| Os dez endpoints antigos foram removidos | Passam a responder **404** | tabela abaixo |
+| As gravações devolvem um objecto em vez de um mapa | Nenhum para quem lê `id`, `etapa`, `nrMissao`, `total` ou `designacao`: os nomes mantêm-se. Há campos novos, e o `cancelar` passa a ter corpo | secção "Resposta das gravações" |
+| Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão | Aparecem em "Ver Notificação" | capítulos 7, 14 e 16 |
 
-| Antigo (deprecated) | Novo |
+### Endpoints antigos — removidos
+
+Os dez endpoints do modelo anterior **foram removidos a 2026-09-16** e passam a responder **404**.
+
+| Antigo (removido) | Novo |
 |---|---|
 | `GET`/`PUT /{uuid}/analise` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/prestadores` |
 | `GET`/`PUT /{uuid}/emissao-requisicao` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/requisicoes` |
@@ -53,8 +60,6 @@ removidos assim que o front-end migrar.
 Mantêm o caminho: `POST /submissao`, `GET`/`PUT /{uuid}/submissao`, `GET /{uuid}`,
 `GET /api/v1/missao-servico`, `PATCH /{id}/cancelar` e `GET`/`PUT /{uuid}/pagamento`.
 
-> Os dois `emissao-requisicao` antigos declaram o parâmetro de caminho como `uui` em vez de `uuid`
-> (gralha do modelo antigo). Só afecta quem gera cliente a partir do OpenAPI.
 
 ---
 
@@ -135,6 +140,31 @@ Todos os erros de validação vêm assim, com a mensagem em `title`:
 
 Enviar sempre `Content-Type: application/json; charset=utf-8`.
 
+### Resposta das gravações
+
+Nenhuma gravação devolve um mapa: cada uma tem um objecto próprio, que aparece no Swagger.
+
+| Endpoints | Objecto | Campos |
+|---|---|---|
+| `POST /submissao`, `PUT /{uuid}/submissao` | `MissaoSubmissaoGravadaResponseDTO` | `id` (uuid da missão), `nrMissao`, `nrMissaoFormatado` |
+| `PUT` de etapa (`prestadores`, `requisicoes`, `logistica`, `validacao-ugal`, `aprovacao-rh`, `cabimento`, `autorizacao`) | `ProcessoEtapaGravadaResponseDTO` | `id` (uuid do processo), `etapa`, `parecer`, `estadoMissao` |
+| `PUT .../avaliacao` | `AvaliacaoPrestadorGravadaResponseDTO` | `id` (uuid da avaliação), `total`, `designacao` |
+| `PUT /{uuid}/pagamento`, `PATCH /{id}/cancelar`, `POST`/`PUT /prestadores` | `SuccessResponseDTO` | `sucesso`, `id` (uuid), `mensagem`, `alertas` |
+
+No `ProcessoEtapaGravadaResponseDTO`:
+
+- `parecer` só vem preenchido em `validacao-ugal` e `aprovacao-rh`;
+- `estadoMissao` só vem preenchido em `autorizacao`;
+- nas restantes etapas os dois vêm a `null`.
+
+```jsonc
+// PUT /{uuid}/processos/AJUDA_CUSTO/logistica
+{ "id": "…", "etapa": "VALIDACAO_UGAL", "parecer": null, "estadoMissao": null }
+
+// PATCH /{id}/cancelar — antes vinha sem corpo
+{ "sucesso": true, "id": "…", "mensagem": "Missão cancelada", "alertas": [] }
+```
+
 ---
 
 ## 3. *Lookups* partilhados
@@ -191,7 +221,7 @@ se escolhem na etapa Prestadores Serviço.
   ]
 }
 ```
-→ `{ "id": "<uuid do prestador>" }` — repara que o uuid vem em **`id`**, não em `uuid`.
+→ `{ "sucesso": true, "id": "<uuid do prestador>", "mensagem": "Prestador gravado", "alertas": [] }` — repara que o uuid vem em **`id`**, não em `uuid`.
 
 O array `emails` segue a [sincronização de listas](#sincronização-de-listas): um email omitido passa
 a `estado: "I"`. O `GET /prestadores/{uuid}` devolve **todos** os emails com o seu estado (é o ecrã
@@ -291,7 +321,7 @@ Etapa como obrigatória; essa exigência é do lado do front-end.
   "processoEtapaAction": "SAVE"
 }
 ```
-→ `{ "nrMissao": 3, "id": "<uuid da missão>" }`
+→ `{ "id": "<uuid da missão>", "nrMissao": 3, "nrMissaoFormatado": "3/2026" }`
 
 **O que acontece ao gravar pela primeira vez:** são criados os **4 processos**, cada um na etapa
 inicial do seu percurso — `BILHETE_PASSAGEM` e `ALOJAMENTO` em `PRESTADOR_SERVICO`, `SEGURO_VIAGEM`
@@ -301,6 +331,22 @@ e `AJUDA_CUSTO` em `LOGISTICA`.
 `true` reactiva-o. Pode alternar-se a qualquer momento editando a submissão.
 
 `nrDias` é calculado pelo servidor a partir das datas — o ecrã mostra-o, não o envia.
+
+**Notificações:**
+
+| Quando | Quem recebe | Tipo |
+|---|---|---|
+| A missão é criada (`POST`) | cada colaborador | `MISSAO_CONFIRMACAO_PEDIDO` |
+| Um colaborador é acrescentado na edição (`PUT`) | só esse colaborador | `MISSAO_CONFIRMACAO_PEDIDO` |
+| A edição muda país, ilha, concelho, destino ou datas de uma missão activa | os colaboradores que já estavam na missão | `MISSAO_ALTERACAO` |
+| Idem, com algum processo já depois da primeira etapa | também os prestadores e os restantes destinatários já contactados, por email | `MISSAO_ALTERACAO` |
+
+O aviso de alteração lista cada campo mudado com o valor anterior, por exemplo
+`- Data de fim: 2026-11-15 (antes: 2026-11-14)`. Uma edição que não mexe nesses campos não notifica
+ninguém.
+
+O email do colaborador vem dos seus contactos. Se o colaborador não tiver email, a notificação
+fica gravada com estado `Pendente` e aparece no portal.
 
 O `GET /{uuid}/submissao` devolve `processos[]`, `colaboradores[]` (com `funUuid` e `uuid`),
 `documentos[]` e a auditoria (`userRegistoName`, `dataRegisto`, …).
@@ -566,6 +612,15 @@ alterar o `cabId` de uma linha já autorizada.
 
 Exige a missão em `FINALIZADO`, ou seja, os quatro processos activos autorizados.
 
+```jsonc
+{ "referenciaPagamento": "TRF-2026/0917", "dataPagamento": "2026-09-16" }
+```
+→ `{ "sucesso": true, "id": "<uuid da missão>", "mensagem": "Pagamento registado", "alertas": [] }`
+
+**Notificação:** no **primeiro** registo do pagamento, cada colaborador com linha de ajuda de custo
+recebe `MISSAO_AJUDA_CUSTO` com os seus valores (valor diário, dias, total, referência e data do
+pagamento). Voltar a gravar para corrigir a referência ou a data não notifica outra vez.
+
 | Situação | Resposta |
 |---|---|
 | Missão por finalizar | **400** `O pagamento só pode ser registado com a missão finalizada (todos os processos autorizados)` |
@@ -633,8 +688,18 @@ campo `origem` diz qual:
 |---|---|
 | `RH_T_MISSAO_PRESTADOR` | pedido de proposta (um registo por email do prestador) |
 | `RH_T_MISSAO_REQUISICAO` | envio da requisição |
-| `RH_T_MISSAO_COLABORADOR` | aviso de logística ao colaborador |
-| `RH_T_MISSAO_SERVICO` | cancelamento |
+| `RH_T_MISSAO_COLABORADOR` | ao colaborador: logística, confirmação do pedido, ajuda de custo, alteração |
+| `RH_T_MISSAO_SERVICO` | aos prestadores: cancelamento e alteração |
+
+| `tipoNotificacao` | O que é |
+|---|---|
+| `MISSAO_PRESTADOR` | pedido de proposta |
+| `MISSAO_EMISSAO_REQUISICAO` | requisição |
+| `MISSAO_LOGISTICA_COLABORADOR` | logística da viagem (uma por processo) |
+| `MISSAO_CONFIRMACAO_PEDIDO` | confirmação do pedido ao colaborador |
+| `MISSAO_AJUDA_CUSTO` | ajuda de custo paga |
+| `MISSAO_ALTERACAO` | alteração da missão |
+| `MISSAO_CANCELAMENTO` | cancelamento |
 
 O endpoint genérico `GET /api/v1/funcionarios/notificacoes` ganhou também os filtros
 `referenciaName` e `referenciaUuid`, úteis para consultar as notificações de **uma** entidade
@@ -646,6 +711,9 @@ prestador, requisição e colaborador.
 ## 17. Cancelar Missão
 
 `PATCH /{uuid}/cancelar` → `{ "motivoCancelamento": "…" }` *(obrigatório)*
+
+Resposta: `{ "sucesso": true, "id": "<uuid da missão>", "mensagem": "Missão cancelada", "alertas": [] }`
+(antes vinha sem corpo).
 
 Inactiva a missão e, com ela, os processos, os pareceres, os colaboradores das requisições e as
 avaliações.
@@ -673,14 +741,14 @@ das requisições — com o nº da missão e o motivo. Cada colaborador recebe u
 | Alojamento em grupo | O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel |
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
-| **"Ver Alerta"** (Lista Missão) | `GET /api/v1/funcionarios/alertas` devolve vazio — o *job* de alertas é fase 2 do projecto. O botão não tem o que mostrar |
-| Templates de notificação | Em desenvolvimento, o template `MISSAO_PRESTADOR` tem texto de preenchimento ("Polhover imoant…"). É dado de parametrização, não código |
+| **"Ver Alerta"** (Lista Missão) | O analista retirou os alertas da missão do âmbito actual: `GET /api/v1/funcionarios/alertas` não devolve nada da missão. O botão pode ficar escondido |
+| Templates de notificação | Estão parametrizados em `RH_T_PARAM_NOTIFICACAO` com textos **provisórios**, a rever pelo negócio. O script para os outros ambientes é `docs/db/missao_servico_notificacoes_dml.sql` |
 
 ---
 
 # Histórico
 
-> **Tudo o que se segue está superado.** Descreve o modelo anterior, em que a missão tinha uma etapa
+> **Tudo o que se segue está superado, e os endpoints aqui descritos foram removidos a 2026-09-16.** Descreve o modelo anterior, em que a missão tinha uma etapa
 > única e os endpoints não levavam o tipo de processo no caminho. Fica como registo do que mudou,
 > para quem ainda esteja a migrar. **Não implementar a partir daqui** — em particular, a afirmação
 > "não existe etapa `AUTORIZACAO`" deixou de ser verdade, e as etapas `ANALISE` e `CABIMENTO`

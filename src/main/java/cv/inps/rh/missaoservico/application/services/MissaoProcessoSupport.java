@@ -125,6 +125,13 @@ public class MissaoProcessoSupport {
 
   /** Variáveis disponíveis nos templates das notificações da missão: {nrMissao}, {destino}, … */
   public Map<String, String> varsMissao(MissaoServicoEntity missao, TipoProcesso tipo) {
+    var vars = varsMissao(missao);
+    vars.put("tipoProcesso", tipo.getDescricao());
+    return vars;
+  }
+
+  /** Variáveis da missão sem processo — para as notificações que dizem respeito à missão inteira. */
+  public Map<String, String> varsMissao(MissaoServicoEntity missao) {
     var nrColaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missao.getUuid()).stream()
         .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
         .count();
@@ -135,7 +142,6 @@ public class MissaoProcessoSupport {
     vars.put("dataFim", missao.getDataFim() != null ? missao.getDataFim().toString() : "");
     vars.put("nrDias", missao.getNrDias() != null ? String.valueOf(missao.getNrDias()) : "");
     vars.put("nrColaboradores", String.valueOf(nrColaboradores));
-    vars.put("tipoProcesso", tipo.getDescricao());
     return vars;
   }
 
@@ -214,6 +220,52 @@ public class MissaoProcessoSupport {
             + "- Destino: " + vars.get("destino") + "\n"
             + "- Datas: " + vars.get("dataInicio") + " a " + vars.get("dataFim") + "\n\n"
             + "Os detalhes podem ser consultados no portal RH.\n\nCom os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /** Confirmação ao colaborador de que a missão foi registada e autorizada (template MISSAO_CONFIRMACAO_PEDIDO). */
+  public Conteudo conteudoConfirmacaoPedido(Map<String, String> vars) {
+    return conteudo("MISSAO_CONFIRMACAO_PEDIDO", vars, null,
+        "Confirmação da Missão Nº " + vars.get("nrMissao"),
+        "Exmo(a) Colaborador(a),\n\n"
+            + "Confirmamos que o pedido da missão de serviço Nº " + vars.get("nrMissao")
+            + " foi registado e autorizado.\n"
+            + "- Destino: " + vars.get("destino") + "\n"
+            + "- Datas: " + vars.get("dataInicio") + " a " + vars.get("dataFim")
+            + " (" + vars.get("nrDias") + " dia(s))\n\n"
+            + "Receberá os detalhes da logística assim que estiverem confirmados.\n\n"
+            + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /**
+   * Informação ao colaborador sobre a ajuda de custo paga (template MISSAO_AJUDA_CUSTO). Além das
+   * variáveis da missão aceita {valorDiario}, {nrDiasAjuda}, {valorTotal}, {referenciaPagamento} e
+   * {dataPagamento}.
+   */
+  public Conteudo conteudoAjudaCusto(Map<String, String> vars) {
+    return conteudo("MISSAO_AJUDA_CUSTO", vars, null,
+        "Ajuda de Custo - Missão Nº " + vars.get("nrMissao"),
+        "Exmo(a) Colaborador(a),\n\n"
+            + "Informamos que foi efetuado o pagamento da ajuda de custo da missão de serviço Nº "
+            + vars.get("nrMissao") + ".\n"
+            + "- Valor diário: " + vars.get("valorDiario") + "\n"
+            + "- Nº de dias: " + vars.get("nrDiasAjuda") + "\n"
+            + "- Valor total: " + vars.get("valorTotal") + "\n"
+            + "- Referência do pagamento: " + vars.get("referenciaPagamento") + "\n"
+            + "- Data do pagamento: " + vars.get("dataPagamento") + "\n\n"
+            + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /**
+   * Aviso de alteração da missão aos envolvidos (template MISSAO_ALTERACAO). Além das variáveis da
+   * missão aceita {alteracoes}: uma linha por campo alterado, com o valor anterior.
+   */
+  public Conteudo conteudoAlteracao(Map<String, String> vars) {
+    return conteudo("MISSAO_ALTERACAO", vars, null,
+        "Alteração da Missão Nº " + vars.get("nrMissao"),
+        "Exmo(a) Sr(a),\n\n"
+            + "Informamos que a missão de serviço Nº " + vars.get("nrMissao") + " foi alterada:\n"
+            + vars.get("alteracoes") + "\n\n"
+            + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
   }
 
   /**

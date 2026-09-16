@@ -59,7 +59,7 @@ th { background: var(--thead); font-weight: 600; }
 <div class="wrap">
 <div class="banner"><strong>Documento gerado</strong> a partir de <code>docs/frontend_changes_missao_servico.md</code>. A fonte da verdade e o ficheiro Markdown no repositorio — se divergirem, vale o Markdown.</div>
 <h1>Missão de Serviço — guia de implementação para o front-end</h1>
-<p><strong>Última actualização:</strong> 2026-09-15 · <strong>Base de todos os endpoints:</strong> <code>/api/v1/missao-servico</code></p>
+<p><strong>Última actualização:</strong> 2026-09-16 · <strong>Base de todos os endpoints:</strong> <code>/api/v1/missao-servico</code></p>
 <blockquote><p>Versão em HTML para partilhar: <a href="evidencias_missao.html">evidencias_missao.html</a> — gerada a partir deste ficheiro; em caso de divergência, vale o Markdown.</p></blockquote>
 <p>Este documento substitui o changelog anterior. Está organizado <strong>por ecrã</strong>, pela ordem em que o utilizador os percorre. Cada capítulo traz os *lookups* que o ecrã precisa, o <code>GET</code> que o preenche, o payload da gravação e os erros esperados. Tudo aqui foi verificado contra a API em execução a 2026-09-15.</p>
 <p>O changelog cronológico e a documentação do modelo anterior estão no fim, em <strong><a href="#histórico">Histórico</a></strong>.</p>
@@ -83,10 +83,18 @@ th { background: var(--thead); font-weight: 600; }
 <li><code>AUTORIZACAO</code> é agora uma <strong>etapa própria</strong>. Acabou o artifício de distinguir Cabimentação de</li>
 </ol>
 <p>Autorização pelo <code>estadoCabimento</code>.</p>
-<h3>Migração dos endpoints antigos</h3>
-<p>Os dez endpoints do modelo anterior continuam a responder, marcados <code>deprecated</code> no Swagger, e serão removidos assim que o front-end migrar.</p>
+<h3>Alterações de 2026-09-16</h3>
 <div class="table-wrap"><table>
-<thead><tr><th>Antigo (deprecated)</th><th>Novo</th></tr></thead>
+<thead><tr><th>Alteração</th><th>Impacto no front-end</th><th>Detalhe</th></tr></thead>
+<tbody>
+<tr><td>Os dez endpoints antigos foram removidos</td><td>Passam a responder <strong>404</strong></td><td>tabela abaixo</td></tr>
+<tr><td>As gravações devolvem um objecto em vez de um mapa</td><td>Nenhum para quem lê <code>id</code>, <code>etapa</code>, <code>nrMissao</code>, <code>total</code> ou <code>designacao</code>: os nomes mantêm-se. Há campos novos, e o <code>cancelar</code> passa a ter corpo</td><td>secção &quot;Resposta das gravações&quot;</td></tr>
+<tr><td>Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão</td><td>Aparecem em &quot;Ver Notificação&quot;</td><td>capítulos 7, 14 e 16</td></tr>
+</tbody></table></div>
+<h3>Endpoints antigos — removidos</h3>
+<p>Os dez endpoints do modelo anterior <strong>foram removidos a 2026-09-16</strong> e passam a responder <strong>404</strong>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Antigo (removido)</th><th>Novo</th></tr></thead>
 <tbody>
 <tr><td><code>GET</code>/<code>PUT /{uuid}/analise</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/prestadores</code></td></tr>
 <tr><td><code>GET</code>/<code>PUT /{uuid}/emissao-requisicao</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/requisicoes</code></td></tr>
@@ -95,7 +103,6 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td><code>GET</code>/<code>PUT /{uuid}/autorizacao</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/autorizacao</code></td></tr>
 </tbody></table></div>
 <p>Mantêm o caminho: <code>POST /submissao</code>, <code>GET</code>/<code>PUT /{uuid}/submissao</code>, <code>GET /{uuid}</code>, <code>GET /api/v1/missao-servico</code>, <code>PATCH /{id}/cancelar</code> e <code>GET</code>/<code>PUT /{uuid}/pagamento</code>.</p>
-<blockquote><p>Os dois <code>emissao-requisicao</code> antigos declaram o parâmetro de caminho como <code>uui</code> em vez de <code>uuid</code> (gralha do modelo antigo). Só afecta quem gera cliente a partir do OpenAPI.</p></blockquote>
 <hr>
 <h2>2. Regras transversais</h2>
 <p>Valem para todos os ecrãs de etapa. Lê isto uma vez e não precisas de o repetir por capítulo.</p>
@@ -144,6 +151,27 @@ th { background: var(--thead); font-weight: 600; }
   &quot;instance&quot;: &quot;/api/v1/missao-servico/submissao&quot;, &quot;igrpType&quot;: &quot;validation&quot; }</code></pre>
 <h3>Encoding</h3>
 <p>Enviar sempre <code>Content-Type: application/json; charset=utf-8</code>.</p>
+<h3>Resposta das gravações</h3>
+<p>Nenhuma gravação devolve um mapa: cada uma tem um objecto próprio, que aparece no Swagger.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Endpoints</th><th>Objecto</th><th>Campos</th></tr></thead>
+<tbody>
+<tr><td><code>POST /submissao</code>, <code>PUT /{uuid}/submissao</code></td><td><code>MissaoSubmissaoGravadaResponseDTO</code></td><td><code>id</code> (uuid da missão), <code>nrMissao</code>, <code>nrMissaoFormatado</code></td></tr>
+<tr><td><code>PUT</code> de etapa (<code>prestadores</code>, <code>requisicoes</code>, <code>logistica</code>, <code>validacao-ugal</code>, <code>aprovacao-rh</code>, <code>cabimento</code>, <code>autorizacao</code>)</td><td><code>ProcessoEtapaGravadaResponseDTO</code></td><td><code>id</code> (uuid do processo), <code>etapa</code>, <code>parecer</code>, <code>estadoMissao</code></td></tr>
+<tr><td><code>PUT .../avaliacao</code></td><td><code>AvaliacaoPrestadorGravadaResponseDTO</code></td><td><code>id</code> (uuid da avaliação), <code>total</code>, <code>designacao</code></td></tr>
+<tr><td><code>PUT /{uuid}/pagamento</code>, <code>PATCH /{id}/cancelar</code>, <code>POST</code>/<code>PUT /prestadores</code></td><td><code>SuccessResponseDTO</code></td><td><code>sucesso</code>, <code>id</code> (uuid), <code>mensagem</code>, <code>alertas</code></td></tr>
+</tbody></table></div>
+<p>No <code>ProcessoEtapaGravadaResponseDTO</code>:</p>
+<ul>
+<li><code>parecer</code> só vem preenchido em <code>validacao-ugal</code> e <code>aprovacao-rh</code>;</li>
+<li><code>estadoMissao</code> só vem preenchido em <code>autorizacao</code>;</li>
+<li>nas restantes etapas os dois vêm a <code>null</code>.</li>
+</ul>
+<pre><code>// PUT /{uuid}/processos/AJUDA_CUSTO/logistica
+{ &quot;id&quot;: &quot;…&quot;, &quot;etapa&quot;: &quot;VALIDACAO_UGAL&quot;, &quot;parecer&quot;: null, &quot;estadoMissao&quot;: null }
+
+// PATCH /{id}/cancelar — antes vinha sem corpo
+{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;…&quot;, &quot;mensagem&quot;: &quot;Missão cancelada&quot;, &quot;alertas&quot;: [] }</code></pre>
 <hr>
 <h2>3. *Lookups* partilhados</h2>
 <p>Cinco campos não são servidos pelo módulo de missão — vêm da parametrização partilhada. Todos devolvem <code>{ &quot;label&quot;: &quot;...&quot;, &quot;value&quot;: 123 }</code>; o <code>value</code> é o que segue no payload.</p>
@@ -187,7 +215,7 @@ th { background: var(--thead); font-weight: 600; }
     { &quot;id&quot;: 19, &quot;email&quot;: &quot;financeiro@...&quot; }        // com id → mantém
   ]
 }</code></pre>
-<p>→ <code>{ &quot;id&quot;: &quot;&lt;uuid do prestador&gt;&quot; }</code> — repara que o uuid vem em <strong><code>id</code></strong>, não em <code>uuid</code>.</p>
+<p>→ <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid do prestador&gt;&quot;, &quot;mensagem&quot;: &quot;Prestador gravado&quot;, &quot;alertas&quot;: [] }</code> — repara que o uuid vem em <strong><code>id</code></strong>, não em <code>uuid</code>.</p>
 <p>O array <code>emails</code> segue a <a href="#sincronização-de-listas">sincronização de listas</a>: um email omitido passa a <code>estado: &quot;I&quot;</code>. O <code>GET /prestadores/{uuid}</code> devolve <strong>todos</strong> os emails com o seu estado (é o ecrã de edição); o ecrã da etapa só recebe os activos.</p>
 <p><strong>Erros:</strong></p>
 <div class="table-wrap"><table>
@@ -258,10 +286,21 @@ th { background: var(--thead); font-weight: 600; }
   &quot;documentos&quot;: [ { &quot;tipoDocumentoId&quot;: 20, &quot;documento&quot;: &quot;convite.pdf&quot; } ],
   &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
 }</code></pre>
-<p>→ <code>{ &quot;nrMissao&quot;: 3, &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot; }</code></p>
+<p>→ <code>{ &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;nrMissao&quot;: 3, &quot;nrMissaoFormatado&quot;: &quot;3/2026&quot; }</code></p>
 <p><strong>O que acontece ao gravar pela primeira vez:</strong> são criados os <strong>4 processos</strong>, cada um na etapa inicial do seu percurso — <code>BILHETE_PASSAGEM</code> e <code>ALOJAMENTO</code> em <code>PRESTADOR_SERVICO</code>, <code>SEGURO_VIAGEM</code> e <code>AJUDA_CUSTO</code> em <code>LOGISTICA</code>.</p>
 <p><strong>O campo <code>alojamento</code> comanda o processo <code>ALOJAMENTO</code>:</strong> a <code>false</code> inactiva-o (<code>estado: &quot;I&quot;</code>), a <code>true</code> reactiva-o. Pode alternar-se a qualquer momento editando a submissão.</p>
 <p><code>nrDias</code> é calculado pelo servidor a partir das datas — o ecrã mostra-o, não o envia.</p>
+<p><strong>Notificações:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Quando</th><th>Quem recebe</th><th>Tipo</th></tr></thead>
+<tbody>
+<tr><td>A missão é criada (<code>POST</code>)</td><td>cada colaborador</td><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td></tr>
+<tr><td>Um colaborador é acrescentado na edição (<code>PUT</code>)</td><td>só esse colaborador</td><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td></tr>
+<tr><td>A edição muda país, ilha, concelho, destino ou datas de uma missão activa</td><td>os colaboradores que já estavam na missão</td><td><code>MISSAO_ALTERACAO</code></td></tr>
+<tr><td>Idem, com algum processo já depois da primeira etapa</td><td>também os prestadores e os restantes destinatários já contactados, por email</td><td><code>MISSAO_ALTERACAO</code></td></tr>
+</tbody></table></div>
+<p>O aviso de alteração lista cada campo mudado com o valor anterior, por exemplo <code>- Data de fim: 2026-11-15 (antes: 2026-11-14)</code>. Uma edição que não mexe nesses campos não notifica ninguém.</p>
+<p>O email do colaborador vem dos seus contactos. Se o colaborador não tiver email, a notificação fica gravada com estado <code>Pendente</code> e aparece no portal.</p>
 <p>O <code>GET /{uuid}/submissao</code> devolve <code>processos[]</code>, <code>colaboradores[]</code> (com <code>funUuid</code> e <code>uuid</code>), <code>documentos[]</code> e a auditoria (<code>userRegistoName</code>, <code>dataRegisto</code>, …).</p>
 <blockquote><p><code>GET /{uuid}</code> é um resumo e <strong>não</strong> traz <code>processos[]</code>. Para o ecrã de edição usar <code>GET /{uuid}/submissao</code>; para a listagem, a lista geral.</p></blockquote>
 <p><strong>Erros:</strong></p>
@@ -429,6 +468,9 @@ th { background: var(--thead); font-weight: 600; }
 <h2>14. Ecrã — Pagamento</h2>
 <p><code>GET</code>/<code>PUT /{uuid}/pagamento</code> — continua a ser <strong>por missão</strong>, não por processo.</p>
 <p>Exige a missão em <code>FINALIZADO</code>, ou seja, os quatro processos activos autorizados.</p>
+<pre><code>{ &quot;referenciaPagamento&quot;: &quot;TRF-2026/0917&quot;, &quot;dataPagamento&quot;: &quot;2026-09-16&quot; }</code></pre>
+<p>→ <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;mensagem&quot;: &quot;Pagamento registado&quot;, &quot;alertas&quot;: [] }</code></p>
+<p><strong>Notificação:</strong> no <strong>primeiro</strong> registo do pagamento, cada colaborador com linha de ajuda de custo recebe <code>MISSAO_AJUDA_CUSTO</code> com os seus valores (valor diário, dias, total, referência e data do pagamento). Voltar a gravar para corrigir a referência ou a data não notifica outra vez.</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
 <tbody>
@@ -472,13 +514,25 @@ th { background: var(--thead); font-weight: 600; }
 <tbody>
 <tr><td><code>RH_T_MISSAO_PRESTADOR</code></td><td>pedido de proposta (um registo por email do prestador)</td></tr>
 <tr><td><code>RH_T_MISSAO_REQUISICAO</code></td><td>envio da requisição</td></tr>
-<tr><td><code>RH_T_MISSAO_COLABORADOR</code></td><td>aviso de logística ao colaborador</td></tr>
-<tr><td><code>RH_T_MISSAO_SERVICO</code></td><td>cancelamento</td></tr>
+<tr><td><code>RH_T_MISSAO_COLABORADOR</code></td><td>ao colaborador: logística, confirmação do pedido, ajuda de custo, alteração</td></tr>
+<tr><td><code>RH_T_MISSAO_SERVICO</code></td><td>aos prestadores: cancelamento e alteração</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th><code>tipoNotificacao</code></th><th>O que é</th></tr></thead>
+<tbody>
+<tr><td><code>MISSAO_PRESTADOR</code></td><td>pedido de proposta</td></tr>
+<tr><td><code>MISSAO_EMISSAO_REQUISICAO</code></td><td>requisição</td></tr>
+<tr><td><code>MISSAO_LOGISTICA_COLABORADOR</code></td><td>logística da viagem (uma por processo)</td></tr>
+<tr><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td><td>confirmação do pedido ao colaborador</td></tr>
+<tr><td><code>MISSAO_AJUDA_CUSTO</code></td><td>ajuda de custo paga</td></tr>
+<tr><td><code>MISSAO_ALTERACAO</code></td><td>alteração da missão</td></tr>
+<tr><td><code>MISSAO_CANCELAMENTO</code></td><td>cancelamento</td></tr>
 </tbody></table></div>
 <p>O endpoint genérico <code>GET /api/v1/funcionarios/notificacoes</code> ganhou também os filtros <code>referenciaName</code> e <code>referenciaUuid</code>, úteis para consultar as notificações de <strong>uma</strong> entidade concreta. Para o ecrã da missão usar o endpoint acima: evita ter de somar uma chamada por prestador, requisição e colaborador.</p>
 <hr>
 <h2>17. Cancelar Missão</h2>
 <p><code>PATCH /{uuid}/cancelar</code> → <code>{ &quot;motivoCancelamento&quot;: &quot;…&quot; }</code> *(obrigatório)*</p>
+<p>Resposta: <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;mensagem&quot;: &quot;Missão cancelada&quot;, &quot;alertas&quot;: [] }</code> (antes vinha sem corpo).</p>
 <p>Inactiva a missão e, com ela, os processos, os pareceres, os colaboradores das requisições e as avaliações.</p>
 <p><strong>Notificação:</strong> se algum processo já passou da primeira etapa do seu percurso, são renotificados todos os que já tinham recebido email desta missão — prestadores, emails adicionais e destinatários das requisições — com o nº da missão e o motivo. Cada colaborador recebe um aviso no portal.</p>
 <div class="table-wrap"><table>
@@ -500,12 +554,12 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Alojamento em grupo</td><td>O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel</td></tr>
 <tr><td>Identidade do utilizador</td><td><code>executadoPor</code> grava <code>anonymousUser</code> em desenvolvimento; sem bloqueio por perfil nesta fase</td></tr>
 <tr><td>Encoding</td><td>Enviar <code>Content-Type: application/json; charset=utf-8</code></td></tr>
-<tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td><code>GET /api/v1/funcionarios/alertas</code> devolve vazio — o *job* de alertas é fase 2 do projecto. O botão não tem o que mostrar</td></tr>
-<tr><td>Templates de notificação</td><td>Em desenvolvimento, o template <code>MISSAO_PRESTADOR</code> tem texto de preenchimento (&quot;Polhover imoant…&quot;). É dado de parametrização, não código</td></tr>
+<tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td>O analista retirou os alertas da missão do âmbito actual: <code>GET /api/v1/funcionarios/alertas</code> não devolve nada da missão. O botão pode ficar escondido</td></tr>
+<tr><td>Templates de notificação</td><td>Estão parametrizados em <code>RH_T_PARAM_NOTIFICACAO</code> com textos <strong>provisórios</strong>, a rever pelo negócio. O script para os outros ambientes é <code>docs/db/missao_servico_notificacoes_dml.sql</code></td></tr>
 </tbody></table></div>
 <hr>
 <h1>Histórico</h1>
-<blockquote><p><strong>Tudo o que se segue está superado.</strong> Descreve o modelo anterior, em que a missão tinha uma etapa única e os endpoints não levavam o tipo de processo no caminho. Fica como registo do que mudou, para quem ainda esteja a migrar. <strong>Não implementar a partir daqui</strong> — em particular, a afirmação &quot;não existe etapa <code>AUTORIZACAO</code>&quot; deixou de ser verdade, e as etapas <code>ANALISE</code> e <code>CABIMENTO</code> passaram a <code>PRESTADOR_SERVICO</code> e a <code>CABIMENTO</code> + <code>AUTORIZACAO</code> separadas.</p></blockquote>
+<blockquote><p><strong>Tudo o que se segue está superado, e os endpoints aqui descritos foram removidos a 2026-09-16.</strong> Descreve o modelo anterior, em que a missão tinha uma etapa única e os endpoints não levavam o tipo de processo no caminho. Fica como registo do que mudou, para quem ainda esteja a migrar. <strong>Não implementar a partir daqui</strong> — em particular, a afirmação &quot;não existe etapa <code>AUTORIZACAO</code>&quot; deixou de ser verdade, e as etapas <code>ANALISE</code> e <code>CABIMENTO</code> passaram a <code>PRESTADOR_SERVICO</code> e a <code>CABIMENTO</code> + <code>AUTORIZACAO</code> separadas.</p></blockquote>
 <h3>1. Correção — <code>cabId</code> deixou de ser obrigatório</h3>
 <p><code>PUT /{uuid}/cabimento</code> rejeitava com <strong>400 <code>cabId é obrigatório</code></strong> qualquer item selecionado sem <code>cabId</code>.</p>
 <p>Estava errado: segundo a Especificação Técnica Funcional, o número de cabimento é <strong>gerado</strong>, não introduzido pelo utilizador — na etapa de Autorização o campo é descrito como *&quot;Mostra o numero de Cabimento Gerado na Etapa Anterior&quot;*. O formulário da Cabimentação só tem selecionar, tipo de serviço, nome, valor e anexo.</p>

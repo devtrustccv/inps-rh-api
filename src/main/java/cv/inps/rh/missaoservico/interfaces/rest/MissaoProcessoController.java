@@ -21,7 +21,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 
 @IgrpController
 @RestController
@@ -84,14 +83,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoPrestadores(@Valid @RequestBody ProcessoPrestadoresRequestDTO saveProcessoPrestadoresRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoPrestadores(@Valid @RequestBody ProcessoPrestadoresRequestDTO saveProcessoPrestadoresRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -145,14 +144,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoRequisicoes(@Valid @RequestBody ProcessoRequisicoesRequestDTO saveProcessoRequisicoesRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoRequisicoes(@Valid @RequestBody ProcessoRequisicoesRequestDTO saveProcessoRequisicoesRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -238,14 +237,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoLogistica(@Valid @RequestBody ProcessoLogisticaRequestDTO saveProcessoLogisticaRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoLogistica(@Valid @RequestBody ProcessoLogisticaRequestDTO saveProcessoLogisticaRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -299,14 +298,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoValidacaoUgal(@Valid @RequestBody ParecerRequestDTO saveProcessoValidacaoUgalRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoValidacaoUgal(@Valid @RequestBody ParecerRequestDTO saveProcessoValidacaoUgalRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -360,14 +359,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoAprovacaoRh(@Valid @RequestBody ParecerRequestDTO saveProcessoAprovacaoRhRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoAprovacaoRh(@Valid @RequestBody ParecerRequestDTO saveProcessoAprovacaoRhRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -422,14 +421,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = AvaliacaoPrestadorGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveAvaliacaoPrestador(@Valid @RequestBody AvaliacaoPrestadorRequestDTO saveAvaliacaoPrestadorRequest
+   public ResponseEntity<AvaliacaoPrestadorGravadaResponseDTO> saveAvaliacaoPrestador(@Valid @RequestBody AvaliacaoPrestadorRequestDTO saveAvaliacaoPrestadorRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso,
     @PathVariable(value = "missaoPrestUuid") String missaoPrestUuid)
   {
@@ -484,14 +483,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoCabimento(@Valid @RequestBody ProcessoCabimentoRequestDTO saveProcessoCabimentoRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoCabimento(@Valid @RequestBody ProcessoCabimentoRequestDTO saveProcessoCabimentoRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
@@ -545,14 +544,14 @@ public class MissaoProcessoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = ProcessoEtapaGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveProcessoAutorizacao(@Valid @RequestBody ProcessoEtapaActionRequestDTO saveProcessoAutorizacaoRequest
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> saveProcessoAutorizacao(@Valid @RequestBody ProcessoEtapaActionRequestDTO saveProcessoAutorizacaoRequest
     , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 

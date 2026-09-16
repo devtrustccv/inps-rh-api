@@ -4,23 +4,19 @@
 package cv.inps.rh.missaoservico.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-
+/** Resposta da gravação da submissão (criar e editar a missão). */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class MissaoCabimentoRequestDTO  {
+public class MissaoSubmissaoGravadaResponseDTO {
 
-  private List<MissaoCabimentoItemRequestDTO> itens;
+  private String id;                  // uuid da missão
+  private Long nrMissao;              // sequencial dentro do ano
+  private String nrMissaoFormatado;   // "nr/ano"
 
-  private ProcessStepAction processoEtapaAction;
 }

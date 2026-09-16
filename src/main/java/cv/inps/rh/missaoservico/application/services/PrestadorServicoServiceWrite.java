@@ -13,6 +13,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.EntidadeEntityRep
 import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamPrestadorDetEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamPrestadorEntityRepository;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class PrestadorServicoServiceWrite {
   private final GeografiaEntityRepository geografiaRepository;
 
   @Transactional
-  public ResponseEntity<Map<String, ?>> criar(CreatePrestadorServicoCommand command) {
+  public ResponseEntity<SuccessResponseDTO> criar(CreatePrestadorServicoCommand command) {
     var dto = command != null ? command.getPrestadorservicorequest() : null;
     validar(dto);
 
@@ -58,11 +59,11 @@ public class PrestadorServicoServiceWrite {
       syncEmails(prestador, dto.getEmails());
     }
 
-    return ResponseEntity.ok(Map.of("id", prestador.getUuid().toString()));
+    return ResponseEntity.ok(new SuccessResponseDTO(true, prestador.getUuid().toString(), "Prestador gravado", new ArrayList<>()));
   }
 
   @Transactional
-  public ResponseEntity<Map<String, ?>> atualizar(UpdatePrestadorServicoCommand command) {
+  public ResponseEntity<SuccessResponseDTO> atualizar(UpdatePrestadorServicoCommand command) {
     var uuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
     var dto = command.getPrestadorservicorequest();
     validar(dto);
@@ -83,7 +84,7 @@ public class PrestadorServicoServiceWrite {
       syncEmails(prestador, dto.getEmails());
     }
 
-    return ResponseEntity.ok(Map.of("id", prestador.getUuid().toString()));
+    return ResponseEntity.ok(new SuccessResponseDTO(true, prestador.getUuid().toString(), "Prestador gravado", new ArrayList<>()));
   }
 
   private void validar(PrestadorServicoRequestDTO dto) {

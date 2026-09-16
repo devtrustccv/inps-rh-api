@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.commands;
 
+import cv.inps.rh.missaoservico.application.dto.ProcessoEtapaGravadaResponseDTO;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.missaoservico.application.services.MissaoProcessoServiceWrite;
@@ -8,10 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 
 @Component
-public class SaveProcessoParecerCommandHandler implements CommandHandler<SaveProcessoParecerCommand, ResponseEntity<Map<String, ?>>> {
+public class SaveProcessoParecerCommandHandler implements CommandHandler<SaveProcessoParecerCommand, ResponseEntity<ProcessoEtapaGravadaResponseDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(SaveProcessoParecerCommandHandler.class);
 
@@ -22,7 +22,7 @@ public class SaveProcessoParecerCommandHandler implements CommandHandler<SavePro
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<Map<String, ?>> handle(SaveProcessoParecerCommand command) {
+   public ResponseEntity<ProcessoEtapaGravadaResponseDTO> handle(SaveProcessoParecerCommand command) {
 
       LOGGER.debug("SaveProcessoParecerCommand : {}", command);
 

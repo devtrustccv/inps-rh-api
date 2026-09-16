@@ -10,11 +10,25 @@ fechar o módulo. Nenhuma impede o que já existe de funcionar.
 Cada ponto diz **o que a spec diz**, **o que o sistema faz hoje** e **o que precisamos de saber**.
 As mais urgentes estão assinaladas com 🔴 — são as que bloqueiam trabalho.
 
+## Estado a 2026-09-16 — respostas do analista
+
+| Ponto | Decisão | Estado |
+|---|---|---|
+| 1.1 Notificação da logística | Fica como está: uma notificação por processo | ✅ fechado |
+| 1.3 Limiares A–D | Por esclarecer; a dúvida vai ser detalhada ao analista | ⏳ aberto |
+| 2.1, 2.2 Alertas da missão | Fora do âmbito por agora | ⛔ descartado |
+| 3.2 Valores dos prazos | Só serviam os alertas | ⛔ descartado |
+| 3.3, 3.4 Destinatários e gatilhos | Não se parametrizam: os destinatários são o próprio prestador e o próprio funcionário | ⛔ descartado |
+| 3.1 Textos dos templates | Parametrizados com textos **provisórios** (`docs/db/missao_servico_notificacoes_dml.sql`), a rever pelo negócio | ✅ feito |
+| 4. Notificações internas | Implementadas as que vão ao colaborador e aos prestadores: confirmação do pedido, ajuda de custo e alteração. As que iam para RH, Financeiro ou SGAL caem, porque não há destinatários por papel | ✅ feito |
+| 5.3, 5.4, 5.5 | Só serviam os alertas | ⛔ descartado |
+| 5.1 SGAL, 5.2 Tabela de preços, 6. Pontos menores | Ficam para o fim | ⏳ adiado |
+
 ---
 
 ## 1. Contradições dentro da spec da missão
 
-### 1.1 🔴 Notificação da logística ao colaborador: uma ou quatro?
+### 1.1 ✅ Notificação da logística ao colaborador: uma ou quatro? — *fica uma por processo*
 
 A spec diz as duas coisas.
 
@@ -75,7 +89,7 @@ O exemplo da própria spec dá 95 (o Preço pontua "Bom": 20 × 75% = 15), o que
 
 ## 2. Contradições entre a spec da missão e a TRANSVERSAL
 
-### 2.1 🔴 Quantos alertas tem a missão: dois ou seis?
+### 2.1 ⛔ Quantos alertas tem a missão: dois ou seis? — *alertas fora do âmbito*
 
 A **spec da missão** descreve seis: fatura próxima do vencimento, fatura em atraso, fatura em falta,
 requisição pendente de resposta, missão próxima do início sem confirmação, documentos obrigatórios
@@ -134,7 +148,7 @@ defeito embutido no código.
 `{nrMissao}`, `{destino}`, `{dataInicio}`, `{dataFim}`, `{nrDias}`, `{nrColaboradores}`,
 `{tipoProcesso}`.
 
-### 3.2 🔴 Valores dos prazos
+### 3.2 ⛔ Valores dos prazos — *descartado com os alertas*
 
 O único número concreto em toda a spec de alertas é *"5 a 10 dias antes"* para a fatura a vencer — e
 não diz se são 5 ou 10.
@@ -145,7 +159,7 @@ não diz se são 5 ou 10.
 - requisição pendente de resposta;
 - missão próxima do início sem confirmação.
 
-### 3.3 🔴 Quem recebe cada notificação
+### 3.3 ⛔ Quem recebe cada notificação — *sem parametrização: prestador e funcionário*
 
 A spec lista cinco papéis: **"Colaborador", "RH", "SGAL", "Financeiro", "Agência de Viagem"**.
 
@@ -260,14 +274,13 @@ O alerta *"Missão com documentos obrigatórios em falta"* precisa da lista.
 
 ---
 
-## Resumo — o que desbloqueia mais
+## Resumo — o que falta decidir (actualizado a 2026-09-16)
 
-1. **Âmbito dos alertas** (2.1) — decide se há job a fazer e qual.
-2. **Destinatários por papel** (3.3) — desbloqueia cinco notificações de uma vez.
-3. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje.
-4. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
-5. **Notificação da logística: uma ou quatro** (1.1) — afecta o que o colaborador recebe já hoje.
-6. **Limiares das classes A–D** (1.3) — hoje estão fixos no código sem origem conhecida.
+1. **Limiares das classes A–D** (1.3) — hoje estão fixos no código sem origem conhecida.
+2. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje.
+3. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
+4. **Pontos menores** (6).
+5. **Textos definitivos dos templates** (3.1) — os actuais são provisórios.
 
 ---
 

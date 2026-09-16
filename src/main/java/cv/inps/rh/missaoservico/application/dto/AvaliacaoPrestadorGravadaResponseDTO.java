@@ -8,17 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 
+/** Resposta da gravação da avaliação do prestador. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class MissaoPrestadorDTO  {
+public class AvaliacaoPrestadorGravadaResponseDTO {
 
-  private Long entId;                     // lookup INPSSIGOF.ENTIDADES
-  private String nome;                    // preenchido automaticamente via entId
-  private String email;
+  private String id;             // uuid da avaliação
+  private BigDecimal total;      // 0–100
+  private String designacao;     // classe A–D
 
 }

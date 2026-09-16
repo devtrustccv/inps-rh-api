@@ -3,6 +3,7 @@
 
 package cv.inps.rh.missaoservico.interfaces.rest;
 
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @IgrpController
 @RestController
@@ -50,14 +50,14 @@ public class PrestadorServicoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> createPrestadorServico(@Valid @RequestBody PrestadorServicoRequestDTO createPrestadorServicoRequest
+   public ResponseEntity<SuccessResponseDTO> createPrestadorServico(@Valid @RequestBody PrestadorServicoRequestDTO createPrestadorServicoRequest
     )
   {
 
@@ -80,14 +80,14 @@ public class PrestadorServicoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> updatePrestadorServico(@Valid @RequestBody PrestadorServicoRequestDTO updatePrestadorServicoRequest
+   public ResponseEntity<SuccessResponseDTO> updatePrestadorServico(@Valid @RequestBody PrestadorServicoRequestDTO updatePrestadorServicoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 

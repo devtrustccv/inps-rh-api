@@ -3,6 +3,7 @@
 
 package cv.inps.rh.missaoservico.interfaces.rest;
 
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
@@ -18,7 +19,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 
 @IgrpController
 @RestController
@@ -50,49 +50,18 @@ public class MissaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = MissaoSubmissaoGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> submeterMissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO submeterMissaoServicoRequest
+   public ResponseEntity<MissaoSubmissaoGravadaResponseDTO> submeterMissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO submeterMissaoServicoRequest
     )
   {
 
       final var command = new SubmeterMissaoServicoCommand(submeterMissaoServicoRequest);
-
-      return commandBus.send(command);
-
-  }
-
-   @PutMapping(
-   value = "{uuid}/analise"
-  )
-  @Operation(
-    summary = "Save analise processo missao servico (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/prestadores)",
-    deprecated = true,
-    description = "Save analise processo missao servico",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<Map<String, ?>> saveAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO saveAnaliseProcessoMissaoServicoRequest
-    , @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var command = new SaveAnaliseProcessoMissaoServicoCommand(saveAnaliseProcessoMissaoServicoRequest, uuid);
 
       return commandBus.send(command);
 
@@ -174,14 +143,14 @@ public class MissaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> cancelarMissaoServico(@Valid @RequestBody MissaoCancelarRequestDTO cancelarMissaoServicoRequest
+   public ResponseEntity<SuccessResponseDTO> cancelarMissaoServico(@Valid @RequestBody MissaoCancelarRequestDTO cancelarMissaoServicoRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -221,37 +190,6 @@ public class MissaoController {
 
   }
 
-   @GetMapping(
-   value = "{uuid}/analise"
-  )
-  @Operation(
-    summary = "Get analise processo missao servico (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/prestadores)",
-    deprecated = true,
-    description = "Get analise processo missao servico",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MissaoAnaliseResponseDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<MissaoAnaliseResponseDTO> getAnaliseProcessoMissaoServico(
-    @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var query = new GetAnaliseProcessoMissaoServicoQuery(uuid);
-
-      return queryBus.handle(query);
-
-  }
-
    @PutMapping(
    value = "{uuid}/submissao"
   )
@@ -265,266 +203,18 @@ public class MissaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = MissaoSubmissaoGravadaResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO saveSubmissaoServicoRequest
+   public ResponseEntity<MissaoSubmissaoGravadaResponseDTO> saveSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO saveSubmissaoServicoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
       final var command = new SaveSubmissaoServicoCommand(saveSubmissaoServicoRequest, uuid);
-
-      return commandBus.send(command);
-
-  }
-
-   @GetMapping(
-   value = "{uui}/emissao-requisicao"
-  )
-  @Operation(
-    summary = "Get submissao servico emissao requisicao (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/requisicoes)",
-    deprecated = true,
-    description = "Get submissao servico emissao requisicao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MissaoEmissaoReqResponseDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<MissaoEmissaoReqResponseDTO> getSubmissaoServicoEmissaoRequisicao(
-    @PathVariable(value = "uui") String uui)
-  {
-
-      final var query = new GetSubmissaoServicoEmissaoRequisicaoQuery(uui);
-
-      return queryBus.handle(query);
-
-  }
-
-   @PutMapping(
-   value = "{uui}/emissao-requisicao"
-  )
-  @Operation(
-    summary = "Save submissao servico emissao requisicao (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/requisicoes)",
-    deprecated = true,
-    description = "Save submissao servico emissao requisicao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<Map<String, ?>> saveSubmissaoServicoEmissaoRequisicao(@Valid @RequestBody MissaoEmissaoRequisicaoRequestDTO saveSubmissaoServicoEmissaoRequisicaoRequest
-    , @PathVariable(value = "uui") String uui)
-  {
-
-      final var command = new SaveSubmissaoServicoEmissaoRequisicaoCommand(saveSubmissaoServicoEmissaoRequisicaoRequest, uui);
-
-      return commandBus.send(command);
-
-  }
-
-   @GetMapping(
-   value = "{uuid}/logistica"
-  )
-  @Operation(
-    summary = "Get missao servico logistica (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/logistica)",
-    deprecated = true,
-    description = "Get missao servico logistica",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MissaoLogisticaResponseDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<MissaoLogisticaResponseDTO> getMissaoServicoLogistica(
-    @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var query = new GetMissaoServicoLogisticaQuery(uuid);
-
-      return queryBus.handle(query);
-
-  }
-
-   @PutMapping(
-   value = "{uuid}/logistica"
-  )
-  @Operation(
-    summary = "Save missao servico logistica (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/logistica)",
-    deprecated = true,
-    description = "Save missao servico logistica",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<Map<String, ?>> saveMissaoServicoLogistica(@Valid @RequestBody MissaoLogisticaRequestDTO saveMissaoServicoLogisticaRequest
-    , @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var command = new SaveMissaoServicoLogisticaCommand(saveMissaoServicoLogisticaRequest, uuid);
-
-      return commandBus.send(command);
-
-  }
-
-   @GetMapping(
-   value = "{uuid}/cabimento"
-  )
-  @Operation(
-    summary = "Get missao servico cabimento (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/cabimento)",
-    deprecated = true,
-    description = "Get missao servico cabimento",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MissaoCabimentoResponseDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<MissaoCabimentoResponseDTO> getMissaoServicoCabimento(
-    @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var query = new GetMissaoServicoCabimentoQuery(uuid);
-
-      return queryBus.handle(query);
-
-  }
-
-   @PutMapping(
-   value = "{uuid}/cabimento"
-  )
-  @Operation(
-    summary = "Save missao servico cabimento (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/cabimento)",
-    deprecated = true,
-    description = "Save missao servico cabimento",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<Map<String, ?>> saveMissaoServicoCabimento(@Valid @RequestBody MissaoCabimentoRequestDTO saveMissaoServicoCabimentoRequest
-    , @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var command = new SaveMissaoServicoCabimentoCommand(saveMissaoServicoCabimentoRequest, uuid);
-
-      return commandBus.send(command);
-
-  }
-
-   @GetMapping(
-   value = "{uuid}/autorizacao"
-  )
-  @Operation(
-    summary = "Get missao servico autorizacao (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/autorizacao)",
-    deprecated = true,
-    description = "Get missao servico autorizacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MissaoAutorizacaoResponseDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<MissaoAutorizacaoResponseDTO> getMissaoServicoAutorizacao(
-    @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var query = new GetMissaoServicoAutorizacaoQuery(uuid);
-
-      return queryBus.handle(query);
-
-  }
-
-   @PutMapping(
-   value = "{uuid}/autorizacao"
-  )
-  @Operation(
-    summary = "Save missao servico autorizacao (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/autorizacao)",
-    deprecated = true,
-    description = "Save missao servico autorizacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<Map<String, ?>> saveMissaoServicoAutorizacao(@Valid @RequestBody MissaoAutorizacaoRequestDTO saveMissaoServicoAutorizacaoRequest
-    , @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var command = new SaveMissaoServicoAutorizacaoCommand(saveMissaoServicoAutorizacaoRequest, uuid);
 
       return commandBus.send(command);
 
@@ -573,14 +263,14 @@ public class MissaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> saveMissaoServicoPagamento(@Valid @RequestBody MissaoPagamentoRequestDTO saveMissaoServicoPagamentoRequest
+   public ResponseEntity<SuccessResponseDTO> saveMissaoServicoPagamento(@Valid @RequestBody MissaoPagamentoRequestDTO saveMissaoServicoPagamentoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
