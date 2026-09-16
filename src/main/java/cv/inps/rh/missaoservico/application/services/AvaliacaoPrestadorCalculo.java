@@ -39,7 +39,10 @@ public final class AvaliacaoPrestadorCalculo {
         .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
   }
 
-  /** Classe do fornecedor: A &gt; 75, B ]40;75], C ]25;40], D [0;25]. */
+  /**
+   * Classe do fornecedor pela tabela "Intervalos (pontuação total %)" da spec 14/09:
+   * A &gt; 75, B ]40;75], C ]25;40], D [0;25].
+   */
   public static String designacao(BigDecimal total) {
     if (total.compareTo(BigDecimal.valueOf(75)) > 0)
       return "A";

@@ -15,7 +15,7 @@ As mais urgentes estão assinaladas com 🔴 — são as que bloqueiam trabalho.
 | Ponto | Decisão | Estado |
 |---|---|---|
 | 1.1 Notificação da logística | Fica como está: uma notificação por processo | ✅ fechado |
-| 1.3 Limiares A–D | Por esclarecer; a dúvida vai ser detalhada ao analista | ⏳ aberto |
+| 1.3 Limiares A–D | Estão na spec, na tabela "Intervalos (pontuação total %)", e conferem com o código | ✅ fechado |
 | 2.1, 2.2 Alertas da missão | Fora do âmbito por agora | ⛔ descartado |
 | 3.2 Valores dos prazos | Só serviam os alertas | ⛔ descartado |
 | 3.3, 3.4 Destinatários e gatilhos | Não se parametrizam: os destinatários são o próprio prestador e o próprio funcionário | ⛔ descartado |
@@ -57,7 +57,13 @@ base de dados.
 **Precisamos de saber:** confirmar que UGAL está certo e que UPAL é gralha. Se for ao contrário,
 muda o domínio e o valor gravado.
 
-### 1.3 🔴 Faltam os limiares que separam as classes A, B, C e D
+### 1.3 ✅ ~~Faltam os limiares que separam as classes A, B, C e D~~ — *estão na spec*
+
+> **Resolvido a 2026-09-16.** A spec tem, ao lado da tabela Classe/Designação, a tabela
+> **"Intervalos (pontuação total %)"**: A > 75, B ]40;75], C ]25;40], D [0;25]. São exactamente os
+> valores do código. A dúvida surgiu porque a conversão da spec para HTML
+> (`docs/spec_missao_servico_14_09.html`) **perdeu essa tabela**. Em caso de dúvida, confirmar
+> sempre no `.docx`. O texto abaixo fica como registo.
 
 A spec define a tabela **Critério / Peso (%)** (5, 15, 40, 20, 20 = 100%) e a tabela
 **Classe / Designação** (A = Fornecedor Preferencial, B = Aceitável, C = Recurso, D = Rejeitado).
@@ -275,11 +281,10 @@ O alerta *"Missão com documentos obrigatórios em falta"* precisa da lista.
 
 ## Resumo — o que falta decidir (actualizado a 2026-09-16)
 
-1. **Limiares das classes A–D** (1.3) — hoje estão fixos no código sem origem conhecida.
-2. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje.
-3. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
-4. **Pontos menores** (6).
-5. **Textos definitivos dos templates** (3.1) — os actuais são provisórios.
+1. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje.
+2. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
+3. **Pontos menores** (6).
+4. **Textos definitivos dos templates** (3.1) — os actuais são provisórios.
 
 ---
 
