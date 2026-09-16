@@ -16,6 +16,9 @@ import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoRequisicoesCommand;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
+import cv.inps.rh.missaoservico.application.commands.SaveMissaoAvaliacoesCommand;
+import cv.inps.rh.missaoservico.application.dto.AvaliacaoPrestadorRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAvaliacoesGravadasResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
@@ -1100,6 +1103,43 @@ public class MissaoProcessoServiceWrite {
 
     var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
     var prestador = support.prestadorDoProcesso(processo, command.getMissaoPrestUuid());
+
+    var avaliacao = gravarAvaliacao(prestador, dto);
+    return ResponseEntity.ok(new AvaliacaoPrestadorGravadaResponseDTO(
+        avaliacao.getUuid().toString(), avaliacao.getTotal(), avaliacao.getDesignacao()));
+  }
+
+  /**
+   * Avaliações de todos os prestadores da missão de uma vez — o ecrã "Detalhe de Avaliação" tem um
+   * só botão Gravar. Cada linha é um prestador <b>num processo</b>: o processo vem do próprio
+   * prestador, por isso o payload não o envia. Ou grava tudo, ou não grava nada.
+   */
+  @Transactional
+  public ResponseEntity<MissaoAvaliacoesGravadasResponseDTO> salvarAvaliacoesDaMissao(SaveMissaoAvaliacoesCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getMissaoavaliacoesrequest();
+    if (dto == null || dto.getAvaliacoes() == null || dto.getAvaliacoes().isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("avaliacoes é obrigatório");
+    }
+
+    var gravadas = new ArrayList<AvaliacaoPrestadorGravadaResponseDTO>();
+    for (var item : dto.getAvaliacoes()) {
+      if (item == null || item.getMissaoPrestUuid() == null) {
+        throw IgrpResponseStatusException.badRequest("missaoPrestUuid é obrigatório em cada avaliação");
+      }
+      var prestador = support.prestadorDaMissao(missaoUuid, item.getMissaoPrestUuid(), true);
+      var pedido = new AvaliacaoPrestadorRequestDTO(item.getSistemaQualidade(), item.getPrazoFornecimento(),
+          item.getQualidadeProduto(), item.getCapacidadeResposta(), item.getPreco());
+      var avaliacao = gravarAvaliacao(prestador, pedido);
+      gravadas.add(new AvaliacaoPrestadorGravadaResponseDTO(
+          avaliacao.getUuid().toString(), avaliacao.getTotal(), avaliacao.getDesignacao()));
+    }
+
+    return ResponseEntity.ok(new MissaoAvaliacoesGravadasResponseDTO(gravadas));
+  }
+
+  /** Valida os cinco critérios, calcula o total e a classe, e grava (cria ou actualiza a avaliação). */
+  private MissaoPrestadorAvalEntity gravarAvaliacao(MissaoPrestadorEntity prestador, AvaliacaoPrestadorRequestDTO dto) {
     if (!missaoRequisicaoRepository.existsByMissaoPrestId_IdAndEstado(prestador.getId(), ESTADO_ATIVO)) {
       throw IgrpResponseStatusException.badRequest(
           "Só é possível avaliar um prestador com requisição emitida neste processo");
@@ -1149,10 +1189,7 @@ public class MissaoProcessoServiceWrite {
     avaliacao.setPreco(escolhas.get(AvaliacaoPrestadorCalculo.PRECO));
     avaliacao.setTotal(total);
     avaliacao.setDesignacao(AvaliacaoPrestadorCalculo.designacao(total));
-    missaoPrestadorAvalRepository.save(avaliacao);
-
-    return ResponseEntity.ok(new AvaliacaoPrestadorGravadaResponseDTO(
-        avaliacao.getUuid().toString(), total, avaliacao.getDesignacao()));
+    return missaoPrestadorAvalRepository.save(avaliacao);
   }
 
   // ---------------------------------------------------------------------------------------------

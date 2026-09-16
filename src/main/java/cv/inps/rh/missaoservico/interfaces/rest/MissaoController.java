@@ -221,6 +221,66 @@ public class MissaoController {
   }
 
    @GetMapping(
+   value = "{uuid}/avaliacoes"
+  )
+  @Operation(
+    summary = "Get avaliacoes dos prestadores da missao",
+    description = "Avaliacoes de todos os prestadores da missao, uma linha por prestador em cada processo. Gravar tambem pode ser feito por processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoAvaliacoesResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<MissaoAvaliacoesResponseDTO> getMissaoAvaliacoes(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetMissaoAvaliacoesQuery(uuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/avaliacoes"
+  )
+  @Operation(
+    summary = "Save avaliacoes dos prestadores da missao",
+    description = "Grava as avaliacoes do ecra todo de uma vez. Ou grava tudo, ou nao grava nada",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoAvaliacoesGravadasResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<MissaoAvaliacoesGravadasResponseDTO> saveMissaoAvaliacoes(@Valid @RequestBody MissaoAvaliacoesRequestDTO saveMissaoAvaliacoesRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new SaveMissaoAvaliacoesCommand(saveMissaoAvaliacoesRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
    value = "{uuid}/cabimentos"
   )
   @Operation(

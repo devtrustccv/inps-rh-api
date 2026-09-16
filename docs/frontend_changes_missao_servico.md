@@ -45,6 +45,7 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 | As gravações devolvem um objecto em vez de um mapa | Nenhum para quem lê `id`, `etapa`, `nrMissao`, `total` ou `designacao`: os nomes mantêm-se. Há campos novos, e o `cancelar` passa a ter corpo | secção "Resposta das gravações" |
 | Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão | Aparecem em "Ver Notificação" | capítulos 7, 14 e 16 |
 | `GET /{uuid}/cabimentos`: vista de consulta com os cabimentos dos quatro processos | Permite montar o ecrã "Cabimentação" da spec com uma chamada | capítulo 13 |
+| `GET`/`PUT /{uuid}/avaliacoes`: avaliações de todos os prestadores da missão | Permite montar e gravar o ecrã "Detalhe de Avaliação" de uma vez; os endpoints por prestador mantêm-se | capítulo 15 |
 | Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados) | Nenhum na API; o `estado` passa a `Enviado`/`Erro`, ou `Pendente` se o colaborador não tiver email | capítulos 10 e 17 |
 | Correcção do guia: o exemplo de Alojamento tinha `numeroDias` e `valor`, que não existem | Enviar `valorTotal` (opcional) e as datas; `colaboradorIds` permite agrupar colaboradores | capítulo 10 |
 
@@ -712,6 +713,50 @@ O total é a soma de `peso × (avaliação/100)`. A classe vem do total: **A** >
 
 > O protótipo mostra totais numa escala 1–5 com "Muito Bom / Bom / Regular". A API segue o texto da
 > spec: total ponderado 0–100 e classes **A–D**. Vale a API.
+
+### Vista da missão inteira
+
+O ecrã "Detalhe de Avaliação" mostra os prestadores da missão numa só tabela, com um botão Gravar.
+Há dois endpoints para isso, e os individuais acima continuam disponíveis.
+
+`GET /{uuid}/avaliacoes` — uma linha **por prestador em cada processo**: o mesmo prestador pode
+servir dois processos e é avaliado no serviço que prestou em cada um.
+
+```jsonc
+{ "missaoUuid": "…", "nrMissaoFormatado": "7/2026", "estadoMissao": "FINALIZADO",
+  "opcoesAvaliacao": [ { "valor": "100", "descricao": "Muito Bom" }, … ],   // uma vez, no topo
+  "avaliacoes": [
+    { "missaoPrestUuid": "…", "nomePrestador": "Atlantico Viagens Teste",
+      "tipoProcesso": "BILHETE_PASSAGEM",
+      "podeAvaliar": true, "avaliado": true,
+      "criterios": [ { "criterio": "SISTEMA_QUALIDADE", "peso": 5, "avaliacao": "100", "pontos": 5 }, … ],
+      "total": 81.25, "designacao": "A", "designacaoDesc": "Fornecedor Preferencial" } ] }
+```
+
+Cada linha tem a mesma forma do `GET` individual; só `opcoesAvaliacao` é que não se repete por
+linha, porque vem uma vez no topo. `podeAvaliar: false` é um prestador sem requisição emitida — a
+linha aparece, mas não se grava.
+
+`PUT /{uuid}/avaliacoes` — grava as linhas todas de uma vez. O processo vem do próprio prestador,
+por isso não se envia o tipo.
+
+```jsonc
+{ "avaliacoes": [
+    { "missaoPrestUuid": "…", "sistemaQualidade": "100", "prazoFornecimento": "75",
+      "qualidadeProduto": "100", "capacidadeResposta": "75", "preco": "50" } ] }
+```
+→ `{ "avaliacoes": [ { "id": "<uuid da avaliação>", "total": 81.25, "designacao": "A" } ] }`, pela
+mesma ordem do pedido.
+
+**Ou grava tudo, ou não grava nada:** se uma linha falhar, nenhuma é gravada.
+
+| Situação | Resposta |
+|---|---|
+| Prestador sem requisição emitida | **400** `Só é possível avaliar um prestador com requisição emitida neste processo` |
+| Prestador de outra missão, ou inactivo | **404** `Prestador não encontrado nesta missão: {uuid}` |
+| `avaliacoes` vazio ou em falta | **400** `avaliacoes é obrigatório` |
+| Linha sem `missaoPrestUuid` | **400** `missaoPrestUuid é obrigatório em cada avaliação` |
+| Missão cancelada | **400** `A missão está cancelada e não admite alterações` |
 
 ---
 

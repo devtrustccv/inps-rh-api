@@ -1,0 +1,16 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoAvaliacoesResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoMissao", "type": "string", "objectType": "java", "required": false },
+    { "name": "avaliacoes", "type": "AvaliacaoPrestadorResponse", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": false },
+    { "name": "opcoesAvaliacao", "type": "OpcaoDominioResponse", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": false }
+  ],
+  "id": "msvdto34avaliacoes"
+}

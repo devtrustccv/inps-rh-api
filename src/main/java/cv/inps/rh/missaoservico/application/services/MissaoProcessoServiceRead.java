@@ -11,6 +11,7 @@ import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.queries.GetListaProcessosEtapaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetAvaliacaoPrestadorQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoAprovacaoRhQuery;
+import cv.inps.rh.missaoservico.application.queries.GetMissaoAvaliacoesQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoCabimentosQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoLogisticaQuery;
@@ -471,6 +472,17 @@ public class MissaoProcessoServiceRead {
     var opcoes = support.dominioAvaliacaoFornecedor("AVALIACAO");
     var designacoes = support.dominioAvaliacaoFornecedor("DESIGNACAO");
     var pesos = support.pesosAvaliacao();
+    return ResponseEntity.ok(avaliacaoDoPrestador(processo, prestador, opcoes, designacoes, pesos, true));
+  }
+
+  /**
+   * Avaliação de um prestador num processo — critérios com peso e pontos, e o que já está gravado.
+   * {@code incluirOpcoes} deixa de fora os selects quando eles vêm uma só vez, no topo da resposta.
+   */
+  private AvaliacaoPrestadorResponseDTO avaliacaoDoPrestador(
+      MissaoProcessoEntity processo, MissaoPrestadorEntity prestador,
+      Map<String, String> opcoes, Map<String, String> designacoes, Map<String, Integer> pesos,
+      boolean incluirOpcoes) {
     var avaliacao = missaoPrestadorAvalRepository
         .findFirstByMissaoPrestId_IdAndEstadoOrderByIdDesc(prestador.getId(), ESTADO_ATIVO)
         .orElse(null);
@@ -501,9 +513,11 @@ public class MissaoProcessoServiceRead {
     response.setPodeAvaliar(missaoRequisicaoRepository.existsByMissaoPrestId_IdAndEstado(prestador.getId(), ESTADO_ATIVO));
     response.setAvaliado(avaliacao != null);
     response.setCriterios(criterios);
-    response.setOpcoesAvaliacao(opcoes.entrySet().stream()
-        .map(e -> new OpcaoDominioResponseDTO(e.getKey(), e.getValue()))
-        .toList());
+    if (incluirOpcoes) {
+      response.setOpcoesAvaliacao(opcoes.entrySet().stream()
+          .map(e -> new OpcaoDominioResponseDTO(e.getKey(), e.getValue()))
+          .toList());
+    }
     if (avaliacao != null) {
       response.setTotal(avaliacao.getTotal());
       response.setDesignacao(avaliacao.getDesignacao());
@@ -512,6 +526,46 @@ public class MissaoProcessoServiceRead {
       var data = avaliacao.getLastModifiedDate() != null ? avaliacao.getLastModifiedDate() : avaliacao.getCreatedDate();
       response.setDataExecucao(data != null ? data.toLocalDate() : null);
     }
+    return response;
+  }
+
+  /**
+   * Avaliações de toda a missão, numa só resposta — o ecrã "Detalhe de Avaliação" mostra os
+   * prestadores da missão na mesma tabela. Uma linha por prestador <b>em cada processo</b>: o mesmo
+   * prestador pode servir dois processos e é avaliado no serviço que prestou em cada um. Gravar
+   * continua a poder ser feito linha a linha, no endpoint por processo.
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoAvaliacoesResponseDTO> getAvaliacoesDaMissao(GetMissaoAvaliacoesQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid);
+    if (processos.isEmpty()) {
+      throw IgrpResponseStatusException.notFound("Missão não encontrada: " + missaoUuid);
+    }
+    var missao = processos.getFirst().getMissaoServId();
+
+    var opcoes = support.dominioAvaliacaoFornecedor("AVALIACAO");
+    var designacoes = support.dominioAvaliacaoFornecedor("DESIGNACAO");
+    var pesos = support.pesosAvaliacao();
+
+    var avaliacoes = new ArrayList<AvaliacaoPrestadorResponseDTO>();
+    for (var processo : processos) {
+      if (!ESTADO_ATIVO.equals(processo.getEstado()))
+        continue;
+      missaoPrestadorRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+          .filter(prest -> ESTADO_ATIVO.equals(prest.getEstado()))
+          .forEach(prest -> avaliacoes.add(
+              avaliacaoDoPrestador(processo, prest, opcoes, designacoes, pesos, false)));
+    }
+
+    var response = new MissaoAvaliacoesResponseDTO();
+    response.setMissaoUuid(missao.getUuid());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+    response.setEstadoMissao(missao.getEstado());
+    response.setAvaliacoes(avaliacoes);
+    response.setOpcoesAvaliacao(opcoes.entrySet().stream()
+        .map(e -> new OpcaoDominioResponseDTO(e.getKey(), e.getValue()))
+        .toList());
     return ResponseEntity.ok(response);
   }
 

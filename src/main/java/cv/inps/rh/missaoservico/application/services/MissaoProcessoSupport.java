@@ -184,6 +184,23 @@ public class MissaoProcessoSupport {
   }
 
   /**
+   * Prestador de qualquer processo da missão, pelo uuid de RH_T_MISSAO_PRESTADOR. Usado pelos ecrãs
+   * da missão inteira, onde o tipo de processo não vem no caminho: é o próprio prestador que o diz.
+   */
+  public MissaoPrestadorEntity prestadorDaMissao(UUID missaoUuid, UUID missaoPrestUuid, boolean escrita) {
+    var prestador = missaoPrestadorRepository.findByUuid(missaoPrestUuid)
+        .filter(x -> x.getMissaoProcessoId() != null
+            && x.getMissaoProcessoId().getMissaoServId() != null
+            && missaoUuid.equals(x.getMissaoProcessoId().getMissaoServId().getUuid())
+            && ESTADO_ATIVO.equals(x.getEstado()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Prestador não encontrado nesta missão: " + missaoPrestUuid));
+    if (escrita && ESTADO_INATIVO.equals(prestador.getMissaoProcessoId().getMissaoServId().getEstado())) {
+      throw IgrpResponseStatusException.badRequest("A missão está cancelada e não admite alterações");
+    }
+    return prestador;
+  }
+
+  /**
    * Opções do domínio AVALIACAO_FORNECEDOR para uma referência (AVALIACAO, PESO, DESIGNACAO), como
    * valor → descrição, pela ordem de registo.
    */

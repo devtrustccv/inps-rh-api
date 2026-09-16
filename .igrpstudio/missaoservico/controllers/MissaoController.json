@@ -226,6 +226,75 @@
       ]
     },
     {
+      "actionName": "getMissaoAvaliacoes",
+      "path": "{uuid}/avaliacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoAvaliacoesResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveMissaoAvaliacoes",
+      "path": "{uuid}/avaliacoes",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "MissaoAvaliacoesRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoAvaliacoesGravadasResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "getMissaoCabimentos",
       "path": "{uuid}/cabimentos",
       "method": "GET",

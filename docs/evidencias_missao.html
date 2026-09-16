@@ -91,6 +91,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>As gravações devolvem um objecto em vez de um mapa</td><td>Nenhum para quem lê <code>id</code>, <code>etapa</code>, <code>nrMissao</code>, <code>total</code> ou <code>designacao</code>: os nomes mantêm-se. Há campos novos, e o <code>cancelar</code> passa a ter corpo</td><td>secção &quot;Resposta das gravações&quot;</td></tr>
 <tr><td>Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão</td><td>Aparecem em &quot;Ver Notificação&quot;</td><td>capítulos 7, 14 e 16</td></tr>
 <tr><td><code>GET /{uuid}/cabimentos</code>: vista de consulta com os cabimentos dos quatro processos</td><td>Permite montar o ecrã &quot;Cabimentação&quot; da spec com uma chamada</td><td>capítulo 13</td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/avaliacoes</code>: avaliações de todos os prestadores da missão</td><td>Permite montar e gravar o ecrã &quot;Detalhe de Avaliação&quot; de uma vez; os endpoints por prestador mantêm-se</td><td>capítulo 15</td></tr>
 <tr><td>Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados)</td><td>Nenhum na API; o <code>estado</code> passa a <code>Enviado</code>/<code>Erro</code>, ou <code>Pendente</code> se o colaborador não tiver email</td><td>capítulos 10 e 17</td></tr>
 <tr><td>Correcção do guia: o exemplo de Alojamento tinha <code>numeroDias</code> e <code>valor</code>, que não existem</td><td>Enviar <code>valorTotal</code> (opcional) e as datas; <code>colaboradorIds</code> permite agrupar colaboradores</td><td>capítulo 10</td></tr>
 </tbody></table></div>
@@ -530,6 +531,33 @@ th { background: var(--thead); font-weight: 600; }
 <p>O total é a soma de <code>peso × (avaliação/100)</code>. A classe vem do total: <strong>A</strong> &gt; 75, <strong>B</strong> ]40;75], <strong>C</strong> ]25;40], <strong>D</strong> [0;25] — <code>designacaoDesc</code> traz o texto (ex.: &quot;Fornecedor Preferencial&quot;).</p>
 <p><strong>Erros:</strong> <code>Avaliação obrigatória para o critério {X}</code> e <code>Avaliação inválida para {X}: {v} (valores: 100, 75, 50, 25)</code>.</p>
 <blockquote><p>O protótipo mostra totais numa escala 1–5 com &quot;Muito Bom / Bom / Regular&quot;. A API segue o texto da spec: total ponderado 0–100 e classes <strong>A–D</strong>. Vale a API.</p></blockquote>
+<h3>Vista da missão inteira</h3>
+<p>O ecrã &quot;Detalhe de Avaliação&quot; mostra os prestadores da missão numa só tabela, com um botão Gravar. Há dois endpoints para isso, e os individuais acima continuam disponíveis.</p>
+<p><code>GET /{uuid}/avaliacoes</code> — uma linha <strong>por prestador em cada processo</strong>: o mesmo prestador pode servir dois processos e é avaliado no serviço que prestou em cada um.</p>
+<pre><code>{ &quot;missaoUuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;7/2026&quot;, &quot;estadoMissao&quot;: &quot;FINALIZADO&quot;,
+  &quot;opcoesAvaliacao&quot;: [ { &quot;valor&quot;: &quot;100&quot;, &quot;descricao&quot;: &quot;Muito Bom&quot; }, … ],   // uma vez, no topo
+  &quot;avaliacoes&quot;: [
+    { &quot;missaoPrestUuid&quot;: &quot;…&quot;, &quot;nomePrestador&quot;: &quot;Atlantico Viagens Teste&quot;,
+      &quot;tipoProcesso&quot;: &quot;BILHETE_PASSAGEM&quot;,
+      &quot;podeAvaliar&quot;: true, &quot;avaliado&quot;: true,
+      &quot;criterios&quot;: [ { &quot;criterio&quot;: &quot;SISTEMA_QUALIDADE&quot;, &quot;peso&quot;: 5, &quot;avaliacao&quot;: &quot;100&quot;, &quot;pontos&quot;: 5 }, … ],
+      &quot;total&quot;: 81.25, &quot;designacao&quot;: &quot;A&quot;, &quot;designacaoDesc&quot;: &quot;Fornecedor Preferencial&quot; } ] }</code></pre>
+<p>Cada linha tem a mesma forma do <code>GET</code> individual; só <code>opcoesAvaliacao</code> é que não se repete por linha, porque vem uma vez no topo. <code>podeAvaliar: false</code> é um prestador sem requisição emitida — a linha aparece, mas não se grava.</p>
+<p><code>PUT /{uuid}/avaliacoes</code> — grava as linhas todas de uma vez. O processo vem do próprio prestador, por isso não se envia o tipo.</p>
+<pre><code>{ &quot;avaliacoes&quot;: [
+    { &quot;missaoPrestUuid&quot;: &quot;…&quot;, &quot;sistemaQualidade&quot;: &quot;100&quot;, &quot;prazoFornecimento&quot;: &quot;75&quot;,
+      &quot;qualidadeProduto&quot;: &quot;100&quot;, &quot;capacidadeResposta&quot;: &quot;75&quot;, &quot;preco&quot;: &quot;50&quot; } ] }</code></pre>
+<p>→ <code>{ &quot;avaliacoes&quot;: [ { &quot;id&quot;: &quot;&lt;uuid da avaliação&gt;&quot;, &quot;total&quot;: 81.25, &quot;designacao&quot;: &quot;A&quot; } ] }</code>, pela mesma ordem do pedido.</p>
+<p><strong>Ou grava tudo, ou não grava nada:</strong> se uma linha falhar, nenhuma é gravada.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Prestador sem requisição emitida</td><td><strong>400</strong> <code>Só é possível avaliar um prestador com requisição emitida neste processo</code></td></tr>
+<tr><td>Prestador de outra missão, ou inactivo</td><td><strong>404</strong> <code>Prestador não encontrado nesta missão: {uuid}</code></td></tr>
+<tr><td><code>avaliacoes</code> vazio ou em falta</td><td><strong>400</strong> <code>avaliacoes é obrigatório</code></td></tr>
+<tr><td>Linha sem <code>missaoPrestUuid</code></td><td><strong>400</strong> <code>missaoPrestUuid é obrigatório em cada avaliação</code></td></tr>
+<tr><td>Missão cancelada</td><td><strong>400</strong> <code>A missão está cancelada e não admite alterações</code></td></tr>
+</tbody></table></div>
 <hr>
 <h2>16. Ecrã — Ver Notificação</h2>
 <p><code>GET /api/v1/missao-servico/{uuid}/notificacoes</code> — o botão &quot;Ver Notificação&quot; da Lista Missão.</p>
