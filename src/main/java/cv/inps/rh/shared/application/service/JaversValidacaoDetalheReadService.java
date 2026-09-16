@@ -73,8 +73,23 @@ public class JaversValidacaoDetalheReadService {
     LOGGER.info("Grelha 'Detalhe de alterações' (JaVers) ativa para: {}", registoPorReferencia.keySet());
   }
 
+  /**
+   * Uma linha da grelha com tudo o que o JaVers sabe dela — incluindo o que o {@link ValidacaoDetalheDTO}
+   * não expõe: o nome da propriedade, o id da linha afectada e a natureza da alteração. Existe para o
+   * backfill de {@code RH_T_VALIDACAO_DETALHE} antes de o JaVers sair: sem estes três dados, as linhas
+   * copiadas não se fundiriam com as do motor novo numa correcção posterior.
+   */
+  public record LinhaJavers(String campo, String rotulo, String valorAnterior, String valorNovo,
+      Long tabelaId, String tipoAlteracao, String autor, java.time.LocalDateTime data, String tabela) {}
+
   @Transactional(readOnly = true)
   public List<ValidacaoDetalheDTO> listar(UUID validacaoUuid) {
+    return linhas(validacaoUuid).stream().map(this::toDto).toList();
+  }
+
+  /** A mesma grelha que {@link #listar}, sem perder informação. */
+  @Transactional(readOnly = true)
+  public List<LinhaJavers> linhas(UUID validacaoUuid) {
     ValidacaoEntity validacao = validacaoEntityRepository.findByUuid(validacaoUuid).orElse(null);
     if (validacao == null) {
       return List.of();
@@ -129,7 +144,7 @@ public class JaversValidacaoDetalheReadService {
         // Só campos de negócio (allow-list do descritor): fora estado (workflow), FKs estruturais e
         // created*/lastModified* (auditoria). Tudo o que não estiver na lista fica de fora por omissão.
         .filter(change -> descriptor.camposNegocio().contains(change.getPropertyName()))
-        .map(change -> toDto(change, descriptor.rotulos()))
+        .map(change -> toLinha(change, descriptor.rotulos()))
         .toList();
   }
 
@@ -151,18 +166,38 @@ public class JaversValidacaoDetalheReadService {
     return String.valueOf(referenciaId).equals(String.valueOf(instanceId.getCdoId()));
   }
 
-  private ValidacaoDetalheDTO toDto(PropertyChange<?> change, Map<String, String> rotulos) {
-    var dto = new ValidacaoDetalheDTO();
-    dto.setCampoAlterado(rotulos.getOrDefault(change.getPropertyName(), change.getPropertyName()));
-    dto.setValorAnterior(displayLeft(change));
-    dto.setValorNovo(displayRight(change));
-
+  private LinhaJavers toLinha(PropertyChange<?> change, Map<String, String> rotulos) {
     CommitMetadata commit = change.getCommitMetadata().orElse(null);
-    if (commit != null) {
-      dto.setAlteradoPor(commit.getAuthor());
-      dto.setDataAlteracao(commit.getCommitDate() == null ? null : commit.getCommitDate().format(DATA_HORA));
-      dto.setTabelaName(commit.getProperties().get(JaversAuditConfig.PROP_TABELA));
+    Long tabelaId = null;
+    if (change.getAffectedGlobalId() instanceof InstanceId instanceId) {
+      try {
+        tabelaId = Long.valueOf(String.valueOf(instanceId.getCdoId()));
+      } catch (NumberFormatException ignored) {
+        // cdoId não numérico (POJO sem id Long) — fica sem id de linha
+      }
     }
+    String tipo = change instanceof InitialValueChange ? "INICIAL"
+        : change instanceof ReferenceChange ? "REFERENCIA" : "VALOR";
+    return new LinhaJavers(
+        change.getPropertyName(),
+        rotulos.getOrDefault(change.getPropertyName(), change.getPropertyName()),
+        displayLeft(change),
+        displayRight(change),
+        tabelaId,
+        tipo,
+        commit != null ? commit.getAuthor() : null,
+        commit != null ? commit.getCommitDate() : null,
+        commit != null ? commit.getProperties().get(JaversAuditConfig.PROP_TABELA) : null);
+  }
+
+  private ValidacaoDetalheDTO toDto(LinhaJavers l) {
+    var dto = new ValidacaoDetalheDTO();
+    dto.setCampoAlterado(l.rotulo());
+    dto.setValorAnterior(l.valorAnterior());
+    dto.setValorNovo(l.valorNovo());
+    dto.setAlteradoPor(l.autor());
+    dto.setDataAlteracao(l.data() == null ? null : l.data().format(DATA_HORA));
+    dto.setTabelaName(l.tabela());
     return dto;
   }
 
