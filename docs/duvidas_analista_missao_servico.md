@@ -260,12 +260,11 @@ O alerta *"Missão com documentos obrigatórios em falta"* precisa da lista.
 
 ## 6. Pontos menores
 
-- **Alojamento em grupo.** A spec diz: *"Alojamento: Cabimento para o hotel ou agência. **Para
-  grupos no mesmo hotel, pode ser um único cabimento**"*. O nosso formulário força uma linha por
-  colaborador, logo gera um cabimento por pessoa. Mantemos assim, ou implementamos o cabimento
-  agrupado?
-- **`entId` do prestador** é validado apenas como obrigatório — não é confrontado com
-  `INPSSIGOF.ENTIDADES`. Queremos essa validação?
+- ~~**Alojamento em grupo.**~~ *Já resolvido no modelo por processo (verificado a 16/09):* uma linha
+  de alojamento aceita vários colaboradores do mesmo prestador (`colaboradorIds`), o que dá um único
+  cabimento para o grupo.
+- ~~**`entId` do prestador.**~~ *Já resolvido (verificado a 16/09):* o registo do prestador e o seguro
+  confrontam o `entId` com as entidades e respondem 400 se não existir.
 - **Filtro "Etapa" da Lista Missão por Etapa** está marcado como obrigatório no protótipo, mas a API
   aceita sem ele (devolve todos os processos). Obrigatório mesmo?
 - **Campo "Alojamento"** está marcado como obrigatório no ecrã de Nova Missão; a API assume **Sim**

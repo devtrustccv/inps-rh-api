@@ -90,6 +90,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Os dez endpoints antigos foram removidos</td><td>Passam a responder <strong>404</strong></td><td>tabela abaixo</td></tr>
 <tr><td>As gravações devolvem um objecto em vez de um mapa</td><td>Nenhum para quem lê <code>id</code>, <code>etapa</code>, <code>nrMissao</code>, <code>total</code> ou <code>designacao</code>: os nomes mantêm-se. Há campos novos, e o <code>cancelar</code> passa a ter corpo</td><td>secção &quot;Resposta das gravações&quot;</td></tr>
 <tr><td>Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão</td><td>Aparecem em &quot;Ver Notificação&quot;</td><td>capítulos 7, 14 e 16</td></tr>
+<tr><td>Correcção do guia: o exemplo de Alojamento tinha <code>numeroDias</code> e <code>valor</code>, que não existem</td><td>Enviar <code>valorTotal</code> (opcional) e as datas; <code>colaboradorIds</code> permite agrupar colaboradores</td><td>capítulo 10</td></tr>
 </tbody></table></div>
 <h3>Endpoints antigos — removidos</h3>
 <p>Os dez endpoints do modelo anterior <strong>foram removidos a 2026-09-16</strong> e passam a responder <strong>404</strong>.</p>
@@ -223,6 +224,8 @@ th { background: var(--thead); font-weight: 600; }
 <tbody>
 <tr><td>Sem <code>entId</code></td><td><strong>400</strong> <code>entId é obrigatório</code></td></tr>
 <tr><td>Sem <code>email</code></td><td><strong>400</strong> <code>email é obrigatório</code></td></tr>
+<tr><td><code>entId</code> que não existe nas entidades</td><td><strong>400</strong> <code>Entidade inválida: {entId}</code></td></tr>
+<tr><td>Entidade já registada noutro prestador</td><td><strong>400</strong> <code>Já existe um prestador registado para a entidade {entId}</code></td></tr>
 <tr><td>Email principal ou adicional mal formado</td><td><strong>400</strong> <code>Email inválido: {valor}</code></td></tr>
 <tr><td>Prestador inexistente (<code>GET</code>/<code>PUT</code>)</td><td><strong>404</strong></td></tr>
 </tbody></table></div>
@@ -375,16 +378,25 @@ th { background: var(--thead); font-weight: 600; }
   &quot;processoEtapaAction&quot;: &quot;SAVE&quot; }
 
 // SEGURO_VIAGEM
-{ &quot;segurosViagem&quot;: [ { &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;, &quot;&lt;uuid&gt;&quot;], &quot;valor&quot;: 45000, &quot;entId&quot;: 100000003 } ] }
+{ &quot;segurosViagem&quot;: [ { &quot;entId&quot;: 100000003,          // obrigatório — do lookup de entidades
+                       &quot;nomeSeguradora&quot;: null,       // null = nome da entidade
+                       &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;, &quot;&lt;uuid&gt;&quot;],
+                       &quot;valor&quot;: 45000 } ] }         // obrigatório
 
-// ALOJAMENTO — todos os campos obrigatórios
-{ &quot;alojamentos&quot;: [ { &quot;colaboradorId&quot;: &quot;&lt;uuid&gt;&quot;, &quot;lugarHospedagem&quot;: &quot;Hotel Praia Mar&quot;,
-                     &quot;flgAlimentacao&quot;: &quot;SIM&quot;,        // &quot;SIM&quot; | &quot;NAO&quot;
-                     &quot;valorDiario&quot;: 6000, &quot;numeroDias&quot;: 5, &quot;valor&quot;: 30000 } ] }
+// ALOJAMENTO — uma linha por quarto/estadia; pode juntar vários colaboradores do mesmo prestador
+{ &quot;alojamentos&quot;: [ { &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;],  // ou &quot;colaboradorId&quot;: &quot;&lt;uuid&gt;&quot; (um só)
+                     &quot;lugarHospedagem&quot;: &quot;Hotel Praia Mar&quot;,   // obrigatório
+                     &quot;flgAlimentacao&quot;: &quot;SIM&quot;,                // obrigatório — &quot;SIM&quot; | &quot;NAO&quot;
+                     &quot;valorDiario&quot;: 6000,                    // obrigatório
+                     &quot;valorTotal&quot;: 36000,                    // null = valorDiario × nº de dias
+                     &quot;moeda&quot;: &quot;CVE&quot;,                         // null = CVE
+                     &quot;dataInicio&quot;: &quot;2026-11-10&quot;,             // null = datas da missão
+                     &quot;dataFim&quot;: &quot;2026-11-15&quot; } ] }
 
 // AJUDA_CUSTO
 { &quot;ajudasCusto&quot;: [ { &quot;colaboradorId&quot;: &quot;&lt;uuid&gt;&quot;, &quot;flgAlojamento&quot;: true,
                      &quot;numeroDiasAlojamento&quot;: 5, &quot;valorDiario&quot;: 6000 } ] }</code></pre>
+<p>No alojamento, o nº de dias é calculado a partir das datas (<code>dataFim − dataInicio + 1</code>). Não se envia <code>numeroDias</code> nem <code>valor</code>: esses campos não existem e são ignorados sem erro.</p>
 <h3>O cálculo da ajuda de custo</h3>
 <p><code>valorDiario</code> é a <strong>base</strong> enviada pelo ecrã. O servidor aplica-lhe a fracção e devolve o <code>valorDiario</code> efectivo e o <code>valorTotal</code> — ambos só de leitura no ecrã.</p>
 <div class="table-wrap"><table>
@@ -549,9 +561,7 @@ th { background: var(--thead); font-weight: 600; }
 <tbody>
 <tr><td><code>cabId</code> (SGAL)</td><td>Não gerado — integração por definir (sem endpoint nem contrato). As linhas ficam <code>CABIMENTADO</code> com <code>cabId: null</code></td></tr>
 <tr><td><code>valorDiario</code></td><td>A base vem do cliente, sem validação. A tabela de preços da ajuda de custo nunca foi especificada</td></tr>
-<tr><td><code>entId</code></td><td>Aceite sem validação — confirmar contra <code>parametrizacao/entidades/ativos</code> no ecrã</td></tr>
 <tr><td>Pesquisa de entidades</td><td><code>entidades/ativos</code> devolve 11 981 registos sem filtro nem paginação</td></tr>
-<tr><td>Alojamento em grupo</td><td>O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel</td></tr>
 <tr><td>Identidade do utilizador</td><td><code>executadoPor</code> grava <code>anonymousUser</code> em desenvolvimento; sem bloqueio por perfil nesta fase</td></tr>
 <tr><td>Encoding</td><td>Enviar <code>Content-Type: application/json; charset=utf-8</code></td></tr>
 <tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td>O analista retirou os alertas da missão do âmbito actual: <code>GET /api/v1/funcionarios/alertas</code> não devolve nada da missão. O botão pode ficar escondido</td></tr>

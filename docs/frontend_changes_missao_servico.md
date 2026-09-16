@@ -44,6 +44,7 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 | Os dez endpoints antigos foram removidos | Passam a responder **404** | tabela abaixo |
 | As gravações devolvem um objecto em vez de um mapa | Nenhum para quem lê `id`, `etapa`, `nrMissao`, `total` ou `designacao`: os nomes mantêm-se. Há campos novos, e o `cancelar` passa a ter corpo | secção "Resposta das gravações" |
 | Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão | Aparecem em "Ver Notificação" | capítulos 7, 14 e 16 |
+| Correcção do guia: o exemplo de Alojamento tinha `numeroDias` e `valor`, que não existem | Enviar `valorTotal` (opcional) e as datas; `colaboradorIds` permite agrupar colaboradores | capítulo 10 |
 
 ### Endpoints antigos — removidos
 
@@ -233,6 +234,8 @@ de edição); o ecrã da etapa só recebe os activos.
 |---|---|
 | Sem `entId` | **400** `entId é obrigatório` |
 | Sem `email` | **400** `email é obrigatório` |
+| `entId` que não existe nas entidades | **400** `Entidade inválida: {entId}` |
+| Entidade já registada noutro prestador | **400** `Já existe um prestador registado para a entidade {entId}` |
 | Email principal ou adicional mal formado | **400** `Email inválido: {valor}` |
 | Prestador inexistente (`GET`/`PUT`) | **404** |
 
@@ -466,17 +469,28 @@ que esse colaborador vem.
   "processoEtapaAction": "SAVE" }
 
 // SEGURO_VIAGEM
-{ "segurosViagem": [ { "colaboradorIds": ["<uuid>", "<uuid>"], "valor": 45000, "entId": 100000003 } ] }
+{ "segurosViagem": [ { "entId": 100000003,          // obrigatório — do lookup de entidades
+                       "nomeSeguradora": null,       // null = nome da entidade
+                       "colaboradorIds": ["<uuid>", "<uuid>"],
+                       "valor": 45000 } ] }         // obrigatório
 
-// ALOJAMENTO — todos os campos obrigatórios
-{ "alojamentos": [ { "colaboradorId": "<uuid>", "lugarHospedagem": "Hotel Praia Mar",
-                     "flgAlimentacao": "SIM",        // "SIM" | "NAO"
-                     "valorDiario": 6000, "numeroDias": 5, "valor": 30000 } ] }
+// ALOJAMENTO — uma linha por quarto/estadia; pode juntar vários colaboradores do mesmo prestador
+{ "alojamentos": [ { "colaboradorIds": ["<uuid>"],  // ou "colaboradorId": "<uuid>" (um só)
+                     "lugarHospedagem": "Hotel Praia Mar",   // obrigatório
+                     "flgAlimentacao": "SIM",                // obrigatório — "SIM" | "NAO"
+                     "valorDiario": 6000,                    // obrigatório
+                     "valorTotal": 36000,                    // null = valorDiario × nº de dias
+                     "moeda": "CVE",                         // null = CVE
+                     "dataInicio": "2026-11-10",             // null = datas da missão
+                     "dataFim": "2026-11-15" } ] }
 
 // AJUDA_CUSTO
 { "ajudasCusto": [ { "colaboradorId": "<uuid>", "flgAlojamento": true,
                      "numeroDiasAlojamento": 5, "valorDiario": 6000 } ] }
 ```
+
+No alojamento, o nº de dias é calculado a partir das datas (`dataFim − dataInicio + 1`). Não se envia
+`numeroDias` nem `valor`: esses campos não existem e são ignorados sem erro.
 
 ### O cálculo da ajuda de custo
 
@@ -736,9 +750,7 @@ das requisições — com o nº da missão e o motivo. Cada colaborador recebe u
 |---|---|
 | `cabId` (SGAL) | Não gerado — integração por definir (sem endpoint nem contrato). As linhas ficam `CABIMENTADO` com `cabId: null` |
 | `valorDiario` | A base vem do cliente, sem validação. A tabela de preços da ajuda de custo nunca foi especificada |
-| `entId` | Aceite sem validação — confirmar contra `parametrizacao/entidades/ativos` no ecrã |
 | Pesquisa de entidades | `entidades/ativos` devolve 11 981 registos sem filtro nem paginação |
-| Alojamento em grupo | O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel |
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
 | **"Ver Alerta"** (Lista Missão) | O analista retirou os alertas da missão do âmbito actual: `GET /api/v1/funcionarios/alertas` não devolve nada da missão. O botão pode ficar escondido |
