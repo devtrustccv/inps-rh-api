@@ -221,6 +221,36 @@ public class MissaoController {
   }
 
    @GetMapping(
+   value = "{uuid}/cabimentos"
+  )
+  @Operation(
+    summary = "Get cabimentos da missao",
+    description = "Cabimentos dos quatro processos numa so resposta (consulta). Cabimentar continua em /processos/{tipoProcesso}/cabimento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoCabimentosResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<MissaoCabimentosResponseDTO> getMissaoCabimentos(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetMissaoCabimentosQuery(uuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "{uuid}/pagamento"
   )
   @Operation(

@@ -1,0 +1,18 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoCabimentosResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoMissao", "type": "string", "objectType": "java", "required": false },
+    { "name": "processos", "type": "MissaoProcessoResponse", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": false },
+    { "name": "itens", "type": "ProcessoCabimentoItemResponse", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": false },
+    { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto33missaocabimentos"
+}

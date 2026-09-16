@@ -226,6 +226,34 @@
       ]
     },
     {
+      "actionName": "getMissaoCabimentos",
+      "path": "{uuid}/cabimentos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoCabimentosResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "getMissaoServicoPagamento",
       "path": "{uuid}/pagamento",
       "method": "GET",

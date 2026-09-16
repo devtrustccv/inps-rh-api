@@ -44,6 +44,7 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 | Os dez endpoints antigos foram removidos | Passam a responder **404** | tabela abaixo |
 | As gravações devolvem um objecto em vez de um mapa | Nenhum para quem lê `id`, `etapa`, `nrMissao`, `total` ou `designacao`: os nomes mantêm-se. Há campos novos, e o `cancelar` passa a ter corpo | secção "Resposta das gravações" |
 | Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão | Aparecem em "Ver Notificação" | capítulos 7, 14 e 16 |
+| `GET /{uuid}/cabimentos`: vista de consulta com os cabimentos dos quatro processos | Permite montar o ecrã "Cabimentação" da spec com uma chamada | capítulo 13 |
 | Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados) | Nenhum na API; o `estado` passa a `Enviado`/`Erro`, ou `Pendente` se o colaborador não tiver email | capítulos 10 e 17 |
 | Correcção do guia: o exemplo de Alojamento tinha `numeroDias` e `valor`, que não existem | Enviar `valorTotal` (opcional) e as datas; `colaboradorIds` permite agrupar colaboradores | capítulo 10 |
 
@@ -626,6 +627,31 @@ alterar o `cabId` de uma linha já autorizada.
 
 > **`cabId` continua `null`** — a integração com o SGAL ainda não existe. Acabou a autorização
 > parcial: o `NEXT` exige todas as linhas.
+
+### Vista da missão inteira
+
+`GET /{uuid}/cabimentos` — **só consulta**, com as linhas dos **quatro** processos numa resposta, como
+no ecrã da spec, que mostra os quatro tipos de serviço na mesma tabela. Cabimentar e autorizar
+continuam a ser feitos processo a processo.
+
+```jsonc
+{ "missaoUuid": "…", "nrMissaoFormatado": "7/2026", "estadoMissao": "FINALIZADO",
+  "processos": [ { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "PAGAMENTO", "estado": "A" }, … ],
+  "itens": [ { "logisticaUuid": "…", "referencia": "BILHETE_PASSAGEM",   // = tipo de serviço
+               "nome": "Atlantico Viagens Teste", "valorTotal": 250000, "moeda": "CVE",
+               "cabId": null, "estadoCabimento": "AUTORIZADO",
+               "colaboradores": [ … ], "documento": null }, … ],
+  "valorTotal": 391000, "dataExecucao": "2026-09-16" }
+```
+
+Os `itens` têm a mesma forma do endpoint por processo, e o `referencia` diz o tipo de serviço de
+cada linha. Os processos inactivos (alojamento desligado) não entram. `processos[]` traz a etapa de
+cada um, para o ecrã saber quais é que já podem ser cabimentados.
+
+| Situação | Resposta |
+|---|---|
+| Missão inexistente | **404** |
+| `uuid` mal formado | **400** `String fornecida não é um UUID válido` |
 
 ---
 

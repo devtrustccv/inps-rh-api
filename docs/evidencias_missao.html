@@ -90,6 +90,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Os dez endpoints antigos foram removidos</td><td>Passam a responder <strong>404</strong></td><td>tabela abaixo</td></tr>
 <tr><td>As gravações devolvem um objecto em vez de um mapa</td><td>Nenhum para quem lê <code>id</code>, <code>etapa</code>, <code>nrMissao</code>, <code>total</code> ou <code>designacao</code>: os nomes mantêm-se. Há campos novos, e o <code>cancelar</code> passa a ter corpo</td><td>secção &quot;Resposta das gravações&quot;</td></tr>
 <tr><td>Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão</td><td>Aparecem em &quot;Ver Notificação&quot;</td><td>capítulos 7, 14 e 16</td></tr>
+<tr><td><code>GET /{uuid}/cabimentos</code>: vista de consulta com os cabimentos dos quatro processos</td><td>Permite montar o ecrã &quot;Cabimentação&quot; da spec com uma chamada</td><td>capítulo 13</td></tr>
 <tr><td>Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados)</td><td>Nenhum na API; o <code>estado</code> passa a <code>Enviado</code>/<code>Erro</code>, ou <code>Pendente</code> se o colaborador não tiver email</td><td>capítulos 10 e 17</td></tr>
 <tr><td>Correcção do guia: o exemplo de Alojamento tinha <code>numeroDias</code> e <code>valor</code>, que não existem</td><td>Enviar <code>valorTotal</code> (opcional) e as datas; <code>colaboradorIds</code> permite agrupar colaboradores</td><td>capítulo 10</td></tr>
 </tbody></table></div>
@@ -479,6 +480,22 @@ th { background: var(--thead); font-weight: 600; }
 </tbody></table></div>
 <p><strong>Erros:</strong> <code>Faltam cabimentar {n} linha(s) do processo</code>, linha que não pertence ao processo, e alterar o <code>cabId</code> de uma linha já autorizada.</p>
 <blockquote><p><strong><code>cabId</code> continua <code>null</code></strong> — a integração com o SGAL ainda não existe. Acabou a autorização parcial: o <code>NEXT</code> exige todas as linhas.</p></blockquote>
+<h3>Vista da missão inteira</h3>
+<p><code>GET /{uuid}/cabimentos</code> — <strong>só consulta</strong>, com as linhas dos <strong>quatro</strong> processos numa resposta, como no ecrã da spec, que mostra os quatro tipos de serviço na mesma tabela. Cabimentar e autorizar continuam a ser feitos processo a processo.</p>
+<pre><code>{ &quot;missaoUuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;7/2026&quot;, &quot;estadoMissao&quot;: &quot;FINALIZADO&quot;,
+  &quot;processos&quot;: [ { &quot;uuid&quot;: &quot;…&quot;, &quot;tipoProcesso&quot;: &quot;BILHETE_PASSAGEM&quot;, &quot;etapa&quot;: &quot;PAGAMENTO&quot;, &quot;estado&quot;: &quot;A&quot; }, … ],
+  &quot;itens&quot;: [ { &quot;logisticaUuid&quot;: &quot;…&quot;, &quot;referencia&quot;: &quot;BILHETE_PASSAGEM&quot;,   // = tipo de serviço
+               &quot;nome&quot;: &quot;Atlantico Viagens Teste&quot;, &quot;valorTotal&quot;: 250000, &quot;moeda&quot;: &quot;CVE&quot;,
+               &quot;cabId&quot;: null, &quot;estadoCabimento&quot;: &quot;AUTORIZADO&quot;,
+               &quot;colaboradores&quot;: [ … ], &quot;documento&quot;: null }, … ],
+  &quot;valorTotal&quot;: 391000, &quot;dataExecucao&quot;: &quot;2026-09-16&quot; }</code></pre>
+<p>Os <code>itens</code> têm a mesma forma do endpoint por processo, e o <code>referencia</code> diz o tipo de serviço de cada linha. Os processos inactivos (alojamento desligado) não entram. <code>processos[]</code> traz a etapa de cada um, para o ecrã saber quais é que já podem ser cabimentados.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Missão inexistente</td><td><strong>404</strong></td></tr>
+<tr><td><code>uuid</code> mal formado</td><td><strong>400</strong> <code>String fornecida não é um UUID válido</code></td></tr>
+</tbody></table></div>
 <hr>
 <h2>14. Ecrã — Pagamento</h2>
 <p><code>GET</code>/<code>PUT /{uuid}/pagamento</code> — continua a ser <strong>por missão</strong>, não por processo.</p>
