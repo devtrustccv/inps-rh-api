@@ -33,7 +33,7 @@ public class ValidacaoDetalheReadService {
   @Transactional(readOnly = true)
   public List<ValidacaoDetalheDTO> listar(UUID validacaoUuid) {
     return validacaoDetalheEntityRepository
-        .findByValidacaoId_UuidOrderByTabelaNameAscOrdemAscIdAsc(validacaoUuid)
+        .findByValidacaoId_UuidOrderByTabelaNameAscTabelaIdAscOrdemAscIdAsc(validacaoUuid)
         .stream()
         .map(this::toDto)
         .toList();
@@ -48,6 +48,7 @@ public class ValidacaoDetalheReadService {
     dto.setDataAlteracao(entidade.getCreatedDate() == null ? null : entidade.getCreatedDate().format(DATA_HORA));
     dto.setTabelaName(entidade.getTabelaName());
     // Aditivos (o frontend continua a ler campoAlterado/valor*): nome técnico e natureza da alteração.
+    dto.setTabelaId(entidade.getTabelaId());
     dto.setCampo(entidade.getCampo());
     dto.setTipoAlteracao(entidade.getTipoAlteracao());
     return dto;

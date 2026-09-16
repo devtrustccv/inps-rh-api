@@ -5,7 +5,10 @@ import cv.inps.rh.shared.application.service.ReferenciaNomeResolver;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoDetalheEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnitUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -41,9 +44,13 @@ public class DetalheAlteracoesService implements DetalheAlteracoes {
   /** Largura das colunas VALOR_* depois do alargamento (era 500). */
   private static final int MAX_VALOR = 2000;
 
+  @PersistenceContext
+  private EntityManager entityManager;
+
   private final EntityManagerFactory entityManagerFactory;
   private final ReferenciaNomeResolver referenciaNomeResolver;
   private final ValidacaoDetalheEntityRepository validacaoDetalheEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   @Override
   public <T> Estado capturar(Campos<T> campos, T alvo) {
@@ -111,8 +118,27 @@ public class DetalheAlteracoesService implements DetalheAlteracoes {
 
   @Override
   @Transactional
-  public <T> int congelar(ValidacaoEntity validacao, String tabela, Long tabelaId,
+  public <T> int congelar(ValidacaoEntity validacaoRecebida, String tabela, Long tabelaId,
       Campos<T> campos, Estado antes, Estado depois) {
+
+    // A linha de detalhe tem VALIDACAO_ID NOT NULL, logo precisa de uma validacao GERIDA e com id.
+    ValidacaoEntity alvo = validacaoRecebida;
+    if (alvo.getId() == null) {
+      // Alguns modulos criam a validacao acrescentando-a a funcionario.getValidacoes() e gravando o
+      // funcionario. Como save() faz MERGE, quem fica gerido (e recebe o id) e uma COPIA — a instancia
+      // que o chamador tem em mao permanece transiente. Sem isto o insert do detalhe rebentava com
+      // TransientPropertyValueException; e persistir esta instancia criaria uma validacao DUPLICADA
+      // com o mesmo uuid. A saida correcta e recuperar a instancia gerida pela chave de negocio.
+      entityManager.flush();
+      if (alvo.getId() == null && alvo.getUuid() != null) {
+        alvo = validacaoEntityRepository.findByUuid(alvo.getUuid()).orElse(alvo);
+      }
+    }
+    if (alvo.getId() == null) {
+      throw new IllegalStateException(
+          "Validacao ainda nao persistida ao congelar o detalhe (tabela " + tabela + ")");
+    }
+    final ValidacaoEntity validacao = alvo;
 
     // Linhas já congeladas para esta validação, nesta tabela E nesta linha. Uma validação pode
     // atravessar várias tabelas (registo de colaborador) e, dentro da mesma tabela, várias linhas

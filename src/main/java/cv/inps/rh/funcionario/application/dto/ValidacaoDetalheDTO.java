@@ -38,6 +38,10 @@ public class ValidacaoDetalheDTO {
   @Schema(description = "Tabela a que o campo pertence; permite agrupar quando a validação toca em várias")
   private String tabelaName;
 
+  @Schema(description = "Id da linha alterada, nas secções que são coleções (ex.: duas contas bancárias). "
+      + "Permite ao ecrã agrupar os campos por registo.")
+  private Long tabelaId;
+
   @Schema(description = "Nome técnico da propriedade alterada (ex.: instidId); campoAlterado é o rótulo visível")
   private String campo;
 
