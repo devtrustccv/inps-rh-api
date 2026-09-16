@@ -226,6 +226,15 @@ onde vem o número devolvido.
 **Hoje:** a etapa funciona — as linhas ficam `CABIMENTADO` e a missão avança — mas o `cabId` fica
 **`null`**. Não há número de cabimento.
 
+**O ecrã da Cabimentação (3.2.4.6) levanta mais duas questões:**
+1. **Formato do nº de cabimento.** O ecrã mostra `CAB/2026/001` — um **texto**. A coluna
+   `RH_T_MISSAO_LOGISTICA.CAB_ID` é **NUMBER**, e a API devolve `cabId` numérico. Se o nº vier no
+   formato do ecrã, é preciso mudar a coluna para VARCHAR2 (alteração de base de dados). O nº é
+   gerado pelo SGAL ou por nós, com o ano e um sequencial?
+2. **A coluna "Nome"** mostra, em todas as linhas, *"INPS - Instituto Nacional de Previdência
+   Social"*, e não o prestador. Hoje devolvemos o nome do prestador, da seguradora ou do colaborador
+   da ajuda de custo, que é o que identifica a linha. Qual é o pretendido?
+
 **Precisamos do financeiro/SGAL:**
 - endpoint de cabimento aplicável a uma linha de `RH_T_MISSAO_LOGISTICA`;
 - contrato do payload (1 cabimento por tipo de serviço; individual por colaborador na ajuda de custo);
