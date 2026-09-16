@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
-import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.UUID;
 
 
 @Repository
-@JaversSpringDataAuditable
 public interface SubstituicaoEntityRepository extends
     JpaRepository<SubstituicaoEntity, Long>,
     JpaSpecificationExecutor<SubstituicaoEntity>

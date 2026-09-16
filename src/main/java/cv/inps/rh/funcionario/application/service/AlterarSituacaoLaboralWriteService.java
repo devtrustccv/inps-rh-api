@@ -13,7 +13,6 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
@@ -45,7 +44,7 @@ import java.util.Objects;
  * Alterar Situação Laboral (Inativar/Ativar Colaborador + Licença S/Vencimento e outras situações).
  * O {@link #execute} é apenas o dispatcher: cada caminho de negócio (CORRIGIR, validar, reenvio de
  * correção, registo processado/não-processado) vive no seu próprio método privado, e a lógica
- * partilhada (flg_processa, ausência, carimbo JaVers, cópia de rem/pag) está em helpers reutilizados.
+ * partilhada (flg_processa, ausência, detalhe de alterações, cópia de rem/pag) está em helpers reutilizados.
  */
 @Service
 @RequiredArgsConstructor
@@ -209,7 +208,7 @@ public class AlterarSituacaoLaboralWriteService {
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
   }
 
-  /** Maker reenvia a correção devolvida (C -> P), editando o mesmo registo, com carimbo JaVers. */
+  /** Maker reenvia a correção devolvida (C -> P), editando o mesmo registo. */
   private SuccessResponseDTO reenviarCorrecao(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
       ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
       TiposRelacionamentoEntity tiprelAtual) {
@@ -229,7 +228,7 @@ public class AlterarSituacaoLaboralWriteService {
     tiprelAtual.setFlgProcessa(flgProcessaDe(param));
     funcionario.setEstadoValidacao(Estado.P.name());
     var validacao = funcionarioRules.reabrirParaValidacao(situacao.getUuid(), Referencia.ESTADO_COLABORADOR);
-    salvarSituacaoComAudit(validacao, situacao, antesDetalhe);
+    salvarSituacao(validacao, situacao, antesDetalhe);
     funcionarioEntityRepository.saveAndFlush(funcionario);
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
         "Situação laboral corrigida e reenviada para validação.", List.of());
@@ -250,7 +249,7 @@ public class AlterarSituacaoLaboralWriteService {
       situacaoAtual.setDataInicio(dataInicio);
       situacaoAtual.setDataFim(dataFim);
       situacaoAtual.setEstado(Estado.P);
-      salvarSituacaoComAudit(validacao, situacaoAtual, antesDetalhe);
+      salvarSituacao(validacao, situacaoAtual, antesDetalhe);
       criarAusenciaSeAplicavel(funcionario, param, situacaoAtual, dataInicio, dataFim);
     }
     // Enviado para validação: o "Estado do Registo" da grelha passa a Pendente. NÃO se toca em
@@ -408,18 +407,10 @@ public class AlterarSituacaoLaboralWriteService {
     return nova;
   }
 
-  /**
-   * Auto-audit (JaVers): carimba o save da situação com a validação em curso — o "detalhe de alterações"
-   * filtra por este validacaoUuid (situacaoLaboralId/motivo/datas/obs).
-   */
-  private void salvarSituacaoComAudit(ValidacaoEntity validacao, SituacaoLaboralEntity situacao,
+  /** Grava a situação e congela o detalhe de alterações contra o estado anterior ao payload. */
+  private void salvarSituacao(ValidacaoEntity validacao, SituacaoLaboralEntity situacao,
       cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado antesDetalhe) {
-    try {
-      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), TABELA_SITUACAO);
-      situacaoLaboralEntityRepository.save(situacao);
-    } finally {
-      ValidacaoAuditContext.clear();
-    }
+    situacaoLaboralEntityRepository.save(situacao);
     congelarDetalhe(validacao, antesDetalhe, situacao);
   }
 

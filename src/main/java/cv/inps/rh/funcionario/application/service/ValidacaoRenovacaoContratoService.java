@@ -92,15 +92,8 @@ public class ValidacaoRenovacaoContratoService {
     if (estaPorCorrigir) {
       tiposRelacionamento.setEstado(Estado.P);
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(contrato.getUuid(), Referencia.RENOVACAO_CONTRATO);
-      // Auto-audit (JaVers): carimba o save do histórico da renovação (feito dentro de
-      // reabrirRenovacaoCorrecao via repo anotado) com a validação — grelha "Detalhe de alterações".
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_CONTRATO_HISTORICO");
-        contratoHistoricoWriteService.reabrirRenovacaoCorrecao(contrato, dto.getDadosRenovacao(), validacaoReaberta);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      // Grava o histórico corrigido e congela o detalhe da renovação contra a validação reaberta.
+      contratoHistoricoWriteService.reabrirRenovacaoCorrecao(contrato, dto.getDadosRenovacao(), validacaoReaberta);
       funcionarioEntityRepository.saveAndFlush(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Renovação de contrato corrigida e reenviada para validação.", List.of());

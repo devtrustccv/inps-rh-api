@@ -30,7 +30,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoDetal
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -133,8 +132,7 @@ public class SubstituicaoWriteService {
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(temDiferencaSalarial ? Estado.P : Estado.A);
-    // Insert inicial via EntityManager (NÃO dispara o auto-audit do JaVers) — assim o 1º commit auditado
-    // é o save carimbado abaixo (baseline da validação), tal como na Mobilidade.
+    // Persistir já: o detalhe mensal e a validação abaixo precisam do id da substituição.
     entityManager.persist(substituicao);
     entityManager.flush();
 
@@ -154,10 +152,6 @@ public class SubstituicaoWriteService {
       funcionarioSubstituto.getValidacoes().add(validacao);
       funcionarioEntityRepository.saveAndFlush(funcionarioSubstituto);
 
-      // Baseline JaVers do REGISTO: 1º commit auditado da substituição, carimbado com a validação INSERT.
-      // Como a validação é INSERT, a grelha mostra os valores iniciais ("criado com…"), incluindo o
-      // colaborador substituído (substituidoTiprelId). As correções futuras acrescentam o antes→depois.
-      substituicaoEntityRepository.save(substituicao);
       // Detalhe congelado do REGISTO: o "antes" nao existe (null), pelo que todos os campos saem como
       // INICIAL — e a grelha diz "criado com ...", que e a semantica de uma validacao INSERT.
       var camposSub = dossierCampos.substituicao();

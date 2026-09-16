@@ -5,7 +5,6 @@ import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
-import cv.inps.rh.funcionario.application.service.registodetalhe.RegistoDetalheCapturaService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -55,7 +54,6 @@ public class ValidarRegistoColaboradorService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
-  private final RegistoDetalheCapturaService registoDetalheCaptura;
   private final cv.inps.rh.funcionario.application.service.registodetalhe.RegistoDetalheCongelador registoDetalheCongelador;
 
   @Transactional
@@ -83,14 +81,8 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
-      // Baseline JaVers do detalhe (filhos auditados + snapshots do funcionário/contrato). O funcionário é
-      // ShallowReference, logo o save em cascata não fotografa os filhos; a captura grava-os pelo repo
-      // auditável SEM ValidacaoAuditContext — o snapshot fica sem validacaoUuid e não aparece na grelha,
-      // servindo só para o reenvio C→P produzir um diff antes→depois em vez de um "valor inicial".
-      // O baseline so existe para o JaVers: e uma regravacao de 11 tabelas cujo unico efeito e criar
-      // um snapshot durável contra o qual diffar no pedido seguinte. O motor novo nao precisa dele —
-      // captura o "antes" em memoria no proprio pedido do reenvio. Sai com o JaVers.
-      registoDetalheCaptura.baseline(funcionario);
+      // Nada a fazer para o detalhe aqui: o "antes" é capturado em memória no próprio pedido do
+      // reenvio (ver registoDetalheCongelador), não num snapshot gravado neste momento.
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
@@ -292,11 +284,8 @@ public class ValidarRegistoColaboradorService {
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     // Detalhe de alterações do REGISTO: só no reenvio de correção (C→P), único momento em que o registo
-    // é editável. A captura regrava os filhos auditados pelo repo DENTRO do ValidacaoAuditContext e
-    // commita os snapshots do funcionário/contrato carimbados com esta validação — o JaVers compara com
-    // o baseline criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
+    // é editável. Compara o dossiê como estava antes do payload (antesDetalhe) com o gravado.
     if (estaPorCorrigir) {
-      registoDetalheCaptura.capturar(saved);
       registoDetalheCongelador.congelar(saved, antesDetalhe);
     }
 

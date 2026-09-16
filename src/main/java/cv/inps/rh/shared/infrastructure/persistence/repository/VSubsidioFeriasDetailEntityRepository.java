@@ -2,7 +2,6 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.processamento.application.dto.SubsidioFeriasDetalheDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VSubsidioFeriasDetailEntity;
-import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@JaversSpringDataAuditable
 public interface VSubsidioFeriasDetailEntityRepository extends
     JpaRepository<VSubsidioFeriasDetailEntity, Long>,
     JpaSpecificationExecutor<VSubsidioFeriasDetailEntity> {

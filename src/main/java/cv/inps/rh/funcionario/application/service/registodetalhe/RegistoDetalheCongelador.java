@@ -22,14 +22,8 @@ import java.util.function.Function;
  * "Detalhe de alterações" do REGISTO_COLABORADOR — o único módulo em que uma validação atravessa
  * VÁRIAS tabelas (funcionário, contrato e 11 secções do dossiê).
  *
- * <p><b>Substitui o {@code RegistoDetalheCapturaService}, e com ele uma fase inteira.</b> O arranjo
- * anterior precisava de um <em>baseline</em> gravado no CORRIGIR (P→C) porque o JaVers precisa de um
- * snapshot <b>durável</b> contra o qual diffar no pedido seguinte — o que obrigava a regravar 11
- * tabelas só para alimentar a auditoria, escritas que não mudavam nada.
- *
- * <p>Aqui não é preciso: o reenvio (C→P) é o próprio pedido que aplica o payload, logo o "antes" está
- * em memória se for capturado antes de o aplicar — exactamente como nos outros módulos. Uma fase a
- * menos, e onze escritas por CORRIGIR a menos.
+ * <p>O "antes" é capturado em memória no próprio pedido do reenvio (C→P), antes de o payload ser
+ * aplicado — exactamente como nos outros módulos. Não é preciso gravar nada no CORRIGIR.
  *
  * <p>Cada secção congela-se com o seu {@code TABELA_NAME} e, nas coleções, com o {@code TABELA_ID} da
  * linha: sem isso, dois familiares a mudar o mesmo campo colidiam e a grelha perdia uma alteração.

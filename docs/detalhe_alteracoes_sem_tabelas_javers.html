@@ -81,6 +81,28 @@ hoje usam JaVers (ou outra forma) → e só no fim tirar a dependência e largar
 <code>JV_*</code>.</p>
 </div>
 
+<div class="card" style="border-color:var(--ok)">
+<p><span class="tag ok">concluído · 16/09/2026</span></p>
+<table>
+  <tr><th>Fase</th><th>Resultado</th></tr>
+  <tr><td>1 · Migrar</td><td>11 módulos ligados ao motor novo; 16 declarações validadas pelo compilador.</td></tr>
+  <tr><td>2 · Testar</td><td>Os 11 testados ao vivo como cliente (lista → get-by-id → acção): registo/edição,
+      CORRIGIR → reenvio, aprovar e rejeitar. 2 bugs do código novo apanhados e corrigidos.</td></tr>
+  <tr><td>Backfill</td><td>50 validações antigas copiadas do JaVers (182 linhas, autor e data originais).
+      Grelhas antes/depois idênticas em 50/50.</td></tr>
+  <tr><td>3 · Remover</td><td>JaVers fora do <code>pom</code> e do código (25 ficheiros apagados, 17
+      repositórios limpos); tabelas e sequências <code>JV_*</code> largadas. Grelhas continuam 50/50.
+      Arranque da aplicação: de 55–107 s para 39 s.</td></tr>
+</table>
+<p>As tabelas <code>JV_*</code> foram largadas <b>sem <code>PURGE</code></b>: enquanto estiverem na recycle bin do
+Oracle, recuperam-se com <code>FLASHBACK TABLE JV_SNAPSHOT TO BEFORE DROP;</code> (idem para
+<code>JV_COMMIT</code>, <code>JV_COMMIT_PROPERTY</code>, <code>JV_GLOBAL_ID</code>).</p>
+<p><b>Noutro ambiente</b> (staging/produção): antes de largar as <code>JV_*</code>, correr o backfill — está no
+commit <code>7550c00c</code> e foi removido a seguir. Sem isso, as validações antigas desse ambiente
+ficam com a grelha vazia. As 5 colunas novas de <code>RH_T_VALIDACAO_DETALHE</code> também têm de ser
+criadas à mão (não há migration).</p>
+</div>
+
 <h2>1. Resposta curta</h2>
 
 <div class="card">

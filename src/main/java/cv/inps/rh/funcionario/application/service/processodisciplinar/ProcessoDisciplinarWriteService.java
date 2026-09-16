@@ -116,14 +116,7 @@ public class ProcessoDisciplinarWriteService {
     if (Estado.C.name().equals(process.getEstado())) {
       process.setEstado(Estado.P.name());
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(process.getUuid(), Referencia.PROCESSO_DISCIPLINAR);
-      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (saveNovoProcessoDisciplinar).
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_PROCESSO_DISCIPLINAR");
-        processoDisciplinarEntityRepository.save(process);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      processoDisciplinarEntityRepository.save(process);
       // Reenvio de correcao: funde com o detalhe existente, preservando o "antes" ORIGINAL.
       detalheAlteracoes.congelar(validacaoReaberta,
           cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_PROCESSO_DISCIPLINAR,
