@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detalhe de alterações sem as tabelas do JaVers</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1c2430; --mut:#5b6675; --line:#e3e7ec;
+    --ok:#137a44; --okbg:#e6f4ec; --bad:#b02a2a; --badbg:#fbeaea; --warn:#8a5a00; --warnbg:#fdf3e0;
+    --code:#0f1620; --codeink:#d7e2ee; --accent:#2456b8;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f141a; --card:#161d26; --ink:#e6ecf3; --mut:#9aa7b6; --line:#26313d;
+    --ok:#57c98a; --okbg:#12301f; --bad:#f08a8a; --badbg:#331414; --warn:#e0b055; --warnbg:#332811;
+    --code:#0a0f15; --codeink:#cfe0f0; --accent:#78a6ff;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:26px;margin:0 0 4px} h2{font-size:20px;margin:36px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+  h3{font-size:16px;margin:22px 0 6px}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:16px 0}
+  .meta div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .meta b{display:block;color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  table{border-collapse:collapse;width:100%;margin:8px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:color-mix(in srgb,var(--card) 70%,var(--line));font-size:13px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
+  .ok{color:var(--ok);background:var(--okbg)} .bad{color:var(--bad);background:var(--badbg)} .warn{color:var(--warn);background:var(--warnbg)}
+  pre{background:var(--code);color:var(--codeink);padding:12px 14px;border-radius:8px;overflow-x:auto;font:13px/1.5 "SF Mono",Consolas,Menlo,monospace;margin:8px 0}
+  code{font-family:"SF Mono",Consolas,Menlo,monospace;background:color-mix(in srgb,var(--card) 60%,var(--line));padding:1px 5px;border-radius:4px;font-size:13px}
+  pre code{background:none;padding:0;font-size:13px;color:inherit}
+  .kv{color:var(--mut)} .accent{color:var(--accent)}
+  .foot{color:var(--mut);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
+  ul,ol{padding-left:22px} li{margin:5px 0}
+  blockquote{margin:10px 0;padding:8px 14px;border-left:3px solid var(--accent);background:var(--card);color:var(--mut)}
+  figure{margin:18px 0}
+  figure svg{max-width:100%;height:auto;display:block}
+  figcaption{color:var(--mut);font-size:13px;margin-top:8px;text-align:center}
+  .dg-box{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+  .dg-keep{fill:var(--okbg);stroke:var(--ok);stroke-width:1.5}
+  .dg-drop{fill:var(--badbg);stroke:var(--bad);stroke-width:1.5}
+  .dg-warn{fill:var(--warnbg);stroke:var(--warn);stroke-width:1.5}
+  .dg-acc{fill:none;stroke:var(--accent);stroke-width:1.5}
+  .dg-t{fill:var(--ink);font:600 13px -apple-system,Segoe UI,Roboto,sans-serif}
+  .dg-c{fill:var(--ink);font:12px "SF Mono",Consolas,Menlo,monospace}
+  .dg-m{fill:var(--mut);font:11.5px -apple-system,Segoe UI,Roboto,sans-serif}
+  .dg-hd{fill:var(--mut);font:700 11px -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.08em}
+  .dg-ok-t{fill:var(--ok);font:700 12px -apple-system,Segoe UI,Roboto,sans-serif}
+  .dg-bad-t{fill:var(--bad);font:700 12px -apple-system,Segoe UI,Roboto,sans-serif}
+  .dg-warn-t{fill:var(--warn);font:600 11.5px -apple-system,Segoe UI,Roboto,sans-serif}
+  .dg-ln{stroke:var(--mut);stroke-width:1.5;fill:none}
+  .dg-ln-bad{stroke:var(--bad);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+  .dg-ln-ok{stroke:var(--ok);stroke-width:1.5;fill:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Detalhe de alterações sem as tabelas do JaVers</h1>
+<p class="sub">Comparação tipada pelo metamodel JPA, congelada na escrita</p>
+
+<div class="meta">
+  <div><b>Data</b>2026-09-16</div>
+  <div><b>Estado</b><span class="tag ok">aprovado · piloto mobilidade em curso</span></div>
+  <div><b>Relação</b>substitui <code>proposta_detalhe_alteracoes.md</code> (03/09)</div>
+  <div><b>Âmbito</b>validação e validação-detalhe (11 módulos)</div>
+</div>
+
+<div class="card" style="border-color:var(--accent)">
+<p><b>Decisão tomada (16/09).</b> O JaVers sai por inteiro — não fica sequer o
+<code>javers-core</code>. A comparação passa a ser declarada com o <b>metamodel JPA</b>
+(<code>hibernate-jpamodelgen</code>, já no <code>pom</code> e já usado nas Specifications do módulo
+<code>configuracao</code>), o diff é congelado <b>na escrita</b> em
+<code>RH_T_VALIDACAO_DETALHE</code>, e as FKs são lidas <b>sem inicializar o proxy</b>.</p>
+<p><b>Ordem acordada:</b> piloto na mobilidade → testar → só depois substituir em todos os pontos que
+hoje usam JaVers (ou outra forma) → e só no fim tirar a dependência e largar as tabelas
+<code>JV_*</code>.</p>
+</div>
+
+<h2>1. Resposta curta</h2>
+
+<div class="card">
+<p><strong>Sim, é possível — e o projecto já tem a prova a correr.</strong></p>
+<p>O JaVers são duas ferramentas dentro da mesma dependência:</p>
+<table>
+  <tr><th>Metade</th><th>O que faz</th><th>O que traz</th><th>Decisão</th></tr>
+  <tr><td><code>javers.compare(a, b)</code></td><td>compara dois objectos <b>agora</b></td><td>nada — função pura, em memória</td><td><span class="tag ok">fica</span></td></tr>
+  <tr><td><code>javers.commit()</code> + <code>JaversSqlRepository</code></td><td>histórico ao longo do <b>tempo</b></td><td>tabelas <code>JV_*</code>, aspectos AOP, <code>ThreadLocal</code>, providers</td><td><span class="tag bad">sai</span></td></tr>
+</table>
+<p>O "detalhe de alterações" precisa só da primeira. Guardar <em>label do campo + valor antigo + valor
+novo</em> é exactamente o output de <code>compare()</code> — nunca precisou de um store de auditoria.</p>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="As duas metades do JaVers: o motor de diff fica, o store de auditoria sai">
+  <defs>
+    <marker id="a-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- dependência actual -->
+  <rect x="330" y="8" width="240" height="40" rx="8" class="dg-box"/>
+  <text x="450" y="26" text-anchor="middle" class="dg-t">org.javers 7.7.0</text>
+  <text x="450" y="41" text-anchor="middle" class="dg-m">uma dependência, duas ferramentas</text>
+
+  <path d="M400,48 L250,78" class="dg-ln" style="color:var(--mut)" marker-end="url(#a-mut)"/>
+  <path d="M500,48 L650,78" class="dg-ln" style="color:var(--mut)" marker-end="url(#a-mut)"/>
+
+  <!-- FICA -->
+  <rect x="30" y="82" width="400" height="200" rx="10" class="dg-keep"/>
+  <text x="50" y="106" class="dg-ok-t">✔ FICA — javers-core</text>
+  <text x="50" y="130" class="dg-c">javers.compare(antes, depois)</text>
+  <text x="50" y="154" class="dg-m">Função pura, em memória. Responde a:</text>
+  <text x="50" y="172" class="dg-m">“o que mudou entre estes dois objectos?”</text>
+  <line x1="50" y1="188" x2="410" y2="188" class="dg-ln" style="stroke:var(--ok);opacity:.35"/>
+  <text x="50" y="208" class="dg-m">• 0 tabelas</text>
+  <text x="50" y="228" class="dg-m">• 0 aspectos AOP, 0 ThreadLocal</text>
+  <text x="50" y="248" class="dg-m">• 0 configuração de dialecto</text>
+  <text x="50" y="270" class="dg-ok-t">É tudo o que a grelha precisa.</text>
+
+  <!-- SAI -->
+  <rect x="470" y="82" width="400" height="200" rx="10" class="dg-drop"/>
+  <text x="490" y="106" class="dg-bad-t">✘ SAI — starter-sql</text>
+  <text x="490" y="130" class="dg-c">javers.commit() + JaversSqlRepository</text>
+  <text x="490" y="154" class="dg-m">Store de auditoria. Responde a:</text>
+  <text x="490" y="172" class="dg-m">“quem mudou o quê, em Março?”</text>
+  <line x1="490" y1="188" x2="850" y2="188" class="dg-ln" style="stroke:var(--bad);opacity:.35"/>
+  <text x="490" y="208" class="dg-m">• tabelas JV_* + migration V3</text>
+  <text x="490" y="228" class="dg-m">• 2 aspectos + 17 @JaversSpringDataAuditable</text>
+  <text x="490" y="248" class="dg-m">• ThreadLocal + Author/CommitPropertiesProvider</text>
+  <text x="490" y="270" class="dg-bad-t">Pergunta que ninguém faz neste ecrã.</text>
+</svg>
+<figcaption>O ecrã de validação compara <b>dois estados agora</b>; o JaVers estava montado para responder
+a uma pergunta sobre o <b>tempo</b>. Largar a metade direita não tira nada à grelha.</figcaption>
+</figure>
+<p>A prova está em <code>EscalaoDetalheDiffWriter</code>: usa <code>javers.compare</code> sobre dois
+snapshots, grava linhas em <code>RH_T_VALIDACAO_DETALHE</code> e <b>não toca em nenhuma tabela
+<code>JV_*</code></b>. Foi escrito como excepção (o tiprel é <em>Shallow Reference</em> e o auto-audit
+gravava-o vazio). <b>A proposta é promover a excepção a regra.</b></p>
+<p><b>E depois um passo a mais.</b> A metade "fica" da tabela acima era a resposta intermédia. Com a
+declaração dos campos feita pelo metamodel JPA (§3), os valores chegam ao comparador já formatados —
+e comparar dois conjuntos de valores formatados é um ciclo com <code>Objects.equals</code>. O
+<code>javers.compare</code> deixa de acrescentar alguma coisa, e sai também. Fazer a comparação em
+casa dá ainda duas garantias que a biblioteca não dava: a <b>ordem</b> é a de declaração, e as
+<b>FKs comparam-se por id</b>, não por nome.</p>
+</div>
+
+<h2>2. O que desaparece</h2>
+
+<figure>
+<svg viewBox="0 0 900 400" role="img" aria-label="Fluxo actual com auto-audit do JaVers contra o fluxo proposto com diff directo">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- ================= HOJE ================= -->
+  <text x="0" y="16" class="dg-hd">HOJE — AUTO-AUDIT</text>
+
+  <rect x="0" y="30" width="150" height="54" rx="8" class="dg-box"/>
+  <text x="75" y="52" text-anchor="middle" class="dg-t">WriteService</text>
+  <text x="75" y="70" text-anchor="middle" class="dg-m">repo.save(entidade)</text>
+
+  <rect x="188" y="30" width="150" height="54" rx="8" class="dg-warn"/>
+  <text x="263" y="52" text-anchor="middle" class="dg-t">ThreadLocal</text>
+  <text x="263" y="70" text-anchor="middle" class="dg-m">ValidacaoAuditContext</text>
+
+  <rect x="376" y="30" width="150" height="54" rx="8" class="dg-box"/>
+  <text x="451" y="52" text-anchor="middle" class="dg-t">Aspecto AOP</text>
+  <text x="451" y="70" text-anchor="middle" class="dg-m">+ CommitProperties</text>
+
+  <rect x="564" y="30" width="150" height="54" rx="8" class="dg-drop"/>
+  <text x="639" y="52" text-anchor="middle" class="dg-t">tabelas JV_*</text>
+  <text x="639" y="70" text-anchor="middle" class="dg-m">commit + snapshots</text>
+
+  <rect x="752" y="30" width="148" height="54" rx="8" class="dg-box"/>
+  <text x="826" y="52" text-anchor="middle" class="dg-t">Read (184 ln)</text>
+  <text x="826" y="70" text-anchor="middle" class="dg-m">filtra tipo+id+ruído</text>
+
+  <g style="color:var(--mut)">
+    <path d="M150,57 L184,57" class="dg-ln" marker-end="url(#a2)"/>
+    <path d="M338,57 L372,57" class="dg-ln" marker-end="url(#a2)"/>
+    <path d="M526,57 L560,57" class="dg-ln" marker-end="url(#a2)"/>
+    <path d="M714,57 L748,57" class="dg-ln" marker-end="url(#a2)"/>
+  </g>
+  <text x="167" y="24" text-anchor="middle" class="dg-m">set()</text>
+  <text x="355" y="24" text-anchor="middle" class="dg-m">lê</text>
+  <text x="543" y="24" text-anchor="middle" class="dg-m">grava</text>
+  <text x="731" y="24" text-anchor="middle" class="dg-m">JQL</text>
+
+  <!-- falha silenciosa -->
+  <path d="M263,84 L263,116 L620,116" class="dg-ln-bad" style="color:var(--bad)" marker-end="url(#a2)"/>
+  <rect x="150" y="124" width="600" height="34" rx="8" class="dg-drop"/>
+  <text x="450" y="146" text-anchor="middle" class="dg-bad-t">esquecer o set() → nenhum commit é carimbado → grelha VAZIA, sem erro nenhum</text>
+
+  <text x="0" y="188" class="dg-m">Além disto: 18 classes marcadas Shallow Reference (senão o commit percorria o grafo: 20–50 s),</text>
+  <text x="0" y="206" class="dg-m">17 repositórios anotados, 2 workarounds de dialecto/schema, e o tiprel — raso — nunca diffava.</text>
+
+  <line x1="0" y1="226" x2="900" y2="226" style="stroke:var(--line);stroke-width:2"/>
+
+  <!-- ================= PROPOSTO ================= -->
+  <text x="0" y="252" class="dg-hd">PROPOSTO — DIFF DIRECTO</text>
+
+  <rect x="0" y="266" width="196" height="64" rx="8" class="dg-box"/>
+  <text x="98" y="290" text-anchor="middle" class="dg-t">WriteService</text>
+  <text x="98" y="308" text-anchor="middle" class="dg-m">tem (antes, depois)</text>
+  <text x="98" y="323" text-anchor="middle" class="dg-m">na mão</text>
+
+  <rect x="248" y="266" width="196" height="64" rx="8" class="dg-keep"/>
+  <text x="346" y="290" text-anchor="middle" class="dg-t">DetalheAlteracoes</text>
+  <text x="346" y="308" text-anchor="middle" class="dg-c">.congelar(...)</text>
+  <text x="346" y="323" text-anchor="middle" class="dg-m">javers.compare em memória</text>
+
+  <rect x="496" y="266" width="196" height="64" rx="8" class="dg-box"/>
+  <text x="594" y="290" text-anchor="middle" class="dg-t">RH_T_VALIDACAO_</text>
+  <text x="594" y="306" text-anchor="middle" class="dg-t">DETALHE</text>
+  <text x="594" y="323" text-anchor="middle" class="dg-m">1 linha por campo</text>
+
+  <rect x="744" y="266" width="156" height="64" rx="8" class="dg-box"/>
+  <text x="822" y="290" text-anchor="middle" class="dg-t">Read (1 linha)</text>
+  <text x="822" y="308" text-anchor="middle" class="dg-m">findBy...OrderByOrdem</text>
+  <text x="822" y="323" text-anchor="middle" class="dg-m">→ grelha</text>
+
+  <g style="color:var(--ok)">
+    <path d="M196,298 L244,298" class="dg-ln-ok" marker-end="url(#a2)"/>
+    <path d="M444,298 L492,298" class="dg-ln-ok" marker-end="url(#a2)"/>
+    <path d="M692,298 L740,298" class="dg-ln-ok" marker-end="url(#a2)"/>
+  </g>
+
+  <rect x="150" y="348" width="600" height="34" rx="8" class="dg-keep"/>
+  <text x="450" y="370" text-anchor="middle" class="dg-ok-t">a chamada em falta não compila / vê-se no diff — não há estado invisível para esquecer</text>
+</svg>
+<figcaption>O caminho de baixo é o que o <code>EscalaoDetalheDiffWriter</code> já faz hoje para
+<code>ALTERACAO_ESCALAO</code>. A proposta é generalizá-lo e apagar o de cima.</figcaption>
+</figure>
+
+<table>
+  <tr><th>Peça</th><th>Onde</th><th>Porquê sai</th></tr>
+  <tr><td>Repositório SQL + fiação do dialecto</td><td><code>JaversAuditConfig</code> (~180 linhas → ~10)</td><td>sem commits, não há SQL</td></tr>
+  <tr><td><code>REFERENCIAS_RASAS</code> (18 classes)</td><td><code>JaversAuditConfig</code></td><td>só existia para o commit não percorrer o grafo</td></tr>
+  <tr><td>Os 2 aspectos AOP</td><td><code>JaversAuditConfig</code></td><td>sem auto-audit</td></tr>
+  <tr><td><code>AuthorProvider</code> / <code>CommitPropertiesProvider</code></td><td><code>JaversAuditConfig</code></td><td>autor passa a vir do <code>AuditEntity</code></td></tr>
+  <tr><td><code>ValidacaoAuditContext</code> + filtro + <b>17 chamadas a <code>set()</code></b></td><td>10 write-services</td><td>a ponte para o provider global deixa de existir</td></tr>
+  <tr><td><code>@JaversSpringDataAuditable</code> em <b>17 repositórios</b></td><td><code>shared/.../repository/*</code></td><td>sem auto-audit</td></tr>
+  <tr><td><code>JaversValidacaoDetalheReadService</code> (184 linhas)</td><td><code>shared/application/service</code></td><td>a grelha passa a vir da tabela</td></tr>
+  <tr><td><code>JaversDetalhePilotController</code></td><td><code>shared/interfaces/rest</code></td><td>era piloto</td></tr>
+  <tr><td><code>V3__javers_schema.sql</code> + tabelas <code>JV_*</code></td><td><code>db/migration</code></td><td>ver §6 (ordem de largar)</td></tr>
+  <tr><td><code>spring.autoconfigure.exclude=...JaversSqlAutoConfiguration</code></td><td><code>application.properties</code></td><td>com <code>javers-core</code> o auto-config nem existe</td></tr>
+</table>
+
+<h3>A dependência muda</h3>
+<pre><code>&lt;!-- SAI: traz repositório SQL, aspectos, auto-config --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.javers&lt;/groupId&gt;
+  &lt;artifactId&gt;javers-spring-boot-starter-sql&lt;/artifactId&gt;
+  &lt;version&gt;7.7.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- ENTRA: só o motor de diff --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.javers&lt;/groupId&gt;
+  &lt;artifactId&gt;javers-core&lt;/artifactId&gt;
+  &lt;version&gt;7.7.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p>Isto é a garantia estrutural: <b>sem o starter no classpath é impossível uma tabela <code>JV_*</code>
+reaparecer</b>. O <code>JaversAuditConfig</code> inteiro reduz-se a:</p>
+
+<pre><code>@Bean Javers javers() { return JaversBuilder.javers().build(); }</code></pre>
+
+<p>Somem também, de graça, os dois <em>workarounds</em> documentados no ficheiro (o
+<code>OracleLegacyDialect</code> não reconhecido pelo <code>DialectMapper</code>, e o inspector do
+polyjdbc vs maiúsculas do Oracle).</p>
+
+<blockquote><b>Saldo:</b> ~1500 linhas de infraestrutura fora, e com elas a classe de bugs silenciosos —
+esquecer um <code>ValidacaoAuditContext.set()</code> dá hoje <b>grelha vazia sem erro nenhum</b>.</blockquote>
+
+<h3>2.1 Trace concreto — editar uma mobilidade mudando <em>só</em> a direcção</h3>
+
+<p>Mobilidade <code>id=871</code>, estado <code>A</code>, direcção <code>DSI</code> (id 12). O maker abre
+o ecrã e troca para <code>DAF</code> (id 18). Nada mais. Eis o que acontece, linha a linha, em
+<code>MobilidadeWriteService.editar</code>:</p>
+
+<figure>
+<svg viewBox="0 0 900 470" role="img" aria-label="Sequência do que acontece ao editar uma mobilidade mudando só a direcção">
+  <defs>
+    <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- coluna esquerda: passos -->
+  <text x="0" y="16" class="dg-hd">ESCRITA — UMA TRANSACÇÃO</text>
+
+  <rect x="0" y="28" width="420" height="40" rx="8" class="dg-box"/>
+  <text x="14" y="46" class="dg-t">1 · guards</text>
+  <text x="14" y="62" class="dg-m">editável (não I/E) · sem processamento salarial</text>
+
+  <rect x="0" y="76" width="420" height="52" rx="8" class="dg-warn"/>
+  <text x="14" y="94" class="dg-t">2 · antes = camposMobilidade(mobilidade)</text>
+  <text x="14" y="110" class="dg-m">guarda SÓ 3 ids: [instid=12, secao=5, localTrab=3]</text>
+  <text x="14" y="124" class="dg-warn-t">é o único "antes" que existe em memória</text>
+
+  <rect x="0" y="136" width="420" height="52" rx="8" class="dg-drop"/>
+  <text x="14" y="154" class="dg-t">3 · aplicar payload — UPDATE IN PLACE</text>
+  <text x="14" y="170" class="dg-c">RH_T_MOBILIDADE#871.instid_id: 12 → 18</text>
+  <text x="14" y="184" class="dg-bad-t">o "antes" foi por cima na própria linha</text>
+
+  <rect x="0" y="196" width="420" height="40" rx="8" class="dg-box"/>
+  <text x="14" y="214" class="dg-t">4 · houveAlteracao? sim (12 ≠ 18)</text>
+  <text x="14" y="230" class="dg-m">se só mudassem datas/tipo → grava e sai, sem validação</text>
+
+  <rect x="0" y="244" width="420" height="52" rx="8" class="dg-box"/>
+  <text x="14" y="262" class="dg-t">5 · INSERT RH_T_VALIDACAO</text>
+  <text x="14" y="278" class="dg-c">tipoAccao=UPDATE · referencia=MOBILIDADE</text>
+  <text x="14" y="292" class="dg-c">estado=P · referenciaId=871 · uuid=…</text>
+
+  <rect x="0" y="304" width="420" height="40" rx="8" class="dg-box"/>
+  <text x="14" y="322" class="dg-t">6 · mobilidade.estado = P</text>
+  <text x="14" y="338" class="dg-m">aparece como "por validar" na lista</text>
+
+  <rect x="0" y="352" width="420" height="52" rx="8" class="dg-warn"/>
+  <text x="14" y="370" class="dg-t">7 · ValidacaoAuditContext.set(...)</text>
+  <text x="14" y="386" class="dg-m">ThreadLocal ← (validacaoId, uuid, "RH_T_MOBILIDADE")</text>
+  <text x="14" y="400" class="dg-warn-t">esquecer esta linha = grelha vazia, sem erro</text>
+
+  <rect x="0" y="412" width="420" height="52" rx="8" class="dg-box"/>
+  <text x="14" y="430" class="dg-t">8 · repo.save(mobilidade) → aspecto AOP</text>
+  <text x="14" y="446" class="dg-m">javers.commit(autor, mobilidade, props do ThreadLocal)</text>
+  <text x="14" y="460" class="dg-m">9 · finally → clear()</text>
+
+  <path d="M430,438 L480,438" class="dg-ln" style="color:var(--mut)" marker-end="url(#a4)"/>
+
+  <!-- coluna direita: o que foi escrito -->
+  <text x="490" y="16" class="dg-hd">O QUE FICOU GRAVADO</text>
+
+  <rect x="490" y="28" width="410" height="128" rx="8" class="dg-keep"/>
+  <text x="504" y="48" class="dg-ok-t">tabelas de negócio</text>
+  <text x="504" y="70" class="dg-c">RH_T_MOBILIDADE#871</text>
+  <text x="504" y="86" class="dg-m">instid_id=18 · estado='P'   (1 linha, alterada)</text>
+  <text x="504" y="110" class="dg-c">RH_T_VALIDACAO#…</text>
+  <text x="504" y="126" class="dg-m">UPDATE / MOBILIDADE / P / referenciaId=871</text>
+  <text x="504" y="146" class="dg-m">→ é isto que alimenta a fila do checker</text>
+
+  <rect x="490" y="168" width="410" height="52" rx="8" class="dg-drop"/>
+  <text x="504" y="188" class="dg-bad-t">RH_T_VALIDACAO_DETALHE</text>
+  <text x="504" y="208" class="dg-c">0 linhas — nada é escrito aqui hoje</text>
+
+  <rect x="490" y="232" width="410" height="128" rx="8" class="dg-drop"/>
+  <text x="504" y="252" class="dg-bad-t">tabelas JV_* — o detalhe vive aqui</text>
+  <text x="504" y="274" class="dg-c">jv_commit           +1</text>
+  <text x="504" y="292" class="dg-c">jv_commit_property  +3  (uuid, id, tabela)</text>
+  <text x="504" y="310" class="dg-c">jv_snapshot         +1  (estado completo)</text>
+  <text x="504" y="328" class="dg-c">jv_global_id        +0/1</text>
+  <text x="504" y="350" class="dg-m">o diff é contra o snapshot do commit anterior</text>
+
+  <rect x="490" y="372" width="410" height="92" rx="8" class="dg-warn"/>
+  <text x="504" y="392" class="dg-warn-t">Consequência</text>
+  <text x="504" y="412" class="dg-m">Depois do passo 3, "DSI" só existe dentro de</text>
+  <text x="504" y="430" class="dg-m">jv_snapshot. Não há linha A + linha P —</text>
+  <text x="504" y="448" class="dg-m">a mobilidade é editada IN PLACE.</text>
+</svg>
+<figcaption>Passos 1–9 correm todos dentro do mesmo <code>@Transactional</code> do
+<code>editar()</code>. O checker só vê o resultado.</figcaption>
+</figure>
+
+<h4>Na leitura (o checker abre a validação)</h4>
+
+<p><code>GET api/v1/funcionarios/validacoes/{uuid}/detalhes</code> →
+<code>GetDetalheAlteracoesQueryHandler</code> → não é <code>ALTERACAO_ESCALAO</code> →
+<code>JaversValidacaoDetalheReadService.listar(uuid)</code>:</p>
+
+<ol>
+  <li>Carrega a validação e escolhe o <code>MobilidadeValidacaoDetalheDescriptor</code> por
+      <code>REFERENCIA_NAME='MOBILIDADE'</code>.</li>
+  <li><code>javers.findChanges(withCommitProperty("validacaoUuid", …))</code> — devolve <b>todos</b> os
+      changes do commit do passo 8.</li>
+  <li>Filtra quatro vezes: só <code>PropertyChange</code>; fora o <code>InitialValueChange</code>
+      (é UPDATE, não criação); só a instância <code>MobilidadeEntity/871</code>; e só os campos da
+      allow-list do descritor.</li>
+  <li>O <code>estado A→P</code> desaparece no filtro 4 (não está na allow-list) — sobra
+      <b>um</b> change.</li>
+  <li><code>ReferenciaNomeResolver</code> traduz <code>DirecaoEntity/12</code> e
+      <code>DirecaoEntity/18</code> para nome, por reflexão (<code>getNome()</code>).</li>
+</ol>
+
+<pre><code>[
+  {
+    "campoAlterado":  "Direcção",
+    "valorAnterior":  "Direção de Sistemas de Informação",
+    "valorNovo":      "Direção Administrativa e Financeira",
+    "alteradoPor":    "Ivanick Santos",
+    "dataAlteracao":  "16-09-2026 11:42",
+    "tabelaName":     "RH_T_MOBILIDADE"
+  }
+]</code></pre>
+
+<div class="card" style="border-color:var(--warn)">
+<p><b>O que este trace prova — e que corrige a proposta de 03/09.</b> Aquela proposta assumia o modelo
+<em>"o antes é a linha A, o depois é a linha P, calcula-se na leitura"</em>. <b>Na mobilidade isso é
+falso:</b> o passo 3 é um <code>UPDATE</code> in place na mesma linha. Depois dele, <code>DSI</code> não
+existe em lado nenhum na base de negócio — só dentro do <code>jv_snapshot</code>.</p>
+<p>Ou seja: largar as <code>JV_*</code> <b>obriga</b> a capturar o diff na escrita, antes de aplicar o
+payload. É exactamente a opção (A) de §3.3 — e não por preferência de estilo, mas porque a (B) é
+impossível aqui. A boa notícia é que o <code>editar()</code> já captura um "antes" no passo 2; só captura
+3 ids em vez do snapshot inteiro. A mudança é trocar essa linha por
+<code>MobilidadeSnapshot.de(mobilidade)</code>, que serve os dois fins (decidir se houve movimento
+<em>e</em> alimentar o diff).</p>
+</div>
+
+<h2>3. O serviço reutilizável</h2>
+
+<p>Objectivo declarado: qualquer módulo do projecto (assiduidade, processamento, missão…) consegue
+alimentar a grelha sem conhecer JaVers nem a tabela. Um pacote novo em <code>shared</code>:</p>
+
+<pre><code>shared/application/detalhe/
+  Rotulo.java                  @interface — label do campo
+  DetalheSnapshot.java         base abstracta (resolve o @Id constante)
+  CampoAlterado.java           record — campo, label, valorAnterior, valorNovo, ordem
+  DetalheAlteracoes.java       interface pública (o que os chamadores injectam)
+  JaversDetalheAlteracoes.java implementação (a única classe que importa org.javers)</code></pre>
+
+<h3>3.1 O snapshot — fonte única de campos, rótulos e ordem</h3>
+
+<pre><code>public final class MobilidadeSnapshot extends DetalheSnapshot {
+  @Rotulo("Tipo de mobilidade") private final String tipoSituacao;
+  @Rotulo("Direção")            private final String direcao;      // FK já resolvida p/ nome
+  @Rotulo("Secção")             private final String seccao;
+  @Rotulo("Data início")        private final String dataInicio;
+  @Rotulo("Observações")        private final String obs;
+  // construtor/factory a partir da entidade
+}</code></pre>
+
+<figure>
+<svg viewBox="0 0 900 330" role="img" aria-label="Do snapshot anotado para as linhas da grelha: campo, rótulo, valor anterior e valor novo">
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <text x="0" y="16" class="dg-hd">1 · DOIS SNAPSHOTS</text>
+  <text x="330" y="16" class="dg-hd">2 · DIFF</text>
+  <text x="468" y="16" class="dg-hd">3 · LINHAS GRAVADAS = GRELHA</text>
+
+  <!-- antes -->
+  <rect x="0" y="28" width="290" height="120" rx="8" class="dg-box"/>
+  <text x="14" y="48" class="dg-m">antes — linha A (mobilidade activa)</text>
+  <text x="14" y="72" class="dg-c">tipoSituacao  "Transferência"</text>
+  <text x="14" y="92" class="dg-c">direcao       "DSI"</text>
+  <text x="14" y="112" class="dg-c">dataInicio    "01-01-2026"</text>
+  <text x="14" y="132" class="dg-c">obs           null</text>
+
+  <!-- depois -->
+  <rect x="0" y="164" width="290" height="120" rx="8" class="dg-box"/>
+  <text x="14" y="184" class="dg-m">depois — linha P (pendente)</text>
+  <text x="14" y="208" class="dg-c">tipoSituacao  "Transferência"</text>
+  <text x="14" y="228" class="dg-c" style="fill:var(--accent)">direcao       "DAF"</text>
+  <text x="14" y="248" class="dg-c">dataInicio    "01-01-2026"</text>
+  <text x="14" y="268" class="dg-c" style="fill:var(--accent)">obs           "reforço"</text>
+
+  <!-- compare -->
+  <g style="color:var(--mut)">
+    <path d="M290,88 L330,140" class="dg-ln" marker-end="url(#a3)"/>
+    <path d="M290,224 L330,172" class="dg-ln" marker-end="url(#a3)"/>
+    <path d="M430,156 L466,156" class="dg-ln" marker-end="url(#a3)"/>
+  </g>
+  <rect x="334" y="128" width="96" height="56" rx="28" class="dg-keep"/>
+  <text x="382" y="152" text-anchor="middle" class="dg-t">compare</text>
+  <text x="382" y="170" text-anchor="middle" class="dg-m">em memória</text>
+
+  <!-- resultado -->
+  <rect x="470" y="28" width="430" height="256" rx="8" class="dg-box"/>
+  <line x1="470" y1="64" x2="900" y2="64" style="stroke:var(--line);stroke-width:1.5"/>
+  <line x1="600" y1="28" x2="600" y2="284" style="stroke:var(--line);stroke-width:1"/>
+  <line x1="700" y1="28" x2="700" y2="284" style="stroke:var(--line);stroke-width:1"/>
+  <line x1="800" y1="28" x2="800" y2="284" style="stroke:var(--line);stroke-width:1"/>
+  <text x="482" y="51" class="dg-hd">CAMPO</text>
+  <text x="612" y="51" class="dg-hd">RÓTULO</text>
+  <text x="712" y="51" class="dg-hd">ANTERIOR</text>
+  <text x="812" y="51" class="dg-hd">NOVO</text>
+
+  <text x="482" y="92" class="dg-c">direcao</text>
+  <text x="612" y="92" class="dg-t">Direção</text>
+  <text x="712" y="92" class="dg-c">DSI</text>
+  <text x="812" y="92" class="dg-c">DAF</text>
+  <line x1="470" y1="108" x2="900" y2="108" style="stroke:var(--line);stroke-width:1"/>
+
+  <text x="482" y="134" class="dg-c">obs</text>
+  <text x="612" y="134" class="dg-t">Observações</text>
+  <text x="712" y="134" class="dg-m">—</text>
+  <text x="812" y="134" class="dg-c">reforço</text>
+  <line x1="470" y1="150" x2="900" y2="150" style="stroke:var(--line);stroke-width:1"/>
+
+  <text x="482" y="180" class="dg-m">(campos iguais não produzem linha)</text>
+
+  <text x="482" y="222" class="dg-m">↑ ORDEM = ordem de declaração no snapshot</text>
+  <text x="482" y="244" class="dg-m">↑ RÓTULO = @Rotulo do mesmo campo</text>
+  <text x="482" y="266" class="dg-m">↑ FK já vem resolvida para nome, não id</text>
+</svg>
+<figcaption>Um só sítio define <b>que campos entram na grelha, com que rótulo e por que ordem</b>:
+o snapshot. Não há segunda lista para manter em sincronia.</figcaption>
+</figure>
+
+<p>Regras que o desenho <em>impõe</em> (e que hoje se podem quebrar em silêncio):</p>
+<ul>
+  <li><b>O rótulo anda colado ao campo.</b> Hoje são duas estruturas separadas
+      (<code>camposNegocio()</code> + <code>rotulos()</code>) onde o nome do campo é repetido e é fácil
+      declarar um sem o outro.</li>
+  <li><b>A <code>ORDEM</code> sai de graça</b> — ordem de declaração dos campos.
+      <span class="tag warn">bug actual</span> <code>getChangesByType(ValueChange.class)</code>
+      <b>não</b> garante a ordem de declaração; a grelha do Escalão sai hoje pela ordem que o JaVers
+      decidir. O serviço novo ordena pelo índice do campo no snapshot.</li>
+  <li><b><code>@Id</code> constante encapsulado na base.</b> É o truque que faz o JaVers ver "antes" e
+      "depois" como duas versões da mesma instância (com ids diferentes emitiria "objecto
+      novo/removido"). Hoje está copiado à mão em cada snapshot — na classe base, ninguém se pode
+      esquecer dele.</li>
+  <li><b>FKs resolvidas na construção</b>, não na leitura: o campo do snapshot já é o nome legível.</li>
+</ul>
+
+<h3>3.2 A API pública — o que o chamador injecta</h3>
+
+<pre><code>public interface DetalheAlteracoes {
+
+  /** Diff em memória, sem tocar na BD. Pré-visualização ou leitura on-the-fly. */
+  List&lt;CampoAlterado&gt; comparar(DetalheSnapshot antes, DetalheSnapshot depois);
+
+  /**
+   * Congela o diff em RH_T_VALIDACAO_DETALHE (uma linha por campo alterado).
+   * Idempotente: reescreve do zero se já houver linhas dessa validação (correcção reenviada).
+   * @return nº de linhas gravadas
+   */
+  int congelar(ValidacaoEntity validacao, String tabela,
+               DetalheSnapshot antes, DetalheSnapshot depois);
+}</code></pre>
+
+<p>Um write-service passa a ter <b>uma linha</b>, com os dois estados que já tem na mão:</p>
+
+<pre><code>detalhe.congelar(validacao, "RH_T_MOBILIDADE",
+                 MobilidadeSnapshot.de(anterior), MobilidadeSnapshot.de(pendente));</code></pre>
+
+<p>Compare-se com hoje: <code>ValidacaoAuditContext.set(id, uuid, "RH_T_MOBILIDADE")</code> antes do
+<code>save()</code>, esperar que o aspecto dispare, e um descritor <code>@Component</code> noutro pacote
+a declarar campos e rótulos. O novo é <b>verificado pelo compilador</b> — se o snapshot não existir, não
+compila; se a chamada faltar, é uma linha visível em falta no fluxo, não um <code>ThreadLocal</code> por
+preencher.</p>
+
+<h3>3.3 Quando congelar — recomendação: <span class="accent">na escrita</span></h3>
+
+<p>Duas opções. A proposta de Setembro escolheu a segunda; hoje recomendo a primeira, por ser a que já
+está provada no código:</p>
+
+<table>
+  <tr><th></th><th>(A) congelar no registo/correcção</th><th>(B) congelar na decisão</th></tr>
+  <tr><td>Quem fica em <code>ALTERADO_POR</code></td><td>o <b>maker</b>, de graça (<code>createdBy</code> do <code>AuditEntity</code>)</td><td>o <b>aprovador</b> — errado; exige colunas explícitas</td></tr>
+  <tr><td>Máquina necessária</td><td>os dois estados que o write-service já tem</td><td>resolver <code>anterior()</code> por módulo + <em>execute-around</em> para garantir a ordem <code>calcular → consolidar</code></td></tr>
+  <tr><td>Risco</td><td>grelha desactualiza se a linha <code>P</code> mudar fora do fluxo de correcção</td><td>nenhum enquanto pendente</td></tr>
+  <tr><td>Estado</td><td><span class="tag ok">já implementado (Escalão)</span></td><td><span class="tag warn">por construir</span></td></tr>
+</table>
+
+<p>(A) resolve o seu risco com <code>limpar() + congelar()</code> no fluxo de correcção — que é o único
+sítio por onde a linha <code>P</code> é editada. É menos uma peça e menos uma ordem crítica por
+respeitar. Módulos que precisem mesmo de cálculo ao vivo enquanto pendentes acrescentam depois um
+<code>anterior()</code>; a interface acomoda-o sem mudar os chamadores de (A).</p>
+
+<h3>3.4 Leitura — o chamador não sabe de onde veio</h3>
+
+<p>O <code>GetDetalheAlteracoesQueryHandler</code> deixa de ter o <code>if</code> do Escalão e os três
+serviços injectados:</p>
+
+<pre><code>return ResponseEntity.ok(validacaoDetalheReadService.listar(validacaoUuid));</code></pre>
+
+<p>Uma só fonte: a tabela. É o que o handler já faz para o Escalão quando há linhas persistidas.</p>
+
+<h2>4. Esquema — alterações aditivas a <code>RH_T_VALIDACAO_DETALHE</code></h2>
+
+<pre><code>ALTER TABLE RH_T_VALIDACAO_DETALHE ADD (
+  CAMPO          VARCHAR2(100),   -- nome técnico: dataInicio, direcao
+  ORDEM          NUMBER(3),       -- ordem de apresentação (declaração no snapshot)
+  TIPO_ALTERACAO VARCHAR2(20)     -- VALOR | REFERENCIA | INICIAL
+);
+ALTER TABLE RH_T_VALIDACAO_DETALHE MODIFY (
+  VALOR_ANTERIOR VARCHAR2(2000),  -- era 500; obs é campo livre e passa disso
+  VALOR_NOVO     VARCHAR2(2000)
+);
+CREATE INDEX IX_VAL_DET_VALIDACAO ON RH_T_VALIDACAO_DETALHE (VALIDACAO_ID, ORDEM);</code></pre>
+
+<ul>
+  <li><code>CAMPO_ALTERADO</code> mantém-se como <b>o rótulo</b> → <b>o frontend não parte</b>.
+      <code>CAMPO</code> acrescenta a identidade técnica (agrupar/filtrar sem fazer parsing do rótulo).</li>
+  <li>Separar os dois preserva o que foi mostrado ao aprovador: se o rótulo mudar amanhã, os registos
+      antigos continuam a dizer o que diziam.</li>
+  <li><b>Insert-once, nunca UPDATE.</b> Correcção = apagar as linhas dessa validação e regravar.</li>
+</ul>
+
+<h2>5. Vale a pena manter o JaVers?</h2>
+
+<div class="card">
+<p>Honestamente: com snapshots planos de <code>String</code>, o <code>compare()</code> faz pouco mais do
+que um ciclo sobre os campos com <code>Objects.equals</code>. São ~20 linhas de reflexão.</p>
+<p><b>Recomendação: manter o <code>javers-core</code></b> — está provado neste projecto e cobre de borla
+os casos que vierem a ter colecções ou objectos aninhados. Mas <b>atrás da interface
+<code>DetalheAlteracoes</code></b>: se um dia a dependência incomodar, troca-se uma classe
+(<code>JaversDetalheAlteracoes</code>) sem tocar em nenhum chamador. É essa a razão de a interface
+existir.</p>
+<p><b>Auditoria a sério</b>, se alguma vez for pedida, é um eixo independente e não este: Hibernate
+Envers (<code>@Audited</code> → tabelas <code>X_AUD</code> + <code>REVINFO</code>, engancha nos eventos
+de flush e apanha <em>dirty checking</em>, coisa que o arranjo actual não apanha). Limite comum às duas
+ferramentas: <b>procedures e SQL nativo continuam invisíveis</b> — ex. <code>PKG_AUMENTO_SALARIAL</code>.
+Auditoria completa para conformidade tem de ser feita na base (Flashback Data Archive ou triggers).</p>
+</div>
+
+<h2>6. Plano de migração</h2>
+
+<p>O JaVers continua a servir os módulos ainda não migrados — nada parte a meio.</p>
+
+<figure>
+<svg viewBox="0 0 900 210" role="img" aria-label="Ordem da migração: infra, escalão, mobilidade, restantes módulos, registo, remoção do starter e por fim as tabelas JV">
+  <!-- barra de coexistência -->
+  <rect x="0" y="12" width="640" height="26" rx="6" class="dg-warn"/>
+  <text x="320" y="30" text-anchor="middle" class="dg-warn-t">JaVers auto-audit continua a servir os módulos por migrar</text>
+  <rect x="648" y="12" width="252" height="26" rx="6" class="dg-keep"/>
+  <text x="774" y="30" text-anchor="middle" class="dg-ok-t">só diff em memória</text>
+
+  <!-- linha do tempo -->
+  <line x1="12" y1="78" x2="888" y2="78" style="stroke:var(--line);stroke-width:3"/>
+
+  <g style="fill:var(--accent)">
+    <circle cx="60" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="200" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="340" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="480" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="620" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="740" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+    <circle cx="860" cy="78" r="7" class="dg-acc" style="fill:var(--card)"/>
+  </g>
+
+  <text x="60"  y="104" text-anchor="middle" class="dg-t">1 · Infra</text>
+  <text x="60"  y="122" text-anchor="middle" class="dg-m">+ V4</text>
+  <text x="200" y="104" text-anchor="middle" class="dg-t">2 · Escalão</text>
+  <text x="200" y="122" text-anchor="middle" class="dg-m">já lá está</text>
+  <text x="340" y="104" text-anchor="middle" class="dg-t">3 · Mobilidade</text>
+  <text x="340" y="122" text-anchor="middle" class="dg-m">tem evidência</text>
+  <text x="480" y="104" text-anchor="middle" class="dg-t">4 · +9 módulos</text>
+  <text x="480" y="122" text-anchor="middle" class="dg-m">repetitivo</text>
+  <text x="620" y="104" text-anchor="middle" class="dg-t">5 · Registo</text>
+  <text x="620" y="122" text-anchor="middle" class="dg-m">multi-tabela</text>
+  <text x="740" y="104" text-anchor="middle" class="dg-t">6 · Starter fora</text>
+  <text x="740" y="122" text-anchor="middle" class="dg-m">aspectos, 17 anot.</text>
+  <text x="860" y="104" text-anchor="middle" class="dg-t">7 · JV_*</text>
+  <text x="860" y="122" text-anchor="middle" class="dg-m">drop</text>
+
+  <rect x="620" y="150" width="280" height="50" rx="8" class="dg-drop"/>
+  <text x="760" y="170" text-anchor="middle" class="dg-bad-t">o passo 7 é decisão de negócio</text>
+  <text x="760" y="189" text-anchor="middle" class="dg-m">validações já decididas não têm backfill possível</text>
+
+  <path d="M760,150 L860,90" class="dg-ln-bad" style="color:var(--bad)"/>
+</svg>
+<figcaption>Cada passo é entregável por si. Só no passo 6 é que o starter sai do <code>pom</code>; as
+tabelas ficam a apodrecer, em leitura, até haver decisão sobre o histórico antigo.</figcaption>
+</figure>
+
+<ol>
+  <li><b>Infra nova</b> em <code>shared/application/detalhe</code> + migration
+      <code>V4__validacao_detalhe.sql</code>. <code>ReferenciaNomeResolver</code> ganha uma assinatura
+      <code>resolver(Class&lt;?&gt;, Object id)</code> — hoje recebe um <code>GlobalId</code> do JaVers e
+      não sobreviveria à remoção dos commits.</li>
+  <li><b>Escalão</b> passa para a infra comum (já lá está em espírito; é encolher o
+      <code>EscalaoDetalheDiffWriter</code>).</li>
+  <li><b>Mobilidade</b> — é o módulo com evidência HTTP do arranjo actual; comparar a grelha lado a
+      lado, campo a campo, pendente e decidida.</li>
+  <li><b>Restantes 9 descritores</b> → snapshots. Campos e rótulos migram directamente; o conhecimento
+      de domínio não se perde, muda de forma.</li>
+  <li><b>Registo de colaborador</b> é o caso irregular (atravessa várias tabelas) — vários pares de
+      snapshot na mesma validação. Os POJOs <code>FuncionarioDadosPessoaisSnapshot</code> /
+      <code>ContratoDadosSnapshot</code>, que hoje existem só para dar ao JaVers algo que fotografar,
+      tornam-se snapshots legítimos.</li>
+  <li><b>Só no fim:</b> cair aspectos, <code>ThreadLocal</code>, as 17 anotações, o starter SQL.</li>
+  <li><b>Tabelas <code>JV_*</code> por último.</b> Validações <b>já decididas</b> antes da migração não
+      têm linhas congeladas e o backfill é impossível (o "antes" já não existe). Deixar as
+      <code>JV_*</code> a apodrecer, em leitura, até haver confiança para as largar — ou aceitar grelha
+      vazia para registos históricos. <em>Decisão de negócio, não técnica.</em></li>
+</ol>
+
+<h3>Critério de aceitação (por módulo)</h3>
+<p><code>GET .../validacoes/{id}/detalhes</code> devolve o <b>mesmo</b> que hoje — mesmos campos, mesmos
+valores antes/depois, mesmos rótulos — para uma validação <b>pendente</b> e para uma <b>já decidida</b>.
+Verificar por SQL directo que as linhas gravadas batem com a resposta HTTP.</p>
+
+<h2>7. Riscos</h2>
+
+<table>
+  <tr><th>Risco</th><th>Mitigação</th></tr>
+  <tr><td>Migrar 11 descritores de uma vez</td><td>módulo a módulo; o JaVers serve os restantes até ao fim</td></tr>
+  <tr><td>Validações antigas sem detalhe congelado</td><td><code>JV_*</code> ficam em leitura até decisão de negócio (§6.7)</td></tr>
+  <tr><td>Ordem da grelha muda ao migrar</td><td>é a correcção de um bug — a ordem passa a ser a declarada; confirmar com o negócio que a ordem nova é a desejada</td></tr>
+  <tr><td>Write-service esquece-se de chamar <code>congelar()</code></td><td>visível em code review (uma linha no fluxo) e detectável por teste: validação sem linhas de detalhe; não há mais <code>ThreadLocal</code> invisível</td></tr>
+  <tr><td>Truncatura a 2000 chars num <code>obs</code> muito longo</td><td>truncar explicitamente com reticências no serviço, não deixar rebentar no insert</td></tr>
+</table>
+
+<p class="foot">Análise sobre o código em <code>develop</code> a 2026-09-16. Substitui a secção 5 de
+<code>proposta_detalhe_alteracoes.md</code> (03/09), escrita antes de o caminho do Escalão existir.</p>
+
+</div>
+</body>
+</html>

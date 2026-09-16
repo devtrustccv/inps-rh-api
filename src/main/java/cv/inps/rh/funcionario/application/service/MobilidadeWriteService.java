@@ -47,6 +47,11 @@ public class MobilidadeWriteService {
   private final cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper tipoRelRemPagHelper;
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  // Piloto do "Detalhe de alterações" sem auto-audit: congela o diff em RH_T_VALIDACAO_DETALHE na
+  // própria escrita. Corre EM PARALELO com o commit do JaVers enquanto a leitura não for virada —
+  // assim dá para confrontar as duas grelhas campo a campo antes de largar a antiga.
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final MobilidadeCampos mobilidadeCampos;
 
   /**
    * "Mobilidade processada" = igual à coluna PROCESSAMENTO da vista RH_V_MOBILIDADE: existe um tiprel
@@ -419,6 +424,13 @@ public class MobilidadeWriteService {
     // Estado dos três campos ANTES de aplicar o payload — a base da comparação mais abaixo.
     var antes = camposMobilidade(mobilidade);
 
+    // Estado COMPLETO antes do payload, para a grelha "Detalhe de alterações". Tem de ser aqui: o
+    // UPDATE abaixo é in place, e depois dele o valor anterior já não existe na base. Pergunta
+    // diferente da de cima — aquela decide SE há movimento a validar (3 campos), esta decide O QUE
+    // se mostra ao aprovador (7 campos).
+    var campos = mobilidadeCampos.get();
+    var antesDetalhe = detalheAlteracoes.capturar(campos, mobilidade);
+
     // 1) UPDATE in place na RH_T_MOBILIDADE. Mesma mecânica do registo (createMobilidade): por cada
     //    tipo escolhido no multi-select o respetivo "(depois)" é obrigatório; os tipos NÃO escolhidos
     //    herdam o valor que já está no registo — aqui o "anterior" é a própria mobilidade, por ser
@@ -448,6 +460,12 @@ public class MobilidadeWriteService {
       } finally {
         ValidacaoAuditContext.clear();
       }
+
+      // Reenvio de correção: o congelar() é idempotente por (validação, tabela) — apaga o detalhe
+      // anterior e regrava, porque o que o checker vai ver agora é outro.
+      detalheAlteracoes.congelar(validacao, "RH_T_MOBILIDADE", campos,
+          antesDetalhe, detalheAlteracoes.capturar(campos, mobilidade));
+
       funcionarioEntityRepository.save(funcionario);
       return new SuccessResponseDTO(true, mobUuid.toString(), "Correção reenviada para validação.", java.util.List.of());
     }
@@ -486,6 +504,11 @@ public class MobilidadeWriteService {
       } finally {
         ValidacaoAuditContext.clear();
       }
+
+      // Caminho novo, a correr em paralelo com o commit acima: congela o diff em
+      // RH_T_VALIDACAO_DETALHE. Nada lê daqui ainda — é para confrontar com a grelha do JaVers.
+      detalheAlteracoes.congelar(valid, "RH_T_MOBILIDADE", campos,
+          antesDetalhe, detalheAlteracoes.capturar(campos, mobilidade));
     }
 
     funcionarioEntityRepository.save(funcionario);

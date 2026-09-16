@@ -97,7 +97,7 @@ public class ValidacaoRenovacaoContratoService {
       try {
         cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
             validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_CONTRATO_HISTORICO");
-        contratoHistoricoWriteService.reabrirRenovacaoCorrecao(contrato, dto.getDadosRenovacao());
+        contratoHistoricoWriteService.reabrirRenovacaoCorrecao(contrato, dto.getDadosRenovacao(), validacaoReaberta);
       } finally {
         cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
       }

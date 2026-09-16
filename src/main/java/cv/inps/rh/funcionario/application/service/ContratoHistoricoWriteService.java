@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 public class ContratoHistoricoWriteService {
 
   private final ContratoHistoricoEntityRepository contratoHistoricoEntityRepository;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
 
   /**
    * Regista o historico inicial de um contrato (versao=1, estado=P).
@@ -37,6 +39,27 @@ public class ContratoHistoricoWriteService {
    * Regista uma renovação pendente (versao=ultima+1, estado=P) com as novas datas propostas.
    * Deve ser chamado em RenovacaoContratoService antes de saveAndFlush.
    */
+  /**
+   * Historico em vigor do contrato (versao mais alta) ANTES de se registar uma renovacao. E o "antes"
+   * da grelha "Detalhe de alteracoes": o aprovador compara as datas do contrato em vigor com as
+   * propostas, nao "criado com ...".
+   */
+  public java.util.Optional<ContratoHistoricoEntity> historicoActual(ContratoEntity contrato) {
+    return contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId());
+  }
+
+  /** Congela o diff da renovacao (historico anterior -> proposta) em RH_T_VALIDACAO_DETALHE. */
+  public void congelarDetalheRenovacao(cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity validacao,
+      cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado antes, ContratoHistoricoEntity novo) {
+    detalheAlteracoes.congelar(validacao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_CONTRATO_HISTORICO,
+        dossierCampos.renovacaoContrato(), antes,
+        detalheAlteracoes.capturar(dossierCampos.renovacaoContrato(), novo));
+  }
+
+  public cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado capturarRenovacao(ContratoHistoricoEntity h) {
+    return detalheAlteracoes.capturar(dossierCampos.renovacaoContrato(), h);
+  }
+
   public ContratoHistoricoEntity registrarRenovacaoPendente(ContratoEntity contrato, RenovarContratoReqDTO dto) {
     int nextVersao = contratoHistoricoEntityRepository
         .findTopByContratoId_IdOrderByVersaoDesc(contrato.getId())
@@ -70,9 +93,17 @@ public class ContratoHistoricoWriteService {
    * pós-registo para que uma validação SIM posterior corra como uma renovação normal.
    */
   public void reabrirRenovacaoCorrecao(ContratoEntity contrato, RenovarContratoReqDTO dto) {
+    reabrirRenovacaoCorrecao(contrato, dto, null);
+  }
+
+  /** Como acima, congelando tambem o detalhe quando a validacao reaberta e conhecida. */
+  public void reabrirRenovacaoCorrecao(ContratoEntity contrato, RenovarContratoReqDTO dto,
+      cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity validacao) {
     contratoHistoricoEntityRepository
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.C)
         .ifPresent(h -> {
+          // Estado ANTES do payload (edicao in place do historico em correccao).
+          var antesDetalhe = capturarRenovacao(h);
           h.setEstado(Estado.P);
           if (dto != null) {
             h.setDataInicio(dto.getDataInicio());
@@ -83,6 +114,9 @@ public class ContratoHistoricoWriteService {
           // O caller carimba com ValidacaoAuditContext para o commit ficar ligado à validação (grelha
           // "Detalhe de alterações"). Baseline vem de registrarRenovacaoPendente (também via repo).
           contratoHistoricoEntityRepository.save(h);
+          if (validacao != null) {
+            congelarDetalheRenovacao(validacao, antesDetalhe, h);
+          }
         });
   }
 

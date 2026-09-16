@@ -39,6 +39,8 @@ public class ValidarDadosBancariosService {
   private final DadosBancariosMapper dadosBancariosMapper;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
 
   @Transactional
   public SuccessResponseDTO executar(ValidarDadosBancariosCommand command) {
@@ -95,6 +97,17 @@ public class ValidarDadosBancariosService {
           "Funcionario possui validação pendente de dados bancarios, por favor validar");
     }
 
+    // Modulo de COLECCAO: o "antes" e por LINHA, capturado antes do sync (que edita in place, cria e
+    // apaga). Linhas novas nao estao no mapa -> o seu "antes" e inexistente (tudo INICIAL).
+    var camposBanc = dossierCampos.dadosBancarios();
+    java.util.Map<Long, cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado> antesPorLinha =
+        new java.util.HashMap<>();
+    if (funcionario.getDadosBancarios() != null) {
+      funcionario.getDadosBancarios().stream()
+          .filter(b -> b != null && b.getId() != null)
+          .forEach(b -> antesPorLinha.put(b.getId(), detalheAlteracoes.capturar(camposBanc, b)));
+    }
+
     var dadosBancarios = dadosBancariosMapper
     .syncBancarios(funcionario.getDadosBancarios(), dadosBancariosReqDTO, funcionario);
     funcionario.setDadosBancarios(dadosBancarios);
@@ -118,6 +131,7 @@ public class ValidarDadosBancariosService {
         ValidacaoAuditContext.clear();
       }
       funcionarioEntityRepository.saveAndFlush(funcionario);
+      congelarBancarios(validacaoReaberta, camposBanc, antesPorLinha, funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Dados bancários corrigidos e reenviados para validação.", List.of());
     }
@@ -157,6 +171,7 @@ public class ValidarDadosBancariosService {
     funcionario.getValidacoes().add(validacao);
 
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    congelarBancarios(validacao, camposBanc, antesPorLinha, funcionario);
 
     validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
@@ -191,5 +206,26 @@ public class ValidarDadosBancariosService {
 
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_BANCARIOS)
         .ifPresent(v -> v.setEstado(novoEstado));
+  }
+  /**
+   * Congela o detalhe de CADA linha bancaria alterada. Uma chamada por linha, com o id na coluna
+   * TABELA_ID: sem isso, duas contas a mudar o MESMO campo (ex.: NIB) colidiam na fusao e a grelha
+   * perdia uma das alteracoes.
+   */
+  private void congelarBancarios(cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity validacao,
+      cv.inps.rh.shared.application.detalhe.Campos<cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity> campos,
+      java.util.Map<Long, cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado> antesPorLinha,
+      cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funcionario) {
+    if (funcionario.getDadosBancarios() == null) {
+      return;
+    }
+    for (var banco : funcionario.getDadosBancarios()) {
+      if (banco == null || banco.getId() == null) {
+        continue;
+      }
+      var antes = antesPorLinha.getOrDefault(banco.getId(), detalheAlteracoes.capturar(campos, null));
+      detalheAlteracoes.congelar(validacao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_DADOS_BANCARIOS, banco.getId(),
+          campos, antes, detalheAlteracoes.capturar(campos, banco));
+    }
   }
 }

@@ -56,6 +56,8 @@ public class CarreiraWriteService {
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
   private final DomainEntityRepository domainEntityRepository;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   /**
@@ -290,6 +292,14 @@ public class CarreiraWriteService {
     validation.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline (ver save acima)
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+
+    // Detalhe do REGISTO. Ao contrario do JaVers, este motor NAO tem de ser chamado no proprio save:
+    // basta ter capturado o "antes" antes do payload. Por isso pode vir aqui, ja com a validacao real
+    // — e desaparece a gimnastica de pre-gerar o UUID so para carimbar o commit certo.
+    var camposCarr = dossierCampos.carreira();
+    detalheAlteracoes.congelar(validation, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_CARREIRA,
+        camposCarr, detalheAlteracoes.capturar(camposCarr, null),
+        detalheAlteracoes.capturar(camposCarr, novaCarreira));
   }
 
   /**
@@ -794,6 +804,10 @@ public class CarreiraWriteService {
         ? funcionarioRules.reabrirParaValidacao(carreira.getUuid(), Referencia.CARREIRA)
         : null;
 
+    // Estado ANTES do payload (a edicao abaixo e in place).
+    var camposCarrEdit = dossierCampos.carreira();
+    var antesCarr = detalheAlteracoes.capturar(camposCarrEdit, carreira);
+
     carreiraMapper.toUpdateEntity(carreira, dto);
     if (revalidar) carreira.setEstado(Estado.P);
 
@@ -928,6 +942,8 @@ public class CarreiraWriteService {
         // religar o tiprel e gravar. NÃO se cria uma validação UPDATE nova.
         validacaoCorrecao.setTiprelId(relacionamento);
         validacaoEntityRepository.save(validacaoCorrecao);
+        detalheAlteracoes.congelar(validacaoCorrecao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_CARREIRA,
+            camposCarrEdit, antesCarr, detalheAlteracoes.capturar(camposCarrEdit, carreira));
       } else {
         var validation = new ValidacaoEntity();
         validation.setTipoAccao(TipoAcao.UPDATE.name());
@@ -939,6 +955,8 @@ public class CarreiraWriteService {
         validation.setUuid(validacaoUuidEdit); // mesmo UUID já carimbado no save da edição (ver acima)
         validation.setFunId(funcionario);
         validacaoEntityRepository.save(validation);
+        detalheAlteracoes.congelar(validation, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_CARREIRA,
+            camposCarrEdit, antesCarr, detalheAlteracoes.capturar(camposCarrEdit, carreira));
       }
     }
 

@@ -37,4 +37,10 @@ public class ValidacaoDetalheDTO {
 
   @Schema(description = "Tabela a que o campo pertence; permite agrupar quando a validação toca em várias")
   private String tabelaName;
+
+  @Schema(description = "Nome técnico da propriedade alterada (ex.: instidId); campoAlterado é o rótulo visível")
+  private String campo;
+
+  @Schema(description = "VALOR | REFERENCIA | INICIAL — distingue 'criado com X' de 'X → Y'")
+  private String tipoAlteracao;
 }

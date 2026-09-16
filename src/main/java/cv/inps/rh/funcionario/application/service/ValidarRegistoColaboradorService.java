@@ -56,6 +56,7 @@ public class ValidarRegistoColaboradorService {
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
   private final RegistoDetalheCapturaService registoDetalheCaptura;
+  private final cv.inps.rh.funcionario.application.service.registodetalhe.RegistoDetalheCongelador registoDetalheCongelador;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -86,10 +87,16 @@ public class ValidarRegistoColaboradorService {
       // ShallowReference, logo o save em cascata não fotografa os filhos; a captura grava-os pelo repo
       // auditável SEM ValidacaoAuditContext — o snapshot fica sem validacaoUuid e não aparece na grelha,
       // servindo só para o reenvio C→P produzir um diff antes→depois em vez de um "valor inicial".
+      // O baseline so existe para o JaVers: e uma regravacao de 11 tabelas cujo unico efeito e criar
+      // um snapshot durável contra o qual diffar no pedido seguinte. O motor novo nao precisa dele —
+      // captura o "antes" em memoria no proprio pedido do reenvio. Sai com o JaVers.
       registoDetalheCaptura.baseline(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
+
+    // Estado do dossie ANTES do payload — e daqui que sai a coluna "valor anterior" da grelha.
+    var antesDetalhe = registoDetalheCongelador.capturar(funcionario);
 
     // A partir daqui aplica-se o payload. Se o registo está em C, é o maker a corrigir (C -> P):
     // 'validar' não pode vir preenchido e tem de existir realmente uma validação por corrigir.
@@ -290,6 +297,7 @@ public class ValidarRegistoColaboradorService {
     // o baseline criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
     if (estaPorCorrigir) {
       registoDetalheCaptura.capturar(saved);
+      registoDetalheCongelador.congelar(saved, antesDetalhe);
     }
 
     // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG

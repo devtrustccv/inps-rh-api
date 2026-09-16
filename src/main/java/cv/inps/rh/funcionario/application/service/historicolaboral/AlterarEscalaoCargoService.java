@@ -57,6 +57,8 @@ public class AlterarEscalaoCargoService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
   private final EscalaoDetalheDiffWriter escalaoDetalheDiffWriter;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
@@ -128,9 +130,13 @@ public class AlterarEscalaoCargoService {
       }
       validacaoC.setTiprelId(emCorrecao);
       validacaoEntityRepository.save(validacaoC);
-      // Detalhe de alterações: regrava do zero (predecessor → movimento corrigido) via javers.compare.
-      escalaoDetalheDiffWriter.limpar(validacaoC.getUuid());
-      escalaoDetalheDiffWriter.persistir(validacaoC, emCorrecao.getTiprelId(), emCorrecao);
+      // Detalhe de alteracoes: predecessor -> movimento corrigido. Ao contrario dos outros modulos, o
+      // "antes" aqui NAO e a mesma linha antes do payload — e o tiprel PREDECESSOR, que e uma linha
+      // distinta e estavel. Por isso nao ha captura previa: ambos os estados sao legiveis agora.
+      var camposEsc = dossierCampos.escalao();
+      detalheAlteracoes.congelar(validacaoC, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_TIPREL, camposEsc,
+          detalheAlteracoes.capturar(camposEsc, emCorrecao.getTiprelId()),
+          detalheAlteracoes.capturar(camposEsc, emCorrecao));
       return new SuccessResponseDTO(true, emCorrecao.getUuid().toString(),
           "Correção reenviada para validação.", List.of());
     }
@@ -170,9 +176,11 @@ public class AlterarEscalaoCargoService {
     validacao.setFunId(funcionario);
     validacaoEntityRepository.save(validacao);
 
-    // Detalhe de alterações persistido no momento (predecessor → novo tiprel) com o motor de diff do
-    // JaVers (javers.compare de dois snapshots) → uma linha por campo em RH_T_VALIDACAO_DETALHE.
-    escalaoDetalheDiffWriter.persistir(validacao, atual, novoTiprel);
+    // Detalhe de alteracoes: predecessor (atual) -> novo tiprel pendente.
+    var camposEscNovo = dossierCampos.escalao();
+    detalheAlteracoes.congelar(validacao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_TIPREL, camposEscNovo,
+        detalheAlteracoes.capturar(camposEscNovo, atual),
+        detalheAlteracoes.capturar(camposEscNovo, novoTiprel));
 
     return new SuccessResponseDTO(true, novoTiprel.getUuid().toString(),
         "Alteração de escalão registada para validação.", List.of());

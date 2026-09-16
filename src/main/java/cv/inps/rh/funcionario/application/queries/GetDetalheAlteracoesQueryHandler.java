@@ -64,6 +64,15 @@ public class GetDetalheAlteracoesQueryHandler implements QueryHandler<GetDetalhe
       }
       return ResponseEntity.ok(alteracaoEscalaoDetalheReadService.listar(validacaoUuid));
     }
+
+    // Migração do "Detalhe de alterações" para o motor tipado (DetalheAlteracoesService), módulo a
+    // módulo. A regra é a mesma do escalão e vale para QUALQUER referência já migrada: havendo detalhe
+    // congelado na tabela, é ele que manda; senão cai para o JaVers, que continua a servir os módulos
+    // por migrar. Zero regressão e nenhum if por referência — quando o último módulo estiver migrado,
+    // o ramo do JaVers (e o seu read-service) desaparecem.
+    if (validacaoDetalheEntityRepository.existsByValidacaoId_Uuid(validacaoUuid)) {
+      return ResponseEntity.ok(validacaoDetalheReadService.listar(validacaoUuid));
+    }
     return ResponseEntity.ok(javersValidacaoDetalheReadService.listar(validacaoUuid));
   }
 

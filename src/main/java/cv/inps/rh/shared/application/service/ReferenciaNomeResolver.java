@@ -38,7 +38,10 @@ public class ReferenciaNomeResolver {
 
   /** Getters candidatos a "rótulo de exibição", por ordem de preferência. */
   private static final List<String> GETTERS_CANDIDATOS =
-      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel", "getNmBanco");
+      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel", "getNmBanco",
+          // ParamSituacaoDetalheEntity chama "motivo" ao seu rótulo (coluna MOTIVO). Sem isto a grelha
+          // mostrava o fallback cru — "ParamSituacaoDetalheEntity #23" — ao aprovador.
+          "getMotivo");
 
   /**
    * Overrides por tipo, para entidades que não sigam a convenção. Chave = nome do tipo JaVers (FQN da
@@ -76,13 +79,7 @@ public class ReferenciaNomeResolver {
       try {
         Class<?> tipo = Class.forName(instanceId.getTypeName());
         Long id = Long.valueOf(String.valueOf(instanceId.getCdoId()));
-        Object entidade = entityManager.find(tipo, id);
-        if (entidade != null) {
-          String nome = nomeDe(entidade, instanceId.getTypeName(), tipo);
-          if (preenchido(nome)) {
-            return nome;
-          }
-        }
+        return resolver(tipo, id);
       } catch (ReflectiveOperationException | NumberFormatException e) {
         LOGGER.debug("Não foi possível resolver nome da referência {}: {}", globalId.value(), e.toString());
       }
@@ -91,6 +88,29 @@ public class ReferenciaNomeResolver {
       return tipo.substring(tipo.lastIndexOf('.') + 1) + " #" + instanceId.getCdoId();
     }
     return globalId.value(); // não-InstanceId: valor cru do JaVers
+  }
+
+  /**
+   * Nome legível de uma referência a partir do <b>tipo + id</b>, sem passar pelo JaVers. É esta a
+   * assinatura usada pelo {@code DetalheAlteracoesService}: o id vem do proxy da FK sem o
+   * inicializar, e o nome vem daqui — um {@code find()} por chave primária, que é barato e, ao
+   * contrário de {@code proxy.getNome()}, nunca lança {@code LazyInitializationException}.
+   *
+   * <p>Fallback legível ({@code "DirecaoEntity #12"}) se a entidade não existir ou não tiver nenhum
+   * dos getters de nome — a grelha nunca rebenta por causa disto.
+   */
+  public String resolver(Class<?> tipo, Object id) {
+    if (tipo == null || id == null) {
+      return null;
+    }
+    Object entidade = entityManager.find(tipo, id);
+    if (entidade != null) {
+      String nome = nomeDe(entidade, tipo.getName(), tipo);
+      if (preenchido(nome)) {
+        return nome;
+      }
+    }
+    return tipo.getSimpleName() + " #" + id;
   }
 
   private String nomeDe(Object entidade, String typeName, Class<?> tipo) {

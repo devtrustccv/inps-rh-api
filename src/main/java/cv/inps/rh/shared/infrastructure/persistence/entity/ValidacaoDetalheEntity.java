@@ -38,18 +38,46 @@ public class ValidacaoDetalheEntity extends AuditEntity {
   @JoinColumn(name = "validacao_id", referencedColumnName = "id", nullable = false)
   private ValidacaoEntity validacaoId;
 
+  /** O RÓTULO mostrado ao aprovador (ex.: "Direcção"). É o que o frontend lê — não mudar. */
   @Column(name = "campo_alterado", nullable = false, length = 100)
   private String campoAlterado;
+
+  /**
+   * Nome técnico da propriedade (ex.: {@code instidId}), separado do rótulo. Permite agrupar,
+   * filtrar e re-renderizar sem fazer parsing do texto visível; e se o rótulo mudar amanhã, os
+   * registos antigos continuam a dizer o que diziam.
+   */
+  @Column(name = "campo", length = 100)
+  private String campo;
+
+  /** Ordem de apresentação na grelha = ordem de declaração dos campos no módulo. */
+  @Column(name = "ordem")
+  private Integer ordem;
+
+  /** VALOR | REFERENCIA | INICIAL — ver {@code CampoAlterado.Tipo}. */
+  @Column(name = "tipo_alteracao", length = 20)
+  private String tipoAlteracao;
 
   /**
    * Nullable, ao contrário do que a spec de BD indica (obrigatório): um campo que estava vazio e
    * passou a ter valor é uma alteração legítima e não teria como ser representada.
    */
-  @Column(name = "valor_anterior", length = 500)
+  @Column(name = "valor_anterior", length = 2000)
   private String valorAnterior;
 
-  @Column(name = "valor_novo", length = 500)
+  @Column(name = "valor_novo", length = 2000)
   private String valorNovo;
+
+  /**
+   * Id da FK que deu origem ao {@code valorAnterior}/{@code valorNovo}, quando o campo é uma
+   * referência. Guardar o id além do nome é a rede: o nome é apresentação e pode mudar, o id é o que
+   * identifica de facto a referência — e permite re-renderizar se a resolução do nome falhar.
+   */
+  @Column(name = "valor_anterior_id")
+  private Long valorAnteriorId;
+
+  @Column(name = "valor_novo_id")
+  private Long valorNovoId;
 
   /** Distingue as tabelas quando uma validação atravessa várias (spec linha 1643). */
   @Column(name = "tabela_name", length = 50)
