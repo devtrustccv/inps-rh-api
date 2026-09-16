@@ -44,6 +44,7 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 | Os dez endpoints antigos foram removidos | Passam a responder **404** | tabela abaixo |
 | As gravações devolvem um objecto em vez de um mapa | Nenhum para quem lê `id`, `etapa`, `nrMissao`, `total` ou `designacao`: os nomes mantêm-se. Há campos novos, e o `cancelar` passa a ter corpo | secção "Resposta das gravações" |
 | Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão | Aparecem em "Ver Notificação" | capítulos 7, 14 e 16 |
+| Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados) | Nenhum na API; o `estado` passa a `Enviado`/`Erro`, ou `Pendente` se o colaborador não tiver email | capítulos 10 e 17 |
 | Correcção do guia: o exemplo de Alojamento tinha `numeroDias` e `valor`, que não existem | Enviar `valorTotal` (opcional) e as datas; `colaboradorIds` permite agrupar colaboradores | capítulo 10 |
 
 ### Endpoints antigos — removidos
@@ -507,7 +508,7 @@ No alojamento, o nº de dias é calculado a partir das datas (`dataFim − dataI
 > uma linha com `flgAlimentacao: "SIM"`. Gravar a ajuda de custo antes do alojamento dá ⅔ **sem
 > erro nenhum**. Gravar o alojamento primeiro, ou regravar a ajuda de custo depois.
 
-`NEXT` → `VALIDACAO_UGAL` e notifica os colaboradores.
+`NEXT` → `VALIDACAO_UGAL` e notifica **por email** os colaboradores das linhas do processo (`MISSAO_LOGISTICA_COLABORADOR`, uma notificação por processo). O campo `notificacao` do payload permite editar o assunto e o corpo; se vier a `null`, usa-se o template. Sem email nos contactos, fica `Pendente`.
 
 **Erros:** campos obrigatórios em falta (`{secção}: {campo} é obrigatório`), colaborador que não é da
 missão, e colaboradores de prestadores diferentes na mesma linha.
@@ -690,9 +691,9 @@ campo `origem` diz qual:
 
 ```jsonc
 [ { "uuid": "…", "tipoNotificacao": "MISSAO_CANCELAMENTO",
-    "assunto": "Cancelamento de Missão Nº 6",
-    "mensagem": "A missão Nº 6 foi cancelada. Motivo: …",
-    "email": "geral@atlanticoviagens.cv",     // null = aviso no portal do colaborador
+    "assunto": "Cancelamento de Missão Nº 6/2026",
+    "mensagem": "A missão Nº 6/2026 foi cancelada. Motivo: …",
+    "email": "geral@atlanticoviagens.cv",     // null = colaborador sem email (fica "Pendente")
     "nomeReceptor": "Atlantico Viagens Teste",
     "dataEnvio": "2026-09-15", "estado": "Enviado",
     "origem": "RH_T_MISSAO_SERVICO" } ]
@@ -734,7 +735,7 @@ avaliações.
 
 **Notificação:** se algum processo já passou da primeira etapa do seu percurso, são renotificados
 todos os que já tinham recebido email desta missão — prestadores, emails adicionais e destinatários
-das requisições — com o nº da missão e o motivo. Cada colaborador recebe um aviso no portal.
+das requisições — com o nº da missão e o motivo. Os colaboradores que **estavam** na missão recebem o mesmo aviso por email; quem já tinha sido retirado não é avisado.
 
 | Situação | Resposta |
 |---|---|

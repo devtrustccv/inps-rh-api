@@ -82,6 +82,7 @@ public class MissaoProcessoServiceWrite {
   private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
   private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
   private final MissaoServicoEntityRepository missaoServicoRepository;
+  private final MissaoNotificacaoColaborador notificacaoColaborador;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -932,7 +933,10 @@ public class MissaoProcessoServiceWrite {
     return colab.getFunId() != null ? colab.getFunId().getNome() : String.valueOf(colab.getUuid());
   }
 
-  /** Um aviso por colaborador das linhas do processo — gravado em RH_T_NOTIFICACAO para o portal. */
+  /**
+   * Um aviso por colaborador das linhas do processo (spec: "O colaborador receberá email"). Vai por
+   * email para os contactos do funcionário; sem email fica gravado "Pendente" para o portal.
+   */
   private void notificarColaboradoresLogistica(MissaoServicoEntity missao, TipoProcesso tipo,
                                                List<MissaoLogisticaEntity> linhas, MissaoNotificacaoRequestDTO editado) {
     var conteudo = support.conteudoLogisticaColaborador(support.varsMissao(missao, tipo), editado);
@@ -944,23 +948,7 @@ public class MissaoProcessoServiceWrite {
       }
     }
 
-    for (var colab : colaboradores.values()) {
-      if (colab.getFunId() == null)
-        continue;
-      var n = new NotificacaoEntity();
-      n.setUuid(UuidCreator.getTimeOrderedEpoch());
-      n.setTipoNotificacao(TIPO_NOTIF_LOGISTICA_COLAB);
-      n.setReferenciaId(colab.getId());
-      n.setReferenciaName(TableName.RH_T_MISSAO_COLABORADOR.name());
-      n.setReferenciaUuid(colab.getUuid());
-      n.setAssunto(conteudo.assunto());
-      n.setMessage(conteudo.corpo());
-      n.setNomeReceptor(colab.getFunId().getNome());
-      n.setFunId(colab.getFunId());
-      n.setDataEnvio(LocalDate.now());
-      n.setEstado("Pendente");
-      notificacaoRepository.save(n);
-    }
+    colaboradores.values().forEach(colab -> notificacaoColaborador.enviar(colab, TIPO_NOTIF_LOGISTICA_COLAB, conteudo));
   }
 
   // ---------------------------------------------------------------------------------------------

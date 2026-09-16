@@ -229,6 +229,8 @@ public class MissaoServicoServiceWrite {
     missaoServicoRepository.save(missao);
 
     var colaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid);
+    // Só é avisado quem estava na missão: um colaborador já retirado não tem de saber do cancelamento.
+    var colaboradoresAtivos = colaboradores.stream().filter(c -> ESTADO_ATIVO.equals(c.getEstado())).toList();
     if (!CollectionUtils.isEmpty(colaboradores)) {
       colaboradores.forEach(c -> c.setEstado(ESTADO_INATIVO));
       missaoColaboradorRepository.saveAll(colaboradores);
@@ -284,7 +286,7 @@ public class MissaoServicoServiceWrite {
     }
 
     if (notificar) {
-      persistirNotificacaoCancelamento(missao, dto);
+      persistirNotificacaoCancelamento(missao, dto, colaboradoresAtivos);
     }
 
     return ResponseEntity.ok(sucesso(missao, "Missão cancelada"));
@@ -542,8 +544,9 @@ public class MissaoServicoServiceWrite {
     return !ETAPA_1.equals(missao.getEtapa()) && !ETAPA_2.equals(missao.getEtapa());
   }
 
-  private void persistirNotificacaoCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto) {
-    String assunto = "Cancelamento de Missão Nº " + missao.getNrMissao();
+  private void persistirNotificacaoCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto,
+                                                List<MissaoColaboradorEntity> colaboradores) {
+    String assunto = "Cancelamento de Missão Nº " + support.nrMissaoFormatado(missao);
     String message = buildMensagemCancelamento(missao, dto);
 
     var toSave = new ArrayList<NotificacaoEntity>();
@@ -552,28 +555,13 @@ public class MissaoServicoServiceWrite {
     destinatariosExternos(missao).forEach((email, nome) ->
         toSave.add(notificacaoExterna(missao, TIPO_NOTIF_CANCELAMENTO, email, nome, assunto, message)));
 
-    // 2. Colaboradores da missão — aviso no portal (sem email)
-    for (var colab : missaoColaboradorRepository.findAllByMissaoServId_Uuid(missao.getUuid())) {
-      if (colab == null || colab.getFunId() == null)
-        continue;
-      var n = new NotificacaoEntity();
-      n.setUuid(UuidCreator.getTimeOrderedEpoch());
-      n.setTipoNotificacao(TIPO_NOTIF_CANCELAMENTO);
-      n.setReferenciaId(missao.getId());
-      n.setReferenciaName(TableName.RH_T_MISSAO_COLABORADOR.name());
-      n.setReferenciaUuid(colab.getUuid());
-      n.setAssunto(assunto);
-      n.setMessage(message);
-      n.setNomeReceptor(colab.getFunId().getNome());
-      n.setFunId(colab.getFunId());
-      n.setDataEnvio(LocalDate.now());
-      n.setEstado("Pendente");
-      toSave.add(n);
-    }
-
     if (!toSave.isEmpty()) {
       notificacaoRepository.saveAll(toSave);
     }
+
+    // 2. Colaboradores que estavam na missão — por email (sem email fica "Pendente" para o portal)
+    var conteudo = new MissaoProcessoSupport.Conteudo(assunto, message);
+    colaboradores.forEach(c -> notificacaoColaborador.enviar(c, TIPO_NOTIF_CANCELAMENTO, conteudo));
   }
 
   /**
@@ -745,9 +733,9 @@ public class MissaoServicoServiceWrite {
   private String buildMensagemCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto) {
     var motivo = dto != null ? dto.getMotivoCancelamento() : null;
     if (StringUtils.hasText(motivo)) {
-      return "A missão Nº " + missao.getNrMissao() + " foi cancelada. Motivo: " + motivo;
+      return "A missão Nº " + support.nrMissaoFormatado(missao) + " foi cancelada. Motivo: " + motivo;
     }
-    return "A missão Nº " + missao.getNrMissao() + " foi cancelada.";
+    return "A missão Nº " + support.nrMissaoFormatado(missao) + " foi cancelada.";
   }
 
 
