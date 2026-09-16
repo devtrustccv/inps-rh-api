@@ -23,7 +23,9 @@ As mais urgentes estão assinaladas com 🔴 — são as que bloqueiam trabalho.
 | 3.1 Textos dos templates | Parametrizados com textos **provisórios** (`docs/db/missao_servico_notificacoes_dml.sql`), a rever pelo negócio | ✅ feito |
 | 4. Notificações internas | Implementadas as que vão ao colaborador e aos prestadores: confirmação do pedido, ajuda de custo e alteração. As que iam para RH, Financeiro ou SGAL caem, porque não há destinatários por papel | ✅ feito |
 | 5.3, 5.4, 5.5 | Só serviam os alertas | ⛔ descartado |
-| 5.1 SGAL, 5.2 Tabela de preços, 6. Pontos menores | Ficam para o fim | ⏳ adiado |
+| 5.1 SGAL, 5.2 Tabela de preços | Verificado que não há especificação nem dados; ficam para o fim, com perguntas concretas | ⏳ adiado |
+| 6. Filtro "Etapa" | Continua opcional na API | ✅ fechado |
+| 7. Avisos ao colaborador | Pontos novos, encontrados nos testes de 16/09 | ⏳ aberto |
 
 ---
 
@@ -229,6 +231,14 @@ onde vem o número devolvido.
 - em que campo da resposta vem o `CAB_ID`;
 - a direcção: somos nós a chamar o SGAL, ou é o SGAL a escrever o `CAB_ID`?
 
+**Verificado a 2026-09-16:** a spec (`.md` completo) não diz mais do que isto. No passo da Aprovação
+RH lê-se *"Essa etapa invoca um serviço para fazer cabimento automatico …."*, com as reticências no
+próprio texto. Também não há nenhum objecto de cabimento para missões nos esquemas a que temos acesso
+(INPSRH, SIPSV0, INPSDB, INPSSIGOF, SIPSGLOBAL).
+
+**O que podemos adiantar enquanto não há contrato:** isolar a chamada ao cabimento numa interface
+própria, com a implementação actual (sem SGAL) por trás. Quando o contrato chegar, muda só essa peça.
+
 ### 5.2 🔴 Tabela de preços da ajuda de custo
 
 A spec diz que o Valor Diário é *"preenchido automaticamente com base no cálculo definido na
@@ -241,6 +251,26 @@ fracção (100% / ⅔ / ⅓), que está correcta e testada.
 **Risco:** quem chama a API decide quanto se transfere ao colaborador, sem travão.
 
 **Precisamos de:** a tabela de preços — que valor, por que função, nacional vs internacional.
+
+**Verificado a 2026-09-16:** a spec (`.md` completo) só lista os factores (função do colaborador,
+nacional/internacional, alojamento) e as fracções. Não há valores, colunas nem lista de
+funções/categorias, e não existe nenhuma tabela ou domínio com isto na BD.
+
+**Proposta nossa, a validar** (não é requisito da spec): uma tabela de parametrização com
+- função ou categoria do colaborador;
+- nacional / internacional (e, se aplicável, grupo de países);
+- valor diário e moeda;
+- data de início e de fim de vigência.
+
+O servidor passaria a calcular o valor diário a partir dessa tabela; enquanto estiver vazia,
+continua a aceitar o valor enviado pelo ecrã.
+
+**Perguntas concretas:**
+1. Qual é a chave da tabela: função, categoria PCCS ou cargo? De onde vem essa informação do
+   colaborador — da relação laboral actual?
+2. Há valores diferentes por país ou região, ou só nacional vs internacional?
+3. Quem mantém a tabela e com que vigência? Os valores mudam por despacho?
+4. Numa missão internacional, a moeda é CVE ou a do destino?
 
 ### 5.3 Data de vencimento da fatura
 
@@ -272,20 +302,49 @@ O alerta *"Missão com documentos obrigatórios em falta"* precisa da lista.
   cabimento para o grupo.
 - ~~**`entId` do prestador.**~~ *Já resolvido (verificado a 16/09):* o registo do prestador e o seguro
   confrontam o `entId` com as entidades e respondem 400 se não existir.
-- **Filtro "Etapa" da Lista Missão por Etapa** está marcado como obrigatório no protótipo, mas a API
-  aceita sem ele (devolve todos os processos). Obrigatório mesmo?
+- ~~**Filtro "Etapa" da Lista Missão por Etapa.**~~ *Decidido a 16/09:* continua opcional na API
+  (sem ele devolve todos os processos). A obrigatoriedade fica no ecrã.
 - **Campo "Alojamento"** está marcado como obrigatório no ecrã de Nova Missão; a API assume **Sim**
   quando não vem. Confirmar que o defeito é esse.
-- **Botão "Ver Alerta"** da Lista Missão não terá o que mostrar enquanto o job não existir.
+- **Botão "Ver Alerta"** da Lista Missão não terá o que mostrar, porque os alertas da missão estão
+  fora do âmbito (2.1). Esconder o botão?
+
+## 7. Notificações ao colaborador — encontrado nos testes de 16/09
+
+### 7.1 Aviso de logística: email e anexos
+
+A spec, na etapa Logística, diz: *"O colaborador receberá email com o seguinte: Número de Missão,
+Assunto…, Corpo do Email…, **Anexos (Bilhetes e Reservas)**"*.
+
+**Hoje:** o aviso de logística (`MISSAO_LOGISTICA_COLABORADOR`) e o aviso de cancelamento ao
+colaborador ficam **só gravados** para o portal (estado `Pendente`), **sem email e sem anexos**. As
+notificações novas ao colaborador (confirmação do pedido, ajuda de custo, alteração) já vão por
+email, para o endereço dos contactos do funcionário.
+
+**Precisamos de saber:**
+1. Os avisos de logística e de cancelamento passam a ir também por email, como os outros? *(A nossa
+   leitura da spec é que sim.)*
+2. Anexar os documentos da logística (bilhetes, reservas) ao email do colaborador é obrigatório?
+
+### 7.2 Colaborador retirado de uma missão em curso
+
+Ao editar a missão e retirar um colaborador, ele deixa de estar na missão mas **não recebe aviso**. A
+spec não trata este caso.
+
+**Precisamos de saber:** avisamos o colaborador retirado (e o prestador, se já tiver requisição com
+ele)?
 
 ---
 
 ## Resumo — o que falta decidir (actualizado a 2026-09-16)
 
-1. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje.
+1. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje; quatro
+   perguntas concretas e uma proposta de modelo.
 2. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
-3. **Pontos menores** (6).
-4. **Textos definitivos dos templates** (3.1) — os actuais são provisórios.
+3. **Email e anexos nos avisos ao colaborador** (7.1) — afecta o que o colaborador recebe hoje.
+4. **Textos definitivos dos templates** (3.1) — os actuais são provisórios; basta o negócio rever
+   assunto e corpo de cada um.
+5. **Colaborador retirado da missão** (7.2) e **pontos menores** (6).
 
 ---
 
