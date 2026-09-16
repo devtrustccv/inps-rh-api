@@ -609,7 +609,7 @@ public class MissaoServicoServiceWrite {
                                                String email, String nome, String assunto, String message) {
     String estado = "Enviado";
     try {
-      emailService.sendEmail(email, assunto, message);
+      emailService.sendEmail(email, assunto, MissaoProcessoSupport.corpoHtml(message));
     } catch (Exception e) {
       LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, e.getMessage());
       estado = "Erro";

@@ -939,7 +939,7 @@ public class MissaoProcessoServiceWrite {
    */
   private void notificarColaboradoresLogistica(MissaoServicoEntity missao, TipoProcesso tipo,
                                                List<MissaoLogisticaEntity> linhas, MissaoNotificacaoRequestDTO editado) {
-    var conteudo = support.conteudoLogisticaColaborador(support.varsMissao(missao, tipo), editado);
+    var conteudo = support.conteudoLogisticaColaborador(tipo, support.varsMissao(missao, tipo), editado);
     var colaboradores = new LinkedHashMap<Long, MissaoColaboradorEntity>();
     var ids = linhas.stream().map(MissaoLogisticaEntity::getId).toList();
     for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids)) {
@@ -1332,7 +1332,7 @@ public class MissaoProcessoServiceWrite {
     for (var email : destinos) {
       var estado = "Enviado";
       try {
-        emailService.sendEmail(email, conteudo.assunto(), conteudo.corpo());
+        emailService.sendEmail(email, conteudo.assunto(), MissaoProcessoSupport.corpoHtml(conteudo.corpo()));
       } catch (Exception ex) {
         LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, ex.getMessage());
         estado = "Erro";

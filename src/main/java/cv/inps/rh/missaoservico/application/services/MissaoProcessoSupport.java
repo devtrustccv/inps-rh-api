@@ -210,16 +210,24 @@ public class MissaoProcessoSupport {
     return pesos;
   }
 
-  /** Aviso ao colaborador de que a logística do processo está registada (template MISSAO_LOGISTICA_COLABORADOR). */
-  public Conteudo conteudoLogisticaColaborador(Map<String, String> vars, MissaoNotificacaoRequestDTO editado) {
-    return conteudo("MISSAO_LOGISTICA_COLABORADOR", vars, editado,
+  /**
+   * Aviso ao colaborador de que a logística do processo está registada. O ecrã da spec tem texto
+   * próprio por processo (ex.: "Emissão de Bilhete de Viagem"), por isso procura-se primeiro o
+   * template MISSAO_LOGISTICA_COLABORADOR_{TIPO} e só depois o genérico MISSAO_LOGISTICA_COLABORADOR.
+   */
+  public Conteudo conteudoLogisticaColaborador(TipoProcesso tipo, Map<String, String> vars, MissaoNotificacaoRequestDTO editado) {
+    var especifico = "MISSAO_LOGISTICA_COLABORADOR_" + tipo.name();
+    var tipoTemplate = paramNotificacaoRepository.findFirstByTipoNotificacaoAndEstadoOrderByIdDesc(especifico, ESTADO_ATIVO).isPresent()
+        ? especifico
+        : "MISSAO_LOGISTICA_COLABORADOR";
+    return conteudo(tipoTemplate, vars, editado,
         "Detalhes da sua Missão Nº " + vars.get("nrMissao") + " - " + vars.get("tipoProcesso"),
         "Exmo(a) Colaborador(a),\n\n"
-            + "Informamos que está registado o " + vars.get("tipoProcesso") + " da sua missão de serviço Nº "
-            + vars.get("nrMissao") + ".\n"
+            + "Informamos que a logística de " + vars.get("tipoProcesso") + " da sua missão de serviço Nº "
+            + vars.get("nrMissao") + " está tratada.\n"
             + "- Destino: " + vars.get("destino") + "\n"
             + "- Datas: " + vars.get("dataInicio") + " a " + vars.get("dataFim") + "\n\n"
-            + "Os detalhes podem ser consultados no portal RH.\n\nCom os melhores cumprimentos,\nINPS - Recursos Humanos");
+            + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
   }
 
   /** Confirmação ao colaborador de que a missão foi registada e autorizada (template MISSAO_CONFIRMACAO_PEDIDO). */
@@ -313,6 +321,17 @@ public class MissaoProcessoSupport {
         + "- Data de regresso: " + vars.get("dataFim") + "\n"
         + "- Nº de colaboradores: " + vars.get("nrColaboradores") + "\n\n"
         + "Aguardamos a vossa proposta.\n\nCom os melhores cumprimentos,\nINPS - Recursos Humanos";
+  }
+
+  /**
+   * Corpo pronto para o email. O procedimento de envio usa text/html, e os textos (templates e
+   * edição no ecrã) são texto simples: sem conversão, as quebras de linha perdem-se. Um corpo que já
+   * traga HTML segue como está.
+   */
+  public static String corpoHtml(String corpo) {
+    if (corpo == null || corpo.matches("(?s).*<(p|br|div|table|html)\\b.*"))
+      return corpo;
+    return org.springframework.web.util.HtmlUtils.htmlEscape(corpo).replace("\r\n", "\n").replace("\n", "<br/>");
   }
 
   private String substituir(String template, Map<String, String> vars) {

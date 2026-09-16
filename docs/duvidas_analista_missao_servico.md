@@ -25,7 +25,7 @@ As mais urgentes estão assinaladas com 🔴 — são as que bloqueiam trabalho.
 | 5.3, 5.4, 5.5 | Só serviam os alertas | ⛔ descartado |
 | 5.1 SGAL, 5.2 Tabela de preços | Verificado que não há especificação nem dados; ficam para o fim, com perguntas concretas | ⏳ adiado |
 | 6. Filtro "Etapa" | Continua opcional na API | ✅ fechado |
-| 7.1 Email nos avisos ao colaborador | Implementado: logística e cancelamento passam a ir por email, como a spec pede. Ficam em aberto os anexos e o conteúdo | ⏳ parcial |
+| 7.1 Email nos avisos ao colaborador | Implementado: email + texto por processo (o ecrã do bilhete esclareceu o conteúdo). Falta só o anexo, que depende de um procedimento de envio que o suporte | ⏳ parcial |
 | 7.2 Colaborador retirado | Por decidir | ⏳ aberto |
 
 ---
@@ -327,12 +327,23 @@ Portal do colaborador fica para a 2.ª fase, por isso um aviso só gravado não 
 Os avisos de logística e de cancelamento passam a ir por email. Sem email nos contactos, ficam
 `Pendente`. No cancelamento só são avisados os colaboradores que estavam na missão.
 
-**Continua em aberto:**
-1. **Anexos:** a spec pede *"Anexos (Bilhetes e Reservas)"* no email. Hoje o email vai sem anexos.
-   Anexamos os documentos carregados na logística do processo?
-2. **Conteúdo:** a spec pede um corpo *"com todos os detalhes da missão (voos, alojamento, ajuda de
-   custo, seguro)"*. Como a decisão 1.1 é manter uma notificação por processo, o email leva os
-   detalhes **daquele** processo? E que detalhes: valores, hotel, datas, seguradora?
+**Conteúdo — resolvido a 16/09 pelo ecrã da spec (3.2.4.3.1).** O ecrã do Bilhete de Passagem mostra
+a secção "Notificação ao Colaborador" com assunto *"Emissão de Bilhete de Viagem"* e um corpo curto
+(*"Informamos que o seu bilhete de viagem foi emitido"*), e não um resumo de toda a missão. Confirma
+a decisão 1.1: **um aviso por processo, com texto próprio desse processo**. Ficou implementado assim:
+procura-se o template `MISSAO_LOGISTICA_COLABORADOR_{TIPO}` e, se não existir, o genérico. O do
+bilhete já está registado com o texto do ecrã; falta o texto dos outros três processos.
+
+**Continua em aberto — anexos.** A spec pede *"Anexos (Bilhetes e Reservas)"* e o ecrã diz *"Segue em
+anexo o respetivo documento"*. Hoje o email vai **sem anexos**, e há uma dependência técnica: o envio
+usa o procedimento `sipsv0.SEND_MAIL_V1`, que só aceita destinatário, assunto e corpo — **não tem
+parâmetro para anexos**.
+
+**Precisamos de saber:**
+1. Confirmar que o anexo a enviar é o documento carregado em "Anexar Fatura" nessa linha da logística.
+2. Quem disponibiliza um procedimento de envio com anexos (ou outro meio de envio)? Sem isso, o
+   requisito não é implementável.
+3. Os textos dos outros três processos (alojamento, seguro e ajuda de custo).
 
 ### 7.2 Colaborador retirado de uma missão em curso
 
@@ -349,7 +360,7 @@ ele)?
 1. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro real hoje; quatro
    perguntas concretas e uma proposta de modelo.
 2. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
-3. **Anexos e conteúdo do aviso de logística** (7.1) — o email já é enviado; falta decidir o que leva.
+3. **Anexos no aviso de logística** (7.1) — depende de um procedimento de envio com anexos; o texto já está resolvido.
 4. **Textos definitivos dos templates** (3.1) — os actuais são provisórios; basta o negócio rever
    assunto e corpo de cada um.
 5. **Colaborador retirado da missão** (7.2) e **pontos menores** (6).

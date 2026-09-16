@@ -463,6 +463,10 @@ Todos os processos passam por aqui. `GET`/`PUT /{uuid}/processos/{tipoProcesso}/
 devolve `colaboradoresDisponiveis[]`, com `funUuid`, `uuid` e — quando aplicável — o prestador de
 que esse colaborador vem.
 
+O `GET` traz ainda `notificacao` (assunto e corpo do aviso ao colaborador, já preenchidos com o
+template e editáveis no ecrã) e, nas linhas de bilhete, `missaoPrestUuid` e `nomePrestador` — a
+coluna "Prestador Serviço" do ecrã. O prestador não se envia: vem da requisição.
+
 ```jsonc
 // BILHETE_PASSAGEM
 { "bilhetesPassagem": [ { "colaboradorIds": ["<uuid>"], "valor": 125000,
@@ -507,6 +511,10 @@ No alojamento, o nº de dias é calculado a partir das datas (`dataFim − dataI
 > **A ordem importa.** O ⅓ só se aplica se o processo `ALOJAMENTO` já tiver, para esse colaborador,
 > uma linha com `flgAlimentacao: "SIM"`. Gravar a ajuda de custo antes do alojamento dá ⅔ **sem
 > erro nenhum**. Gravar o alojamento primeiro, ou regravar a ajuda de custo depois.
+
+O texto do aviso pode ser diferente por processo: procura-se o template
+`MISSAO_LOGISTICA_COLABORADOR_{TIPO}` (ex.: `..._BILHETE_PASSAGEM`, "Emissão de Bilhete de Viagem") e,
+se não existir, usa-se o genérico `MISSAO_LOGISTICA_COLABORADOR`.
 
 `NEXT` → `VALIDACAO_UGAL` e notifica **por email** os colaboradores das linhas do processo (`MISSAO_LOGISTICA_COLABORADOR`, uma notificação por processo). O campo `notificacao` do payload permite editar o assunto e o corpo; se vier a `null`, usa-se o template. Sem email nos contactos, fica `Pendente`.
 

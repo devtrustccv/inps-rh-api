@@ -26,7 +26,7 @@ public class ProcessoRequisicaoItemResponseDTO {
   private UUID requisicaoUuid;
   private Long nrRequisicao;
   private Integer anoRequisicao;
-  private String notaEncomenda;           // "RMS-2026/3"
+  private String notaEncomenda;           // "RMS-2026-0003"
   private BigDecimal valorTotal;
   private List<MissaoColaboradorResponseDTO> colaboradores;
   private AnexoRespDTO proposta;          // fatura proforma anexada

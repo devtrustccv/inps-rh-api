@@ -20,11 +20,12 @@ import java.util.*;
 import static cv.inps.rh.missaoservico.application.services.MissaoProcessoSupport.ESTADO_ATIVO;
 
 /**
- * Nota de encomenda (requisição) de um processo de missão — ecrã "Extrair Requisição" da spec.
+ * Nota de encomenda (requisição) de um processo de missão — ecrã "Extrair Requisição" da spec,
+ * segundo o modelo 3.2.4.2.2.
  *
- * <p>O modelo de dados só guarda o valor total da requisição (RH_T_MISSAO_REQUISICAO.VALOR_TOTAL);
- * a spec pede valor por linha, que não existe. As linhas listam o serviço a favor de cada
- * colaborador e o valor aparece no total.
+ * <p>O modelo de dados só guarda o valor total da requisição (RH_T_MISSAO_REQUISICAO.VALOR_TOTAL),
+ * por isso a descrição é uma linha única — o serviço a favor de todos os colaboradores — com esse
+ * valor, como no modelo.
  */
 @Service
 @RequiredArgsConstructor
@@ -41,13 +42,13 @@ public class RequisicaoPdfService {
     return pdfGenerator.generate("missao-requisicao", modelo(requisicao));
   }
 
-  /** Nº apresentado na nota de encomenda — ex.: "RMS-2026/3". */
+  /** Nº apresentado na nota de encomenda, como no modelo da spec — ex.: "RMS-2026-0134". */
   public static String notaEncomenda(MissaoRequisicaoEntity requisicao) {
-    return "RMS-" + requisicao.getAno() + "/" + requisicao.getNrRequisacao();
+    return "RMS-%d-%04d".formatted(requisicao.getAno(), requisicao.getNrRequisacao());
   }
 
   public static String nomeFicheiro(MissaoRequisicaoEntity requisicao) {
-    return "requisicao_RMS-" + requisicao.getAno() + "-" + requisicao.getNrRequisacao() + ".pdf";
+    return "requisicao_" + notaEncomenda(requisicao) + ".pdf";
   }
 
   private Map<String, Object> modelo(MissaoRequisicaoEntity r) {
@@ -66,30 +67,42 @@ public class RequisicaoPdfService {
         .toList();
 
     var model = new HashMap<String, Object>();
+    model.put("logoPath", Optional.ofNullable(getClass().getResource("/static/img/inps_logo.png"))
+        .map(java.net.URL::toExternalForm).orElse(""));
     model.put("nomeInstituicao", instituicao != null ? instituicao.getNome() : "Instituto Nacional de Previdência Social");
     model.put("nifInstituicao", instituicao != null && instituicao.getNif() != null ? String.valueOf(instituicao.getNif()) : "");
     model.put("notaEncomenda", notaEncomenda(r));
     var local = instituicao != null && StringUtils.hasText(instituicao.getLocalidade()) ? capitalizar(instituicao.getLocalidade()) : "Praia";
     model.put("localData", local + ", aos " + LocalDate.now().format(DATA_EXTENSO));
+    model.put("nrRequisicao", String.valueOf(r.getNrRequisacao()));
     model.put("prestadorNome", param != null ? param.getNome() : prestador.getNome());
     model.put("prestadorNif", param != null && param.getNif() != null ? param.getNif() : "—");
     model.put("prestadorMorada", param != null && param.getMorada() != null ? param.getMorada() : "—");
-    model.put("nrMissao", missao.getAno() != null ? missao.getNrMissao() + "/" + missao.getAno() : String.valueOf(missao.getNrMissao()));
-    model.put("linhas", colaboradores.stream().map(nome -> tipoDesc + " a favor de " + nome).toList());
-    model.put("total", formatarValor(r.getValorTotal()));
-    model.put("totalExtenso", r.getValorTotal() != null ? ValorPorExtenso.escudos(r.getValorTotal()) : "—");
+    model.put("descricao", tipoDesc + " a favor de " + juntar(colaboradores));
+    model.put("valor", formatarValor(r.getValorTotal()));
+    model.put("total", r.getValorTotal() != null ? formatarValor(r.getValorTotal()) + " ECV" : "—");
+    model.put("totalExtenso", r.getValorTotal() != null ? capitalizar(ValorPorExtenso.escudos(r.getValorTotal())) : "—");
     model.put("elaboradoPor", missao.getAutorizadoPor());
-    model.put("aprovadoPor", r.getLastModifiedBy() != null ? r.getLastModifiedBy() : r.getCreatedBy());
+    // Spec: "Aprovado por — quem submeteu a etapa" (RH_T_MISSAO_REQUISICAO.USER_REGISTO_NAME)
+    model.put("aprovadoPor", r.getCreatedBy());
     return model;
   }
 
+  /** Valor como no modelo: "1 900"; as casas decimais só aparecem quando existem. */
   private String formatarValor(BigDecimal valor) {
     if (valor == null)
-      return "—";
+      return "";
     var nf = NumberFormat.getNumberInstance(PT);
-    nf.setMinimumFractionDigits(2);
+    nf.setMinimumFractionDigits(valor.stripTrailingZeros().scale() > 0 ? 2 : 0);
     nf.setMaximumFractionDigits(2);
-    return nf.format(valor) + " CVE";
+    return nf.format(valor);
+  }
+
+  /** "A", "A e B", "A, B e C". */
+  private static String juntar(List<String> nomes) {
+    if (nomes.size() <= 1)
+      return nomes.isEmpty() ? "" : nomes.getFirst();
+    return String.join(", ", nomes.subList(0, nomes.size() - 1)) + " e " + nomes.getLast();
   }
 
   private String capitalizar(String s) {

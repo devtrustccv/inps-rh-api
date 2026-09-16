@@ -51,7 +51,7 @@ public class MissaoNotificacaoColaborador {
     var estado = "Pendente";
     if (email != null) {
       try {
-        emailService.sendEmail(email, conteudo.assunto(), conteudo.corpo());
+        emailService.sendEmail(email, conteudo.assunto(), MissaoProcessoSupport.corpoHtml(conteudo.corpo()));
         estado = "Enviado";
       } catch (Exception ex) {
         LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, ex.getMessage());

@@ -373,6 +373,7 @@ th { background: var(--thead); font-weight: 600; }
 <h2>10. Ecrã — Logística</h2>
 <p>Todos os processos passam por aqui. <code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/logistica</code></p>
 <p><strong>Só a secção do tipo do processo é aceite.</strong> As outras devem vir a <code>null</code> (não mexer). O <code>GET</code> devolve <code>colaboradoresDisponiveis[]</code>, com <code>funUuid</code>, <code>uuid</code> e — quando aplicável — o prestador de que esse colaborador vem.</p>
+<p>O <code>GET</code> traz ainda <code>notificacao</code> (assunto e corpo do aviso ao colaborador, já preenchidos com o template e editáveis no ecrã) e, nas linhas de bilhete, <code>missaoPrestUuid</code> e <code>nomePrestador</code> — a coluna &quot;Prestador Serviço&quot; do ecrã. O prestador não se envia: vem da requisição.</p>
 <pre><code>// BILHETE_PASSAGEM
 { &quot;bilhetesPassagem&quot;: [ { &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;], &quot;valor&quot;: 125000,
                           &quot;anexo&quot;: { &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;fatura.pdf&quot; } } ],
@@ -408,6 +409,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td><code>true</code></td><td><code>SIM</code></td><td><strong>⅓</strong></td><td>2000/dia → 10 000</td></tr>
 </tbody></table></div>
 <blockquote><p><strong>A ordem importa.</strong> O ⅓ só se aplica se o processo <code>ALOJAMENTO</code> já tiver, para esse colaborador, uma linha com <code>flgAlimentacao: &quot;SIM&quot;</code>. Gravar a ajuda de custo antes do alojamento dá ⅔ <strong>sem erro nenhum</strong>. Gravar o alojamento primeiro, ou regravar a ajuda de custo depois.</p></blockquote>
+<p>O texto do aviso pode ser diferente por processo: procura-se o template <code>MISSAO_LOGISTICA_COLABORADOR_{TIPO}</code> (ex.: <code>..._BILHETE_PASSAGEM</code>, &quot;Emissão de Bilhete de Viagem&quot;) e, se não existir, usa-se o genérico <code>MISSAO_LOGISTICA_COLABORADOR</code>.</p>
 <p><code>NEXT</code> → <code>VALIDACAO_UGAL</code> e notifica <strong>por email</strong> os colaboradores das linhas do processo (<code>MISSAO_LOGISTICA_COLABORADOR</code>, uma notificação por processo). O campo <code>notificacao</code> do payload permite editar o assunto e o corpo; se vier a <code>null</code>, usa-se o template. Sem email nos contactos, fica <code>Pendente</code>.</p>
 <p><strong>Erros:</strong> campos obrigatórios em falta (<code>{secção}: {campo} é obrigatório</code>), colaborador que não é da missão, e colaboradores de prestadores diferentes na mesma linha.</p>
 <hr>

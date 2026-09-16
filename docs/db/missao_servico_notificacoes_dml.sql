@@ -5,7 +5,8 @@
 -- O cancelamento (MISSAO_CANCELAMENTO) não tem template: o texto leva o motivo e é montado no código.
 --
 -- Variáveis disponíveis em todos os templates: {nrMissao} {destino} {dataInicio} {dataFim} {nrDias} {nrColaboradores}
---   MISSAO_PRESTADOR, MISSAO_EMISSAO_REQUISICAO, MISSAO_LOGISTICA_COLABORADOR: + {tipoProcesso}
+--   MISSAO_PRESTADOR, MISSAO_EMISSAO_REQUISICAO, MISSAO_LOGISTICA_COLABORADOR[_{TIPO}]: + {tipoProcesso}
+--   MISSAO_LOGISTICA_COLABORADOR_{TIPO} (opcional, por processo) prevalece sobre o genérico
 --   MISSAO_EMISSAO_REQUISICAO: + {nrRequisicao} {valorTotal} {colaboradores}
 --   MISSAO_AJUDA_CUSTO: + {valorDiario} {nrDiasAjuda} {valorTotal} {referenciaPagamento} {dataPagamento}
 --   MISSAO_ALTERACAO: + {alteracoes}
@@ -44,6 +45,7 @@ BEGIN
   tipo('MISSAO_CONFIRMACAO_PEDIDO',    'Missão - Confirmação do pedido ao colaborador');
   tipo('MISSAO_AJUDA_CUSTO',           'Missão - Informação sobre a ajuda de custo');
   tipo('MISSAO_ALTERACAO',             'Missão - Alteração da missão');
+  tipo('MISSAO_LOGISTICA_COLABORADOR_BILHETE_PASSAGEM', 'Missão - Emissão de bilhete de viagem ao colaborador');
 
   template('MISSAO_PRESTADOR',
     'Pedido de Proposta - {tipoProcesso} - Missão Nº {nrMissao}',
@@ -79,11 +81,20 @@ INPS - Recursos Humanos');
     'Detalhes da sua Missão Nº {nrMissao} - {tipoProcesso}',
     'Exmo(a) Colaborador(a),
 
-Informamos que está registado o {tipoProcesso} da sua missão de serviço Nº {nrMissao}.
+Informamos que a logística de {tipoProcesso} da sua missão de serviço Nº {nrMissao} está tratada.
 - Destino: {destino}
 - Datas: {dataInicio} a {dataFim}
 
-Os detalhes podem ser consultados no portal RH.
+Com os melhores cumprimentos,
+INPS - Recursos Humanos');
+
+  -- Texto do ecrã da spec (3.2.4.3.1 Processo - Bilhete Passagem), sem a frase do anexo enquanto o
+  -- envio de email não suportar anexos. Os outros processos usam MISSAO_LOGISTICA_COLABORADOR.
+  template('MISSAO_LOGISTICA_COLABORADOR_BILHETE_PASSAGEM',
+    'Emissão de Bilhete de Viagem - Missão Nº {nrMissao}',
+    'Exmo(a). Senhor(a),
+
+Informamos que o seu bilhete de viagem para a missão de serviço Nº {nrMissao} ({destino}, {dataInicio} a {dataFim}) foi emitido.
 
 Com os melhores cumprimentos,
 INPS - Recursos Humanos');

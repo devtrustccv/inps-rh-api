@@ -3,82 +3,104 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Nota de Encomenda</title>
+    <!-- Modelo da spec: 3.2.4.2.2 "Extrair Requisição" -->
     <style>
-        @page { size: A4; margin: 20mm 18mm; }
-        body { font-family: "Times New Roman", serif; font-size: 12px; line-height: 1.4; }
-        .topo { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-        .topo td { vertical-align: top; }
-        .instituicao { font-weight: bold; font-size: 13px; }
-        .titulo { text-align: right; }
-        .titulo .nota { font-size: 15px; font-weight: bold; }
-        .bloco { margin-bottom: 14px; }
-        .rotulo { font-weight: bold; }
-        table.linhas { width: 100%; border-collapse: collapse; margin: 10px 0 6px; }
-        table.linhas th, table.linhas td { border: 1px solid #000; padding: 5px 6px; }
-        table.linhas th { background: #e6e6e6; text-align: left; }
-        .valor { text-align: right; white-space: nowrap; }
-        .total td { font-weight: bold; }
-        .extenso { margin: 8px 0 26px; }
-        .assinaturas { width: 100%; margin-top: 40px; border-collapse: collapse; }
-        .assinaturas td { width: 50%; text-align: center; vertical-align: bottom; padding: 0 12px; }
-        .linha-assinatura { border-top: 1px solid #000; margin-top: 46px; padding-top: 4px; }
+        @page { size: A4; margin: 15mm 18mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 1.35; color: #000; }
+        .destaque { color: #6a2c8e; font-weight: bold; }
+        .caixa { border: 1px solid #6a5a8e; border-radius: 10px; padding: 8px 12px; }
+
+        .logo { height: 95px; }
+        .nif { margin: 4px 0 12px 8px; }
+
+        table.cabecalho { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        table.cabecalho td { vertical-align: top; }
+        .nota { width: 42%; }
+        .nota .numero { font-size: 13px; }
+        .local { padding-left: 24px; }
+        .local .rotulo { display: inline-block; width: 140px; }
+        .nr-caixa { display: inline-block; border: 1px solid #000; min-width: 70px; text-align: center;
+                    font-weight: bold; padding: 1px 6px; }
+
+        .prestador { margin-bottom: 14px; }
+        .prestador table { border-collapse: collapse; }
+        .prestador td { padding: 1px 0; }
+        .prestador .rotulo { width: 110px; font-size: 12px; }
+
+        table.linhas { width: 100%; border-collapse: collapse; }
+        table.linhas th, table.linhas td { border: 1px solid #000; padding: 4px 6px; }
+        table.linhas th { background: #e6e6e6; text-align: center; }
+        .col-valor { width: 18%; text-align: right; vertical-align: top; }
+        .descricao { height: 90px; vertical-align: top; }
+        .extenso { vertical-align: top; height: 34px; }
+        .total-rotulo { font-weight: bold; font-size: 10px; text-align: right; white-space: nowrap; }
+        .total-valor { font-weight: bold; text-align: center; white-space: nowrap; }
+
+        table.assinaturas { width: 100%; border-collapse: separate; border-spacing: 14px 0; margin-top: 18px; }
+        table.assinaturas td { width: 50%; height: 80px; vertical-align: top; }
+        .assinatura-rotulo { font-weight: bold; }
     </style>
 </head>
 <body>
 
-<table class="topo">
+<img class="logo" th:if="${logoPath != ''}" th:src="${logoPath}" alt="INPS"/>
+<div class="nif destaque">NIF: <span th:text="${nifInstituicao}">300198426</span></div>
+
+<table class="cabecalho">
     <tr>
-        <td>
-            <div class="instituicao" th:text="${nomeInstituicao}">Instituto Nacional de Previdência Social</div>
-            <div>NIF: <span th:text="${nifInstituicao}">000000000</span></div>
+        <td class="nota">
+            <div class="caixa">
+                <div>NOTA DE ENCOMENDA/</div>
+                <div class="numero destaque" th:text="${notaEncomenda}">RMS-2026-0134</div>
+            </div>
         </td>
-        <td class="titulo">
-            <div>NOTA DE ENCOMENDA</div>
-            <div class="nota" th:text="${notaEncomenda}">RMS-2026/1</div>
-            <div th:text="${localData}">Praia, aos 14 de setembro de 2026</div>
+        <td class="local">
+            <div><span class="rotulo">Local e Data</span><span class="nr-caixa" th:text="${nrRequisicao}">134</span></div>
+            <div th:text="${localData}">Praia, aos 13 de agosto de 2026</div>
         </td>
     </tr>
 </table>
 
-<div class="bloco">
-    <div><span class="rotulo">Requisita-se ao:</span> <span th:text="${prestadorNome}">Prestador</span></div>
-    <div><span class="rotulo">NIF:</span> <span th:text="${prestadorNif}">—</span></div>
-    <div><span class="rotulo">Endereço:</span> <span th:text="${prestadorMorada}">—</span></div>
-    <div><span class="rotulo">Missão de Serviço N.º:</span> <span th:text="${nrMissao}">1/2026</span></div>
+<div class="caixa prestador">
+    <table>
+        <tr><td class="rotulo">Requisita-se ao</td><td th:text="${prestadorNome}">AVITUR, LDA</td></tr>
+        <tr><td class="rotulo">NIF:</td><td th:text="${prestadorNif}">263284379</td></tr>
+        <tr><td class="rotulo">Endereço:</td><td th:text="${prestadorMorada}">FOGO - SÃO FILIPE</td></tr>
+    </table>
 </div>
 
 <table class="linhas">
     <thead>
     <tr>
-        <th>Descrição</th>
-        <th class="valor">Valor</th>
+        <th colspan="2">Descrição</th>
+        <th class="col-valor" style="text-align: center">Valor</th>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="linha : ${linhas}">
-        <td th:text="${linha}">Bilhete Passagem a favor de Colaborador</td>
-        <td class="valor"></td>
+    <tr>
+        <td class="descricao" colspan="2" th:text="${descricao}">Bilhete de viagem a favor de Osvaldo Dias</td>
+        <td class="col-valor" th:text="${valor}">1 900</td>
     </tr>
-    <tr class="total">
-        <td>Total da Requisição</td>
-        <td class="valor" th:text="${total}">0,00 CVE</td>
+    <tr>
+        <td class="extenso">
+            <div class="assinatura-rotulo">São:</div>
+            <div th:text="${totalExtenso}">Mil e novecentos escudos</div>
+        </td>
+        <td class="total-rotulo">TOTAL DE REQUISIÇÃO:</td>
+        <td class="total-valor" th:text="${total}">1 900 ECV</td>
     </tr>
     </tbody>
 </table>
 
-<div class="extenso">
-    <span class="rotulo">São:</span> <span th:text="${totalExtenso}">zero escudos</span>
-</div>
-
 <table class="assinaturas">
     <tr>
-        <td>
-            <div>Elaborado por</div>
-            <div class="linha-assinatura" th:text="${elaboradoPor}">—</div>
+        <td class="caixa">
+            <span class="assinatura-rotulo">Elaborado por:</span>
+            <span th:text="${elaboradoPor}">Carla Gonçalves</span>
         </td>
-        <td>
-            <div>Aprovado por</div>
-            <div class="linha-assinatura" th:text="${aprovadoPor}">—</div>
+        <td class="caixa">
+            <span class="assinatura-rotulo">Aprovado por:</span>
+            <span th:text="${aprovadoPor}">Armandina do Rosário</span>
         </td>
     </tr>
 </table>

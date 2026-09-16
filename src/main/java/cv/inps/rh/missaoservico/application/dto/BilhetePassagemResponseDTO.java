@@ -24,6 +24,8 @@ public class BilhetePassagemResponseDTO  {
 
   private Long id;
   private UUID uuid;
+  private UUID missaoPrestUuid;           // prestador da linha (coluna "Prestador Serviço" do ecrã)
+  private String nomePrestador;
   private List<MissaoLogisticaDetResponseDTO> colaboradores;
   private BigDecimal valor;               // MissaoLogisticaEntity.valorTotal
   private AnexoRespDTO documento;

@@ -229,6 +229,11 @@ public class MissaoProcessoServiceRead {
           var dto = new BilhetePassagemResponseDTO();
           dto.setId(l.getId());
           dto.setUuid(l.getUuid());
+          var prestador = l.getPrestadorServId();
+          if (prestador != null) {
+            dto.setMissaoPrestUuid(prestador.getUuid());
+            dto.setNomePrestador(prestador.getParamPrestId() != null ? prestador.getParamPrestId().getNome() : prestador.getNome());
+          }
           dto.setColaboradores(colaboradores);
           dto.setValor(l.getValorTotal());
           dto.setDocumento(documento);
@@ -300,7 +305,7 @@ public class MissaoProcessoServiceRead {
       disponiveis = ativos.stream().map(support::toColaboradorDto).toList();
     }
 
-    var conteudo = support.conteudoLogisticaColaborador(support.varsMissao(missao, tipo), null);
+    var conteudo = support.conteudoLogisticaColaborador(tipo, support.varsMissao(missao, tipo), null);
     var notificacao = new MissaoNotificacaoResponseDTO();
     notificacao.setAssunto(conteudo.assunto());
     notificacao.setCorpoEmail(conteudo.corpo());
