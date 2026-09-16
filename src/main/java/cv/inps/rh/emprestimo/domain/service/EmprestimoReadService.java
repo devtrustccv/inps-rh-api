@@ -51,6 +51,7 @@ public class EmprestimoReadService {
     var funId = entity.getTiprel().getFunId();
 
     var dto = new DetalhesEmprestimoDTO();
+    dto.setNomeFornecedor(entity.getNomeFornecedor());
     dto.setDataInicio(entity.getDataInicio());
     dto.setDataFim(entity.getDataFim());
     dto.setValorPrestacao(entity.getValorPrestacao());
@@ -84,6 +85,8 @@ public class EmprestimoReadService {
       dto.setNumeroContaBanco(o.getNuConta());
     });
 
+    // TODO 15/09/2026 20:18 outros emprestimons
+
     var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
@@ -94,7 +97,7 @@ public class EmprestimoReadService {
             obj.getValorPrestacao()
         ))
         .toList();
-    dto.setOutrosEmprestimos(another);
+    dto.setOutrosEmprestimosFuncionario(another);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 
@@ -146,6 +149,17 @@ public class EmprestimoReadService {
     baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
     baseDecision.setData(obj.getCreatedDate().toLocalDate());
+    baseDecision.setExecutadoPor(obj.getLastModifiedBy());
+
+    var responsavel = new BaseDecisaoDTO.Responsavel(
+        obj.getParecerResponsavel(),
+        obj.getObservacaoResponsavel(),
+        obj.getDataObservacaoResponsavel(),
+        obj.getUtilizadorObservacaoResponsavel()
+    );
+
+    baseDecision.setResponsavel(responsavel);
+
     return baseDecision;
   }
 

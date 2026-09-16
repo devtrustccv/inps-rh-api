@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -52,4 +54,16 @@ public class PedidoDecisaoEntity extends AuditEntity {
   @NotNull
   @Column(name = "UUID", nullable = false, length = 100)
   private String uuid;
+
+  @Column(name = "PARECER_RESPONSAVEL", length = 100)
+  private String parecerResponsavel;
+
+  @Column(name = "UTILIZADOR_OBS_RESPONSAVEL", length = 100)
+  private String utilizadorObservacaoResponsavel;
+
+  @Column(name = "OBSERVACAO_RESPONSAVEL", length = 1000)
+  private String observacaoResponsavel;
+
+  @Column(name = "DATA_OBSERVACAO_RESPONSAVEL")
+  private LocalDateTime dataObservacaoResponsavel;
 }
