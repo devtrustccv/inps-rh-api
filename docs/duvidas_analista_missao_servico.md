@@ -15,6 +15,7 @@ As mais urgentes estão assinaladas com 🔴 — são as que bloqueiam trabalho.
 | Ponto | Decisão | Estado |
 |---|---|---|
 | 1.1 Notificação da logística | Fica como está: uma notificação por processo | ✅ fechado |
+| 1.2 UGAL ou UPAL | É UGAL. Na spec, "UGAL" aparece no fluxo e em `REPONSAVEL = 'UGAL'`; "UPAL" só no título da etapa (gralha). O domínio usa `VALIDACAO_UGAL` | ✅ fechado |
 | 1.3 Limiares A–D | Estão na spec, na tabela "Intervalos (pontuação total %)", e conferem com o código | ✅ fechado |
 | 2.1, 2.2 Alertas da missão | Fora do âmbito por agora | ⛔ descartado |
 | 3.2 Valores dos prazos | Só serviam os alertas | ⛔ descartado |
@@ -47,7 +48,7 @@ processos activos, o colaborador recebe **quatro emails**.
 **Precisamos de saber:** um aviso por processo, um único de síntese no fim, ou os dois (o
 operacional por processo e o de síntese para o colaborador levar na viagem)?
 
-### 1.2 Nome da etapa: UGAL ou UPAL?
+### 1.2 ✅ Nome da etapa: UGAL ou UPAL? — *é UGAL (16/09)*
 
 O título da etapa diz **"ETAPA – VALIDAÇÃO UPAL"**, mas o resto do documento diz **UGAL** (3 vezes).
 
