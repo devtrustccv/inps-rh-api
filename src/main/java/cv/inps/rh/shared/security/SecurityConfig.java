@@ -84,7 +84,7 @@ public class SecurityConfig {
             http.oauth2ResourceServer(oauth2 -> {
                 if (jwtIssuer == null || jwtIssuer.isBlank()) {
                     // No issuer configured — ignore any token sent, requests pass through.
-                    LOGGER.warn("AUTH_JWT_ISSUER not configured — tokens will be ignored.");
+                    LOGGER.warn("IGRP_ACCESS_API_BASE_URL (issuer) not configured — tokens will be ignored.");
                     oauth2.bearerTokenResolver(request -> null);
                 }
                 oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()));
@@ -143,7 +143,7 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         if (jwtIssuer == null || jwtIssuer.isBlank()) {
-            LOGGER.warn("AUTH_JWT_ISSUER not configured — JWT decoder disabled.");
+            LOGGER.warn("IGRP_ACCESS_API_BASE_URL (issuer) not configured — JWT decoder disabled.");
             return token -> null;
         }
         try {
@@ -153,7 +153,7 @@ public class SecurityConfig {
             LOGGER.error("Failed to reach Keycloak at '{}': {}", jwtIssuer, e.getMessage());
             if (isSecurityDisabled()) {
                 LOGGER.warn("Running in development mode — token validation will be unavailable until Keycloak is reachable.");
-                return token -> { throw new BadJwtException("Keycloak is not reachable. Fix AUTH_JWT_ISSUER in your .env file."); };
+                return token -> { throw new BadJwtException("Keycloak is not reachable. Fix IGRP_ACCESS_API_BASE_URL in your .env file."); };
             }
             throw new IllegalStateException("Cannot start: Keycloak is not reachable at '" + jwtIssuer + "'.", e);
         }
