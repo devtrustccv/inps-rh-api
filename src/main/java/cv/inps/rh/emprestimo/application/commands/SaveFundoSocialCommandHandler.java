@@ -25,7 +25,7 @@ public class SaveFundoSocialCommandHandler implements CommandHandler<SaveFundoSo
 
     LOGGER.debug("SaveFundoSocialCommand : {}", command);
 
-    emprestimoWriteService.saveFundoSocial(command.getFundosocialrequest());
+    emprestimoWriteService.saveFundoSocial(command.getTipoPedido(), command.getFundosocialrequest());
 
     return ResponseEntity.ok().build();
   }

@@ -27,7 +27,6 @@ public class FundoSocialRequestDTO  {
   @NotBlank(message = "The field <funcionarioId> is required")
 
   private String funcionarioId ;
-  @NotNull(message = "The field <tipoMovimentoId> is required")
 
   private Long tipoMovimentoId ;
   @NotNull(message = "The field <dataInicio> is required")
