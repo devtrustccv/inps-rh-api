@@ -27,74 +27,75 @@ import java.util.UUID;
 @Table(name = "RH_T_DEF_PAGAMENTOS")
 public class DefPagamentoEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_pag")
-    @SequenceGenerator(name = "seq_def_pag", sequenceName = "SEQ_DEF_PAG", allocationSize = 1)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_pag")
+  @SequenceGenerator(name = "seq_def_pag", sequenceName = "SEQ_DEF_PAG", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
 
   @NotNull(message = "tmId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tm_id", referencedColumnName = "id")
-    private TipoMovimentoEntity tmId;
-    @Column(name="valor")
-    private BigDecimal valor;
+  @JoinColumn(name = "tm_id", referencedColumnName = "id")
+  private TipoMovimentoEntity tmId;
+
+  @Column(name = "valor")
+  private BigDecimal valor;
 
 
-  @Column(name="data_inicio")
-    private LocalDate dataInicio;
+  @Column(name = "data_inicio")
+  private LocalDate dataInicio;
 
 
-  @Column(name="data_fim")
-    private LocalDate dataFim;
+  @Column(name = "data_fim")
+  private LocalDate dataFim;
 
 
   @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+  @Column(name = "estado")
+  private Estado estado;
 
 
-  @Column(name="obs")
-    private String obs;
+  @Column(name = "obs")
+  private String obs;
 
 
-  @Column(name="uuid")
-    private UUID uuid;
+  @Column(name = "uuid")
+  private UUID uuid;
 
 
-  @Column(name="percentagem")
-    private BigDecimal percentagem;
+  @Column(name = "percentagem")
+  private BigDecimal percentagem;
 
 
-  @Column(name="nib")
-    private String nib;
+  @Column(name = "nib")
+  private String nib;
 
 
-  @Column(name="nif")
-    private Integer nif;
+  @Column(name = "nif")
+  private Integer nif;
 
 
-  @Column(name="nm_entidade")
-    private String nmEntidade;
+  @Column(name = "nm_entidade")
+  private String nmEntidade;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rhb_id", referencedColumnName = "id")
-    private BancoEntity rhbId;
+  @JoinColumn(name = "rhb_id", referencedColumnName = "id")
+  private BancoEntity rhbId;
 
 
-  @Column(name="ent_id")
-    private Long entId;
+  @Column(name = "ent_id")
+  private Long entId;
 
-    @Column(name="data_ultimo_proc")
-    private LocalDate dataUltimoProc;
+  @Column(name = "data_ultimo_proc")
+  private LocalDate dataUltimoProc;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "fun_id")
+  private FuncionarioEntity funId;
 
 
   /**
@@ -103,12 +104,12 @@ public class DefPagamentoEntity extends AuditEntity {
    * remover quando um processamento é eliminado — se ficar nulo, o pagamento
    * fica órfão.
    */
-  @Column(name="tipo")
-   private String tipo;
+  @Column(name = "tipo")
+  private String tipo;
 
 
-  @Column(name="moeda")
-   private String moeda;
+  @Column(name = "moeda")
+  private String moeda;
 
 
 }

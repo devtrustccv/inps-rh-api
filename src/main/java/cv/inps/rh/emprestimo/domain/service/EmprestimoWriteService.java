@@ -68,7 +68,7 @@ public class EmprestimoWriteService {
     paramEmprestimoEntityRepository.saveAll(entities);
   }
 
-  public void saveFundoSocial(List<FundoSocialRequestDTO> requests) {
+  public void saveFundoSocial(TipoPedido tipoPedido, List<FundoSocialRequestDTO> requests) {
 
     for (var request : requests) {
 
@@ -84,8 +84,8 @@ public class EmprestimoWriteService {
       entity.setValorEmprestimo(request.getValorTotalEmprestimo());
       entity.setValorDivida(request.getValorTotalEmprestimo());
       entity.setFinalidade(request.getFinalidade());
-      entity.setTipoEmprestimo(TipoPedido.FUNDO_SOCIAL.name());
-      entity.setTipoSituacao(TipoPedido.FUNDO_SOCIAL.name());
+      entity.setTipoEmprestimo(tipoPedido.name());
+      entity.setTipoSituacao(tipoPedido.name());
       entity.setVersao(1L);
       entity.setTiprel(currentRelation);
       entity.setNrPrestacao(DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim()));
@@ -107,23 +107,26 @@ public class EmprestimoWriteService {
           request.getDocumentos(),
           funId,
           entity.getUuid(),
-          TipoPedido.FUNDO_SOCIAL.name()
+          tipoPedido.name()
       );
 
-      var defPagamentoEntity = new DefPagamentoEntity();
-      defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()));
-      defPagamentoEntity.setValor(entity.getValorPrestacao());
-      defPagamentoEntity.setDataInicio(entity.getDataInicio());
-      defPagamentoEntity.setDataFim(entity.getDataFim());
-      defPagamentoEntity.setEstado(Estado.A);
-      defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
-      defPagamentoEntity.setFunId(funId);
-      var savedDefPag = defPagamentoEntityRepository.save(defPagamentoEntity);
+      TipoMovimentoEntity tipoMovimento = request.getTipoMovimentoId() != null ? tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()) : null;
+      if (tipoMovimento != null) {
+        var defPagamentoEntity = new DefPagamentoEntity();
+        defPagamentoEntity.setTmId(tipoMovimento);
+        defPagamentoEntity.setValor(entity.getValorPrestacao());
+        defPagamentoEntity.setDataInicio(entity.getDataInicio());
+        defPagamentoEntity.setDataFim(entity.getDataFim());
+        defPagamentoEntity.setEstado(Estado.A);
+        defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
+        defPagamentoEntity.setFunId(funId);
+        var savedDefPag = defPagamentoEntityRepository.save(defPagamentoEntity);
 
-      var tipoRel = new TipoRelRemPagEntity();
-      tipoRel.setTiprelId(currentRelation);
-      tipoRel.setPagId(savedDefPag);
-      tipoRelRemPagEntityRepository.save(tipoRel);
+        var tipoRel = new TipoRelRemPagEntity();
+        tipoRel.setTiprelId(currentRelation);
+        tipoRel.setPagId(savedDefPag);
+        tipoRelRemPagEntityRepository.save(tipoRel);
+      }
     }
   }
 
@@ -157,6 +160,7 @@ public class EmprestimoWriteService {
     );
   }
 
+  // TODO 17/09/2026 15:40 will be used later
   public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(

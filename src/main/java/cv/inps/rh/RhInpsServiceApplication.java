@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -24,13 +25,13 @@ public class RhInpsServiceApplication {
     return new ApplicationAuditorAware();
   }
 
-  @Bean
-  public DateTimeProvider auditDateTimeProvider() {
-    return () -> Optional.of(LocalDateTime.now());
+  static void main(String[] args) {
+    SpringApplication.run(RhInpsServiceApplication.class, args);
   }
 
-  public static void main(String[] args) {
-    SpringApplication.run(RhInpsServiceApplication.class, args);
+  @Bean
+  public DateTimeProvider auditDateTimeProvider() {
+    return () -> Optional.of(LocalDateTime.now(ZoneId.systemDefault()));
   }
 
 }
