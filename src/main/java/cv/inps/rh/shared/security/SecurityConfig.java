@@ -1,5 +1,7 @@
 package cv.inps.rh.shared.security;
 
+import cv.igrp.framework.auth.core.security.IgrpAuthorizationServiceAdapter;
+import cv.igrp.framework.auth.core.security.IgrpJwtAuthenticationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +22,6 @@ import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -83,7 +84,7 @@ public class SecurityConfig {
             http.oauth2ResourceServer(oauth2 -> {
                 if (jwtIssuer == null || jwtIssuer.isBlank()) {
                     // No issuer configured — ignore any token sent, requests pass through.
-                    LOGGER.warn("AUTH_JWT_ISSUER not configured — tokens will be ignored.");
+                    LOGGER.warn("IGRP_ACCESS_API_BASE_URL (issuer) not configured — tokens will be ignored.");
                     oauth2.bearerTokenResolver(request -> null);
                 }
                 oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()));
@@ -120,14 +121,18 @@ public class SecurityConfig {
     /**
      * Configures a JWT authentication converter that extracts roles from the JWT and assigns them to authorities.
      *
+     * <p>Delega no converter do iGRP, que transforma os claims {@code permissions},
+     * {@code selectedRole} e {@code departments} em authorities (base do
+     * {@code @igrpAuthorization.check...}). O adapter e instanciado aqui, em vez de se activar
+     * {@code igrp.authorization.service.adapter=igrp}, para o {@code @Bean jwtAuthenticationConverter}
+     * do framework, que tem o mesmo nome, nao colidir com este.
+     *
      * @return the {@link JwtAuthenticationConverter} used to convert JWT tokens to Spring Security authentication
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        var converter = new JwtAuthenticationConverter();
-        var grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return converter;
+        return new IgrpJwtAuthenticationConverter()
+            .jwtAuthenticationConverter(new IgrpAuthorizationServiceAdapter());
     }
 
     /**
@@ -138,7 +143,7 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         if (jwtIssuer == null || jwtIssuer.isBlank()) {
-            LOGGER.warn("AUTH_JWT_ISSUER not configured — JWT decoder disabled.");
+            LOGGER.warn("IGRP_ACCESS_API_BASE_URL (issuer) not configured — JWT decoder disabled.");
             return token -> null;
         }
         try {
@@ -148,7 +153,7 @@ public class SecurityConfig {
             LOGGER.error("Failed to reach Keycloak at '{}': {}", jwtIssuer, e.getMessage());
             if (isSecurityDisabled()) {
                 LOGGER.warn("Running in development mode — token validation will be unavailable until Keycloak is reachable.");
-                return token -> { throw new BadJwtException("Keycloak is not reachable. Fix AUTH_JWT_ISSUER in your .env file."); };
+                return token -> { throw new BadJwtException("Keycloak is not reachable. Fix IGRP_ACCESS_API_BASE_URL in your .env file."); };
             }
             throw new IllegalStateException("Cannot start: Keycloak is not reachable at '" + jwtIssuer + "'.", e);
         }
