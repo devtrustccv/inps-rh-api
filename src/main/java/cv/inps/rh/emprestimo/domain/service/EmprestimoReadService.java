@@ -37,6 +37,7 @@ public class EmprestimoReadService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
+  private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
 
@@ -85,11 +86,23 @@ public class EmprestimoReadService {
       dto.setNumeroContaBanco(o.getNuConta());
     });
 
-    // TODO 15/09/2026 20:18 outros emprestimons
+    var otherLoans = emprestimoOutroEntityRepository.findByReferenciaOrigemAndFunAndEstado(order, order.getFunId(), Estado.A.name())
+        .stream()
+        .map(obj -> new OutrosEmprestimosDTO(
+            obj.getUuid(),
+            obj.getTiposEmprestimo(),
+            obj.getDataInicio(),
+            obj.getDataFim(),
+            obj.getValorEmprestimo(),
+            obj.getValorPrestacao()
+        ))
+        .toList();
+    dto.setOutrosEmprestimos(otherLoans);
 
     var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
+            obj.getUuid(),
             obj.getTipoEmprestimo(),
             obj.getDataInicio(),
             obj.getDataFim(),
@@ -97,7 +110,7 @@ public class EmprestimoReadService {
             obj.getValorPrestacao()
         ))
         .toList();
-    dto.setOutrosEmprestimosFuncionario(another);
+    dto.setEmprestimos(another);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 

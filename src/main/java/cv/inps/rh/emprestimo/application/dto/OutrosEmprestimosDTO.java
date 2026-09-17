@@ -4,20 +4,25 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.constraints.NotBlank;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @IgrpDTO
-public record OutrosEmprestimosDTO (
+public record OutrosEmprestimosDTO(
 
-  String tipoEmprestimo,
+    String id,
 
-  LocalDate dataEmprestimo,
+    @NotBlank(message = "<Tipo Emprestimo é obrigatório>")
+    String tipoEmprestimo,
 
-  LocalDate dataTermino,
+    LocalDate dataEmprestimo,
 
-  BigDecimal valorEmprestimo,
+    LocalDate dataTermino,
 
-  BigDecimal valorPrestacaoMensal
-){}
+    BigDecimal valorEmprestimo,
+
+    BigDecimal valorPrestacaoMensal
+) {
+}
