@@ -1,6 +1,6 @@
 # RH INPS Service
 
-Serviço de Recursos Humanos do INPS (Instituto Nacional de Previdência Social — Cabo Verde). Spring Boot 3.5 + Java 23, sobre o framework **IGRP** (cv.igrp.framework), persistência Oracle via JPA/Hibernate, OAuth2 Resource Server.
+Serviço de Recursos Humanos do INPS (Instituto Nacional de Previdência Social — Cabo Verde). Spring Boot 3.5 + Java 26, sobre o framework **IGRP** (cv.igrp.framework), persistência Oracle via JPA/Hibernate, OAuth2 Resource Server + iGRP Auth (`cv.igrp.framework.auth`, igual ao inss_core_service).
 
 Ver @README.md e @pom.xml.
 
@@ -87,6 +87,6 @@ detalheAlteracoes.congelar(validacao, DossierCampos.T_<TABELA>, campos, antes,
 
 - Ao criar entidade nova, não esquecer `@EntityListeners(AuditingEntityListener.class)` — sem isso, os campos auditáveis ficam nulos.
 - Oracle não aceita `boolean` nativo: mapear com `@Type` ou usar `NUMBER(1)` + converter.
-- `java.version=23` no `pom.xml` — garantir JDK 23+ no ambiente local, senão o `maven-compiler-plugin` falha.
+- `java.version=26` no `pom.xml` — garantir JDK 26+ no ambiente local, senão o `maven-compiler-plugin` falha.
 - Versões IGRP usam `-beta` — alinhar `igrp.version` no pom antes de bumps.
 - **Build com o VS Code aberto**: depois de `mvn clean`, o compilador do IDE mexe no `target/classes` e o jar pode sair **sem os `.properties`** (a app arranca como `[core]` e rebenta no placeholder do OAuth2); os `package` seguintes não o reconstroem. Apagar o jar antes de empacotar e confirmar com `jar tf target/*.jar | grep application.properties`.
