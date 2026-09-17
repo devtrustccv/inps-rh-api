@@ -391,3 +391,86 @@ O terceiro caso era antes **ignorado em silêncio** na edição (e aplicado, no 
 
 Em resumo, para cada movimento envie **apenas** o `*Destino` do tipo que seleccionou. Os tipos não
 seleccionados não precisam de ser enviados — herdam o valor actual do registo.
+
+---
+
+# Validar edição de Mobilidade — rejeitar passa a inactivar
+
+**Data:** 2026-09-14
+**Branch:** develop
+
+`PUT /api/v1/funcionarios/{idFuncionario}/mobilidades/{mobilidadeId}/validar` (validação de uma
+mobilidade **editada** — validação `UPDATE`)
+
+## O que muda
+
+Sem alteração de contrato de API. Muda o **estado** final da mobilidade quando o checker rejeita uma
+edição.
+
+| Decisão | Antes | Agora |
+|---|---|---|
+| `SIM` | mobilidade `A` | mobilidade `A` (igual) |
+| `NAO` | mobilidade `A` (igual ao SIM) | mobilidade **`I`** |
+| `CORRIGIR` | mobilidade `C` | mobilidade `C` (igual) |
+
+A edição é um update no próprio registo, pelo que rejeitar **não reverte valores** — o registo fica
+com os dados editados e passa a inactivo. Se o colaborador precisar de outra mobilidade, regista-se uma
+nova (`POST .../mobilidades`).
+
+A validação do **registo** de uma mobilidade nova (`INSERT`) não é afectada: já seguia `A`/`I`.
+
+---
+
+# Detalhe de alterações — campos novos e ordenação por registo
+
+**Data:** 2026-09-16
+**Branch:** develop
+
+`GET /api/v1/funcionarios/validacoes/{idValidacao}/detalhes`
+
+## O que muda
+
+Três campos **novos** em cada linha (`ValidacaoDetalheDTO`). Os existentes mantêm-se iguais —
+`campoAlterado` continua a ser o **rótulo** a mostrar, pelo que o ecrã actual não precisa de mudar.
+
+| Campo | Tipo | Exemplo | Para que serve |
+|---|---|---|---|
+| `campo` | `String` | `"instidId"` | Nome técnico do campo. Permite filtrar/agrupar sem depender do texto do rótulo. |
+| `tipoAlteracao` | `String` | `"VALOR"` | `VALOR` — alterado · `REFERENCIA` — referência (direcção, banco…) alterada · `INICIAL` — o campo não tinha valor (registo novo: "criado com…"). |
+| `tabelaId` | `Long` | `699` | Id do registo alterado, nas secções que têm vários (contas bancárias, familiares, contactos…). |
+
+Exemplo de uma linha:
+
+```json
+{
+  "campoAlterado": "Nº de conta",
+  "valorAnterior": "7654321",
+  "valorNovo": "3333333",
+  "alteradoPor": "anonymousUser",
+  "dataAlteracao": "16-09-2026 19:33",
+  "tabelaName": "RH_T_DADOS_BANCARIOS",
+  "tabelaId": 699,
+  "campo": "numConta",
+  "tipoAlteracao": "VALOR"
+}
+```
+
+## Ordenação
+
+As linhas vêm ordenadas por **tabela → registo (`tabelaId`) → ordem do formulário**. Numa validação
+que altera duas contas bancárias, os campos de cada conta vêm juntos, em vez de intercalados. Para
+mostrar um sub-título por conta, basta agrupar por `tabelaId`.
+
+## Validações antigas
+
+Validações registadas antes desta data não têm estes campos: `campo`, `tipoAlteracao` e `tabelaId`
+vêm a `null`. Tratar como opcionais.
+
+## Comportamento corrigido (sem alteração de contrato)
+
+- **Correcção reenviada** (depois de "Corrigir"): o *Valor anterior* passa a ser sempre o valor
+  **aprovado**, não o valor que o validador devolveu. Ex.: aprovado `DARH`, proposto `DGFI`,
+  devolvido, corrigido para `DCC` → a grelha mostra `DARH → DCC`.
+- **Rendimento** e **Desconto** passam a ter grelha também no **registo** (antes só depois de uma
+  correcção).
+- Deixam de aparecer linhas de alterações antigas que não pertenciam à validação aberta.

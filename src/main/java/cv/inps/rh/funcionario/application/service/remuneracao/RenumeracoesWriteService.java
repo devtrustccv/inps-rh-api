@@ -40,6 +40,8 @@ public class RenumeracoesWriteService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   public SuccessResponseDTO novoRemuneracao(String funcionarioId, NovoRemuneracaoRequestDTO request) {
@@ -79,6 +81,14 @@ public class RenumeracoesWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+
+    // Detalhe do REGISTO. Ate aqui este fluxo nao carimbava nada (so a correcao tinha auto-audit), pelo
+    // que um rendimento registado e aprovado a primeira nunca teve grelha nenhuma. Com o "antes"
+    // inexistente todos os campos saem INICIAL e a grelha mostra "criado com ...".
+    var camposRendNovo = dossierCampos.rendimento();
+    detalheAlteracoes.congelar(validation, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_DEF_REMUNERACOES,
+        camposRendNovo, detalheAlteracoes.capturar(camposRendNovo, null),
+        detalheAlteracoes.capturar(camposRendNovo, remuneracao));
 
     return new SuccessResponseDTO(true, remuneracao.getUuid().toString(), "Remuneração registada.", List.of());
   }
@@ -122,6 +132,12 @@ public class RenumeracoesWriteService {
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
 
+    // Detalhe do REGISTO — mesma lacuna que o rendimento: so a correcao estava carimbada.
+    var camposDescNovo = dossierCampos.desconto();
+    detalheAlteracoes.congelar(validation, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_DEF_PAGAMENTOS,
+        camposDescNovo, detalheAlteracoes.capturar(camposDescNovo, null),
+        detalheAlteracoes.capturar(camposDescNovo, pagamento));
+
     return new SuccessResponseDTO(true, pagamento.getUuid().toString(), "Pagamento/desconto registado.", List.of());
   }
 
@@ -157,6 +173,9 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     funcionarioRules.garantirEditavel(remuneracao.getEstado());
+    // Estado ANTES do payload (edicao in place).
+    var camposRend = dossierCampos.rendimento();
+    var antesRend = detalheAlteracoes.capturar(camposRend, remuneracao);
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
@@ -168,14 +187,10 @@ public class RenumeracoesWriteService {
     if (remuneracao.getEstado() == Estado.C) {
       remuneracao.setEstado(Estado.P);
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(remuneracao.getUuid(), Referencia.RENDIMENTO);
-      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoRemuneracao).
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_REMUNERACOES");
-        definicaoRemuneracaoEntityRepository.save(remuneracao);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      definicaoRemuneracaoEntityRepository.save(remuneracao);
+      // Reenvio de correcao: funde com o detalhe existente, preservando o "antes" ORIGINAL.
+      detalheAlteracoes.congelar(validacaoReaberta, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_DEF_REMUNERACOES,
+          camposRend, antesRend, detalheAlteracoes.capturar(camposRend, remuneracao));
       return new SuccessResponseDTO(true, remuneracao.getUuid().toString(),
           "Rendimento corrigido e reenviado para validação.", List.of());
     }
@@ -234,6 +249,10 @@ public class RenumeracoesWriteService {
 
     funcionarioRules.garantirEditavel(pagamento.getEstado());
 
+    // Estado ANTES do payload (edicao in place).
+    var camposDesc = dossierCampos.desconto();
+    var antesDesc = detalheAlteracoes.capturar(camposDesc, pagamento);
+
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
     pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
@@ -249,14 +268,10 @@ public class RenumeracoesWriteService {
     if (pagamento.getEstado() == Estado.C) {
       pagamento.setEstado(Estado.P);
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(pagamento.getUuid(), Referencia.DESCONTO);
-      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoPagamento).
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_PAGAMENTOS");
-        defPagamentoEntityRepository.save(pagamento);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      defPagamentoEntityRepository.save(pagamento);
+      // Reenvio de correcao: funde com o detalhe existente, preservando o "antes" ORIGINAL.
+      detalheAlteracoes.congelar(validacaoReaberta, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_DEF_PAGAMENTOS,
+          camposDesc, antesDesc, detalheAlteracoes.capturar(camposDesc, pagamento));
       return new SuccessResponseDTO(true, pagamento.getUuid().toString(),
           "Desconto corrigido e reenviado para validação.", List.of());
     }

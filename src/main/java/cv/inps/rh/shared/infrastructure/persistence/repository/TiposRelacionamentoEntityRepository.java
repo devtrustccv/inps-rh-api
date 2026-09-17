@@ -7,7 +7,6 @@ import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,10 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// Auditado por JaVers para alimentar a grelha "Detalhe de alterações" do movimento GESTÃO LABORAL
-// (Alterar Escalão/Cargo). Commits sem ValidacaoAuditContext ficam sem propriedades (inofensivos),
-// como nos restantes repositórios auditados (DefinicaoRemuneracao, DefPagamento, Contacto, ...).
-@JaversSpringDataAuditable
 @Repository
 public interface TiposRelacionamentoEntityRepository extends JpaRepository<TiposRelacionamentoEntity, Long>, JpaSpecificationExecutor<TiposRelacionamentoEntity> {
 

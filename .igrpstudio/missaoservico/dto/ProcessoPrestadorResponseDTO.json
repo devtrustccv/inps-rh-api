@@ -1,0 +1,78 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoPrestadorResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "uuid",
+      "type": "uuid",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "paramPrestUuid",
+      "type": "uuid",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "entId",
+      "type": "long",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "nome",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "emails",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "collectionType": "list"
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "notaAvaliacao",
+      "type": "double",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "notaAvaliacaoDesignacao",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "notaAvaliacaoDesc",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    }
+  ],
+  "id": "msvdto10procprestitem"
+}

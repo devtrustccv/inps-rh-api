@@ -20,7 +20,7 @@ import java.util.UUID;
 @IgrpDTO
 public class AjudaCustoRequestDTO {
 
-  private UUID colaboradorId;             // MissaoColaboradorEntity.id — obrigatório
+  private UUID colaboradorId;             // funUuid OU uuid do colaborador da missão (o GET expõe ambos) — obrigatório
   private Boolean flgAlojamento;          // checkbox "Inclui alojamento?" — obrigatório
   private Integer numeroDiasAlojamento;   // número de dias — obrigatório
   // valorDiario → calculado no service pela parametrização:

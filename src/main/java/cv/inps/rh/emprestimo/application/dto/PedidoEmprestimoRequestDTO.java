@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +21,7 @@ public class PedidoEmprestimoRequestDTO extends PedidoEmprestimoDTO {
 
   @NotNull(message = "The field <action> is required")
 
-  private ProcessStepAction action ;
-
+  private ProcessStepAction action;
 }
+
+

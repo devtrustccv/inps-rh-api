@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missao de Servico — Alteracoes para o Front-End</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --border: #d1d9e0;
+  --code-bg: #f6f8fa; --accent: #0969da; --thead: #f6f8fa; --mark: #fff8c5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d;
+    --code-bg: #161b22; --accent: #4493f8; --thead: #161b22; --mark: #3f2c00;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 32px; padding-inline: 16px; }
+h1, h2, h3, h4 { line-height: 1.25; margin: 1.6em 0 .6em; font-weight: 600; }
+h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: .3em; margin-top: 0; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: .3em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1em; }
+p, ul, ol { margin: 0 0 1em; }
+li { margin: .25em 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+code {
+  background: var(--code-bg); border-radius: 6px; padding: .2em .4em;
+  font: .87em/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: break-word;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px; overflow-x: auto; margin: 0 0 1em;
+}
+pre code { background: none; padding: 0; font-size: .85em; line-height: 1.5; }
+blockquote {
+  margin: 0 0 1em; padding: .1px 1em; color: var(--muted);
+  border-left: .25em solid var(--border);
+}
+.table-wrap { overflow-x: auto; margin: 0 0 1em; }
+table { border-collapse: collapse; width: 100%; font-size: .93em; }
+th, td { border: 1px solid var(--border); padding: 6px 13px; text-align: left; vertical-align: top; }
+th { background: var(--thead); font-weight: 600; }
+.banner {
+  background: var(--mark); border: 1px solid var(--border); border-radius: 6px;
+  padding: 12px 16px; margin-bottom: 28px; font-size: .92em; color: var(--fg);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="banner"><strong>Documento gerado</strong> a partir de <code>docs/frontend_changes_missao_servico.md</code>. A fonte da verdade e o ficheiro Markdown no repositorio — se divergirem, vale o Markdown.</div>
+<h1>Missão de Serviço — guia de implementação para o front-end</h1>
+<p><strong>Última actualização:</strong> 2026-09-16 · <strong>Base de todos os endpoints:</strong> <code>/api/v1/missao-servico</code></p>
+<blockquote><p>Versão em HTML para partilhar: <a href="evidencias_missao.html">evidencias_missao.html</a> — gerada a partir deste ficheiro; em caso de divergência, vale o Markdown.</p></blockquote>
+<p>Este documento substitui o changelog anterior. Está organizado <strong>por ecrã</strong>, pela ordem em que o utilizador os percorre. Cada capítulo traz os *lookups* que o ecrã precisa, o <code>GET</code> que o preenche, o payload da gravação e os erros esperados. Tudo aqui foi verificado contra a API em execução a 2026-09-15.</p>
+<p>O changelog cronológico e a documentação do modelo anterior estão no fim, em <strong><a href="#histórico">Histórico</a></strong>.</p>
+<hr>
+<h2>1. O que mudou — leitura obrigatória</h2>
+<p>A missão <strong>deixou de ter uma etapa única</strong>. Passou a ter <strong>quatro processos independentes</strong>, cada um com a sua etapa e o seu percurso:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Processo</th><th>Percurso</th></tr></thead>
+<tbody>
+<tr><td><code>BILHETE_PASSAGEM</code></td><td>Prestador Serviço → Emissão Requisição → Logística → Validação UGAL → Aprovação RH → Cabimento → Autorização → Pagamento</td></tr>
+<tr><td><code>ALOJAMENTO</code></td><td>igual ao bilhete</td></tr>
+<tr><td><code>SEGURO_VIAGEM</code></td><td>começa na <strong>Logística</strong> — não passa por prestadores nem requisição</td></tr>
+<tr><td><code>AJUDA_CUSTO</code></td><td>começa na <strong>Logística</strong></td></tr>
+</tbody></table></div>
+<p>A submissão cria os quatro de uma vez. Cada um avança ao seu ritmo: o bilhete pode estar em Cabimento enquanto a ajuda de custo ainda está na Logística.</p>
+<p><strong>Consequências directas:</strong></p>
+<ol>
+<li>As rotas de etapa levam o tipo de processo no caminho: <code>/{missaoUuid}/processos/{tipoProcesso}/{etapa}</code>.</li>
+<li>A lista de trabalho é de <strong>processos</strong>, não de missões.</li>
+<li>O ecrã a mostrar decide-se pela <strong>etapa do processo</strong>.</li>
+<li><code>AUTORIZACAO</code> é agora uma <strong>etapa própria</strong>. Acabou o artifício de distinguir Cabimentação de</li>
+</ol>
+<p>Autorização pelo <code>estadoCabimento</code>.</p>
+<h3>Alterações de 2026-09-16</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Alteração</th><th>Impacto no front-end</th><th>Detalhe</th></tr></thead>
+<tbody>
+<tr><td>Os dez endpoints antigos foram removidos</td><td>Passam a responder <strong>404</strong></td><td>tabela abaixo</td></tr>
+<tr><td>As gravações devolvem um objecto em vez de um mapa</td><td>Nenhum para quem lê <code>id</code>, <code>etapa</code>, <code>nrMissao</code>, <code>total</code> ou <code>designacao</code>: os nomes mantêm-se. Há campos novos, e o <code>cancelar</code> passa a ter corpo</td><td>secção &quot;Resposta das gravações&quot;</td></tr>
+<tr><td>Três notificações novas: confirmação do pedido, ajuda de custo paga e alteração da missão</td><td>Aparecem em &quot;Ver Notificação&quot;</td><td>capítulos 7, 14 e 16</td></tr>
+<tr><td><code>GET /{uuid}/cabimentos</code>: vista de consulta com os cabimentos dos quatro processos</td><td>Permite montar o ecrã &quot;Cabimentação&quot; da spec com uma chamada</td><td>capítulo 13</td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/avaliacoes</code>: avaliações de todos os prestadores da missão</td><td>Permite montar e gravar o ecrã &quot;Detalhe de Avaliação&quot; de uma vez; os endpoints por prestador mantêm-se</td><td>capítulo 15</td></tr>
+<tr><td>Os avisos de logística e de cancelamento ao colaborador passam a ir por email (antes ficavam só gravados)</td><td>Nenhum na API; o <code>estado</code> passa a <code>Enviado</code>/<code>Erro</code>, ou <code>Pendente</code> se o colaborador não tiver email</td><td>capítulos 10 e 17</td></tr>
+<tr><td>Correcção do guia: o exemplo de Alojamento tinha <code>numeroDias</code> e <code>valor</code>, que não existem</td><td>Enviar <code>valorTotal</code> (opcional) e as datas; <code>colaboradorIds</code> permite agrupar colaboradores</td><td>capítulo 10</td></tr>
+</tbody></table></div>
+<h3>Endpoints antigos — removidos</h3>
+<p>Os dez endpoints do modelo anterior <strong>foram removidos a 2026-09-16</strong> e passam a responder <strong>404</strong>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Antigo (removido)</th><th>Novo</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/analise</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/prestadores</code></td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/emissao-requisicao</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/requisicoes</code></td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/logistica</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/logistica</code></td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/cabimento</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/cabimento</code></td></tr>
+<tr><td><code>GET</code>/<code>PUT /{uuid}/autorizacao</code></td><td><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/autorizacao</code></td></tr>
+</tbody></table></div>
+<p>Mantêm o caminho: <code>POST /submissao</code>, <code>GET</code>/<code>PUT /{uuid}/submissao</code>, <code>GET /{uuid}</code>, <code>GET /api/v1/missao-servico</code>, <code>PATCH /{id}/cancelar</code> e <code>GET</code>/<code>PUT /{uuid}/pagamento</code>.</p>
+<hr>
+<h2>2. Regras transversais</h2>
+<p>Valem para todos os ecrãs de etapa. Lê isto uma vez e não precisas de o repetir por capítulo.</p>
+<h3><code>SAVE</code> vs <code>NEXT</code></h3>
+<p>Todos os <code>PUT</code> de etapa aceitam <code>processoEtapaAction</code>:</p>
+<ul>
+<li><strong><code>SAVE</code></strong> — grava e fica na etapa. Grava mesmo fora de ordem (fica só um aviso no log), para não</li>
+</ul>
+<p>perder o que o utilizador preencheu.</p>
+<ul>
+<li><strong><code>NEXT</code></strong> — valida, grava e avança. Exige que o processo já tenha atingido a etapa do ecrã.</li>
+</ul>
+<p>A etapa <strong>nunca retrocede</strong>, excepto por parecer desfavorável, que devolve o processo à etapa anterior de propósito.</p>
+<h3>A guarda de etapa está no <code>PUT</code>, não no <code>GET</code></h3>
+<p>Gravar numa etapa que o processo não percorre (<code>prestadores</code> em <code>SEGURO_VIAGEM</code>, por exemplo) ou fora de sequência dá <strong>400</strong>. O <code>GET</code> correspondente devolve <strong>200</strong> com as listas vazias.</p>
+<p><strong>Não uses o <code>GET</code> para decidir se o ecrã existe</strong> — usa o percurso do tipo de processo (tabela do capítulo 1).</p>
+<h3>Identificadores de colaborador</h3>
+<p>Onde há colaboradores, o <code>GET</code> devolve dois identificadores lado a lado: <code>funUuid</code> (do funcionário) e <code>uuid</code> (do colaborador *desta* missão). <strong>Ambos são aceites</strong> na gravação, em todos os campos: <code>colaboradorId</code>, <code>colaboradorIds</code> e <code>funcionarioUuids</code>.</p>
+<h3>Sincronização de listas</h3>
+<p>Nos <code>PUT</code> que recebem arrays (emails do prestador, linhas de logística, requisições):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>No payload</th><th>Efeito</th></tr></thead>
+<tbody>
+<tr><td>item <strong>sem</strong> <code>id</code></td><td>cria</td></tr>
+<tr><td>item <strong>com</strong> <code>id</code></td><td>actualiza</td></tr>
+<tr><td>item <strong>omitido</strong> do array</td><td>inactiva (<code>estado: &quot;I&quot;</code>)</td></tr>
+<tr><td>campo a <code>null</code></td><td>preserva o que está gravado</td></tr>
+<tr><td>array <code>[]</code></td><td>inactiva tudo</td></tr>
+</tbody></table></div>
+<p>Regravar o mesmo payload <strong>não duplica linhas</strong> — os ids mantêm-se.</p>
+<h3>Anexos — fluxo de dois passos</h3>
+<p>O campo <code>documento</code> de um anexo <strong>não é o nome do ficheiro</strong>: é o <code>fileId</code> devolvido pelo upload.</p>
+<ol>
+<li><code>POST /api/v1/documento/private</code> com o ficheiro → devolve o <code>fileId</code></li>
+<li>Enviar esse <code>fileId</code> em <code>documento</code>, com o <code>tipoDocumentoId</code> do lookup</li>
+<li>Para ver ou descarregar: <code>GET /api/v1/documento?fileId={documento}</code> → devolve uma **URL</li>
+</ol>
+<p>pré-assinada** do storage, com validade limitada</p>
+<p>Enviar um nome de ficheiro inventado grava o texto mas o passo 3 responde <strong>400</strong>. É este <code>GET</code> que serve o ícone &quot;Ver documento&quot; do ecrã de Validação UGAL.</p>
+<p>Anexos enviados pelo ecrã ficam em <code>estado: &quot;P&quot;</code>; os gerados pelo sistema (PDF da requisição) ficam em <code>&quot;A&quot;</code>.</p>
+<h3>Anexos e PDFs nunca bloqueiam o fluxo</h3>
+<p>Se o storage falhar, a etapa grava na mesma e devolve <strong>200</strong>; fica um <code>ERROR</code> no log do servidor e o documento não aparece na resposta. A nota de encomenda continua disponível em *Extrair Requisição*, que a gera a partir dos dados.</p>
+<h3>Formato dos erros</h3>
+<p>Todos os erros de validação vêm assim, com a mensagem em <code>title</code>:</p>
+<pre><code>{ &quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: &quot;ambitoMissao é obrigatório&quot;, &quot;status&quot;: 400,
+  &quot;instance&quot;: &quot;/api/v1/missao-servico/submissao&quot;, &quot;igrpType&quot;: &quot;validation&quot; }</code></pre>
+<h3>Encoding</h3>
+<p>Enviar sempre <code>Content-Type: application/json; charset=utf-8</code>.</p>
+<h3>Resposta das gravações</h3>
+<p>Nenhuma gravação devolve um mapa: cada uma tem um objecto próprio, que aparece no Swagger.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Endpoints</th><th>Objecto</th><th>Campos</th></tr></thead>
+<tbody>
+<tr><td><code>POST /submissao</code>, <code>PUT /{uuid}/submissao</code></td><td><code>MissaoSubmissaoGravadaResponseDTO</code></td><td><code>id</code> (uuid da missão), <code>nrMissao</code>, <code>nrMissaoFormatado</code></td></tr>
+<tr><td><code>PUT</code> de etapa (<code>prestadores</code>, <code>requisicoes</code>, <code>logistica</code>, <code>validacao-ugal</code>, <code>aprovacao-rh</code>, <code>cabimento</code>, <code>autorizacao</code>)</td><td><code>ProcessoEtapaGravadaResponseDTO</code></td><td><code>id</code> (uuid do processo), <code>etapa</code>, <code>parecer</code>, <code>estadoMissao</code></td></tr>
+<tr><td><code>PUT .../avaliacao</code></td><td><code>AvaliacaoPrestadorGravadaResponseDTO</code></td><td><code>id</code> (uuid da avaliação), <code>total</code>, <code>designacao</code></td></tr>
+<tr><td><code>PUT /{uuid}/pagamento</code>, <code>PATCH /{id}/cancelar</code>, <code>POST</code>/<code>PUT /prestadores</code></td><td><code>SuccessResponseDTO</code></td><td><code>sucesso</code>, <code>id</code> (uuid), <code>mensagem</code>, <code>alertas</code></td></tr>
+</tbody></table></div>
+<p>No <code>ProcessoEtapaGravadaResponseDTO</code>:</p>
+<ul>
+<li><code>parecer</code> só vem preenchido em <code>validacao-ugal</code> e <code>aprovacao-rh</code>;</li>
+<li><code>estadoMissao</code> só vem preenchido em <code>autorizacao</code>;</li>
+<li>nas restantes etapas os dois vêm a <code>null</code>.</li>
+</ul>
+<pre><code>// PUT /{uuid}/processos/AJUDA_CUSTO/logistica
+{ &quot;id&quot;: &quot;…&quot;, &quot;etapa&quot;: &quot;VALIDACAO_UGAL&quot;, &quot;parecer&quot;: null, &quot;estadoMissao&quot;: null }
+
+// PATCH /{id}/cancelar — antes vinha sem corpo
+{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;…&quot;, &quot;mensagem&quot;: &quot;Missão cancelada&quot;, &quot;alertas&quot;: [] }</code></pre>
+<hr>
+<h2>3. *Lookups* partilhados</h2>
+<p>Cinco campos não são servidos pelo módulo de missão — vêm da parametrização partilhada. Todos devolvem <code>{ &quot;label&quot;: &quot;...&quot;, &quot;value&quot;: 123 }</code>; o <code>value</code> é o que segue no payload.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Campo do ecrã</th><th>Endpoint</th><th>Referência</th></tr></thead>
+<tbody>
+<tr><td>País de Destino</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=1</code></td><td>223 países; Cabo Verde = <code>1238</code></td></tr>
+<tr><td>Ilha</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=2&amp;geogrId=1238</code></td><td>10 ilhas; só para destino em Cabo Verde</td></tr>
+<tr><td>Concelho</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=3&amp;geogrId={ilhaId}</code></td><td>Santiago = <code>12387</code> → Praia = <code>1238704</code></td></tr>
+<tr><td>Tipo Documento</td><td><code>GET /api/v1/parametrizacao/tipo-documento/ativos</code></td><td>28 tipos; <code>value</code> é o <code>tipoDocumentoId</code></td></tr>
+<tr><td>Entidade (<code>entId</code>)</td><td><code>GET /api/v1/parametrizacao/entidades/ativos</code></td><td><code>value</code> é o <code>entId</code> do prestador</td></tr>
+<tr><td>Colaboradores</td><td><code>GET /api/v1/funcionarios?pageNumber=0&amp;pageSize=10</code></td><td>pesquisa de colaborador</td></tr>
+</tbody></table></div>
+<p>Os *selects* de domínio (parecer, etapa, tipo de processo, avaliação) <strong>vêm na resposta do próprio ecrã</strong> — ver cada capítulo.</p>
+<blockquote><p><code>entidades/ativos</code> devolve <strong>11 981 registos</strong> de uma vez, sem filtro nem paginação. Para a caixa &quot;Pesquisar prestador de serviços…&quot; é preciso filtrar no cliente ou pedir um endpoint de pesquisa.</p></blockquote>
+<hr>
+<h2>4. Ecrã — Gestão de Prestadores de Serviço</h2>
+<p>Menu próprio, independente do fluxo da missão. É aqui que se parametrizam os prestadores que depois se escolhem na etapa Prestadores Serviço.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Acção</th><th>Método</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Lista</td><td><code>GET</code></td><td><code>/prestadores</code></td></tr>
+<tr><td>Detalhe (ecrã de edição)</td><td><code>GET</code></td><td><code>/prestadores/{uuid}</code></td></tr>
+<tr><td>Registar</td><td><code>POST</code></td><td><code>/prestadores</code></td></tr>
+<tr><td>Editar</td><td><code>PUT</code></td><td><code>/prestadores/{uuid}</code></td></tr>
+<tr><td>Ver Avaliação</td><td><code>GET</code></td><td><code>/prestadores/{uuid}/avaliacoes</code></td></tr>
+</tbody></table></div>
+<p><strong>Lookups:</strong> <code>entidades/ativos</code> (campo Nome → <code>entId</code>) e <code>geografias?nivelDetalhe=2&amp;geogrId=1238</code> (Ilha).</p>
+<p><strong>Registar / Editar:</strong></p>
+<pre><code>{
+  &quot;entId&quot;: 100000007,                      // obrigatório — do lookup de entidades
+  &quot;nome&quot;: &quot;Atlantico Viagens&quot;,             // se omitido, usa-se o nome da entidade
+  &quot;nif&quot;: &quot;200987654&quot;,
+  &quot;email&quot;: &quot;geral@atlanticoviagens.cv&quot;,    // obrigatório — email principal
+  &quot;telefone&quot;: &quot;2612345&quot;,
+  &quot;ilhaId&quot;: 12387,
+  &quot;morada&quot;: &quot;Av. Cidade de Lisboa, Praia&quot;,
+  &quot;estado&quot;: &quot;A&quot;,                           // no registo, por defeito &quot;A&quot;
+  &quot;emails&quot;: [                              // aba &quot;Outros Email&quot;; null = não mexer
+    { &quot;email&quot;: &quot;reservas@atlanticoviagens.cv&quot; },   // sem id → cria
+    { &quot;id&quot;: 19, &quot;email&quot;: &quot;financeiro@...&quot; }        // com id → mantém
+  ]
+}</code></pre>
+<p>→ <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid do prestador&gt;&quot;, &quot;mensagem&quot;: &quot;Prestador gravado&quot;, &quot;alertas&quot;: [] }</code> — repara que o uuid vem em <strong><code>id</code></strong>, não em <code>uuid</code>.</p>
+<p>O array <code>emails</code> segue a <a href="#sincronização-de-listas">sincronização de listas</a>: um email omitido passa a <code>estado: &quot;I&quot;</code>. O <code>GET /prestadores/{uuid}</code> devolve <strong>todos</strong> os emails com o seu estado (é o ecrã de edição); o ecrã da etapa só recebe os activos.</p>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Sem <code>entId</code></td><td><strong>400</strong> <code>entId é obrigatório</code></td></tr>
+<tr><td>Sem <code>email</code></td><td><strong>400</strong> <code>email é obrigatório</code></td></tr>
+<tr><td><code>entId</code> que não existe nas entidades</td><td><strong>400</strong> <code>Entidade inválida: {entId}</code></td></tr>
+<tr><td>Entidade já registada noutro prestador</td><td><strong>400</strong> <code>Já existe um prestador registado para a entidade {entId}</code></td></tr>
+<tr><td>Email principal ou adicional mal formado</td><td><strong>400</strong> <code>Email inválido: {valor}</code></td></tr>
+<tr><td>Prestador inexistente (<code>GET</code>/<code>PUT</code>)</td><td><strong>404</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2>5. Ecrã — Lista Missão</h2>
+<p><code>GET /api/v1/missao-servico</code> — paginada. Filtros: nº de missão e período.</p>
+<p>Cada linha traz a missão <strong>e a sub-lista dos seus processos</strong>, que é o que a linha expande:</p>
+<pre><code>{ &quot;content&quot;: [ {
+    &quot;uuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;3/2026&quot;, &quot;destino&quot;: &quot;…&quot;,
+    &quot;nacionalInternacional&quot;: &quot;Nacional&quot;, &quot;dataMissao&quot;: &quot;2026-11-10&quot;,
+    &quot;estado&quot;: &quot;A&quot;, &quot;estadoDesc&quot;: &quot;Activo&quot;,        // A | I (cancelada) | FINALIZADO
+    &quot;etapa&quot;: &quot;PRESTADOR_SERVICO&quot;,                  // etapa menos avançada dos processos activos
+    &quot;situacao&quot;: &quot;PENDENTE_REQUISICAO&quot;, &quot;situacaoDesc&quot;: &quot;Pendente de Requisição&quot;,
+    &quot;processos&quot;: [
+      { &quot;uuid&quot;: &quot;…&quot;, &quot;tipoProcesso&quot;: &quot;BILHETE_PASSAGEM&quot;, &quot;tipoProcessoDesc&quot;: &quot;Bilhete Passagem&quot;,
+        &quot;etapa&quot;: &quot;LOGISTICA&quot;, &quot;etapaDesc&quot;: &quot;Processamento Logístico&quot;,
+        &quot;estado&quot;: &quot;A&quot;, &quot;valorTotal&quot;: 223000 }
+    ] } ],
+  &quot;pageNumber&quot;: 0, &quot;pageSize&quot;: 10, &quot;totalElements&quot;: 3, &quot;totalPages&quot;: 1 }</code></pre>
+<p>Acções da linha: Editar Missão, Cancelar Missão, Ver Notificação, Ver Alerta. Acções da sub-linha: Ver/Executar Processo (leva ao ecrã da etapa daquele processo) e Avaliar Prestador.</p>
+<blockquote><p>O processo com <code>estado: &quot;I&quot;</code> é um processo inactivo — tipicamente o <code>ALOJAMENTO</code> quando a missão tem &quot;Alojamento = Não&quot;. Mostrar a cinzento ou esconder, mas não oferecer &quot;Executar&quot;.</p></blockquote>
+<hr>
+<h2>6. Ecrã — Lista Missão por Etapa</h2>
+<p>A lista de trabalho. <code>GET /processos?etapa=&amp;tipoProcesso=</code> — uma linha <strong>por processo</strong>, paginada.</p>
+<pre><code>{ &quot;content&quot;: [ {
+    &quot;missaoUuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;3/2026&quot;,
+    &quot;nacionalInternacional&quot;: &quot;Nacional&quot;, &quot;destino&quot;: &quot;…&quot;,
+    &quot;dataInicio&quot;: &quot;2026-11-10&quot;, &quot;dataFim&quot;: &quot;2026-11-14&quot;,
+    &quot;processoUuid&quot;: &quot;…&quot;, &quot;tipoProcesso&quot;: &quot;AJUDA_CUSTO&quot;, &quot;tipoProcessoDesc&quot;: &quot;Ajuda Custo&quot;,
+    &quot;etapa&quot;: &quot;LOGISTICA&quot;, &quot;etapaDesc&quot;: &quot;Processamento Logístico&quot; } ],
+  &quot;opcoesEtapa&quot;:        [ { &quot;valor&quot;: &quot;PRESTADOR_SERVICO&quot;, &quot;descricao&quot;: &quot;Prestador Serviço&quot; }, … ],
+  &quot;opcoesTipoProcesso&quot;: [ { &quot;valor&quot;: &quot;BILHETE_PASSAGEM&quot;,  &quot;descricao&quot;: &quot;Bilhete Passagem&quot;  }, … ],
+  &quot;pageNumber&quot;: 0, &quot;pageSize&quot;: 10, &quot;totalElements&quot;: 7, &quot;totalPages&quot;: 1 }</code></pre>
+<p>Os dois *selects* do filtro vêm na própria resposta: <code>opcoesEtapa</code> (as 8 etapas, pela ordem do fluxo) e <code>opcoesTipoProcesso</code> (os 4 tipos). Usar <code>valor</code> no pedido e <code>descricao</code> no ecrã.</p>
+<p>Ambos os filtros são <strong>opcionais na API</strong> — sem eles devolve todos os processos. O ecrã marca a Etapa como obrigatória; essa exigência é do lado do front-end.</p>
+<hr>
+<h2>7. Ecrã — Nova Missão / Registo de Missão</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Acção</th><th>Método</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Criar</td><td><code>POST</code></td><td><code>/submissao</code></td></tr>
+<tr><td>Carregar para edição</td><td><code>GET</code></td><td><code>/{uuid}/submissao</code></td></tr>
+<tr><td>Editar</td><td><code>PUT</code></td><td><code>/{uuid}/submissao</code></td></tr>
+</tbody></table></div>
+<p><strong>Lookups:</strong> países, ilhas, concelhos, tipos de documento e a pesquisa de colaboradores.</p>
+<pre><code>{
+  &quot;paisDestinoId&quot;: 1238,                   // obrigatório
+  &quot;ilhaId&quot;: 12387,                         // só se o destino for Cabo Verde
+  &quot;concelhoId&quot;: 1238704,                   // idem
+  &quot;descricaoDestino&quot;: &quot;Praia — formação&quot;,  // obrigatório
+  &quot;ambitoMissao&quot;: &quot;Formação sobre RH&quot;,     // obrigatório
+  &quot;dataInicio&quot;: &quot;2026-11-10&quot;,              // obrigatório
+  &quot;dataFim&quot;: &quot;2026-11-14&quot;,                 // obrigatório, &gt;= dataInicio
+  &quot;alojamento&quot;: true,                      // a instituição trata do alojamento?
+  &quot;autorizadoPor&quot;: &quot;Director de RH&quot;,       // obrigatório
+  &quot;dataAutorizacao&quot;: &quot;2026-09-15&quot;,         // obrigatório
+  &quot;colaboradores&quot;: [                       // obrigatório, pelo menos um
+    { &quot;colaboradorId&quot;: &quot;&lt;funUuid&gt;&quot;, &quot;numeroDocumento&quot;: &quot;PA496450&quot; },
+    { &quot;colaboradorId&quot;: &quot;&lt;funUuid&gt;&quot; }       // sem numeroDocumento usa o do funcionário
+  ],
+  &quot;documentos&quot;: [ { &quot;tipoDocumentoId&quot;: 20, &quot;documento&quot;: &quot;convite.pdf&quot; } ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<p>→ <code>{ &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;nrMissao&quot;: 3, &quot;nrMissaoFormatado&quot;: &quot;3/2026&quot; }</code></p>
+<p><strong>O que acontece ao gravar pela primeira vez:</strong> são criados os <strong>4 processos</strong>, cada um na etapa inicial do seu percurso — <code>BILHETE_PASSAGEM</code> e <code>ALOJAMENTO</code> em <code>PRESTADOR_SERVICO</code>, <code>SEGURO_VIAGEM</code> e <code>AJUDA_CUSTO</code> em <code>LOGISTICA</code>.</p>
+<p><strong>O campo <code>alojamento</code> comanda o processo <code>ALOJAMENTO</code>:</strong> a <code>false</code> inactiva-o (<code>estado: &quot;I&quot;</code>), a <code>true</code> reactiva-o. Pode alternar-se a qualquer momento editando a submissão.</p>
+<p><code>nrDias</code> é calculado pelo servidor a partir das datas — o ecrã mostra-o, não o envia.</p>
+<p><strong>Notificações:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Quando</th><th>Quem recebe</th><th>Tipo</th></tr></thead>
+<tbody>
+<tr><td>A missão é criada (<code>POST</code>)</td><td>cada colaborador</td><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td></tr>
+<tr><td>Um colaborador é acrescentado na edição (<code>PUT</code>)</td><td>só esse colaborador</td><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td></tr>
+<tr><td>A edição muda país, ilha, concelho, destino ou datas de uma missão activa</td><td>os colaboradores que já estavam na missão</td><td><code>MISSAO_ALTERACAO</code></td></tr>
+<tr><td>Idem, com algum processo já depois da primeira etapa</td><td>também os prestadores e os restantes destinatários já contactados, por email</td><td><code>MISSAO_ALTERACAO</code></td></tr>
+</tbody></table></div>
+<p>O aviso de alteração lista cada campo mudado com o valor anterior, por exemplo <code>- Data de fim: 2026-11-15 (antes: 2026-11-14)</code>. Uma edição que não mexe nesses campos não notifica ninguém.</p>
+<p>O email do colaborador vem dos seus contactos. Se o colaborador não tiver email, a notificação fica gravada com estado <code>Pendente</code> e aparece no portal.</p>
+<p>O <code>GET /{uuid}/submissao</code> devolve <code>processos[]</code>, <code>colaboradores[]</code> (com <code>funUuid</code> e <code>uuid</code>), <code>documentos[]</code> e a auditoria (<code>userRegistoName</code>, <code>dataRegisto</code>, …).</p>
+<blockquote><p><code>GET /{uuid}</code> é um resumo e <strong>não</strong> traz <code>processos[]</code>. Para o ecrã de edição usar <code>GET /{uuid}/submissao</code>; para a listagem, a lista geral.</p></blockquote>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td><code>dataFim</code> anterior a <code>dataInicio</code></td><td><strong>400</strong> <code>dataFim não pode ser anterior a dataInicio</code></td></tr>
+<tr><td>Sem colaboradores</td><td><strong>400</strong> <code>colaboradores é obrigatório</code></td></tr>
+<tr><td>Sem <code>paisDestinoId</code>, <code>descricaoDestino</code>, <code>ambitoMissao</code>, <code>dataInicio</code>, <code>dataFim</code>, <code>autorizadoPor</code> ou <code>dataAutorizacao</code></td><td><strong>400</strong> <code>{campo} é obrigatório</code></td></tr>
+</tbody></table></div>
+<blockquote><p><code>alojamento</code> é o único campo marcado com <code>*</code> no ecrã que a API aceita em falta: quando não vem, a criação assume <strong>Sim</strong>. É um valor por defeito deliberado.</p></blockquote>
+<hr>
+<h2>8. Ecrã — Prestadores Serviço *(ex-Análise)*</h2>
+<p>Só em <code>BILHETE_PASSAGEM</code> e <code>ALOJAMENTO</code>.</p>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/prestadores</code></p>
+<p>O <code>GET</code> devolve os prestadores <strong>já escolhidos</strong> e o texto da notificação. O catálogo para escolher vem de <code>GET /prestadores</code> (capítulo 4).</p>
+<pre><code>{
+  &quot;prestadores&quot;: [&quot;&lt;paramPrestUuid&gt;&quot;, &quot;&lt;paramPrestUuid&gt;&quot;],   // 1 a 3; lista completa
+  &quot;notificacao&quot;: {
+    &quot;assunto&quot;: &quot;Pedido de proposta — Missão 3/2026&quot;,
+    &quot;corpoEmail&quot;: &quot;Exmos. Senhores, solicitamos proposta…&quot;   // vazio = template parametrizado
+  },
+  &quot;processoEtapaAction&quot;: &quot;NEXT&quot;
+}</code></pre>
+<p>No <code>GET</code>, cada prestador traz <code>emails[]</code> — o principal <strong>mais os adicionais activos</strong>. São esses que recebem o pedido de proposta no <code>NEXT</code>.</p>
+<p>A coluna <strong>Nota Avaliação</strong> vem em <code>notaAvaliacao</code> (total 0–100), <code>notaAvaliacaoDesignacao</code> (<code>A</code>–<code>D</code>) e <code>notaAvaliacaoDesc</code> (ex.: &quot;Fornecedor Preferencial&quot;). É a avaliação <strong>mais recente</strong> desse prestador, de qualquer missão; vem <code>null</code> enquanto nunca tiver sido avaliado.</p>
+<p><code>NEXT</code> → etapa passa a <code>EMISSAO_REQUISICAO</code> e notifica todos esses emails.</p>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Mais de 3 prestadores <strong>distintos</strong></td><td><strong>400</strong> <code>Máximo de 3 prestadores por processo</code></td></tr>
+<tr><td>Lista vazia</td><td><strong>400</strong> <code>Selecione pelo menos um prestador</code></td></tr>
+<tr><td>Em <code>SEGURO_VIAGEM</code> ou <code>AJUDA_CUSTO</code></td><td><strong>400</strong> <code>O processo {tipo} não passa pela etapa PRESTADOR_SERVICO</code></td></tr>
+<tr><td><code>tipoProcesso</code> inexistente</td><td><strong>400</strong> <code>Tipo de processo inválido: {valor}</code></td></tr>
+</tbody></table></div>
+<blockquote><p>Prestadores repetidos no array são deduplicados antes de se validar o limite — enviar o mesmo prestador duas vezes não consome duas vagas.</p></blockquote>
+<hr>
+<h2>9. Ecrã — Emissão de Requisição</h2>
+<p>Só em <code>BILHETE_PASSAGEM</code> e <code>ALOJAMENTO</code>.</p>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/requisicoes</code></p>
+<p>Uma requisição <strong>por prestador</strong>, cada uma com N colaboradores. O <code>GET</code> devolve uma linha por prestador escolhido na etapa anterior, e <code>colaboradoresMissao[]</code> para o multiselect.</p>
+<pre><code>{
+  &quot;requisicoes&quot;: [
+    { &quot;missaoPrestUuid&quot;: &quot;…&quot;,              // do GET: requisicoes[].missaoPrestUuid
+      &quot;selecionado&quot;: true,
+      &quot;funcionarioUuids&quot;: [&quot;&lt;funUuid&gt;&quot;],   // colaboradores desta requisição
+      &quot;valorTotal&quot;: 125000,
+      &quot;proposta&quot;: { &quot;tipoDocumentoId&quot;: 20, &quot;documento&quot;: &quot;proposta.pdf&quot; } }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<p>Ao gravar, cada requisição recebe um <strong>número anual sequencial</strong> e uma nota de encomenda: <code>nrRequisicao: 3</code>, <code>anoRequisicao: 2026</code>, <code>notaEncomenda: &quot;RMS-2026/3&quot;</code>.</p>
+<p><strong>Extrair Requisição (PDF):</strong> <code>GET /{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf</code> → <code>application/pdf</code>. Gerado a partir dos dados, sempre disponível. No <code>NEXT</code> fica também arquivado em documentos.</p>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Colaborador em duas requisições do mesmo processo</td><td><strong>400</strong> <code>O colaborador {nome} já está associado à requisição de {prestador}</code></td></tr>
+<tr><td>Colaborador que não é da missão</td><td><strong>400</strong> <code>Colaborador não pertence à missão: {uuid}</code></td></tr>
+<tr><td>Prestador não escolhido na etapa anterior</td><td><strong>400</strong> <code>Prestador não seleccionado neste processo: {uuid}</code></td></tr>
+<tr><td>Requisição sem colaboradores</td><td><strong>400</strong> <code>Associe pelo menos um colaborador à requisição de {prestador}</code></td></tr>
+<tr><td>PDF de requisição inexistente</td><td><strong>404</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2>10. Ecrã — Logística</h2>
+<p>Todos os processos passam por aqui. <code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/logistica</code></p>
+<p><strong>Só a secção do tipo do processo é aceite.</strong> As outras devem vir a <code>null</code> (não mexer). O <code>GET</code> devolve <code>colaboradoresDisponiveis[]</code>, com <code>funUuid</code>, <code>uuid</code> e — quando aplicável — o prestador de que esse colaborador vem.</p>
+<p>O <code>GET</code> traz ainda <code>notificacao</code> (assunto e corpo do aviso ao colaborador, já preenchidos com o template e editáveis no ecrã) e, nas linhas de bilhete, <code>missaoPrestUuid</code> e <code>nomePrestador</code> — a coluna &quot;Prestador Serviço&quot; do ecrã. O prestador não se envia: vem da requisição.</p>
+<pre><code>// BILHETE_PASSAGEM
+{ &quot;bilhetesPassagem&quot;: [ { &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;], &quot;valor&quot;: 125000,
+                          &quot;anexo&quot;: { &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;fatura.pdf&quot; } } ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot; }
+
+// SEGURO_VIAGEM
+{ &quot;segurosViagem&quot;: [ { &quot;entId&quot;: 100000003,          // obrigatório — do lookup de entidades
+                       &quot;nomeSeguradora&quot;: null,       // null = nome da entidade
+                       &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;, &quot;&lt;uuid&gt;&quot;],
+                       &quot;valor&quot;: 45000 } ] }         // obrigatório
+
+// ALOJAMENTO — uma linha por quarto/estadia; pode juntar vários colaboradores do mesmo prestador
+{ &quot;alojamentos&quot;: [ { &quot;colaboradorIds&quot;: [&quot;&lt;uuid&gt;&quot;],  // ou &quot;colaboradorId&quot;: &quot;&lt;uuid&gt;&quot; (um só)
+                     &quot;lugarHospedagem&quot;: &quot;Hotel Praia Mar&quot;,   // obrigatório
+                     &quot;flgAlimentacao&quot;: &quot;SIM&quot;,                // obrigatório — &quot;SIM&quot; | &quot;NAO&quot;
+                     &quot;valorDiario&quot;: 6000,                    // obrigatório
+                     &quot;valorTotal&quot;: 36000,                    // null = valorDiario × nº de dias
+                     &quot;moeda&quot;: &quot;CVE&quot;,                         // null = CVE
+                     &quot;dataInicio&quot;: &quot;2026-11-10&quot;,             // null = datas da missão
+                     &quot;dataFim&quot;: &quot;2026-11-15&quot; } ] }
+
+// AJUDA_CUSTO
+{ &quot;ajudasCusto&quot;: [ { &quot;colaboradorId&quot;: &quot;&lt;uuid&gt;&quot;, &quot;flgAlojamento&quot;: true,
+                     &quot;numeroDiasAlojamento&quot;: 5, &quot;valorDiario&quot;: 6000 } ] }</code></pre>
+<p>No alojamento, o nº de dias é calculado a partir das datas (<code>dataFim − dataInicio + 1</code>). Não se envia <code>numeroDias</code> nem <code>valor</code>: esses campos não existem e são ignorados sem erro.</p>
+<h3>O cálculo da ajuda de custo</h3>
+<p><code>valorDiario</code> é a <strong>base</strong> enviada pelo ecrã. O servidor aplica-lhe a fracção e devolve o <code>valorDiario</code> efectivo e o <code>valorTotal</code> — ambos só de leitura no ecrã.</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>flgAlojamento</code></th><th>Alimentação no processo ALOJAMENTO</th><th>Fracção</th><th>Exemplo com base 6000 × 5 dias</th></tr></thead>
+<tbody>
+<tr><td><code>false</code></td><td>—</td><td><strong>100%</strong></td><td>6000/dia → 30 000</td></tr>
+<tr><td><code>true</code></td><td><code>NAO</code>, ou sem linha de alojamento</td><td><strong>⅔</strong></td><td>4000/dia → 20 000</td></tr>
+<tr><td><code>true</code></td><td><code>SIM</code></td><td><strong>⅓</strong></td><td>2000/dia → 10 000</td></tr>
+</tbody></table></div>
+<blockquote><p><strong>A ordem importa.</strong> O ⅓ só se aplica se o processo <code>ALOJAMENTO</code> já tiver, para esse colaborador, uma linha com <code>flgAlimentacao: &quot;SIM&quot;</code>. Gravar a ajuda de custo antes do alojamento dá ⅔ <strong>sem erro nenhum</strong>. Gravar o alojamento primeiro, ou regravar a ajuda de custo depois.</p></blockquote>
+<p>O texto do aviso pode ser diferente por processo: procura-se o template <code>MISSAO_LOGISTICA_COLABORADOR_{TIPO}</code> (ex.: <code>..._BILHETE_PASSAGEM</code>, &quot;Emissão de Bilhete de Viagem&quot;) e, se não existir, usa-se o genérico <code>MISSAO_LOGISTICA_COLABORADOR</code>.</p>
+<p><code>NEXT</code> → <code>VALIDACAO_UGAL</code> e notifica <strong>por email</strong> os colaboradores das linhas do processo (<code>MISSAO_LOGISTICA_COLABORADOR</code>, uma notificação por processo). O campo <code>notificacao</code> do payload permite editar o assunto e o corpo; se vier a <code>null</code>, usa-se o template. Sem email nos contactos, fica <code>Pendente</code>.</p>
+<p><strong>Erros:</strong> campos obrigatórios em falta (<code>{secção}: {campo} é obrigatório</code>), colaborador que não é da missão, e colaboradores de prestadores diferentes na mesma linha.</p>
+<hr>
+<h2>11. Ecrã — Validação UGAL</h2>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/validacao-ugal</code></p>
+<p>O <code>GET</code> traz os documentos a consultar, em três listas — <code>autorizacao</code> (anexos do registo da missão), <code>requisicoes</code> (PDFs emitidos) e <code>faturas</code> (anexos da logística) — mais <code>parecerAtual</code>, <code>historico</code> e as opções do *select*:</p>
+<pre><code>{ &quot;processo&quot;: { … },
+  &quot;autorizacao&quot;: [], &quot;requisicoes&quot;: [ { &quot;id&quot;: 513, &quot;tipoDocumentoDesc&quot;: &quot;…&quot;, &quot;documento&quot;: &quot;…&quot; } ],
+  &quot;faturas&quot;: [],
+  &quot;parecerAtual&quot;: null,
+  &quot;historico&quot;: [],
+  &quot;opcoesParecer&quot;: [ { &quot;valor&quot;: &quot;FAVORAVEL&quot;,    &quot;descricao&quot;: &quot;Favorável&quot; },
+                     { &quot;valor&quot;: &quot;DESFAVORAVEL&quot;, &quot;descricao&quot;: &quot;Desfavorável&quot; } ] }</code></pre>
+<pre><code>{ &quot;parecer&quot;: &quot;FAVORAVEL&quot;, &quot;observacao&quot;: &quot;Conforme.&quot;, &quot;processoEtapaAction&quot;: &quot;NEXT&quot; }</code></pre>
+<ul>
+<li><strong>Favorável + <code>NEXT</code></strong> → <code>APROVACAO_RH</code>.</li>
+<li><strong>Desfavorável + <code>NEXT</code></strong> → o processo <strong>volta a <code>LOGISTICA</code></strong> e o parecer é arquivado no</li>
+</ul>
+<p>histórico (<code>estado: &quot;I&quot;</code>); abre-se um ciclo novo.</p>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Sem <code>parecer</code></td><td><strong>400</strong> <code>parecer é obrigatório (FAVORAVEL ou DESFAVORAVEL)</code></td></tr>
+<tr><td>Desfavorável sem <code>observacao</code></td><td><strong>400</strong> <code>A observação é obrigatória num parecer desfavorável</code></td></tr>
+<tr><td><code>parecer</code> fora do domínio</td><td><strong>400</strong> <code>Parecer inválido: {valor}</code></td></tr>
+</tbody></table></div>
+<blockquote><p>O protótipo marca a Observação como opcional. É opcional <strong>só</strong> no parecer favorável.</p></blockquote>
+<hr>
+<h2>12. Ecrã — Aprovação RH</h2>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/aprovacao-rh</code></p>
+<p>Dois pareceres sequenciais no mesmo ecrã. O <code>GET</code> devolve <code>parecerCoordenador</code>, <code>parecerDirector</code>, <code>parecerUgal</code> (o que abriu a etapa, para consulta), <code>historico</code> e dois *selects*: <code>opcoesParecer</code> e <code>opcoesResponsavel</code> (<code>COORDENADOR_RH</code>, <code>DIRECTOR_RH</code>).</p>
+<pre><code>{ &quot;responsavel&quot;: &quot;COORDENADOR_RH&quot;,   // obrigatório neste ecrã
+  &quot;parecer&quot;: &quot;FAVORAVEL&quot;, &quot;observacao&quot;: &quot;Concordo.&quot;,
+  &quot;processoEtapaAction&quot;: &quot;NEXT&quot; }</code></pre>
+<p><strong>A ordem é fixa:</strong> o Coordenador emite primeiro; só depois o Director. O parecer do Director é o que faz avançar — e ao avançar dispara o cabimento, passando a etapa a <code>CABIMENTO</code>. O parecer do Coordenador é obrigatório mas não vinculativo.</p>
+<p><strong>Erros:</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Director antes do Coordenador</td><td><strong>400</strong> <code>O parecer do Director exige o parecer emitido do Coordenador RH</code></td></tr>
+<tr><td>Sem <code>parecer</code></td><td><strong>400</strong> <code>parecer é obrigatório (FAVORAVEL ou DESFAVORAVEL)</code></td></tr>
+<tr><td>Desfavorável sem <code>observacao</code></td><td><strong>400</strong> <code>A observação é obrigatória num parecer desfavorável</code></td></tr>
+</tbody></table></div>
+<hr>
+<h2>13. Ecrãs — Cabimentação e Autorização</h2>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/cabimento</code> e <code>.../autorizacao</code></p>
+<p>São <strong>etapas distintas</strong> com a mesma estrutura de resposta — já não se distinguem pelo <code>estadoCabimento</code>:</p>
+<pre><code>{ &quot;processo&quot;: { &quot;etapa&quot;: &quot;CABIMENTO&quot; }, &quot;estadoMissao&quot;: &quot;A&quot;, &quot;valorTotal&quot;: 45000,
+  &quot;itens&quot;: [ { &quot;logisticaUuid&quot;: &quot;…&quot;, &quot;referencia&quot;: &quot;SEGURO_VIAGEM&quot;,
+               &quot;nome&quot;: &quot;Halcyon Viagens&quot;,     // prestador, seguradora ou colaborador
+               &quot;valorTotal&quot;: 45000, &quot;moeda&quot;: &quot;CVE&quot;,
+               &quot;cabId&quot;: null, &quot;estadoCabimento&quot;: null,
+               &quot;colaboradores&quot;: [ … ], &quot;documento&quot;: null } ] }</code></pre>
+<p><strong>Cabimentação:</strong></p>
+<pre><code>{ &quot;itens&quot;: [ { &quot;logisticaUuid&quot;: &quot;…&quot;, &quot;selecionado&quot;: true,
+               &quot;cabId&quot;: null,     // só no cabimento manual/internacional
+               &quot;anexo&quot;: { &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;nota.pdf&quot; } } ],
+  &quot;processoEtapaAction&quot;: &quot;NEXT&quot; }</code></pre>
+<p><strong>Autorização</strong> — sem campos: <code>{ &quot;processoEtapaAction&quot;: &quot;NEXT&quot; }</code></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Acção</th><th>Efeito</th></tr></thead>
+<tbody>
+<tr><td>Cabimentação <code>NEXT</code></td><td>Linhas seleccionadas → <code>CABIMENTADO</code>. Só avança com <strong>todas</strong> cabimentadas</td></tr>
+<tr><td>Autorização <code>NEXT</code></td><td><strong>Todas</strong> as linhas → <code>AUTORIZADO</code>; processo → <code>PAGAMENTO</code></td></tr>
+<tr><td>Último processo activo a chegar a <code>PAGAMENTO</code></td><td>Missão passa a <code>estado: &quot;FINALIZADO&quot;</code></td></tr>
+</tbody></table></div>
+<p><strong>Erros:</strong> <code>Faltam cabimentar {n} linha(s) do processo</code>, linha que não pertence ao processo, e alterar o <code>cabId</code> de uma linha já autorizada.</p>
+<blockquote><p><strong><code>cabId</code> continua <code>null</code></strong> — a integração com o SGAL ainda não existe. Acabou a autorização parcial: o <code>NEXT</code> exige todas as linhas.</p></blockquote>
+<h3>Vista da missão inteira</h3>
+<p><code>GET /{uuid}/cabimentos</code> — <strong>só consulta</strong>, com as linhas dos <strong>quatro</strong> processos numa resposta, como no ecrã da spec, que mostra os quatro tipos de serviço na mesma tabela. Cabimentar e autorizar continuam a ser feitos processo a processo.</p>
+<pre><code>{ &quot;missaoUuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;7/2026&quot;, &quot;estadoMissao&quot;: &quot;FINALIZADO&quot;,
+  &quot;processos&quot;: [ { &quot;uuid&quot;: &quot;…&quot;, &quot;tipoProcesso&quot;: &quot;BILHETE_PASSAGEM&quot;, &quot;etapa&quot;: &quot;PAGAMENTO&quot;, &quot;estado&quot;: &quot;A&quot; }, … ],
+  &quot;itens&quot;: [ { &quot;logisticaUuid&quot;: &quot;…&quot;, &quot;referencia&quot;: &quot;BILHETE_PASSAGEM&quot;,   // = tipo de serviço
+               &quot;nome&quot;: &quot;Atlantico Viagens Teste&quot;, &quot;valorTotal&quot;: 250000, &quot;moeda&quot;: &quot;CVE&quot;,
+               &quot;cabId&quot;: null, &quot;estadoCabimento&quot;: &quot;AUTORIZADO&quot;,
+               &quot;colaboradores&quot;: [ … ], &quot;documento&quot;: null }, … ],
+  &quot;valorTotal&quot;: 391000, &quot;dataExecucao&quot;: &quot;2026-09-16&quot; }</code></pre>
+<p>Os <code>itens</code> têm a mesma forma do endpoint por processo, e o <code>referencia</code> diz o tipo de serviço de cada linha. Os processos inactivos (alojamento desligado) não entram. <code>processos[]</code> traz a etapa de cada um, para o ecrã saber quais é que já podem ser cabimentados.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Missão inexistente</td><td><strong>404</strong></td></tr>
+<tr><td><code>uuid</code> mal formado</td><td><strong>400</strong> <code>String fornecida não é um UUID válido</code></td></tr>
+</tbody></table></div>
+<hr>
+<h2>14. Ecrã — Pagamento</h2>
+<p><code>GET</code>/<code>PUT /{uuid}/pagamento</code> — continua a ser <strong>por missão</strong>, não por processo.</p>
+<p>Exige a missão em <code>FINALIZADO</code>, ou seja, os quatro processos activos autorizados.</p>
+<pre><code>{ &quot;referenciaPagamento&quot;: &quot;TRF-2026/0917&quot;, &quot;dataPagamento&quot;: &quot;2026-09-16&quot; }</code></pre>
+<p>→ <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;mensagem&quot;: &quot;Pagamento registado&quot;, &quot;alertas&quot;: [] }</code></p>
+<p><strong>Notificação:</strong> no <strong>primeiro</strong> registo do pagamento, cada colaborador com linha de ajuda de custo recebe <code>MISSAO_AJUDA_CUSTO</code> com os seus valores (valor diário, dias, total, referência e data do pagamento). Voltar a gravar para corrigir a referência ou a data não notifica outra vez.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Missão por finalizar</td><td><strong>400</strong> <code>O pagamento só pode ser registado com a missão finalizada (todos os processos autorizados)</code></td></tr>
+</tbody></table></div>
+<hr>
+<h2>15. Ecrã — Avaliar Prestador</h2>
+<p><code>GET</code>/<code>PUT /{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao</code></p>
+<p>Acessível pela sub-lista de processos da Lista Missão. O <code>GET</code> traz tudo o que o ecrã precisa — critérios, pesos e as opções dos *selects*:</p>
+<pre><code>{ &quot;nomePrestador&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;3/2026&quot;, &quot;tipoProcesso&quot;: &quot;ALOJAMENTO&quot;,
+  &quot;podeAvaliar&quot;: true, &quot;avaliado&quot;: false,
+  &quot;criterios&quot;: [ { &quot;criterio&quot;: &quot;SISTEMA_QUALIDADE&quot;,  &quot;peso&quot;: 5,  &quot;avaliacao&quot;: null, … },
+                 { &quot;criterio&quot;: &quot;PRAZO_FORNECIMENTO&quot;, &quot;peso&quot;: 15, … },
+                 { &quot;criterio&quot;: &quot;QUALIDADE_PRODUTO&quot;,  &quot;peso&quot;: 40, … },
+                 { &quot;criterio&quot;: &quot;CAPACIDADE_RESPOSTA&quot;,&quot;peso&quot;: 20, … },
+                 { &quot;criterio&quot;: &quot;PRECO&quot;,              &quot;peso&quot;: 20, … } ],
+  &quot;opcoesAvaliacao&quot;: [ { &quot;valor&quot;: &quot;100&quot;, &quot;descricao&quot;: &quot;Muito Bom&quot; },
+                       { &quot;valor&quot;: &quot;75&quot;,  &quot;descricao&quot;: &quot;Bom&quot; },
+                       { &quot;valor&quot;: &quot;50&quot;,  &quot;descricao&quot;: &quot;Satisfaz&quot; },
+                       { &quot;valor&quot;: &quot;25&quot;,  &quot;descricao&quot;: &quot;Mau&quot; } ],
+  &quot;total&quot;: null, &quot;designacao&quot;: null, &quot;designacaoDesc&quot;: null }</code></pre>
+<pre><code>{ &quot;sistemaQualidade&quot;: &quot;100&quot;, &quot;prazoFornecimento&quot;: &quot;75&quot;, &quot;qualidadeProduto&quot;: &quot;100&quot;,
+  &quot;capacidadeResposta&quot;: &quot;75&quot;, &quot;preco&quot;: &quot;50&quot; }</code></pre>
+<p>→ <code>{ &quot;total&quot;: 81.25, &quot;designacao&quot;: &quot;A&quot;, &quot;id&quot;: &quot;…&quot; }</code></p>
+<p>O total é a soma de <code>peso × (avaliação/100)</code>. A classe vem do total: <strong>A</strong> &gt; 75, <strong>B</strong> ]40;75], <strong>C</strong> ]25;40], <strong>D</strong> [0;25] — <code>designacaoDesc</code> traz o texto (ex.: &quot;Fornecedor Preferencial&quot;).</p>
+<p><strong>Erros:</strong> <code>Avaliação obrigatória para o critério {X}</code> e <code>Avaliação inválida para {X}: {v} (valores: 100, 75, 50, 25)</code>.</p>
+<blockquote><p>O protótipo mostra totais numa escala 1–5 com &quot;Muito Bom / Bom / Regular&quot;. A API segue o texto da spec: total ponderado 0–100 e classes <strong>A–D</strong>. Vale a API.</p></blockquote>
+<h3>Vista da missão inteira</h3>
+<p>O ecrã &quot;Detalhe de Avaliação&quot; mostra os prestadores da missão numa só tabela, com um botão Gravar. Há dois endpoints para isso, e os individuais acima continuam disponíveis.</p>
+<p><code>GET /{uuid}/avaliacoes</code> — uma linha <strong>por prestador em cada processo</strong>: o mesmo prestador pode servir dois processos e é avaliado no serviço que prestou em cada um.</p>
+<pre><code>{ &quot;missaoUuid&quot;: &quot;…&quot;, &quot;nrMissaoFormatado&quot;: &quot;7/2026&quot;, &quot;estadoMissao&quot;: &quot;FINALIZADO&quot;,
+  &quot;opcoesAvaliacao&quot;: [ { &quot;valor&quot;: &quot;100&quot;, &quot;descricao&quot;: &quot;Muito Bom&quot; }, … ],   // uma vez, no topo
+  &quot;avaliacoes&quot;: [
+    { &quot;missaoPrestUuid&quot;: &quot;…&quot;, &quot;nomePrestador&quot;: &quot;Atlantico Viagens Teste&quot;,
+      &quot;tipoProcesso&quot;: &quot;BILHETE_PASSAGEM&quot;,
+      &quot;podeAvaliar&quot;: true, &quot;avaliado&quot;: true,
+      &quot;criterios&quot;: [ { &quot;criterio&quot;: &quot;SISTEMA_QUALIDADE&quot;, &quot;peso&quot;: 5, &quot;avaliacao&quot;: &quot;100&quot;, &quot;pontos&quot;: 5 }, … ],
+      &quot;total&quot;: 81.25, &quot;designacao&quot;: &quot;A&quot;, &quot;designacaoDesc&quot;: &quot;Fornecedor Preferencial&quot; } ] }</code></pre>
+<p>Cada linha tem a mesma forma do <code>GET</code> individual; só <code>opcoesAvaliacao</code> é que não se repete por linha, porque vem uma vez no topo. <code>podeAvaliar: false</code> é um prestador sem requisição emitida — a linha aparece, mas não se grava.</p>
+<p><code>PUT /{uuid}/avaliacoes</code> — grava as linhas todas de uma vez. O processo vem do próprio prestador, por isso não se envia o tipo.</p>
+<pre><code>{ &quot;avaliacoes&quot;: [
+    { &quot;missaoPrestUuid&quot;: &quot;…&quot;, &quot;sistemaQualidade&quot;: &quot;100&quot;, &quot;prazoFornecimento&quot;: &quot;75&quot;,
+      &quot;qualidadeProduto&quot;: &quot;100&quot;, &quot;capacidadeResposta&quot;: &quot;75&quot;, &quot;preco&quot;: &quot;50&quot; } ] }</code></pre>
+<p>→ <code>{ &quot;avaliacoes&quot;: [ { &quot;id&quot;: &quot;&lt;uuid da avaliação&gt;&quot;, &quot;total&quot;: 81.25, &quot;designacao&quot;: &quot;A&quot; } ] }</code>, pela mesma ordem do pedido.</p>
+<p><strong>Ou grava tudo, ou não grava nada:</strong> se uma linha falhar, nenhuma é gravada.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Prestador sem requisição emitida</td><td><strong>400</strong> <code>Só é possível avaliar um prestador com requisição emitida neste processo</code></td></tr>
+<tr><td>Prestador de outra missão, ou inactivo</td><td><strong>404</strong> <code>Prestador não encontrado nesta missão: {uuid}</code></td></tr>
+<tr><td><code>avaliacoes</code> vazio ou em falta</td><td><strong>400</strong> <code>avaliacoes é obrigatório</code></td></tr>
+<tr><td>Linha sem <code>missaoPrestUuid</code></td><td><strong>400</strong> <code>missaoPrestUuid é obrigatório em cada avaliação</code></td></tr>
+<tr><td>Missão cancelada</td><td><strong>400</strong> <code>A missão está cancelada e não admite alterações</code></td></tr>
+</tbody></table></div>
+<hr>
+<h2>16. Ecrã — Ver Notificação</h2>
+<p><code>GET /api/v1/missao-servico/{uuid}/notificacoes</code> — o botão &quot;Ver Notificação&quot; da Lista Missão.</p>
+<p>Devolve <strong>todas</strong> as notificações emitidas no âmbito da missão numa só chamada, da mais recente para a mais antiga. Ficam gravadas com referências diferentes conforme a etapa que as gerou, e o campo <code>origem</code> diz qual:</p>
+<pre><code>[ { &quot;uuid&quot;: &quot;…&quot;, &quot;tipoNotificacao&quot;: &quot;MISSAO_CANCELAMENTO&quot;,
+    &quot;assunto&quot;: &quot;Cancelamento de Missão Nº 6/2026&quot;,
+    &quot;mensagem&quot;: &quot;A missão Nº 6/2026 foi cancelada. Motivo: …&quot;,
+    &quot;email&quot;: &quot;geral@atlanticoviagens.cv&quot;,     // null = colaborador sem email (fica &quot;Pendente&quot;)
+    &quot;nomeReceptor&quot;: &quot;Atlantico Viagens Teste&quot;,
+    &quot;dataEnvio&quot;: &quot;2026-09-15&quot;, &quot;estado&quot;: &quot;Enviado&quot;,
+    &quot;origem&quot;: &quot;RH_T_MISSAO_SERVICO&quot; } ]</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th><code>origem</code></th><th>Notificações</th></tr></thead>
+<tbody>
+<tr><td><code>RH_T_MISSAO_PRESTADOR</code></td><td>pedido de proposta (um registo por email do prestador)</td></tr>
+<tr><td><code>RH_T_MISSAO_REQUISICAO</code></td><td>envio da requisição</td></tr>
+<tr><td><code>RH_T_MISSAO_COLABORADOR</code></td><td>ao colaborador: logística, confirmação do pedido, ajuda de custo, alteração</td></tr>
+<tr><td><code>RH_T_MISSAO_SERVICO</code></td><td>aos prestadores: cancelamento e alteração</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th><code>tipoNotificacao</code></th><th>O que é</th></tr></thead>
+<tbody>
+<tr><td><code>MISSAO_PRESTADOR</code></td><td>pedido de proposta</td></tr>
+<tr><td><code>MISSAO_EMISSAO_REQUISICAO</code></td><td>requisição</td></tr>
+<tr><td><code>MISSAO_LOGISTICA_COLABORADOR</code></td><td>logística da viagem (uma por processo)</td></tr>
+<tr><td><code>MISSAO_CONFIRMACAO_PEDIDO</code></td><td>confirmação do pedido ao colaborador</td></tr>
+<tr><td><code>MISSAO_AJUDA_CUSTO</code></td><td>ajuda de custo paga</td></tr>
+<tr><td><code>MISSAO_ALTERACAO</code></td><td>alteração da missão</td></tr>
+<tr><td><code>MISSAO_CANCELAMENTO</code></td><td>cancelamento</td></tr>
+</tbody></table></div>
+<p>O endpoint genérico <code>GET /api/v1/funcionarios/notificacoes</code> ganhou também os filtros <code>referenciaName</code> e <code>referenciaUuid</code>, úteis para consultar as notificações de <strong>uma</strong> entidade concreta. Para o ecrã da missão usar o endpoint acima: evita ter de somar uma chamada por prestador, requisição e colaborador.</p>
+<hr>
+<h2>17. Cancelar Missão</h2>
+<p><code>PATCH /{uuid}/cancelar</code> → <code>{ &quot;motivoCancelamento&quot;: &quot;…&quot; }</code> *(obrigatório)*</p>
+<p>Resposta: <code>{ &quot;sucesso&quot;: true, &quot;id&quot;: &quot;&lt;uuid da missão&gt;&quot;, &quot;mensagem&quot;: &quot;Missão cancelada&quot;, &quot;alertas&quot;: [] }</code> (antes vinha sem corpo).</p>
+<p>Inactiva a missão e, com ela, os processos, os pareceres, os colaboradores das requisições e as avaliações.</p>
+<p><strong>Notificação:</strong> se algum processo já passou da primeira etapa do seu percurso, são renotificados todos os que já tinham recebido email desta missão — prestadores, emails adicionais e destinatários das requisições — com o nº da missão e o motivo. Os colaboradores que <strong>estavam</strong> na missão recebem o mesmo aviso por email; quem já tinha sido retirado não é avisado.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Resposta</th></tr></thead>
+<tbody>
+<tr><td>Sem <code>motivoCancelamento</code></td><td><strong>400</strong> <code>motivoCancelamento é obrigatório</code></td></tr>
+<tr><td>Missão já cancelada</td><td><strong>400</strong> <code>A missão já está cancelada</code></td></tr>
+<tr><td>Missão finalizada</td><td><strong>400</strong> <code>A missão está finalizada e não pode ser cancelada</code></td></tr>
+</tbody></table></div>
+<hr>
+<h2>18. Limitações conhecidas</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Tema</th><th>Situação</th></tr></thead>
+<tbody>
+<tr><td><code>cabId</code> (SGAL)</td><td>Não gerado — integração por definir (sem endpoint nem contrato). As linhas ficam <code>CABIMENTADO</code> com <code>cabId: null</code></td></tr>
+<tr><td><code>valorDiario</code></td><td>A base vem do cliente, sem validação. A tabela de preços da ajuda de custo nunca foi especificada</td></tr>
+<tr><td>Pesquisa de entidades</td><td><code>entidades/ativos</code> devolve 11 981 registos sem filtro nem paginação</td></tr>
+<tr><td>Identidade do utilizador</td><td><code>executadoPor</code> grava <code>anonymousUser</code> em desenvolvimento; sem bloqueio por perfil nesta fase</td></tr>
+<tr><td>Encoding</td><td>Enviar <code>Content-Type: application/json; charset=utf-8</code></td></tr>
+<tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td>O analista retirou os alertas da missão do âmbito actual: <code>GET /api/v1/funcionarios/alertas</code> não devolve nada da missão. O botão pode ficar escondido</td></tr>
+<tr><td>Templates de notificação</td><td>Estão parametrizados em <code>RH_T_PARAM_NOTIFICACAO</code> com textos <strong>provisórios</strong>, a rever pelo negócio. O script para os outros ambientes é <code>docs/db/missao_servico_notificacoes_dml.sql</code></td></tr>
+</tbody></table></div>
+<hr>
+<h1>Histórico</h1>
+<blockquote><p><strong>Tudo o que se segue está superado, e os endpoints aqui descritos foram removidos a 2026-09-16.</strong> Descreve o modelo anterior, em que a missão tinha uma etapa única e os endpoints não levavam o tipo de processo no caminho. Fica como registo do que mudou, para quem ainda esteja a migrar. <strong>Não implementar a partir daqui</strong> — em particular, a afirmação &quot;não existe etapa <code>AUTORIZACAO</code>&quot; deixou de ser verdade, e as etapas <code>ANALISE</code> e <code>CABIMENTO</code> passaram a <code>PRESTADOR_SERVICO</code> e a <code>CABIMENTO</code> + <code>AUTORIZACAO</code> separadas.</p></blockquote>
+<h3>1. Correção — <code>cabId</code> deixou de ser obrigatório</h3>
+<p><code>PUT /{uuid}/cabimento</code> rejeitava com <strong>400 <code>cabId é obrigatório</code></strong> qualquer item selecionado sem <code>cabId</code>.</p>
+<p>Estava errado: segundo a Especificação Técnica Funcional, o número de cabimento é <strong>gerado</strong>, não introduzido pelo utilizador — na etapa de Autorização o campo é descrito como *&quot;Mostra o numero de Cabimento Gerado na Etapa Anterior&quot;*. O formulário da Cabimentação só tem selecionar, tipo de serviço, nome, valor e anexo.</p>
+<h3>Antes</h3>
+<pre><code>// 400 — cabId é obrigatório
+{ &quot;itens&quot;: [ { &quot;logisticaId&quot;: 101, &quot;selecionado&quot;: true, &quot;anexo&quot;: { ... } } ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot; }</code></pre>
+<h3>Depois</h3>
+<pre><code>// 200 — cabId é opcional
+{ &quot;itens&quot;: [ { &quot;logisticaId&quot;: 101, &quot;selecionado&quot;: true, &quot;anexo&quot;: { ... } } ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot; }</code></pre>
+<blockquote><p><code>cabId</code> continua a ser aceite no payload — serve os <strong>cabimentos manuais/internacionais</strong>, que a spec descreve como preenchidos à mão pelo departamento financeiro.</p></blockquote>
+<p><strong>Nota:</strong> a geração automática do <code>cabId</code> via SGAL <strong>ainda não está implementada</strong> (sem endpoint nem contrato definidos). As linhas ficam <code>CABIMENTADO</code> com <code>cabId: null</code>.</p>
+<hr>
+<h3>2. <code>SAVE</code> vs <code>NEXT</code> — comportamento corrigido em todas as etapas</h3>
+<p>Todos os <code>PUT</code> de etapa aceitam <code>processoEtapaAction</code> com dois valores: <code>&quot;SAVE&quot;</code> (Gravar) e <code>&quot;NEXT&quot;</code> (Avançar/Cabimentar/Autorizar).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Ação</th><th>O que faz</th></tr></thead>
+<tbody>
+<tr><td><code>SAVE</code></td><td>Grava os dados do formulário. <strong>Não</strong> avança a etapa, <strong>não</strong> muda estados, <strong>não</strong> envia notificações.</td></tr>
+<tr><td><code>NEXT</code></td><td>Grava, avança a etapa, muda estados e envia as notificações da etapa.</td></tr>
+</tbody></table></div>
+<h3>O que mudou</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Endpoint</th><th>Antes</th><th>Depois</th></tr></thead>
+<tbody>
+<tr><td><code>PUT /{uuid}/cabimento</code></td><td><code>SAVE</code> marcava <code>CABIMENTADO</code> e avançava a etapa</td><td><code>SAVE</code> só grava anexos/seleção</td></tr>
+<tr><td><code>PUT /{uuid}/autorizacao</code></td><td><code>SAVE</code> marcava <code>AUTORIZADO</code></td><td><code>SAVE</code> só valida; só <code>NEXT</code> autoriza</td></tr>
+<tr><td>Todos os <code>PUT</code> de etapa</td><td><code>SAVE</code> reescrevia a etapa da missão</td><td><code>SAVE</code> nunca toca na etapa</td></tr>
+</tbody></table></div>
+<hr>
+<h3>3. A etapa nunca retrocede</h3>
+<p>Cada <code>salvar*</code> escrevia a etapa do seu ecrã de forma incondicional. Numa missão em <code>PAGAMENTO</code>, gravar no ecrã de submissão devolvia-a a <code>SUBMISSAO</code>, reabrindo etapas já concluídas.</p>
+<p>Agora a transição é <strong>monotónica</strong>: a etapa só avança, nunca recua. Gravar num ecrã de uma etapa já ultrapassada continua a ser permitido (correções), mas não puxa o processo para trás.</p>
+<p>Ordem das etapas: <code>SUBMISSAO</code> → <code>ANALISE</code> → <code>EMISSAO_REQUISICAO</code> → <code>LOGISTICA</code> → <code>CABIMENTO</code> → <code>PAGAMENTO</code></p>
+<hr>
+<h3>4. Guarda de ordem — <code>NEXT</code> fora de sequência dá 400</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Ação</th><th>Etapa à frente da atual</th><th>Etapa já ultrapassada</th></tr></thead>
+<tbody>
+<tr><td><code>SAVE</code></td><td>grava (só regista aviso no log)</td><td>grava</td></tr>
+<tr><td><code>NEXT</code></td><td><strong>400</strong></td><td>avança (sem retroceder)</td></tr>
+</tbody></table></div>
+<pre><code>// PUT /{uuid}/cabimento com NEXT numa missão em SUBMISSAO
+{
+  &quot;status&quot;: 400,
+  &quot;title&quot;: &quot;A missão encontra-se na etapa &#x27;SUBMISSAO&#x27; — esta operação exige que já tenha atingido a etapa &#x27;CABIMENTO&#x27;&quot;
+}</code></pre>
+<p><code>PUT /{uuid}/pagamento</code> exige sempre que a etapa <code>PAGAMENTO</code> tenha sido atingida (não tem Gravar/Avançar).</p>
+<hr>
+<h3>5. Gravações idempotentes</h3>
+<p>Gravar duas vezes o mesmo formulário deixou de ter efeitos colaterais.</p>
+<p><strong>Logística</strong> — o maior problema: cada gravação <strong>inativava e recriava</strong> as linhas. Consequências, agora resolvidas:</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Antes</th><th>Depois</th></tr></thead>
+<tbody>
+<tr><td><code>logisticaId</code> após re-gravar</td><td>mudavam (ex.: 132→137)</td><td>estáveis</td></tr>
+<tr><td>Anexos</td><td>perdidos (ficavam na linha inativa)</td><td>preservados</td></tr>
+<tr><td>Linhas em <code>RH_T_MISSAO_LOGISTICA</code></td><td>+N por gravação</td><td>sem crescimento</td></tr>
+</tbody></table></div>
+<blockquote><p><strong>Importante:</strong> os <code>logisticaId</code> que o ecrã de Cabimentação envia deixam de ser invalidados por uma gravação da Logística noutro separador.</p></blockquote>
+<p><strong>Autorização</strong> — gravar duas vezes dava <code>400 Item sem cabimento</code>. Agora aceita itens já <code>AUTORIZADO</code> (idempotente).</p>
+<p><strong>Anexos</strong> — ao reenviar um anexo já existente, incluir sempre o <code>id</code> que veio no GET:</p>
+<pre><code>&quot;anexo&quot;: { &quot;id&quot;: 349, &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;bilhete.pdf&quot; }  // atualiza
+&quot;anexo&quot;: { &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;bilhete.pdf&quot; }             // cria novo e marca o anterior como eliminado</code></pre>
+<hr>
+<h3>6. Novo campo — <code>colaboradoresMissao</code></h3>
+<p><strong>Endpoints:</strong> <code>GET /{uuid}/emissao-requisicao</code> e <code>GET /{uuid}/logistica</code></p>
+<p>Devolve o universo de colaboradores afetos à missão, para popular os multiselects <strong>sem uma segunda chamada</strong> ao <code>/submissao</code>.</p>
+<pre><code>&quot;colaboradoresMissao&quot;: [
+  {
+    &quot;id&quot;: 31,                                            // RH_T_MISSAO_COLABORADOR.id
+    &quot;uuid&quot;: &quot;019fed6d-ae2a-755d-812b-4efb450802b0&quot;,      // uuid da linha missão-colaborador
+    &quot;funId&quot;: 958873,                                     // RH_T_FUNCIONARIOS.id
+    &quot;funUuid&quot;: &quot;019fd75f-0b61-7406-a256-a709912e8b51&quot;,   // uuid do funcionário  ← usar este
+    &quot;nomeColaborador&quot;: &quot;Wilson Cabral Tavares&quot;,
+    &quot;numDocumento&quot;: &quot;19940819M002H&quot;,
+    &quot;estado&quot;: &quot;A&quot;,
+    &quot;missaoPrestId&quot;: 17,                                 // só em /logistica
+    &quot;nomePrestador&quot;: &quot;Halcyon Viagens&quot;                   // só em /logistica
+  }
+]</code></pre>
+<blockquote><p>⚠️ <strong>Armadilha:</strong> os campos <code>missaoColabIds</code>, <code>colaboradorIds</code> e <code>colaboradorId</code> dos payloads esperam o <strong><code>funUuid</code></strong> (uuid do funcionário), apesar do nome. Os outros três identificadores devolvem <code>400 Colaborador inválido</code>.</p></blockquote>
+<h3><code>missaoPrestId</code> / <code>nomePrestador</code> (só na Logística)</h3>
+<p>Uma linha de <strong>bilhete</strong> ou <strong>seguro</strong> só pode agrupar colaboradores do <strong>mesmo prestador</strong> — a associação é feita na etapa de Emissão de Requisição. Agrupar colaboradores de agências diferentes devolve:</p>
+<pre><code>{ &quot;status&quot;: 400, &quot;title&quot;: &quot;Prestador inconsistente para os colaboradores selecionados&quot; }</code></pre>
+<p>Com estes campos, o multiselect pode agrupar por agência e evitar a seleção inválida:</p>
+<pre><code>▾ Colaboradores
+  ── Halcyon Viagens ──────────
+     ☐ Wilson Cabral Tavares
+  ── Cabo Verde Travel ────────
+     ☐ Tatiana Delgado Barbosa</code></pre>
+<p>Colaborador com <code>missaoPrestId: null</code> ficou de fora da Emissão de Requisição — qualquer linha de logística para ele dá <code>400 Requisição não encontrada para colaborador</code>. Deve ser desativado na UI.</p>
+<hr>
+<h3>7. Novo campo — <code>colaboradores</code> por linha</h3>
+<p><strong>Endpoints:</strong> <code>GET /{uuid}/cabimento</code> e <code>GET /{uuid}/autorizacao</code></p>
+<p>O campo <code>nome</code> mostra o <strong>prestador</strong> (ou o colaborador, no caso da ajuda de custo), o que torna linhas distintas indistinguíveis:</p>
+<pre><code>│ 144 │ SEGURO_VIAGEM │ Impar Seguros │ 15.000 │   ← de quem?
+│ 145 │ SEGURO_VIAGEM │ Impar Seguros │ 15.000 │   ← de quem?</code></pre>
+<p>Cada item passa a incluir os seus colaboradores:</p>
+<pre><code>{
+  &quot;logisticaId&quot;: 144,
+  &quot;referencia&quot;: &quot;SEGURO_VIAGEM&quot;,
+  &quot;nome&quot;: &quot;Impar Seguros&quot;,
+  &quot;valorTotal&quot;: 15000,
+  &quot;colaboradores&quot;: [
+    { &quot;id&quot;: 165,
+      &quot;missaoColabUuid&quot;: &quot;019fed6d-ae2a-755d-812b-4efb450802b0&quot;,
+      &quot;funcionarioUuid&quot;: &quot;019fd75f-0b61-7406-a256-a709912e8b51&quot;,
+      &quot;nomeColaborador&quot;: &quot;Wilson Cabral Tavares&quot;,
+      &quot;estado&quot;: &quot;A&quot; }
+  ]
+}</code></pre>
+<hr>
+<h3>8. <code>numDocumento</code> — passaportes deixaram de se perder</h3>
+<p>Números de documento <strong>alfanuméricos</strong> (ex.: passaporte <code>PA466262</code>) eram convertidos para <code>null</code> sem erro, por a coluna <code>RH_T_MISSAO_COLABORADOR.NUM_DOCUMENTO</code> ser <code>NUMBER</code>. Passou a <code>VARCHAR2</code>, e a leitura usa o funcionário como fonte de verdade.</p>
+<p>Aplica-se retroativamente: missões já gravadas passam a mostrar o valor correto.</p>
+<blockquote><p><strong>Ops:</strong> o <code>ALTER TABLE</code> foi aplicado diretamente na BD (o Flyway está desligado e esta tabela não consta das migrações). <strong>Tem de ser repetido noutros ambientes.</strong></p></blockquote>
+<hr>
+<h3>Fluxo completo — o que enviar em cada etapa</h3>
+<p>Percurso real de uma missão com 2 colaboradores repartidos por 2 agências.</p>
+<h3>Etapa 1 · Submissão</h3>
+<p><strong>Lookups do ecrã:</strong></p>
+<pre><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=1   → países  [{label, value}]
+GET /api/v1/funcionarios?pageNumber=0&amp;pageSize=10      → colaboradores</code></pre>
+<p><strong>Criar:</strong> <code>POST /submissao</code></p>
+<pre><code>{
+  &quot;paisDestinoId&quot;: 1033,
+  &quot;descricaoDestino&quot;: &quot;Paris - conferência CIPRES&quot;,
+  &quot;ambitoMissao&quot;: &quot;INTERNACIONAL&quot;,
+  &quot;dataInicio&quot;: &quot;2026-10-05&quot;,
+  &quot;dataFim&quot;: &quot;2026-10-09&quot;,
+  &quot;autorizadoPor&quot;: &quot;Wilson&quot;,
+  &quot;dataAutorizacao&quot;: &quot;2026-08-10&quot;,
+  &quot;colaboradores&quot;: [
+    { &quot;colaboradorId&quot;: &quot;019fd75f-0b61-7406-a256-a709912e8b51&quot; },
+    { &quot;colaboradorId&quot;: &quot;019fd759-2039-74b2-a587-cd2b5f131ae0&quot; }
+  ],
+  &quot;documentos&quot;: [ { &quot;tipoDocumentoId&quot;: 20, &quot;documento&quot;: &quot;convite_cipres.pdf&quot; } ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<p>→ <code>{ &quot;nrMissao&quot;: 3, &quot;id&quot;: &quot;&lt;uuid&gt;&quot; }</code></p>
+<p><strong>Editar:</strong> <code>PUT /{uuid}/submissao</code> com o mesmo corpo.</p>
+<ul>
+<li><strong>Não enviar <code>estado</code></strong> — o backend põe <code>&quot;A&quot;</code>.</li>
+<li><code>nrDias</code> é calculado a partir das datas.</li>
+<li><code>documentos[].documento</code> é o <strong>nome do ficheiro já carregado</strong> via <code>POST /api/v1/documento/private</code>, não o binário.</li>
+</ul>
+<h3>Etapa 2 · Análise</h3>
+<p><code>GET /{uuid}/analise</code> → <code>{ missaoId, etapaAtual, prestadores: [], notificacao }</code></p>
+<p><code>PUT /{uuid}/analise</code></p>
+<pre><code>{
+  &quot;prestadores&quot;: [
+    { &quot;entId&quot;: 11, &quot;nome&quot;: &quot;Halcyon Viagens&quot;,   &quot;email&quot;: &quot;reservas@halcyon.cv&quot; },
+    { &quot;entId&quot;: 12, &quot;nome&quot;: &quot;Cabo Verde Travel&quot;, &quot;email&quot;: &quot;geral@cvtravel.cv&quot; }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<ul>
+<li>Máximo <strong>3 prestadores</strong>.</li>
+<li>A lista é sincronizada por inteiro: quem não vier é inativado.</li>
+<li><code>NEXT</code> → envia o pedido de proposta às agências.</li>
+</ul>
+<h3>Etapa 3 · Emissão de Requisição</h3>
+<p><code>GET /{uuid}/emissao-requisicao</code> → <code>requisicoes[]</code> + <code>colaboradoresMissao[]</code></p>
+<p><code>PUT /{uuid}/emissao-requisicao</code></p>
+<pre><code>{
+  &quot;requisicoes&quot;: [
+    { &quot;missaoPrestId&quot;: 17, &quot;selecionado&quot;: true,
+      &quot;missaoColabIds&quot;: [&quot;019fd75f-0b61-7406-a256-a709912e8b51&quot;],
+      &quot;documentoProposta&quot;: { &quot;tipoDocumentoId&quot;: 19, &quot;documento&quot;: &quot;proposta_halcyon.pdf&quot; } },
+    { &quot;missaoPrestId&quot;: 18, &quot;selecionado&quot;: true,
+      &quot;missaoColabIds&quot;: [&quot;019fd759-2039-74b2-a587-cd2b5f131ae0&quot;],
+      &quot;documentoProposta&quot;: { &quot;tipoDocumentoId&quot;: 19, &quot;documento&quot;: &quot;proposta_cvtravel.pdf&quot; } }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<ul>
+<li><code>missaoColabIds</code> = <strong><code>funUuid</code></strong>.</li>
+<li>Cria uma requisição por par prestador × colaborador.</li>
+<li><strong>Esta associação determina o que é possível agrupar na Logística.</strong></li>
+<li><code>NEXT</code> → notifica os prestadores selecionados.</li>
+</ul>
+<h3>Etapa 4 · Logística</h3>
+<p><code>GET /{uuid}/logistica</code> → 4 secções + <code>colaboradoresMissao[]</code> (com prestador)</p>
+<p><code>PUT /{uuid}/logistica</code></p>
+<pre><code>{
+  &quot;bilhetesPassagem&quot;: [
+    { &quot;colaboradorIds&quot;: [&quot;&lt;funUuid&gt;&quot;], &quot;valor&quot;: 90000,
+      &quot;anexo&quot;: { &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;bilhete_wilson.pdf&quot; } }
+  ],
+  &quot;segurosViagem&quot;: [
+    { &quot;entId&quot;: 12, &quot;nomeSeguradora&quot;: &quot;Impar Seguros&quot;,
+      &quot;colaboradorIds&quot;: [&quot;&lt;funUuid&gt;&quot;], &quot;valor&quot;: 15000 }
+  ],
+  &quot;alojamentos&quot;: [
+    { &quot;colaboradorId&quot;: &quot;&lt;funUuid&gt;&quot;, &quot;flgAlimentacao&quot;: &quot;NAO&quot;,
+      &quot;lugarHospedagem&quot;: &quot;Ibis Paris Gare du Nord&quot;,
+      &quot;valorDiario&quot;: 12000, &quot;valorTotal&quot;: 60000, &quot;moeda&quot;: &quot;CVE&quot;,
+      &quot;dataInicio&quot;: &quot;2026-10-05&quot;, &quot;dataFim&quot;: &quot;2026-10-09&quot; }
+  ],
+  &quot;ajudasCusto&quot;: [
+    { &quot;colaboradorId&quot;: &quot;&lt;funUuid&gt;&quot;, &quot;flgAlojamento&quot;: true,
+      &quot;numeroDiasAlojamento&quot;: 5, &quot;valorDiario&quot;: 12000 }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>Secção</th><th>Colaboradores</th><th>Campos obrigatórios</th></tr></thead>
+<tbody>
+<tr><td><code>bilhetesPassagem</code></td><td>lista (mesmo prestador)</td><td><code>colaboradorIds</code>, <code>valor</code></td></tr>
+<tr><td><code>segurosViagem</code></td><td>lista (mesmo prestador)</td><td><code>entId</code>, <code>colaboradorIds</code>, <code>valor</code></td></tr>
+<tr><td><code>alojamentos</code></td><td><strong>um por linha</strong></td><td><code>colaboradorId</code>, <code>flgAlimentacao</code>, <code>lugarHospedagem</code>, <code>valorDiario</code>, <code>valorTotal</code></td></tr>
+<tr><td><code>ajudasCusto</code></td><td><strong>um por linha</strong></td><td><code>colaboradorId</code>, <code>flgAlojamento</code>, <code>numeroDiasAlojamento</code>, <code>valorDiario</code></td></tr>
+</tbody></table></div>
+<p><strong>Cálculo da ajuda de custo</strong> — o backend aplica a fração ao <code>valorDiario</code> enviado:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>Fração</th><th>Exemplo (base 12.000)</th></tr></thead>
+<tbody>
+<tr><td><code>flgAlojamento: false</code> (alojamento próprio)</td><td>100%</td><td>12.000/dia</td></tr>
+<tr><td><code>flgAlojamento: true</code> + alojamento com <code>flgAlimentacao: &quot;NAO&quot;</code></td><td>⅔</td><td>8.000/dia</td></tr>
+<tr><td><code>flgAlojamento: true</code> + alojamento com <code>flgAlimentacao: &quot;SIM&quot;</code></td><td>⅓</td><td>4.000/dia</td></tr>
+</tbody></table></div>
+<p><code>valorTotal = valorDiário calculado × numeroDiasAlojamento</code>, feito no backend.</p>
+<blockquote><p>⚠️ O <strong><code>valorDiario</code> base vem do cliente</strong> e não é validado contra nenhuma tabela de preços. A spec prevê que dependa da função do colaborador e de missão nacional/internacional, mas essa parametrização não existe. Só omitir uma secção do payload a deixa intacta.</p></blockquote>
+<p><code>NEXT</code> → notifica os colaboradores com os detalhes de viagem.</p>
+<h3>Etapa 5 · Cabimentação</h3>
+<p><code>GET /{uuid}/cabimento</code> → uma linha por serviço, com <code>colaboradores</code> e <code>fatura</code></p>
+<p><code>PUT /{uuid}/cabimento</code></p>
+<pre><code>{
+  &quot;itens&quot;: [
+    { &quot;logisticaId&quot;: 142, &quot;selecionado&quot;: true,
+      &quot;anexo&quot;: { &quot;id&quot;: 360, &quot;tipoDocumentoId&quot;: 21, &quot;documento&quot;: &quot;bilhete_wilson.pdf&quot; } },
+    { &quot;logisticaId&quot;: 148, &quot;selecionado&quot;: true }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;SAVE&quot;
+}</code></pre>
+<ul>
+<li><code>SAVE</code> → grava anexos e seleção; <code>estadoCabimento</code> continua <code>null</code>.</li>
+<li><code>NEXT</code> (<strong>Cabimentar</strong>) → <code>estadoCabimento: &quot;CABIMENTADO&quot;</code> nos selecionados.</li>
+<li>Pelo menos um item selecionado, senão <code>400 Selecione pelo menos um item</code>.</li>
+</ul>
+<h3>Etapa 6 · Autorização</h3>
+<p><code>GET /{uuid}/autorizacao</code> → linhas com <code>estadoCabimento</code> e <code>numeroCabimento</code></p>
+<p><code>PUT /{uuid}/autorizacao</code></p>
+<pre><code>{
+  &quot;itens&quot;: [
+    { &quot;logisticaId&quot;: 142, &quot;autorizado&quot;: true },
+    { &quot;logisticaId&quot;: 143, &quot;autorizado&quot;: true }
+  ],
+  &quot;processoEtapaAction&quot;: &quot;NEXT&quot;
+}</code></pre>
+<ul>
+<li>Item não <code>CABIMENTADO</code> → <code>400 Item sem cabimento: {id}</code>.</li>
+<li><code>SAVE</code> <strong>não</strong> autoriza; só <code>NEXT</code>.</li>
+<li><code>NEXT</code> → <code>AUTORIZADO</code> + etapa <code>PAGAMENTO</code>.</li>
+</ul>
+<h3>Etapa 7 · Pagamento</h3>
+<p><code>PUT /{uuid}/pagamento</code></p>
+<pre><code>{ &quot;referenciaPagamento&quot;: &quot;TRF-2026-0003&quot;, &quot;dataPagamento&quot;: &quot;2026-08-10&quot; }</code></pre>
+<p>Sem <code>processoEtapaAction</code>.</p>
+<hr>
+<h3>Como saber que ecrã mostrar</h3>
+<p><strong>Não existe etapa <code>AUTORIZACAO</code>.</strong> Depois de cabimentar, <code>etapaAtual</code> continua <code>CABIMENTO</code> — conforme a spec, que manda escrever <code>&#x27;CABIMENTO&#x27;</code> no fim da Cabimentação e <code>&#x27;PAGAMENTO&#x27;</code> no fim da Autorização.</p>
+<p>O frontend distingue os dois ecrãs pelo <strong><code>estadoCabimento</code> dos itens</strong>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>etapaAtual</code></th><th><code>estadoCabimento</code> dos itens</th><th>Ecrã</th></tr></thead>
+<tbody>
+<tr><td><code>SUBMISSAO</code></td><td>—</td><td>Submissão</td></tr>
+<tr><td><code>ANALISE</code></td><td>—</td><td>Análise</td></tr>
+<tr><td><code>EMISSAO_REQUISICAO</code></td><td>—</td><td>Emissão de Requisição</td></tr>
+<tr><td><code>LOGISTICA</code></td><td>—</td><td>Logística</td></tr>
+<tr><td><code>CABIMENTO</code></td><td><code>null</code></td><td><strong>Cabimentação</strong> (por cabimentar)</td></tr>
+<tr><td><code>CABIMENTO</code></td><td><code>CABIMENTADO</code></td><td><strong>Autorização</strong> (por autorizar)</td></tr>
+<tr><td><code>PAGAMENTO</code></td><td><code>AUTORIZADO</code></td><td>Pagamento / concluído</td></tr>
+</tbody></table></div>
+<p>Sequência de estados de cada linha: <code>null</code> → <code>CABIMENTADO</code> (Cabimentar) → <code>AUTORIZADO</code> (Autorizar).</p>
+<h3>Autorização parcial</h3>
+<p>É possível autorizar apenas alguns itens. <strong>Mas o <code>NEXT</code> avança para <code>PAGAMENTO</code> de qualquer forma</strong>, deixando os restantes em <code>CABIMENTADO</code>. Esses itens podem ser autorizados mais tarde (a guarda de etapa permite gravar em etapas já ultrapassadas), mas <strong>nada na UI os sinaliza</strong> — a missão aparece como concluída.</p>
+<p>Recomendação para o frontend: só permitir Autorizar quando todos os itens estiverem selecionados, ou avisar explicitamente sobre os que ficam por autorizar.</p>
+<hr>
+</div>
+</body>
+</html>

@@ -190,7 +190,7 @@
       "primaryKey": false
     },
     {
-      "name": "outrosEmprestimos",
+      "name": "outrosEmprestimosFuncionario",
       "objectType": "dto",
       "type": "OutrosEmprestimos",
       "required": false,

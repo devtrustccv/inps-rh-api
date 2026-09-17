@@ -16,7 +16,6 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import org.slf4j.Logger;
@@ -47,6 +46,9 @@ public class MobilidadeWriteService {
   private final cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper tipoRelRemPagHelper;
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  // "Detalhe de alterações": congela o diff em RH_T_VALIDACAO_DETALHE na própria escrita.
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final MobilidadeCampos mobilidadeCampos;
 
   /**
    * "Mobilidade processada" = igual à coluna PROCESSAMENTO da vista RH_V_MOBILIDADE: existe um tiprel
@@ -92,18 +94,6 @@ public class MobilidadeWriteService {
     valid.setReferenciaUuid(novaMobilidade.getUuid());
     entityManager.persist(valid);
     entityManager.flush();
-
-    // Baseline JaVers do REGISTO: grava o snapshot inicial da mobilidade recém-criada. Sem isto, o
-    // JaVers só passa a conhecer a entidade na 1ª EDIÇÃO — e essa edição sairia como snapshot inicial
-    // (sem "antes"), deixando a grelha vazia. Com o baseline aqui, qualquer edição futura (incluindo a
-    // primeira) já produz um diff antes→depois. Carimbado com a validação de INSERT; a grelha desta
-    // valida­ção fica vazia de propósito (um REGISTO é criação, não tem "antes").
-    try {
-      ValidacaoAuditContext.set(valid.getId(), valid.getUuid(), "RH_T_MOBILIDADE");
-      mobilidadeEntityRepository.save(novaMobilidade);
-    } finally {
-      ValidacaoAuditContext.clear();
-    }
 
     return new SuccessResponseDTO(true, novaMobilidade.getUuid().toString(), "Mobilidade registada.", java.util.List.of());
 
@@ -305,17 +295,12 @@ public class MobilidadeWriteService {
       updateMobilidade(mobilidade, mobilidadeDto);
       var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (validacao != null) validacao.setEstado(estado);
-      // Só o REGISTO (INSERT) muda o estado da mobilidade segundo a decisão e cria/troca
-      // tipos_relacionamento. A validação de uma EDIÇÃO (UPDATE) NÃO mexe no tiprel — a alteração já
-      // está in place e o tiprel atual referencia-a via MOB_ID.
-      if (validacaoInsert.isPresent()) {
-        // REGISTO: A (aprovado) ou I (rejeitado).
+      // A mobilidade segue a decisão — A (aprovada) ou I (rejeitada) — tanto no REGISTO (INSERT) como
+      // na EDIÇÃO (UPDATE). Rejeitar uma edição NÃO reverte valores: o update in place fica e o registo
+      // passa a inactivo; se o colaborador precisar de outra mobilidade, regista-se uma nova. Só o
+      // REGISTO cria/troca tipos_relacionamento (mais abaixo); a EDIÇÃO não mexe no tiprel.
+      if (validacao != null) {
         mobilidade.setEstado(estado);
-      } else if (validacao != null) {
-        // EDIÇÃO: a mobilidade estava PENDENTE (P) com os dados já editados in place; validar tira-a
-        // do pendente → volta a ACTIVA (A), quer aprovada quer rejeitada (o update foi feito "na
-        // mesma"; sem snapshot não se revertem valores).
-        mobilidade.setEstado(Estado.A);
       }
 
       if (estado.equals(Estado.A) && validacaoInsert.isPresent()) {
@@ -395,7 +380,7 @@ public class MobilidadeWriteService {
    * update registo (in place); o botão só fica visível se não tiver processamento" + "registo e
    * alteração passa por validação". Faz UPDATE in place na RH_T_MOBILIDADE + cria validação pendente
    * UPDATE + marca a mobilidade PENDENTE (P). NÃO toca no tipos_relacionamento — a alteração propaga
-   * via MOB_ID; a mobilidade volta a A quando validada.
+   * via MOB_ID; a mobilidade passa a A se aprovada ou a I se rejeitada (sem reverter valores).
    *
    * <p><b>Só vai a validação se houver movimento.</b> "Alteração", aqui, é mudança de DIREÇÃO,
    * UNIDADE ou LOCAL DE TRABALHO — os três campos que definem a mobilidade. Editar apenas as datas
@@ -424,6 +409,13 @@ public class MobilidadeWriteService {
     // Estado dos três campos ANTES de aplicar o payload — a base da comparação mais abaixo.
     var antes = camposMobilidade(mobilidade);
 
+    // Estado COMPLETO antes do payload, para a grelha "Detalhe de alterações". Tem de ser aqui: o
+    // UPDATE abaixo é in place, e depois dele o valor anterior já não existe na base. Pergunta
+    // diferente da de cima — aquela decide SE há movimento a validar (3 campos), esta decide O QUE
+    // se mostra ao aprovador (7 campos).
+    var campos = mobilidadeCampos.get();
+    var antesDetalhe = detalheAlteracoes.capturar(campos, mobilidade);
+
     // 1) UPDATE in place na RH_T_MOBILIDADE. Mesma mecânica do registo (createMobilidade): por cada
     //    tipo escolhido no multi-select o respetivo "(depois)" é obrigatório; os tipos NÃO escolhidos
     //    herdam o valor que já está no registo — aqui o "anterior" é a própria mobilidade, por ser
@@ -440,19 +432,20 @@ public class MobilidadeWriteService {
     // 2a) Maker reenvia a correção: a mobilidade estava EM CORREÇÃO (C) porque o checker a devolveu.
     //     Aplicado o payload acima, volta à fila de validação (C -> P) REACTIVANDO a mesma validação
     //     que o checker deixou em C (INSERT tem precedência sobre UPDATE) — não cria uma nova. Espelha
-    //     o C -> P do registo de colaborador. A correção é auditada (JaVers) contra essa validação.
+    //     o C -> P do registo de colaborador.
     if (Estado.C.equals(mobilidade.getEstado())) {
       var validacao = funcionarioRules.getValidacaoByReferenciaUuid(mobUuid, Estado.C, TipoAcao.INSERT, Referencia.MOBILIDADE)
           .or(() -> funcionarioRules.getValidacaoByReferenciaUuid(mobUuid, Estado.C, TipoAcao.UPDATE, Referencia.MOBILIDADE))
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Esta mobilidade não está por corrigir."));
       validacao.setEstado(Estado.P);
       mobilidade.setEstado(Estado.P);
-      try {
-        ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_MOBILIDADE");
-        mobilidadeEntityRepository.save(mobilidade);
-      } finally {
-        ValidacaoAuditContext.clear();
-      }
+      mobilidadeEntityRepository.save(mobilidade);
+
+      // Reenvio de correção: o congelar() é idempotente por (validação, tabela) — apaga o detalhe
+      // anterior e regrava, porque o que o checker vai ver agora é outro.
+      detalheAlteracoes.congelar(validacao, "RH_T_MOBILIDADE", campos,
+          antesDetalhe, detalheAlteracoes.capturar(campos, mobilidade));
+
       funcionarioEntityRepository.save(funcionario);
       return new SuccessResponseDTO(true, mobUuid.toString(), "Correção reenviada para validação.", java.util.List.of());
     }
@@ -460,8 +453,7 @@ public class MobilidadeWriteService {
     // 2a-bis) Nenhum dos três campos mudou: é uma edição simples (datas/tipo). Grava-se o que veio e
     //    fica por aqui — NÃO se cria validação nem se tira a mobilidade de ACTIVA. Sem isto, gravar o
     //    formulário sem tocar em nada mandava para o checker um pedido de aprovação de uma alteração
-    //    inexistente (e a grelha de detalhe mostrava os campos como se tivessem sido preenchidos de
-    //    raiz, por ser o primeiro diff do JaVers sobre o registo).
+    //    inexistente.
     if (!houveAlteracao) {
       mobilidadeEntityRepository.save(mobilidade);
       funcionarioEntityRepository.save(funcionario);
@@ -481,16 +473,9 @@ public class MobilidadeWriteService {
       entityManager.persist(valid);
       mobilidade.setEstado(Estado.P);
 
-      // Auditoria de alterações (JaVers): marca a validação corrente para o CommitPropertiesProvider
-      // e força o commit auto-audit da mobilidade — o save() no repositório dispara o aspecto. O
-      // JaVers calcula o diff antes/depois contra o seu próprio snapshot, pelo que é imune ao
-      // auto-flush do Hibernate que apagava o loadedState. O holder é sempre limpo no finally.
-      try {
-        ValidacaoAuditContext.set(valid.getId(), valid.getUuid(), "RH_T_MOBILIDADE");
-        mobilidadeEntityRepository.save(mobilidade);
-      } finally {
-        ValidacaoAuditContext.clear();
-      }
+      mobilidadeEntityRepository.save(mobilidade);
+      detalheAlteracoes.congelar(valid, "RH_T_MOBILIDADE", campos,
+          antesDetalhe, detalheAlteracoes.capturar(campos, mobilidade));
     }
 
     funcionarioEntityRepository.save(funcionario);

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -43,5 +44,8 @@ public class MissaoServicoResumoDTO  {
   private BigDecimal valorBP;             // REFERENCIA='BILHETE_PASSAGEM'
   private BigDecimal valorAlojamento;     // REFERENCIA='ALOJAMENTO'
   private BigDecimal valorSeguro;         // REFERENCIA='SEGURO_VIAGEM'
+
+  // Sub-lista (spec 14/09): os processos da missão, cada um com a sua etapa
+  private List<MissaoProcessoResumoDTO> processos;
 
 }

@@ -55,9 +55,12 @@ public class RenovacaoContratoService {
     var dadosRenovacao = dto != null ? dto.getDadosRenovacao() : null;
 
     var ctx = validarRenovacao(command.getIdFuncionario(), dadosRenovacao);
-    aplicarRenovacao(ctx, dadosRenovacao);
+    var detalhe = aplicarRenovacao(ctx, dadosRenovacao);
 
     funcionarioEntityRepository.saveAndFlush(ctx.funcionario());
+
+    // Congelar DEPOIS do flush: a ValidacaoEntity so tem id/uuid persistidos aqui.
+    contratoHistoricoWriteService.congelarDetalheRenovacao(detalhe.validacao(), detalhe.antes(), detalhe.novo());
 
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
     renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(ctx.contratoAtual()));
@@ -172,14 +175,24 @@ public class RenovacaoContratoService {
    * TipoRelacionamento atual e cria um novo (estado P) apontando ao mesmo contrato, e regista a
    * validação pendente. Não faz flush — o chamador decide quando gravar.
    */
-  private void aplicarRenovacao(ContextoRenovacao ctx, RenovarContratoReqDTO dadosRenovacao) {
+  /** O que o congelamento do detalhe precisa de saber do que a renovacao acabou de criar. */
+  private record DetalheRenovacao(cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity validacao,
+      cv.inps.rh.shared.application.detalhe.DetalheAlteracoes.Estado antes,
+      cv.inps.rh.shared.infrastructure.persistence.entity.ContratoHistoricoEntity novo) {}
+
+  private DetalheRenovacao aplicarRenovacao(ContextoRenovacao ctx, RenovarContratoReqDTO dadosRenovacao) {
 
     var funcionario = ctx.funcionario();
     var contratoAtual = ctx.contratoAtual();
     var tipoRelacionamentoAtual = ctx.tiprelAtual();
 
+    // "Antes" da grelha: as datas do contrato EM VIGOR (historico de versao mais alta). Tem de ser
+    // lido antes de registar a proposta, senao a proposta ja e a versao mais alta.
+    var antesRenovacao = contratoHistoricoWriteService.capturarRenovacao(
+        contratoHistoricoWriteService.historicoActual(contratoAtual).orElse(null));
+
     // Regista as novas datas propostas no historico (Estado.P) — sem criar novo ContratoEntity
-    contratoHistoricoWriteService.registrarRenovacaoPendente(contratoAtual, dadosRenovacao);
+    var novoHistorico = contratoHistoricoWriteService.registrarRenovacaoPendente(contratoAtual, dadosRenovacao);
 
     // Fecha o TipoRelacionamento atual e cria novo apontando para o mesmo contrato.
     // Spec da Renovação: o antigo fecha com DATA_FIM = "data inicio do novo registo" MENOS 1 dia (regra
@@ -207,6 +220,7 @@ public class RenovacaoContratoService {
     valid.setReferenciaId(contratoAtual.getId());
     valid.setReferenciaUuid(contratoAtual.getUuid());
     funcionario.getValidacoes().add(valid);
+    return new DetalheRenovacao(valid, antesRenovacao, novoHistorico);
   }
 
   /**

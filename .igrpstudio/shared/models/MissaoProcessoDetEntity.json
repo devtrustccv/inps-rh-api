@@ -1,0 +1,91 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "MissaoProcessoDetEntity",
+  "tableName": "RH_T_MISSAO_PROCESSO_DET",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "sequenceName": "SEQ_MISSAO_PROCESSO_DET"
+    },
+    {
+      "name": "missao_processo_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "MissaoProcessoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "parecer",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "observacao",
+      "type": "string",
+      "length": 500,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "responsavel",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "length": 1,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "uuid",
+      "type": "uuid",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "msv10missaoprocdet",
+  "uniqueConstraints": [],
+  "indexes": []
+}

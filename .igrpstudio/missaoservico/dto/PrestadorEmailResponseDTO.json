@@ -1,0 +1,15 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "PrestadorEmailResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "long", "objectType": "java", "required": false },
+    { "name": "uuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "email", "type": "string", "objectType": "java", "required": false },
+    { "name": "estado", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto04prestemailresp"
+}

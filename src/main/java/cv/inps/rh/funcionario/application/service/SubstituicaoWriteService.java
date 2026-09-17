@@ -30,7 +30,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoDetal
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -63,6 +62,8 @@ public class SubstituicaoWriteService {
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
   private final SubstituicaoDetalheEntityRepository substituicaoDetalheEntityRepository;
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -131,8 +132,7 @@ public class SubstituicaoWriteService {
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(temDiferencaSalarial ? Estado.P : Estado.A);
-    // Insert inicial via EntityManager (NÃO dispara o auto-audit do JaVers) — assim o 1º commit auditado
-    // é o save carimbado abaixo (baseline da validação), tal como na Mobilidade.
+    // Persistir já: o detalhe mensal e a validação abaixo precisam do id da substituição.
     entityManager.persist(substituicao);
     entityManager.flush();
 
@@ -152,15 +152,12 @@ public class SubstituicaoWriteService {
       funcionarioSubstituto.getValidacoes().add(validacao);
       funcionarioEntityRepository.saveAndFlush(funcionarioSubstituto);
 
-      // Baseline JaVers do REGISTO: 1º commit auditado da substituição, carimbado com a validação INSERT.
-      // Como a validação é INSERT, a grelha mostra os valores iniciais ("criado com…"), incluindo o
-      // colaborador substituído (substituidoTiprelId). As correções futuras acrescentam o antes→depois.
-      try {
-        ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_SUBSTITUICAO");
-        substituicaoEntityRepository.save(substituicao);
-      } finally {
-        ValidacaoAuditContext.clear();
-      }
+      // Detalhe congelado do REGISTO: o "antes" nao existe (null), pelo que todos os campos saem como
+      // INICIAL — e a grelha diz "criado com ...", que e a semantica de uma validacao INSERT.
+      var camposSub = dossierCampos.substituicao();
+      detalheAlteracoes.congelar(validacao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_SUBSTITUICAO,
+          camposSub, detalheAlteracoes.capturar(camposSub, null),
+          detalheAlteracoes.capturar(camposSub, substituicao));
     } else {
       funcionarioEntityRepository.save(funcionarioSubstituto);
     }
@@ -216,6 +213,11 @@ public class SubstituicaoWriteService {
           "Substituição em correção: não pode ser validada. Corrija e reenvie primeiro.");
     }
 
+    // Estado ANTES do payload, para a grelha "Detalhe de alterações". Tem de ser aqui: a edicao
+    // abaixo e in place e depois dela o valor anterior ja nao existe na base.
+    var camposSub = dossierCampos.substituicao();
+    var antesDetalhe = detalheAlteracoes.capturar(camposSub, substituicao);
+
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     // Motivo também é editável na correção/validação (ponto 1): sem isto, o maker não podia corrigir o
@@ -230,14 +232,12 @@ public class SubstituicaoWriteService {
     if (substituicao.getEstado() == Estado.C) {
       substituicao.setEstado(Estado.P);
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
-      // Auto-audit (JaVers): carimba o save da correção com a validação; o baseline vem do registo.
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SUBSTITUICAO");
-        substituicaoEntityRepository.save(substituicao);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      substituicaoEntityRepository.save(substituicao);
+      // Reenvio de correcao: congelar() funde com o detalhe ja existente, preservando o "antes"
+      // ORIGINAL (o ultimo aprovado) em vez do estado pendente que o checker devolveu.
+      detalheAlteracoes.congelar(validacaoReaberta,
+          cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_SUBSTITUICAO,
+          camposSub, antesDetalhe, detalheAlteracoes.capturar(camposSub, substituicao));
       funcionarioEntityRepository.save(funcionarioSubstituto);
       return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
           "Substituição corrigida e reenviada para validação.", List.of());

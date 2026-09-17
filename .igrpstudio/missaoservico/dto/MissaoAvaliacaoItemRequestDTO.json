@@ -1,0 +1,17 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoAvaliacaoItemRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoPrestUuid", "type": "uuid", "objectType": "java", "required": true },
+    { "name": "sistemaQualidade", "type": "string", "objectType": "java", "required": true },
+    { "name": "prazoFornecimento", "type": "string", "objectType": "java", "required": true },
+    { "name": "qualidadeProduto", "type": "string", "objectType": "java", "required": true },
+    { "name": "capacidadeResposta", "type": "string", "objectType": "java", "required": true },
+    { "name": "preco", "type": "string", "objectType": "java", "required": true }
+  ],
+  "id": "msvdto36avaliacaoitem"
+}

@@ -67,11 +67,13 @@ public class NotificacaoController {
     @RequestParam(value = "dataEnvioDe", required = false) String dataEnvioDe,
     @RequestParam(value = "dataEnvioAte", required = false) String dataEnvioAte,
     @RequestParam(value = "estado", required = false) String estado,
+    @RequestParam(value = "referenciaName", required = false) String referenciaName,
+    @RequestParam(value = "referenciaUuid", required = false) String referenciaUuid,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new ListaNotificacoesQuery(tipoNotificacao, dataEnvioDe, dataEnvioAte, estado, pageNumber, pageSize);
+      final var query = new ListaNotificacoesQuery(tipoNotificacao, dataEnvioDe, dataEnvioAte, estado, referenciaName, referenciaUuid, pageNumber, pageSize);
 
       return queryBus.handle(query);
 

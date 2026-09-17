@@ -1,0 +1,18 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoRequisicoesResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "requisicoes", "type": "ProcessoRequisicaoItemResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "colaboradoresMissao", "type": "MissaoColaboradorResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto13procreqresp"
+}

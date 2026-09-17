@@ -63,6 +63,14 @@ public class NotificacaoReadService {
         predicates.add(cb.equal(root.get("estado"), query.getEstado()));
       }
 
+      if (StringUtils.hasText(query.getReferenciaName())) {
+        predicates.add(cb.equal(root.get("referenciaName"), query.getReferenciaName()));
+      }
+
+      if (StringUtils.hasText(query.getReferenciaUuid())) {
+        predicates.add(cb.equal(root.get("referenciaUuid"), UUID.fromString(query.getReferenciaUuid())));
+      }
+
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 

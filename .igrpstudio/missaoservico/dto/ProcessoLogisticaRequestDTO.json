@@ -1,0 +1,17 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoLogisticaRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "bilhetesPassagem", "type": "BilhetePassagemRequest", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "segurosViagem", "type": "SeguroViagemRequest", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "alojamentos", "type": "AlojamentoRequest", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "ajudasCusto", "type": "AjudaCustoRequest", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "notificacao", "type": "MissaoNotificacaoRequest", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "processoEtapaAction", "type": "ProcessStepAction", "objectType": "enum", "required": false, "module": "emprestimo" }
+  ],
+  "id": "msvdto15proclogreq"
+}

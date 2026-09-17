@@ -1,0 +1,128 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "MissaoPrestadorAvalEntity",
+  "tableName": "RH_T_MISSAO_PRESTADOR_AVAL",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "sequenceName": "SEQ_MISSAO_PRESTADOR_AVAL"
+    },
+    {
+      "name": "missao_prest_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "MissaoPrestadorEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "sistema_qualidade",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "prazo_fornecimento",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "qualidade_produto",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "capacidade_resposta",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "preco",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "total",
+      "type": "decimal",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "designacao",
+      "type": "string",
+      "length": 50,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "length": 1,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "uuid",
+      "type": "uuid",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "msv12missaoprestaval",
+  "uniqueConstraints": [],
+  "indexes": []
+}

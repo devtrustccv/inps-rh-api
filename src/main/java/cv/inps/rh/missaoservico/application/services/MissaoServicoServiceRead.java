@@ -1,9 +1,13 @@
 package cv.inps.rh.missaoservico.application.services;
 
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
+import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.missaoservico.application.dto.NotificacaoMissaoResponseDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -33,254 +37,13 @@ public class MissaoServicoServiceRead {
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
-  private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final DocumentoEntityRepository documentoRepository;
   private final DocumentoMapper documentoMapper;
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
   private final NotificacaoEntityRepository notificacaoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
-
-  @Transactional(readOnly = true)
-  public ResponseEntity<MissaoCabimentoResponseDTO> getCabimento(GetMissaoServicoCabimentoQuery query) {
-    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
-    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-
-    var logistica = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
-        .toList();
-
-    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
-    var ids = logistica.stream()
-        .map(MissaoLogisticaEntity::getId)
-        .filter(java.util.Objects::nonNull)
-        .toList();
-    if (!ids.isEmpty()) {
-      var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
-      if (!CollectionUtils.isEmpty(dets)) {
-        for (var d : dets) {
-          if (d == null || d.getMissaoLogistId() == null || d.getMissaoLogistId().getId() == null)
-            continue;
-          detByLogId.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d);
-        }
-      }
-    }
-
-    var itens = new ArrayList<MissaoCabimentoItemResponseDTO>();
-    for (var l : logistica) {
-      if (l == null)
-        continue;
-
-      var nome = resolveNome(l, detByLogId.get(l.getId()));
-
-      var docs = l.getUuid() != null
-          ? documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_LOGISTICA.name(),
-          l.getUuid())
-          : List.<cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity>of();
-      var fatura = docs == null
-          ? null
-          : docs.stream()
-          .filter(d -> d != null && d.getEstado() != Estado.E)
-          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-              Comparator.nullsLast(Comparator.naturalOrder())))
-          .map(documentoMapper::toRespDto)
-          .orElse(null);
-
-      var item = new MissaoCabimentoItemResponseDTO();
-      item.setLogisticaId(l.getId());
-      item.setLogisticaUuid(l.getUuid());
-      item.setReferencia(l.getReferencia());
-      item.setNome(nome);
-      item.setValorTotal(l.getValorTotal());
-      item.setCabId(l.getCabId());
-      item.setEstadoCabimento(l.getEstadoCabimento());
-      item.setFatura(fatura);
-      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
-      itens.add(item);
-    }
-
-    var response = new MissaoCabimentoResponseDTO();
-    response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
-    response.setItens(itens);
-
-    return ResponseEntity.ok(response);
-  }
-
-  @Transactional(readOnly = true)
-  public ResponseEntity<MissaoAutorizacaoResponseDTO> getAutorizacao(GetMissaoServicoAutorizacaoQuery query) {
-    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
-    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-
-    var logistica = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
-        .toList();
-
-    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
-    var ids = logistica.stream()
-        .map(MissaoLogisticaEntity::getId)
-        .filter(java.util.Objects::nonNull)
-        .toList();
-    if (!ids.isEmpty()) {
-      var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
-      if (!CollectionUtils.isEmpty(dets)) {
-        for (var d : dets) {
-          if (d == null || d.getMissaoLogistId() == null || d.getMissaoLogistId().getId() == null)
-            continue;
-          detByLogId.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d);
-        }
-      }
-    }
-
-    var itens = new ArrayList<MissaoAutorizacaoItemResponseDTO>();
-    for (var l : logistica) {
-      if (l == null)
-        continue;
-
-      var item = new MissaoAutorizacaoItemResponseDTO();
-      item.setLogisticaId(l.getId());
-      item.setReferencia(l.getReferencia());
-      item.setNome(resolveNome(l, detByLogId.get(l.getId())));
-      item.setValorTotal(l.getValorTotal());
-      item.setNumeroCabimento(l.getCabId());
-      item.setEstadoCabimento(l.getEstadoCabimento());
-      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
-      itens.add(item);
-    }
-
-    var response = new MissaoAutorizacaoResponseDTO();
-    response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
-    response.setItens(itens);
-    return ResponseEntity.ok(response);
-  }
-
-  @Transactional(readOnly = true)
-  public ResponseEntity<MissaoLogisticaResponseDTO> getLogistica(GetMissaoServicoLogisticaQuery query) {
-    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
-    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-
-    var logistica = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
-        .toList();
-
-    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
-    var ids = logistica.stream()
-        .map(MissaoLogisticaEntity::getId)
-        .filter(Objects::nonNull)
-        .toList();
-    if (!ids.isEmpty()) {
-      var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
-      if (!CollectionUtils.isEmpty(dets)) {
-        for (var d : dets) {
-          if (d == null || d.getMissaoLogistId() == null || d.getMissaoLogistId().getId() == null)
-            continue;
-          detByLogId.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d);
-        }
-      }
-    }
-
-    var bilhetes = new ArrayList<BilhetePassagemResponseDTO>();
-    var seguros = new ArrayList<SeguroViagemResponseDTO>();
-    var alojamentos = new ArrayList<AlojamentoResponseDTO>();
-    var ajudas = new ArrayList<AjudaCustoResponseDTO>();
-
-    for (var l : logistica) {
-      if (l == null || !StringUtils.hasText(l.getReferencia()))
-        continue;
-
-      var referencia = l.getReferencia();
-      var dets = detByLogId.get(l.getId());
-
-      var docs = l.getUuid() != null
-          ? documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_LOGISTICA.name(),
-          l.getUuid())
-          : List.<cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity>of();
-      var documento = docs == null
-          ? null
-          : docs.stream()
-          .filter(d -> d != null && d.getEstado() != Estado.E)
-          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-              Comparator.nullsLast(Comparator.naturalOrder())))
-          .map(documentoMapper::toRespDto)
-          .orElse(null);
-
-      if ("BILHETE_PASSAGEM".equalsIgnoreCase(referencia)) {
-        var bp = new BilhetePassagemResponseDTO();
-        bp.setId(l.getId());
-        bp.setUuid(l.getUuid());
-        bp.setColaboradores(mapDet(dets));
-        bp.setValor(l.getValorTotal());
-        bp.setDocumento(documento);
-        bp.setEstado(l.getEstado());
-        bilhetes.add(bp);
-        continue;
-      }
-
-      if ("SEGURO_VIAGEM".equalsIgnoreCase(referencia)) {
-        var sv = new SeguroViagemResponseDTO();
-        sv.setId(l.getId());
-        sv.setUuid(l.getUuid());
-        sv.setEntId(l.getEntId());
-        sv.setNomeSeguradora(l.getNomeSeguradora());
-        sv.setColaboradores(mapDet(dets));
-        sv.setValor(l.getValorTotal());
-        sv.setDocumento(documento);
-        sv.setEstado(l.getEstado());
-        seguros.add(sv);
-        continue;
-      }
-
-      if ("ALOJAMENTO".equalsIgnoreCase(referencia)) {
-        var al = new AlojamentoResponseDTO();
-        al.setId(l.getId());
-        al.setUuid(l.getUuid());
-        al.setFlgAlimentacao(l.getFlgAlimentacao());
-        al.setLugarHospedagem(l.getLugarHospedagem());
-        al.setValorDiario(l.getValorDiario());
-        al.setValorTotal(l.getValorTotal());
-        al.setMoeda(l.getMoeda());
-        al.setDataInicio(l.getDataInicio());
-        al.setDataFim(l.getDataFim());
-        al.setNrDias(l.getNrDias());
-        al.setColaborador(firstDet(dets));
-        al.setDocumento(documento);
-        al.setEstado(l.getEstado());
-        alojamentos.add(al);
-        continue;
-      }
-
-      if ("AJUDA_CUSTO".equalsIgnoreCase(referencia)) {
-        var ac = new AjudaCustoResponseDTO();
-        ac.setId(l.getId());
-        ac.setUuid(l.getUuid());
-        ac.setColaborador(firstDet(dets));
-        ac.setFlgAlojamento("SIM".equalsIgnoreCase(l.getFlgAlojamento()));
-        ac.setNumeroDiasAlojamento(l.getNrDias());
-        ac.setValorDiario(l.getValorDiario());
-        ac.setValorTotal(l.getValorTotal());
-        ac.setEstado(l.getEstado());
-        ajudas.add(ac);
-      }
-    }
-
-    var response = new MissaoLogisticaResponseDTO();
-    response.setMissaoId(missao.getId());
-    response.setMissaoUuid(missao.getUuid());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
-    response.setBilhetesPassagem(bilhetes);
-    response.setSegurosViagem(seguros);
-    response.setAlojamentos(alojamentos);
-    response.setAjudasCusto(ajudas);
-    response.setColaboradoresMissao(colaboradoresDaMissaoComPrestador(missaoUuid));
-    return ResponseEntity.ok(response);
-  }
+  private final MissaoProcessoEntityRepository missaoProcessoRepository;
 
   @Transactional(readOnly = true)
   public ResponseEntity<MissaoPagamentoResponseDTO> getPagamento(GetMissaoServicoPagamentoQuery query) {
@@ -289,57 +52,16 @@ public class MissaoServicoServiceRead {
 
     var response = new MissaoPagamentoResponseDTO();
     response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
+    // No modelo por processo a etapa da missão fica em SUBMISSAO: mostrar a do processo activo
+    // mais atrasado, como na lista, em vez de um valor que não diz nada ao ecrã.
+    var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid);
+    var etapa = processoMaisAtrasado(processos).map(MissaoProcessoEntity::getEtapa).orElse(missao.getEtapa());
+    response.setEtapaAtual(etapa);
+    var etapaEnum = EtapaProcesso.fromCode(etapa);
+    response.setEtapaAtualDesc(etapaEnum != null ? etapaEnum.getDescricao() : resolveEtapaDesc(etapa));
     response.setEstado(missao.getEstado());
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
-    return ResponseEntity.ok(response);
-  }
-
-  @Transactional(readOnly = true)
-  public ResponseEntity<MissaoAnaliseResponseDTO> getAnalise(GetAnaliseProcessoMissaoServicoQuery query) {
-    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
-    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-
-    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(p -> p != null && ESTADO_ATIVO.equals(p.getEstado()))
-        .map(p -> {
-          var dto = new MissaoPrestadorResponseDTO();
-          dto.setId(p.getId());
-          dto.setUuid(p.getUuid());
-          dto.setEntId(p.getEntId());
-          dto.setNome(p.getNome());
-          dto.setEmail(p.getEmail());
-          dto.setEstado(p.getEstado());
-          return dto;
-        })
-        .toList();
-
-    MissaoNotificacaoResponseDTO notificacao = null;
-    var notificacoes = notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
-        TableName.RH_T_MISSAO_SERVICO.name(),
-        missaoUuid);
-    if (!CollectionUtils.isEmpty(notificacoes)) {
-      var latest = notificacoes.stream()
-          .filter(n -> n != null && (StringUtils.hasText(n.getAssunto()) || StringUtils.hasText(n.getMessage())))
-          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity::getId,
-              Comparator.nullsLast(Comparator.naturalOrder())))
-          .orElse(null);
-      if (latest != null) {
-        notificacao = new MissaoNotificacaoResponseDTO();
-        notificacao.setAssunto(latest.getAssunto());
-        notificacao.setCorpoEmail(latest.getMessage());
-      }
-    }
-
-    var response = new MissaoAnaliseResponseDTO();
-    response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
-    response.setPrestadores(prestadores);
-    response.setNotificacao(notificacao);
     return ResponseEntity.ok(response);
   }
 
@@ -372,6 +94,10 @@ public class MissaoServicoServiceRead {
     response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
     response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
+    response.setIlhaId(missao.getIlhaId() != null ? missao.getIlhaId().getId() : null);
+    response.setIlhaNome(missao.getIlhaId() != null ? missao.getIlhaId().getNome() : null);
+    response.setConcelhoId(missao.getConcelhoId() != null ? missao.getConcelhoId().getId() : null);
+    response.setConcelhoNome(missao.getConcelhoId() != null ? missao.getConcelhoId().getNome() : null);
     response.setFlgDestino(missao.getFlgDestino());
     response.setDescricaoDestino(missao.getDescricaoDestino());
     response.setAmbitoMissao(missao.getAmbitoMissao());
@@ -385,6 +111,10 @@ public class MissaoServicoServiceRead {
     response.setEstado(missao.getEstado());
     response.setColaboradores(colaboradores);
     response.setDocumentos(documentos);
+    var processos = processosDaMissao(missaoUuid);
+    response.setProcessos(processos);
+    response.setAlojamento(processos.stream()
+        .anyMatch(p -> TipoProcesso.ALOJAMENTO.name().equals(p.getTipoProcesso()) && ESTADO_ATIVO.equals(p.getEstado())));
 
     response.setDataRegisto(toLocalDate(missao.getCreatedDate()));
     response.setUserRegistoId(missao.getCreatedById());
@@ -393,139 +123,6 @@ public class MissaoServicoServiceRead {
     response.setUserAlteracaoName(missao.getLastModifiedBy());
     response.setDataAlteracao(toLocalDate(missao.getLastModifiedDate()));
 
-    return ResponseEntity.ok(response);
-  }
-
-  @Transactional(readOnly = true)
-  public ResponseEntity<MissaoEmissaoReqResponseDTO> getEmissaoRequisicao(
-      GetSubmissaoServicoEmissaoRequisicaoQuery query) {
-    var missaoUuid = IdentificadorUnico.from(query.getUui()).valor();
-    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-
-    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(r -> r != null && ESTADO_ATIVO.equals(r.getEstado()))
-        .toList();
-
-    var byPrest = new HashMap<Long, List<MissaoRequisicaoEntity>>();
-    for (var r : requisicoes) {
-      var prestId = r.getMissaoPrestId() != null ? r.getMissaoPrestId().getId() : null;
-      if (prestId == null)
-        continue;
-      byPrest.computeIfAbsent(prestId, _ -> new ArrayList<>()).add(r);
-    }
-
-    var itens = new ArrayList<MissaoReqItemResponseDTO>();
-    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(p -> p != null && ESTADO_ATIVO.equals(p.getEstado()))
-        .toList();
-
-    if (!CollectionUtils.isEmpty(prestadores)) {
-      for (var prest : prestadores) {
-        if (prest == null || prest.getId() == null)
-          continue;
-
-        var list = byPrest.getOrDefault(prest.getId(), List.of());
-        var selecionado = !CollectionUtils.isEmpty(list);
-
-        var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
-        for (var r : list) {
-          var c = r != null ? r.getMissaoColabId() : null;
-          if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
-            continue;
-          colaboradores.add(toColaboradorDto(c));
-        }
-
-        AnexoRespDTO proposta = null;
-        for (var r : list) {
-          if (r == null || r.getUuid() == null)
-            continue;
-          var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
-              TableName.RH_T_MISSAO_REQUISICAO.name(),
-              r.getUuid());
-          if (CollectionUtils.isEmpty(docs))
-            continue;
-          proposta = docs.stream()
-              .filter(d -> d != null && d.getEstado() != Estado.E)
-              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                  Comparator.nullsLast(Comparator.naturalOrder())))
-              .map(documentoMapper::toRespDto)
-              .orElse(null);
-          if (proposta != null)
-            break;
-        }
-
-        var item = new MissaoReqItemResponseDTO();
-        item.setId(prest.getId());
-        item.setUuid(prest.getUuid());
-        item.setMissaoPrestId(prest.getId());
-        item.setNomePrestador(prest.getNome());
-        item.setEmailPrestador(prest.getEmail());
-        item.setColaboradores(colaboradores);
-        item.setProposta(proposta);
-        item.setSelecionado(selecionado);
-        item.setEstado(ESTADO_ATIVO);
-        itens.add(item);
-      }
-    } else {
-      for (var entry : byPrest.entrySet()) {
-        var list = entry.getValue();
-        if (CollectionUtils.isEmpty(list))
-          continue;
-        var any = list.getFirst();
-        var prest = any != null ? any.getMissaoPrestId() : null;
-        if (prest == null)
-          continue;
-
-        var selecionado = !CollectionUtils.isEmpty(list);
-        var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
-        for (var r : list) {
-          var c = r != null ? r.getMissaoColabId() : null;
-          if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
-            continue;
-          colaboradores.add(toColaboradorDto(c));
-        }
-
-        AnexoRespDTO proposta = null;
-        for (var r : list) {
-          if (r == null || r.getUuid() == null)
-            continue;
-          var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
-              TableName.RH_T_MISSAO_REQUISICAO.name(),
-              r.getUuid());
-          if (CollectionUtils.isEmpty(docs))
-            continue;
-          proposta = docs.stream()
-              .filter(d -> d != null && d.getEstado() != Estado.E)
-              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                  Comparator.nullsLast(Comparator.naturalOrder())))
-              .map(documentoMapper::toRespDto)
-              .orElse(null);
-          if (proposta != null)
-            break;
-        }
-
-        var item = new MissaoReqItemResponseDTO();
-        item.setId(prest.getId());
-        item.setUuid(prest.getUuid());
-        item.setMissaoPrestId(prest.getId());
-        item.setNomePrestador(prest.getNome());
-        item.setEmailPrestador(prest.getEmail());
-        item.setColaboradores(colaboradores);
-        item.setProposta(proposta);
-        item.setSelecionado(selecionado);
-        item.setEstado(ESTADO_ATIVO);
-        itens.add(item);
-      }
-    }
-
-    var response = new MissaoEmissaoReqResponseDTO();
-    response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
-    response.setRequisicoes(itens);
-    response.setColaboradoresMissao(colaboradoresDaMissao(missaoUuid));
     return ResponseEntity.ok(response);
   }
 
@@ -622,6 +219,13 @@ public class MissaoServicoServiceRead {
     }
 
     var totalsByMissao = new HashMap<Long, Map<String, BigDecimal>>();
+    var totaisPorProcesso = new HashMap<Long, BigDecimal>();
+    var processosPorMissao = new HashMap<Long, List<MissaoProcessoEntity>>();
+    if (!missaoIds.isEmpty()) {
+      for (var p : missaoProcessoRepository.findAllByMissaoServId_IdIn(missaoIds)) {
+        processosPorMissao.computeIfAbsent(p.getMissaoServId().getId(), _ -> new ArrayList<>()).add(p);
+      }
+    }
     if (!missaoIds.isEmpty()) {
       Specification<MissaoLogisticaEntity> logSpec = (root, q, cb) -> cb.and(
           root.get("missaoServId").get("id").in(missaoIds),
@@ -641,6 +245,9 @@ public class MissaoServicoServiceRead {
           totalsByMissao
               .computeIfAbsent(mid, _ -> new HashMap<>())
               .merge(ref.toUpperCase(), v, BigDecimal::add);
+          if (l.getMissaoProcessoId() != null) {
+            totaisPorProcesso.merge(l.getMissaoProcessoId().getId(), v, BigDecimal::add);
+          }
         }
       }
     }
@@ -651,7 +258,9 @@ public class MissaoServicoServiceRead {
         continue;
 
       var estado = resolveEstadoMissao(m);
-      var situacao = resolveSituacaoLista(m);
+      var processosDaMissao = processosPorMissao.getOrDefault(m.getId(), List.of());
+      var situacao = processosDaMissao.isEmpty() ? resolveSituacaoLista(m) : situacaoPorProcessos(m, processosDaMissao);
+      var etapaAtrasada = processoMaisAtrasado(processosDaMissao).map(MissaoProcessoEntity::getEtapa).orElse(m.getEtapa());
 
       var sums = totalsByMissao.getOrDefault(m.getId(), java.util.Map.of());
       var dto = new MissaoServicoResumoDTO();
@@ -663,8 +272,10 @@ public class MissaoServicoServiceRead {
       dto.setDestino(m.getDescricaoDestino());
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
-      dto.setEtapa(m.getEtapa());
-      dto.setEtapaDesc(resolveEtapaLista(m.getEtapa()));
+      // Etapa da missão = a do processo activo mais atrasado (a etapa da missão fica em SUBMISSAO)
+      dto.setEtapa(etapaAtrasada);
+      var etapaEnum = EtapaProcesso.fromCode(etapaAtrasada);
+      dto.setEtapaDesc(etapaEnum != null ? etapaEnum.getDescricao() : resolveEtapaLista(etapaAtrasada));
       dto.setEstado(estado.estado());
       dto.setEstadoDesc(estado.estadoDesc());
       dto.setSituacao(situacao.estado());
@@ -673,6 +284,21 @@ public class MissaoServicoServiceRead {
       dto.setValorBP(sums.get("BILHETE_PASSAGEM"));
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
       dto.setValorSeguro(sums.get("SEGURO_VIAGEM"));
+      dto.setProcessos(processosDaMissao.stream()
+          .sorted(Comparator.comparing(MissaoProcessoEntity::getId))
+          .map(p -> {
+            var pd = new MissaoProcessoResumoDTO();
+            pd.setUuid(p.getUuid());
+            pd.setTipoProcesso(p.getTipoProcesso());
+            pd.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+            pd.setEtapa(p.getEtapa());
+            var e = EtapaProcesso.fromCode(p.getEtapa());
+            pd.setEtapaDesc(e != null ? e.getDescricao() : p.getEtapa());
+            pd.setEstado(p.getEstado());
+            pd.setValorTotal(totaisPorProcesso.get(p.getId()));
+            return pd;
+          })
+          .toList());
       content.add(dto);
     }
 
@@ -688,105 +314,12 @@ public class MissaoServicoServiceRead {
     return ResponseEntity.ok(wrapper);
   }
 
-  private String resolveNome(
-      MissaoLogisticaEntity logistica,
-      List<MissaoLogisticaDetEntity> dets) {
-    if (logistica == null)
-      return null;
-
-    if ("AJUDA_CUSTO".equalsIgnoreCase(logistica.getReferencia())) {
-      if (!CollectionUtils.isEmpty(dets)) {
-        var d0 = dets.getFirst();
-        if (d0 != null && d0.getMissaoColabId() != null && d0.getMissaoColabId().getFunId() != null) {
-          return d0.getMissaoColabId().getFunId().getNome();
-        }
-      }
-    }
-
-    if ("SEGURO_VIAGEM".equalsIgnoreCase(logistica.getReferencia())
-        && org.springframework.util.StringUtils.hasText(logistica.getNomeSeguradora())) {
-      return logistica.getNomeSeguradora();
-    }
-
-    return logistica.getPrestadorServId() != null ? logistica.getPrestadorServId().getNome() : null;
-  }
-
-  private List<MissaoLogisticaDetResponseDTO> mapDet(
-      List<MissaoLogisticaDetEntity> dets) {
-    if (CollectionUtils.isEmpty(dets))
-      return List.of();
-    var out = new ArrayList<MissaoLogisticaDetResponseDTO>();
-    for (var d : dets) {
-      var dto = toDetDto(d);
-      if (dto != null)
-        out.add(dto);
-    }
-    return out;
-  }
-
-  private MissaoLogisticaDetResponseDTO firstDet(
-      List<MissaoLogisticaDetEntity> dets) {
-    if (CollectionUtils.isEmpty(dets))
-      return null;
-    return toDetDto(dets.getFirst());
-  }
-
-  private MissaoLogisticaDetResponseDTO toDetDto(
-      MissaoLogisticaDetEntity d) {
-    if (d == null)
-      return null;
-    var dto = new MissaoLogisticaDetResponseDTO();
-    dto.setId(d.getId());
-    dto.setEstado(d.getEstado());
-    dto.setMissaoColabUuid(d.getMissaoColabId() != null ? d.getMissaoColabId().getUuid() : null);
-    dto.setFuncionarioUuid(d.getMissaoColabId() != null && d.getMissaoColabId().getFunId() != null
-        ? d.getMissaoColabId().getFunId().getUuid()
-        : null);
-    dto.setNomeColaborador(d.getMissaoColabId() != null && d.getMissaoColabId().getFunId() != null
-        ? d.getMissaoColabId().getFunId().getNome()
-        : null);
-    return dto;
-  }
-
   /** Colaboradores ativos afetos à missão — usado pelos ecrãs que precisam de popular multiselects. */
   private List<MissaoColaboradorResponseDTO> colaboradoresDaMissao(UUID missaoUuid) {
     return missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
         .stream()
         .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
         .map(this::toColaboradorDto)
-        .toList();
-  }
-
-  /**
-   * Como {@link #colaboradoresDaMissao}, mas com o prestador a que cada colaborador ficou associado
-   * na emissão de requisição. A logística só permite agrupar colaboradores do mesmo prestador numa
-   * linha de bilhete/seguro, e sem esta informação o multiselect ofereceria combinações inválidas.
-   */
-  private List<MissaoColaboradorResponseDTO> colaboradoresDaMissaoComPrestador(UUID missaoUuid) {
-    var prestadorPorColab = new HashMap<Long, MissaoPrestadorEntity>();
-    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
-    if (!CollectionUtils.isEmpty(requisicoes)) {
-      for (var r : requisicoes) {
-        if (r == null || !ESTADO_ATIVO.equals(r.getEstado()))
-          continue;
-        if (r.getMissaoColabId() == null || r.getMissaoColabId().getId() == null || r.getMissaoPrestId() == null)
-          continue;
-        prestadorPorColab.putIfAbsent(r.getMissaoColabId().getId(), r.getMissaoPrestId());
-      }
-    }
-
-    return missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
-        .map(c -> {
-          var dto = toColaboradorDto(c);
-          var prest = prestadorPorColab.get(c.getId());
-          if (dto != null && prest != null) {
-            dto.setMissaoPrestId(prest.getId());
-            dto.setNomePrestador(prest.getNome());
-          }
-          return dto;
-        })
         .toList();
   }
 
@@ -808,6 +341,25 @@ public class MissaoServicoServiceRead {
     dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
     dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
     return dto;
+  }
+
+  /** Os processos da missão, pela ordem de criação, com as descrições de tipo e etapa. */
+  private List<MissaoProcessoResponseDTO> processosDaMissao(UUID missaoUuid) {
+    return missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid)
+        .stream()
+        .map(p -> {
+          var dto = new MissaoProcessoResponseDTO();
+          dto.setId(p.getId());
+          dto.setUuid(p.getUuid());
+          dto.setTipoProcesso(p.getTipoProcesso());
+          dto.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+          dto.setEtapa(p.getEtapa());
+          var etapa = EtapaProcesso.fromCode(p.getEtapa());
+          dto.setEtapaDesc(etapa != null ? etapa.getDescricao() : p.getEtapa());
+          dto.setEstado(p.getEstado());
+          return dto;
+        })
+        .toList();
   }
 
   private String resolveAmbitoMissao(Integer flgDestino) {
@@ -838,9 +390,39 @@ public class MissaoServicoServiceRead {
     if (missao == null || !StringUtils.hasText(missao.getEstado())) {
       return new EstadoDesc("", "");
     }
-    return ESTADO_INATIVO.equals(missao.getEstado())
-        ? new EstadoDesc(ESTADO_INATIVO, "Cancelado")
-        : new EstadoDesc(ESTADO_ATIVO, "Activo");
+    if (ESTADO_INATIVO.equals(missao.getEstado()))
+      return new EstadoDesc(ESTADO_INATIVO, "Cancelado");
+    if ("FINALIZADO".equals(missao.getEstado()))
+      return new EstadoDesc("FINALIZADO", "Finalizado");
+    return new EstadoDesc(ESTADO_ATIVO, "Activo");
+  }
+
+  /** Processo activo mais atrasado — define a etapa e a situação da missão na lista. */
+  private Optional<MissaoProcessoEntity> processoMaisAtrasado(List<MissaoProcessoEntity> processos) {
+    return processos.stream()
+        .filter(p -> ESTADO_ATIVO.equals(p.getEstado()))
+        .min(Comparator.comparing(p -> {
+          var e = EtapaProcesso.fromCode(p.getEtapa());
+          return e != null ? e.ordinal() : -1;
+        }));
+  }
+
+  /** Situação da missão no modelo por processo: o que falta ao processo mais atrasado. */
+  private EstadoDesc situacaoPorProcessos(MissaoServicoEntity missao, List<MissaoProcessoEntity> processos) {
+    if ("FINALIZADO".equals(missao.getEstado()))
+      return missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null
+          ? new EstadoDesc("PAGO", "Pago")
+          : new EstadoDesc("POR_PAGAR", "Autorizado — por pagar");
+    var etapa = processoMaisAtrasado(processos).map(p -> EtapaProcesso.fromCode(p.getEtapa())).orElse(null);
+    if (etapa == null)
+      return new EstadoDesc("", "");
+    return switch (etapa) {
+      case PRESTADOR_SERVICO, EMISSAO_REQUISICAO -> new EstadoDesc("PENDENTE_REQUISICAO", "Pendente de Requisição");
+      case LOGISTICA -> new EstadoDesc("PENDENTE_FATURA", "Pendente de Fatura");
+      case VALIDACAO_UGAL, APROVACAO_RH -> new EstadoDesc("EM_VALIDACAO", "Em Validação");
+      case CABIMENTO, AUTORIZACAO -> new EstadoDesc("POR_PAGAR", "Por pagar");
+      case PAGAMENTO -> new EstadoDesc("PAGO", "Pago");
+    };
   }
 
   /**
@@ -950,5 +532,53 @@ public class MissaoServicoServiceRead {
 
   private java.time.LocalDate toLocalDate(LocalDateTime dt) {
     return dt != null ? dt.toLocalDate() : null;
+  }
+
+  /**
+   * Todas as notificações emitidas no âmbito de uma missão — ecrã "Ver Notificação" da Lista Missão.
+   *
+   * <p>Ficam espalhadas por quatro referências: a missão (cancelamento), o prestador (pedido de
+   * proposta, um registo por email), a requisição (envio ao prestador) e o colaborador (aviso de
+   * logística). Este método junta-as e ordena da mais recente para a mais antiga.
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<List<NotificacaoMissaoResponseDTO>> listarNotificacoes(UUID missaoUuid) {
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var encontradas = new java.util.LinkedHashMap<Long, NotificacaoMissaoResponseDTO>();
+    java.util.function.BiConsumer<String, UUID> recolher = (referencia, uuid) -> {
+      if (uuid == null)
+        return;
+      for (var n : notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(referencia, uuid)) {
+        encontradas.putIfAbsent(n.getId(), toNotificacaoDto(n, referencia));
+      }
+    };
+
+    recolher.accept(TableName.RH_T_MISSAO_SERVICO.name(), missao.getUuid());
+    for (var p : missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_PRESTADOR.name(), p.getUuid());
+    for (var r : missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_REQUISICAO.name(), r.getUuid());
+    for (var c : missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_COLABORADOR.name(), c.getUuid());
+
+    var out = new java.util.ArrayList<>(encontradas.values());
+    out.sort(java.util.Comparator.comparing(NotificacaoMissaoResponseDTO::getDataEnvio,
+        java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
+    return ResponseEntity.ok(out);
+  }
+
+  private NotificacaoMissaoResponseDTO toNotificacaoDto(NotificacaoEntity n, String origem) {
+    var dto = new NotificacaoMissaoResponseDTO();
+    dto.setUuid(n.getUuid());
+    dto.setTipoNotificacao(n.getTipoNotificacao());
+    dto.setAssunto(n.getAssunto());
+    dto.setMensagem(n.getMessage());
+    dto.setEmail(n.getEmail());
+    dto.setNomeReceptor(n.getNomeReceptor());
+    dto.setDataEnvio(n.getDataEnvio());
+    dto.setEstado(n.getEstado());
+    dto.setOrigem(origem);
+    return dto;
   }
 }

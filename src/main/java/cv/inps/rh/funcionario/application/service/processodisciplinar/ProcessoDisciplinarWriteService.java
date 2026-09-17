@@ -37,6 +37,8 @@ public class ProcessoDisciplinarWriteService {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
 
   public SuccessResponseDTO saveNovoProcessoDisciplinar(String funcionarioId, ProcessoDisciplinarRequestDTO request) {
 
@@ -64,6 +66,14 @@ public class ProcessoDisciplinarWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+
+    // Detalhe congelado do REGISTO: o "antes" nao existe, pelo que todos os campos saem INICIAL —
+    // a grelha diz "criado com ...", que e a semantica de uma validacao INSERT.
+    var camposPd = dossierCampos.processoDisciplinar();
+    detalheAlteracoes.congelar(validation,
+        cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_PROCESSO_DISCIPLINAR,
+        camposPd, detalheAlteracoes.capturar(camposPd, null),
+        detalheAlteracoes.capturar(camposPd, process));
 
     return new SuccessResponseDTO(true, process.getUuid().toString(), "Processo disciplinar registado.", List.of());
   }
@@ -95,6 +105,10 @@ public class ProcessoDisciplinarWriteService {
           "Processo disciplinar em correção: não pode ser validado. Corrija e reenvie primeiro.");
     }
 
+    // Estado ANTES do payload (a edicao abaixo e in place).
+    var camposPd = dossierCampos.processoDisciplinar();
+    var antesDetalhe = detalheAlteracoes.capturar(camposPd, process);
+
     process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
     populateEntity(request, process);
 
@@ -102,14 +116,11 @@ public class ProcessoDisciplinarWriteService {
     if (Estado.C.name().equals(process.getEstado())) {
       process.setEstado(Estado.P.name());
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(process.getUuid(), Referencia.PROCESSO_DISCIPLINAR);
-      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (saveNovoProcessoDisciplinar).
-      try {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
-            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_PROCESSO_DISCIPLINAR");
-        processoDisciplinarEntityRepository.save(process);
-      } finally {
-        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
-      }
+      processoDisciplinarEntityRepository.save(process);
+      // Reenvio de correcao: funde com o detalhe existente, preservando o "antes" ORIGINAL.
+      detalheAlteracoes.congelar(validacaoReaberta,
+          cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_PROCESSO_DISCIPLINAR,
+          camposPd, antesDetalhe, detalheAlteracoes.capturar(camposPd, process));
       return new SuccessResponseDTO(true, process.getUuid().toString(),
           "Processo disciplinar corrigido e reenviado para validação.", List.of());
     }

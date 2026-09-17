@@ -59,7 +59,7 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private String etapaDesc;
 
   @Valid
-  private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
+  private List<OutrosEmprestimosDTO> outrosEmprestimosFuncionario = new ArrayList<>();
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();

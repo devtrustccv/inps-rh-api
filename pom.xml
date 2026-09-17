@@ -38,7 +38,8 @@
     </repositories>
     <properties>
         <igrp.version>0.1.0-beta.1</igrp.version>
-        <java.version>23</java.version>
+        <igrp.auth.version>0.2.0-beta.8</igrp.auth.version>
+        <java.version>26</java.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
         <springdoc.version>2.9.0</springdoc.version>
     </properties>
@@ -140,9 +141,9 @@
         </dependency>
 
         <dependency>
-            <groupId>cv.igrp.platform.access</groupId>
-            <artifactId>client</artifactId>
-            <version>0.1.0-beta-20251002.133018-5</version>
+            <groupId>cv.igrp.framework.auth</groupId>
+            <artifactId>core-spring-boot</artifactId>
+            <version>${igrp.auth.version}</version>
         </dependency>
 
         <dependency>
@@ -204,17 +205,6 @@
             <artifactId>flying-saucer-pdf</artifactId>
             <version>10.0.7</version>
             <scope>compile</scope>
-        </dependency>
-
-        <!--
-            JaVers - auditoria de alterações campo-a-campo (RH_T_VALIDACAO_DETALHE).
-            Auto-audit ao nível do repositório (@JaversSpringDataAuditable), sem tocar nas
-            entidades geradas pelo iGRP. Cria as tabelas JV_* no Oracle no arranque.
-        -->
-        <dependency>
-            <groupId>org.javers</groupId>
-            <artifactId>javers-spring-boot-starter-sql</artifactId>
-            <version>7.7.0</version>
         </dependency>
 
     </dependencies>

@@ -1,0 +1,15 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoEtapaGravadaResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "string", "objectType": "java", "required": false },
+    { "name": "etapa", "type": "string", "objectType": "java", "required": false },
+    { "name": "parecer", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoMissao", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto31processoetapagravada"
+}

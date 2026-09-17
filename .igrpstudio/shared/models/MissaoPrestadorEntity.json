@@ -67,6 +67,42 @@
       }
     },
     {
+      "name": "param_prest_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "ParamPrestadorEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "missao_processo_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "MissaoProcessoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
       "name": "estado",
       "type": "string",
       "length": 1,

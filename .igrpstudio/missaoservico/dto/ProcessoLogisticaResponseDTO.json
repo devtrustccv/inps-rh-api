@@ -1,0 +1,24 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoLogisticaResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "dataInicioMissao", "type": "date", "objectType": "java", "required": false },
+    { "name": "dataFimMissao", "type": "date", "objectType": "java", "required": false },
+    { "name": "bilhetesPassagem", "type": "BilhetePassagemResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "segurosViagem", "type": "SeguroViagemResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "alojamentos", "type": "AlojamentoResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "ajudasCusto", "type": "AjudaCustoResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "colaboradoresDisponiveis", "type": "MissaoColaboradorResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "notificacao", "type": "MissaoNotificacaoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto16proclogresp"
+}

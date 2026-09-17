@@ -1,0 +1,65 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "NotificacaoMissaoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "uuid",
+      "type": "uuid",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "tipoNotificacao",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "assunto",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "mensagem",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "nomeReceptor",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "dataEnvio",
+      "type": "date",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "origem",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    }
+  ],
+  "id": "msvdto34notifmissaoresp"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ParecerRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "responsavel", "type": "string", "objectType": "java", "required": false },
+    { "name": "parecer", "type": "string", "objectType": "java", "required": true },
+    { "name": "observacao", "type": "string", "objectType": "java", "required": false },
+    { "name": "processoEtapaAction", "type": "ProcessStepAction", "objectType": "enum", "required": false, "module": "emprestimo" }
+  ],
+  "id": "msvdto17parecerreq"
+}

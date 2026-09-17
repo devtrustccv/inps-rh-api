@@ -1,0 +1,12 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoAvaliacoesGravadasResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "avaliacoes", "type": "AvaliacaoPrestadorGravadaResponse", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": false }
+  ],
+  "id": "msvdto37avaliacoesgrav"
+}

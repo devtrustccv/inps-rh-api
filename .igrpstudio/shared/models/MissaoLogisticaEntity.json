@@ -21,10 +21,10 @@
       "sequenceName": "SEQ_MISSAO_LOGISTICA"
     },
     {
-      "name": "prestador_serv_id",
+      "name": "missao_prest_id",
       "type": "relation",
       "length": 255,
-      "nullable": false,
+      "nullable": true,
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false,
@@ -154,6 +154,24 @@
       "relation": {
         "type": "ManyToOne",
         "entity": "MissaoServicoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "missao_processo_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "MissaoProcessoEntity",
         "referencedColumnName": "id",
         "cardinality": "oneWay",
         "fetchType": "lazy",

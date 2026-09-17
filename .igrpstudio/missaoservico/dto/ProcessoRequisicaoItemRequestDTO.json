@@ -1,0 +1,16 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoRequisicaoItemRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoPrestUuid", "type": "uuid", "objectType": "java", "required": true },
+    { "name": "selecionado", "type": "boolean", "objectType": "java", "required": false },
+    { "name": "funcionarioUuids", "type": "uuid", "objectType": "java", "required": false, "collectionType": "list" },
+    { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "proposta", "type": "AnexoReq", "objectType": "dto", "required": false, "module": "shared" }
+  ],
+  "id": "msvdto12procreqitemreq"
+}

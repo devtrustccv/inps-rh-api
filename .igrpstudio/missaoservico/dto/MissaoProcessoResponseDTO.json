@@ -1,0 +1,18 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoProcessoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "long", "objectType": "java", "required": false },
+    { "name": "uuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "tipoProcesso", "type": "string", "objectType": "java", "required": false },
+    { "name": "tipoProcessoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "etapa", "type": "string", "objectType": "java", "required": false },
+    { "name": "etapaDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "estado", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto07processoresp"
+}

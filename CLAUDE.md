@@ -1,6 +1,6 @@
 # RH INPS Service
 
-Serviço de Recursos Humanos do INPS (Instituto Nacional de Previdência Social — Cabo Verde). Spring Boot 3.5 + Java 23, sobre o framework **IGRP** (cv.igrp.framework), persistência Oracle via JPA/Hibernate, OAuth2 Resource Server.
+Serviço de Recursos Humanos do INPS (Instituto Nacional de Previdência Social — Cabo Verde). Spring Boot 3.5 + Java 26, sobre o framework **IGRP** (cv.igrp.framework), persistência Oracle via JPA/Hibernate, OAuth2 Resource Server + iGRP Auth (`cv.igrp.framework.auth`, igual ao inss_core_service).
 
 Ver @README.md e @pom.xml.
 
@@ -43,7 +43,7 @@ Documentação funcional do domínio em [docs/](docs/) — consultar antes de im
 Credenciais/URLs via env vars — nunca hardcoded:
 
 - **Oracle DB**: `ORACLE_HOST`, `ORACLE_PORT`, `ORACLE_SERVICE_NAME`, `ORACLE_USER`, `ORACLE_PASSWORD`
-- **Auth JWT (OAuth2 RS)**: `AUTH_JWT_ISSUER`
+- **Auth JWT (OAuth2 RS) + Acesso iGRP**: `IGRP_ACCESS_API_BASE_URL` (é também o issuer), `IGRP_ACCESS_M2M_CLIENT_ID`/`_SECRET`
 - **MinIO (storage)**: `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET_NAME`
 - **Processamento salarial**: `PROCESSAMENTO_SALARIAL_BASE_URL`
 - **Serviços externos**: `EXTERNAL_NIF_URL`, `EXTERNAL_SNIAC_URL`, `EXTERNAL_BI_URL` (cada um com `_TOKEN` próprio)
@@ -58,9 +58,35 @@ Credenciais/URLs via env vars — nunca hardcoded:
 
 Este repositório traz o skill **`igrp-spring-generator`** em [.claude/skills/igrp-spring-generator/](.claude/skills/igrp-spring-generator/). Invocar via `/igrp-spring-generator` (ou deixar Claude acionar automaticamente) quando o pedido envolver: criar projeto Spring Boot `newApi`, novos endpoints/rotas REST, ou gerar controller/action/DTO/model/enum/module a partir de manifestos IGRP. O skill mantém compatibilidade byte-a-byte com o gerador de referência e escreve em `.igrpstudio/**.json` + `src/main/java/**`.
 
+## Detalhe de alterações (validação maker-checker)
+
+A grelha "Detalhe de alterações" (`GET api/v1/funcionarios/validacoes/{id}/detalhes`) vem **só** de
+`RH_T_VALIDACAO_DETALHE`, congelada na escrita por cada módulo. **Não há JaVers** (removido a 2026-09-16).
+
+- Infra: `shared/application/detalhe/` — `Campos<T>` (declaração tipada pelo metamodel JPA),
+  `DetalheAlteracoes` (`capturar` / `congelar`).
+- Declarações do dossiê: `funcionario/application/service/detalhe/DossierCampos` (+ `MobilidadeCampos`).
+  Usar sempre `XEntity_.campo` — nunca o nome do campo em string.
+- Ligar um módulo novo são 3 passos no write-service:
+
+```java
+var campos = dossierCampos.<modulo>();
+var antes = detalheAlteracoes.capturar(campos, entidade);   // ANTES de aplicar o payload (edição in place)
+// ... aplicar o payload, criar/reabrir a ValidacaoEntity ...
+detalheAlteracoes.congelar(validacao, DossierCampos.T_<TABELA>, campos, antes,
+                           detalheAlteracoes.capturar(campos, entidade));
+```
+
+- Registo (INSERT): `antes = capturar(campos, null)` → tudo `INICIAL`.
+- Coleções (várias linhas na mesma validação): usar o `congelar(..., tabelaId, ...)` — uma chamada por linha.
+- Reenvio de correção: o `congelar()` funde com o que já está congelado e mantém o valor anterior **aprovado**.
+- FKs: `.referencia(...)` lê o id sem inicializar o proxy e resolve o nome por PK
+  (`ReferenciaNomeResolver`); se o nome sair como `"XEntity #id"`, falta o getter em `GETTERS_CANDIDATOS`.
+
 ## Armadilhas comuns
 
 - Ao criar entidade nova, não esquecer `@EntityListeners(AuditingEntityListener.class)` — sem isso, os campos auditáveis ficam nulos.
 - Oracle não aceita `boolean` nativo: mapear com `@Type` ou usar `NUMBER(1)` + converter.
-- `java.version=23` no `pom.xml` — garantir JDK 23+ no ambiente local, senão o `maven-compiler-plugin` falha.
+- `java.version=26` no `pom.xml` — garantir JDK 26+ no ambiente local, senão o `maven-compiler-plugin` falha.
 - Versões IGRP usam `-beta` — alinhar `igrp.version` no pom antes de bumps.
+- **Build com o VS Code aberto**: depois de `mvn clean`, o compilador do IDE mexe no `target/classes` e o jar pode sair **sem os `.properties`** (a app arranca como `[core]` e rebenta no placeholder do OAuth2); os `package` seguintes não o reconstroem. Apagar o jar antes de empacotar e confirmar com `jar tf target/*.jar | grep application.properties`.

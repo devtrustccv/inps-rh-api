@@ -31,6 +31,10 @@ public class MissaoSubmissaoResponseDTO  {
   private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private Long paisDestinoId;
   private String paisDestinoNome;
+  private Long ilhaId;
+  private String ilhaNome;
+  private Long concelhoId;
+  private String concelhoNome;
   private Integer flgDestino;
   private String descricaoDestino;        // local preciso da missão
   private String ambitoMissao;            // texto livre: objetivo/âmbito da missão
@@ -44,6 +48,8 @@ public class MissaoSubmissaoResponseDTO  {
   private String estado;
   private List<MissaoColaboradorResponseDTO> colaboradores;
   private List<AnexoRespDTO> documentos;
+  private Boolean alojamento;             // processo ALOJAMENTO activo
+  private List<MissaoProcessoResponseDTO> processos;
   // audit
   private LocalDate dataRegisto;
   private Long userRegistoId;

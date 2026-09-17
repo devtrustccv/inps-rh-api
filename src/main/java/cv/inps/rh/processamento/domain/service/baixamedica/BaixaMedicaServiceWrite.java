@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.sql.Types;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -41,6 +42,7 @@ public class BaixaMedicaServiceWrite {
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheRepository;
   private final ValidacaoEntityRepository validacaoRepository;
+  private final FaltaEntityRepository faltaRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final DocumentoMapper documentoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
@@ -112,6 +114,30 @@ public class BaixaMedicaServiceWrite {
       ausencia.setObs(req.getObservacao());
       ausencia.setEstado(Estado.P);
       ausenciaRepository.save(ausencia);
+    }
+
+    var calculo = chamarProcedure(tiprel.getId(), req.getDataInicio(), req.getDataFim(),
+        req.getTipoLicenca(), req.getDataInicioFalta());
+
+    if (calculo.getMsgError() != null && !calculo.getMsgError().isBlank())
+      throw IgrpResponseStatusException.badRequest(calculo.getMsgError());
+
+    for (var item : calculo.getFaltasMensais()) {
+      var falta = new FaltaEntity();
+      falta.setUuid(UuidCreator.getTimeOrderedEpoch());
+      falta.setTiprelId(tiprel);
+      falta.setParamSitId(paramSit);
+      falta.setHorasAusencia("+0 00:00:00");
+      // O procedure retorna datas em formato dd/MM/yyyy
+      var fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+      if (item.getDataInicioFalta() != null && !item.getDataInicioFalta().isBlank())
+        falta.setDataInicio(java.time.LocalDate.parse(item.getDataInicioFalta(), fmt).atStartOfDay());
+      if (item.getDataFimFalta() != null && !item.getDataFimFalta().isBlank())
+        falta.setDataFim(java.time.LocalDate.parse(item.getDataFimFalta(), fmt).atStartOfDay());
+      if (item.getValorDesc() != null && !item.getValorDesc().isBlank())
+        falta.setValor(new java.math.BigDecimal(item.getValorDesc()));
+      falta.setEstado(Estado.P);
+      faltaRepository.save(falta);
     }
 
     var validacao = dadosContratuaisMapper.toValidacaoInsert(

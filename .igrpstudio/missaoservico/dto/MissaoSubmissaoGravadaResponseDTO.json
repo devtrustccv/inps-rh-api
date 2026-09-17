@@ -1,0 +1,14 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoSubmissaoGravadaResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "string", "objectType": "java", "required": false },
+    { "name": "nrMissao", "type": "long", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto30submissaogravada"
+}

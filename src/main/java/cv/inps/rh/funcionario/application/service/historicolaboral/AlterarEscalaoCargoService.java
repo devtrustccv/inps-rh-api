@@ -12,7 +12,6 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -57,7 +56,8 @@ public class AlterarEscalaoCargoService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
-  private final EscalaoDetalheDiffWriter escalaoDetalheDiffWriter;
+  private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
+  private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
   public SuccessResponseDTO alterar(String funcionarioId, AlterarEscalaoCargoDTO dto) {
@@ -120,24 +120,19 @@ public class AlterarEscalaoCargoService {
       if (dto.getObservacao() != null) emCorrecao.setObs(dto.getObservacao());
       emCorrecao.setEstado(Estado.P);
       var validacaoC = funcionarioRules.reabrirParaValidacao(emCorrecao.getUuid(), Referencia.ALTERACAO_ESCALAO);
-      try {
-        ValidacaoAuditContext.set(validacaoC.getId(), validacaoC.getUuid(), "RH_T_TIPOS_RELACIONAMENTO");
-        tiposRelacionamentoEntityRepository.save(emCorrecao);
-      } finally {
-        ValidacaoAuditContext.clear();
-      }
+      tiposRelacionamentoEntityRepository.save(emCorrecao);
       validacaoC.setTiprelId(emCorrecao);
       validacaoEntityRepository.save(validacaoC);
-      // Detalhe de alterações: regrava do zero (predecessor → movimento corrigido) via javers.compare.
-      escalaoDetalheDiffWriter.limpar(validacaoC.getUuid());
-      escalaoDetalheDiffWriter.persistir(validacaoC, emCorrecao.getTiprelId(), emCorrecao);
+      // Detalhe de alteracoes: predecessor -> movimento corrigido. Ao contrario dos outros modulos, o
+      // "antes" aqui NAO e a mesma linha antes do payload — e o tiprel PREDECESSOR, que e uma linha
+      // distinta e estavel. Por isso nao ha captura previa: ambos os estados sao legiveis agora.
+      var camposEsc = dossierCampos.escalao();
+      detalheAlteracoes.congelar(validacaoC, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_TIPREL, camposEsc,
+          detalheAlteracoes.capturar(camposEsc, emCorrecao.getTiprelId()),
+          detalheAlteracoes.capturar(camposEsc, emCorrecao));
       return new SuccessResponseDTO(true, emCorrecao.getUuid().toString(),
           "Correção reenviada para validação.", List.of());
     }
-
-    // Pré-gera o UUID da validação para carimbar JÁ o save do tiprel — é esse save que cria o snapshot
-    // JaVers da grelha "Detalhe de alterações". Carimbar um save posterior seria no-op.
-    var validacaoUuid = UuidCreator.getTimeOrderedEpoch();
 
     var novoTiprel = contratuaisEntityMapper.clone(atual);
     novoTiprel.setTiprelId(atual);
@@ -152,12 +147,7 @@ public class AlterarEscalaoCargoService {
     novoTiprel.setTipoSituacao(tipoSituacao);
     novoTiprel.setObs(dto.getObservacao() != null ? dto.getObservacao() : tipoSituacao);
     novoTiprel.setReferente(Referencia.ALTERACAO_ESCALAO.name());
-    try {
-      ValidacaoAuditContext.set(null, validacaoUuid, "RH_T_TIPOS_RELACIONAMENTO");
-      tiposRelacionamentoEntityRepository.save(novoTiprel);
-    } finally {
-      ValidacaoAuditContext.clear();
-    }
+    tiposRelacionamentoEntityRepository.save(novoTiprel);
 
     var validacao = new ValidacaoEntity();
     validacao.setTipoAccao(TipoAcao.UPDATE.name());
@@ -166,13 +156,15 @@ public class AlterarEscalaoCargoService {
     validacao.setReferenciaUuid(novoTiprel.getUuid());
     validacao.setTiprelId(novoTiprel);
     validacao.setEstado(Estado.P);
-    validacao.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline
+    validacao.setUuid(UuidCreator.getTimeOrderedEpoch());
     validacao.setFunId(funcionario);
     validacaoEntityRepository.save(validacao);
 
-    // Detalhe de alterações persistido no momento (predecessor → novo tiprel) com o motor de diff do
-    // JaVers (javers.compare de dois snapshots) → uma linha por campo em RH_T_VALIDACAO_DETALHE.
-    escalaoDetalheDiffWriter.persistir(validacao, atual, novoTiprel);
+    // Detalhe de alteracoes: predecessor (atual) -> novo tiprel pendente.
+    var camposEscNovo = dossierCampos.escalao();
+    detalheAlteracoes.congelar(validacao, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_TIPREL, camposEscNovo,
+        detalheAlteracoes.capturar(camposEscNovo, atual),
+        detalheAlteracoes.capturar(camposEscNovo, novoTiprel));
 
     return new SuccessResponseDTO(true, novoTiprel.getUuid().toString(),
         "Alteração de escalão registada para validação.", List.of());

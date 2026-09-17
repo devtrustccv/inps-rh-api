@@ -22,7 +22,7 @@ import java.util.UUID;
 @IgrpDTO
 public class BilhetePassagemRequestDTO  {
 
-  private List<UUID> colaboradorIds;      // multiselect — MissaoColaboradorEntity.id — obrigatório
+  private List<UUID> colaboradorIds;      // multiselect — funUuid OU uuid do colaborador da missão (o GET expõe ambos) — obrigatório
   private BigDecimal valor;               // obrigatório
   private AnexoReqDTO anexo;  // upload PDF — opcional
 

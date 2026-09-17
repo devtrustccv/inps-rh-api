@@ -1,163 +1,158 @@
-> Updated: 2026-09-09 12:40 -01:00
+> Updated: 2026-09-16 20:50 -01:00
 
 ## Goal
 
-Validar, contra a Oracle de dev e com a app a correr, os fluxos do Dossiê do Colaborador
-(registo → validação → contrato → mobilidade), corrigindo o que se desviar do caso de uso
-`docs/caso_uso_teste_gravacao_04_09_26.md`. Sessão anterior fechou contrato e mobilidade; falta
-continuar pelas restantes secções.
+Tirar o JaVers do projecto (código, `pom` e tabelas `JV_*`) sem perder a grelha "Detalhe de
+alterações" das validações do dossiê. **Concluído.** Falta: levar a mudança a staging/produção e
+tratar 3 problemas antigos que os testes expuseram (secção própria abaixo).
 
 ## Current state
 
-4 commits em `develop` (sem push), todos com `mvn compile` limpo e verificados com a app a correr:
+Commits em `develop` (sem push feito nesta sessão):
 
-- `15d1c6de` ativar/desativar contrato deixa de dar 400 com progressão por validar (finder do tiprel
-  passou a `est_act_adm=1`; desativação já não zera a marca)
-- `7971d4ef` remove `inicial`/`atual` dos dois GET de detalhe (ninguém os lia; no dossiê vinham
-  sempre `false`). A lista mantém-nos
-- `4e14fd0d` editar mobilidade só vai a validação se mudar direção/unidade/local
-- `20f780b1` rejeita `*Destino` de tipo não escolhido (400)
+| Commit | O quê |
+|---|---|
+| `a72a5472` | Motor novo + 11 módulos ligados + leitura pela tabela |
+| `2f905960` | Correcções dos testes (validação transiente; grelha agrupada por linha; `tabelaId` no DTO) |
+| `7550c00c` | Backfill temporário JaVers → tabela (endpoint `POST .../validacoes/detalhes/backfill`) |
+| `4ca97639` | Remoção total do JaVers + `CLAUDE.md` (padrão + armadilha de build) |
 
-Changelog do front-end em `docs/frontend_changes_funcionario.md` (4 entradas novas, no fim).
+- Motor: `src/main/java/cv/inps/rh/shared/application/detalhe/` (`Campos`, `CampoAlterado`,
+  `DetalheAlteracoes`, `DetalheAlteracoesService`). Declarações: `funcionario/application/service/detalhe/DossierCampos.java`
+  (16 entidades) + `MobilidadeCampos.java`. Registo de colaborador: `registodetalhe/RegistoDetalheCongelador.java`.
+- 11 módulos ligados **e testados ao vivo** (lista → get-by-id → acção; registo/edição, CORRIGIR →
+  reenvio, aprovar/rejeitar): mobilidade, processo disciplinar, rendimento, desconto, situação laboral,
+  substituição, carreira, registo de colaborador, escalão/cargo, dados bancários, renovação de contrato.
+- Dev (Oracle `62.84.179.137:xe`, user `INPSRH`): `RH_T_VALIDACAO_DETALHE` tem as 5 colunas novas;
+  backfill feito (50 validações, 182 linhas, 0 erros, grelhas antes/depois 50/50 iguais);
+  `JV_SNAPSHOT/JV_COMMIT/JV_COMMIT_PROPERTY/JV_GLOBAL_ID` + 3 sequências **largadas sem PURGE**
+  (estão na recycle bin).
+- Build: `mvn clean package` → BUILD SUCCESS, 0 classes `org.javers` no jar. App arranca em ~39 s na
+  porta **8087**. Único ERROR no log = Keycloak indisponível em dev (esperado).
+- Doc: `docs/detalhe_alteracoes_sem_tabelas_javers.html` (análise + estado final);
+  `docs/frontend_changes_funcionario.md` (campos novos `campo`, `tipoAlteracao`, `tabelaId`).
 
-Colaborador de teste criado e validado nesta sessão, em estado limpo:
-`Nuno Teste Sync`, id **958937**, uuid **01a085fa-fc04-7f08-a5d9-75b4b8a886b7**,
-contrato 746 (uuid `1f1ac43a-f979-63a4-a624-711ba536f6f7`), mobilidade 720
-(uuid `01a085fa-fc0f-7780-9958-e2696024cbad`), tiprel 173442. Tudo `A`, sem validações pendentes.
+## Decisions made — do not re-litigate
 
-Untracked/deleted em `docs/` no `git status` são anteriores a esta sessão — não mexer.
-
-## Decisões tomadas — não re-litigar
-
-- `est_act_adm=1` = **qual** é o vínculo corrente; `estado` = se está ativo. Dimensões independentes;
-  um tiprel `I` + `est_act_adm=1` é legítimo (confirmado pelo utilizador).
-- Nunca identificar o vínculo corrente por `max(id)` do tiprel — há sempre candidatos de workflow
-  (progressão P/E/I) com id maior.
-- `inicial`/`atual` só existem na **lista** de contratos. Não repor nos GET de detalhe.
-- Editar mobilidade: só direção, unidade e local disparam validação. Datas e tipo gravam-se sempre
-  mas não vão ao checker. O reenvio de correção (`C`) mantém-se e vai à fila mesmo sem diferenças.
-- Contrato da API da mobilidade: enviar **apenas** o `*Destino` do tipo selecionado. Falta → 400;
-  a mais → 400.
-- No ecrã de mobilidade só interessam **DIRECAO, SECAO e LOCAL_TRABALHO**. Os restantes valores de
-  `tipo_situacao` (`INICIO`, `NOVO_CONTRATO`, `RENOVACAO`) são carimbos deixados por outras ações —
-  registo de colaborador, contrato — e não são para tratar aqui. Decidido pelo utilizador: fica como
-  está, incluindo o `tipo_situacao` poder ficar híbrido (`INICIO,SECAO`) e aparecer na grelha do
-  checker. **Não reabrir.**
+- **Sem JaVers, nem `javers-core`**: com valores já formatados, comparar é `Objects.equals`; o
+  comparador próprio garante ordem de declaração e compara FKs por id.
+- **Declaração tipada pelo metamodel** (`XEntity_.campo`), nunca nomes em string: apanhou
+  `tipoCarreira` inexistente no descritor antigo.
+- **Congelar na escrita, capturar ANTES do payload** (as edições são in place; depois o "antes" não existe).
+- **FKs**: id via `PersistenceUnitUtil.getIdentifier()` (não inicializa o proxy) + nome por
+  `ReferenciaNomeResolver.resolver(Class, id)`; gravar nome **e** id (`VALOR_*_ID`).
+- **Reenvio de correcção funde** com o já congelado e mantém o valor anterior **aprovado**.
+- **Colecções** (bancários, contactos, familiares…): `congelar(..., tabelaId, ...)` por linha.
+- **Validação transiente** (criada por `funcionario.getValidacoes().add` + `save`, que faz MERGE):
+  `congelar()` faz flush e recupera por uuid — **nunca `persist()`** (criou uma duplicada, 1156/1157, já apagada).
+- **Sem migrations** (pedido explícito): esquema muda por SQL directo; `V3__javers_schema.sql` removida.
+- `CAMPO_ALTERADO` continua a ser o rótulo → frontend não parte.
 
 ## Constraints
 
-- PR contra `develop`, nunca `main`. Conventional commits.
-- Pedir autorização ao utilizador **antes de cada escrita** (POST/PUT/PATCH); GET são livres.
-- Mostrar sempre o HTTP status + corpo cru indentado, não resumir.
-- Arrays nos PUT: sempre completos e com `id` — ver memória `reference_sync_arrays_put` (sem id
-  duplica; ausente do array é soft-deleted `E`; `null` preserva; `[]` limpa).
-- `contratoId`, `idFuncionario`, `mobilidadeId` nos paths e query params são **UUID**, não id numérico.
+- Compilar com JDK 23 (`C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot`), **correr o jar com
+  JDK 25** (`...\jdk-25.0.2.10-hotspot`) — o 23 crasha (0xC0000005).
+- Testes ao vivo = como cliente do ecrã; mostrar payload e resposta crus e indentados; verificar na BD;
+  não é preciso pedir autorização para escritas em dev.
+- SQL directo: `tools/db/DbQuery.java` / `DbExec.java` (nunca `DbUpdate`), via PowerShell.
+- Convenção de sync nos PUT: sem `id` cria, omitido apaga, `null` preserva, `[]` limpa tudo.
 
 ## Blockers & risks
 
-- Nenhum bloqueio. App a correr (task `bvylfuzcx`, porta **8087**).
-- `docs/frontend_changes_funcionario.md` cresceu muito; considerar dividir por tema.
-- Nada foi feito push — os 4 commits só existem localmente.
+- **Staging/produção ainda não migrados.** Antes de largar as `JV_*` lá: criar as colunas (SQL em
+  *How to verify*) e correr o backfill do commit `7550c00c` (fazer checkout desse commit, arrancar,
+  `POST .../backfill?dryRun=true` depois `false`). Sem isso as validações antigas ficam com grelha vazia.
+- O backfill copiou os defeitos do JaVers tal e qual — ex.: linha fantasma "Data fim 2026-12-31 → null"
+  na mobilidade (validação 1106 do Nuno). Não há como corrigir: o estado anterior já não existe.
+- 16 validações antigas (12 `REGISTO_COLABORADOR`, 4 `RENOVACAO_CONTRATO`) já eram vazias no JaVers e continuam.
+- `alteradoPor` do motor novo = `anonymousUser` (auditor do AuditEntity); o JaVers mostrava
+  `system-bot@nosi.cv`. Combinado deixar assim por agora.
+- Registo de mobilidade continua sem grelha (decisão antiga: o ecrã usa o `MOB_ID`).
+
+## Problemas pré-existentes encontrados nos testes — a explicar noutra sessão
+
+Nenhum vem da migração; nenhum foi corrigido. O utilizador pediu explicação detalhada numa sessão
+seguinte.
+
+1. **Rejeitar (`validacao:"NAO"`) a edição de uma carreira inactiva registos de outras validações.**
+   `POST .../carreiras/{id}/validar` → `CarreiraWriteService.validarCarreira` (~linha 438). Com o
+   Nuno: carreira 831 → `I` com o escalão rejeitado, tiprel 173442 → `I`, vencimento 1527 → `I`,
+   e também o rendimento **1647** e o desconto **1745**, que pertenciam a OUTRAS validações pendentes.
+   Foi preciso repor à mão (SQL em *How to verify*). Liga à memória "rejeição associa fixos a tiprel rejeitado".
+2. **A aprovação da situação laboral grava o payload do validador em vez de aprovar o do maker.**
+   `AlterarSituacaoLaboralWriteService.validar` (~linhas 177-179): `setMotivoSitLabId(motivo)`,
+   `setSituacaoLaboralId(param)`, `setObs(dto.getObservacao())` com os dados do pedido do checker. Na
+   reactivação do Nuno apagou a `obs` "Reativacao - teste"; com outro `situacaoLaboralId` consolidaria
+   uma situação diferente da que o maker submeteu e da que a grelha mostra. Correcção provável: tirar
+   as 3 linhas (a linha pendente já tem o proposto) — confirmar se o frontend reenvia o formulário no SIM.
+3. **Mudar a situação laboral de um colaborador activo está quase sempre bloqueado.**
+   `guardComboInativarAtivar` (~linha 503): `ativaContrato(param) && funcionario.estado == A` → 400
+   "já está ativo". Em `RH_T_PARAM_SITUACAO` quase todas têm `FLG_ESTADO_CONTRATO='A'` (incl. licenças,
+   baixas, férias); só **9 APOSENTADO ('C')** e **15 Falecimento ('S')** passam. Falta decidir se o
+   erro está nos dados (flag mal preenchida) ou na regra (devia aplicar-se só à situação "ATIVO").
+
+Relacionados (não são bugs novos): rejeitar edição in-place **não reverte valores** (documentado
+como decisão para a mobilidade em `docs/frontend_changes_funcionario.md`); `ParamSituacaoDetalheEntity`
+só resolvia nome depois de acrescentar `getMotivo` ao resolver (feito).
 
 ## Relevant files
 
-- `src/main/java/cv/inps/rh/funcionario/application/service/MobilidadeWriteService.java:168` —
-  `aplicarCamposMobilidade`, a regra tipos↔"(depois)" nos dois sentidos; `editar()` ~L390 tem a
-  comparação que decide se vai a validação
-- `src/main/java/cv/inps/rh/funcionario/application/service/AlterarEstadoContratoService.java:74` —
-  finder do tiprel corrente
-- `docs/caso_uso_teste_gravacao_04_09_26.md:352` — secção Mobilidade do caso de uso
-- `tools/db/DbQuery.java`, `DbExec.java` — SQL directo (usar `DbExec` para escrita; `DbUpdate` dá
-  ORA-17273 depois de gravar)
+- `shared/application/detalhe/DetalheAlteracoesService.java` — capturar/comparar/congelar/fundir; recuperação por uuid.
+- `funcionario/application/service/detalhe/DossierCampos.java` — todas as declarações + nomes de tabela.
+- `funcionario/application/service/registodetalhe/RegistoDetalheCongelador.java` — registo (13 secções).
+- `shared/application/service/ReferenciaNomeResolver.java` — id → nome; `GETTERS_CANDIDATOS`, `OVERRIDES`.
+- `shared/application/service/ValidacaoDetalheReadService.java` + `funcionario/application/queries/GetDetalheAlteracoesQueryHandler.java` — leitura (uma fonte).
+- `CLAUDE.md` secção "Detalhe de alterações" — padrão de 3 passos para ligar módulos novos.
+- `scratchpad/` (gitignored): `registo_detalhe_0916*.json`, `registo_semjavers*.json`, `backfill_antes.json`, `backfill_comparar.py`.
 
 ## How to verify / resume
 
-Ambiente (2 armadilhas que custaram tempo):
-
-- **JDK 23 obrigatório.** `JAVA_HOME` do sistema aponta para `jdk-21` e o arranque falha com
-  `UnsupportedClassVersionError` (class file 67 vs 65). Usar
-  `C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot`.
-- **A app sobe na porta 8087**, não na 8089 do CLAUDE.md.
-- O **Bash tool tem o PATH partido** (sem `ls`, `curl`, `git`, `python`). Usar PowerShell para
-  comandos; as ferramentas Read/Grep/Glob funcionam normalmente.
-
-Arrancar:
-
 ```powershell
+# build (fechar/ignorar o IDE; apagar o jar antes para não sair sem .properties)
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot"
-$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-cd C:\Users\ivanick.santos\Nick-personal\personal-workspace\projects\RH_INPS_SERVICE
-mvn spring-boot:run          # ~1-4 min; esperar "Started RhInpsServiceApplication"
+Remove-Item target\rh-service-0.0.1-SNAPSHOT.jar* -ErrorAction SilentlyContinue
+mvn -o clean package -DskipTests      # ler BUILD SUCCESS; não usar -q
+jar tf target\rh-service-0.0.1-SNAPSHOT.jar | Select-String "classes/application.properties"   # tem de aparecer
+& "C:\Program Files\Eclipse Adoptium\jdk-25.0.2.10-hotspot\bin\java.exe" -jar target\rh-service-0.0.1-SNAPSHOT.jar
+# log deve dizer [RHINPSSERVICE] e "Tomcat started on port 8087"; se disser [core], o jar está sem .properties
 ```
 
-Chamadas HTTP (o `WebClient` com UTF-8 evita o mojibake que o `Invoke-WebRequest` produz nos acentos):
-
-```powershell
-$wc=New-Object System.Net.WebClient; $wc.Encoding=[System.Text.Encoding]::UTF8
-($wc.DownloadString("http://localhost:8087/api/v1/funcionarios?pageNumber=0&pageSize=20")) |
-  ConvertFrom-Json | ConvertTo-Json -Depth 12
-```
-
-SQL directo:
-
-```powershell
-cd tools\db
-$cp=".;C:/Users/ivanick.santos/.m2/repository/com/oracle/database/jdbc/ojdbc11/23.7.0.25.01/ojdbc11-23.7.0.25.01.jar"
-& "C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot\bin\java.exe" -cp $cp DbQuery "SELECT ..."
-```
-
-Nomes reais de tabelas/colunas (vários palpites falharam com ORA-00942/00904):
-`RH_T_FUNCIONARIOS`, `RH_T_SECAO`, `RH_T_MOBILIDADE` (coluna `INSTIT_ID`, não `INSTID_ID`),
-`RH_T_VALIDACAO` (coluna `TIPO_ACCAO`, dois C), `RH_T_CARREIRA`, `RH_T_CONTRATO_VINCULO`,
-`RH_T_TIPOS_RELACIONAMENTO`, `RH_V_CONTRATO`.
-
-Confirmar o estado herdado:
-
-```powershell
-git log --oneline -4        # deve mostrar 20f780b1, 4e14fd0d, 7971d4ef, 15d1c6de
-mvn -q compile -DskipTests  # EXIT=0
-```
+- Grelhas antigas: `python scratchpad/backfill_comparar.py` → `50/50 grelhas com o MESMO conteudo`.
+- Sem JaVers: `git grep -i javers -- src pom.xml` → só javadocs históricos em `DossierCampos`/`MobilidadeCampos`.
+- SQL das colunas (para staging/produção):
+  ```sql
+  ALTER TABLE RH_T_VALIDACAO_DETALHE ADD (CAMPO VARCHAR2(100), ORDEM NUMBER(3), TIPO_ALTERACAO VARCHAR2(20), VALOR_ANTERIOR_ID NUMBER, VALOR_NOVO_ID NUMBER);
+  ALTER TABLE RH_T_VALIDACAO_DETALHE MODIFY (VALOR_ANTERIOR VARCHAR2(2000), VALOR_NOVO VARCHAR2(2000));
+  CREATE INDEX IX_VAL_DET_VALIDACAO ON RH_T_VALIDACAO_DETALHE (VALIDACAO_ID, ORDEM);
+  ```
+- Recuperar as JV_* em dev (se preciso): `FLASHBACK TABLE JV_SNAPSHOT TO BEFORE DROP;` (idem as outras 3).
+- Estado de referência do Nuno (958937), para repor depois de testes de carreira:
+  carreira 831 `A` escalão 16 salário 190336; tiprel 173442 `A` salário 190336; REM 1527 `A`; PAG 1736-1738 `A`;
+  REM 1647 `P` e PAG 1745 `P` (rendimento/desconto de teste, validações pendentes).
 
 ## Test / validation plan
 
-Colaborador **958937** (uuid `01a085fa-fc04-7f08-a5d9-75b4b8a886b7`), mobilidade uuid
-`01a085fa-fc0f-7780-9958-e2696024cbad`. Base: `PUT /api/v1/funcionarios/{funUuid}/mobilidades/{mobUuid}`.
+Dados de teste em dev: Nuno Teste Sync 958937 (`01a085fa-fc04-7f08-a5d9-75b4b8a886b7`, mobilidade 720,
+carreira 831); **Teste Motor Detalhe Corrigido 958940** (`01a0abe6-8b2f-7365-b940-f1a5a6581705`,
+vínculo 17 PCCS **sem carreira** — único para testar escalão; bancários 699/700/701);
+**Teste Sem JaVers Corrigido 958941** (`01a0ac26-cbd0-7034-9cd1-96f74d479df4`, registo `P` pendente);
+Adérito 958939 (contrato 748, renovação `P` pendente, validação `01a0abef-39c2-7c8e-9018-d30ed1b6668e`).
+Pendentes deixados de propósito: rendimento 1647 e desconto 1745 (Nuno), registo do 958941, renovação do Adérito.
 
-Regressões já verificadas nesta sessão — repetir só se se mexer em `MobilidadeWriteService`:
-
-1. **No-op** — payload igual ao que está na BD (`tipoMobilidade:"INICIO"`, `dataInicio:"2026-09-09"`).
-   Esperado: 200 `"Sem alterações."`; mobilidade fica `A`; nenhuma validação nova.
-2. **Só data** — `{"tipoMobilidade":"INICIO","dataInicio":"2026-09-09","dataFim":"2026-12-31"}`.
-   Esperado: 200 `"Sem alterações."`; `data_fim` gravada; estado `A`.
-3. **Alteração real** — `{"tipoMobilidade":"INICIO,SECAO","dataInicio":"2026-09-09","seccaoDestino":2}`.
-   Esperado: 200 `"Mobilidade actualizada."`; mobilidade `P`; validação `UPDATE MOBILIDADE` `P`.
-   Detalhe (`GET /api/v1/funcionarios/validacoes/{validacaoUuid}/detalhes`) tem de mostrar
-   `valorAnterior` preenchido — se vier `null`, o baseline JaVers partiu-se.
-4. **Falta o destino** — `{"tipoMobilidade":"SECAO","dataInicio":"2026-09-09"}`.
-   Esperado: 400 `Escolheu mobilidade de Unidade: indique o campo "Unidade (depois)".`; rollback total.
-5. **Destino a mais** — `{"tipoMobilidade":"SECAO",...,"seccaoDestino":12,"direcaoDestino":100010075}`.
-   Esperado: 400 `Enviou "Direcção (depois)" mas não escolheu mobilidade de Direcção.`
-6. **Herança** — depois do teste 3, confirmar por SQL que `instit_id` e `local_trab_id` ficaram
-   inalterados (100010973 e 5).
-
-Limpar depois de cada teste que deixe `P`: validar com
-`PUT .../mobilidades/{mobUuid}/validar` e body `{"validar":"SIM","tipoMobilidade":...}` (esperado
-200 `"Mobilidade validada."`, mobilidade volta a `A`, **tiprel não muda** — uma edição não cria nem
-troca tiprel). Em alternativa, repor por SQL com `DbExec`.
-
-Contrato — regressão do `15d1c6de`, no 958925 (uuid `01a061d6-f65c-74cd-a5e3-3c45f3de5734`,
-contrato uuid `1f1abadd-e93d-63b2-a3bf-b3e110b02d03`, que tem uma progressão rejeitada):
-`PATCH .../contratos/{contratoUuid}/estado` com `{"estado":"I"}` → 200; tiprel 173439 fica `I` com
-`est_act_adm=1` e o candidato 173440 intacto; depois `{"estado":"A"}` → 200 e o get-by-id volta
-idêntico. Num contrato **não** atual (731, uuid `1f1a6bff-07c9-698b-85ba-459f5766daec`) os dois
-sentidos devem dar 400.
+Para os 3 problemas pré-existentes (próxima sessão):
+1. Carreira: fotografar Nuno (SQL acima) → `PUT .../{F}/carreiras/{C}` escalão 16→17 com `subsidios:null,encargosDescontos:null`
+   → `POST .../carreiras/{C}/validar {"validacao":"NAO"}` → esperado hoje: 1647/1745 passam a `I` (bug) → repor.
+2. Situação laboral: registar (`PATCH .../situacao-laboral`, `situacaoLaboralId:9, motivoId:23, observacao:"x"`)
+   → aprovar com `{"validar":"SIM","situacaoLaboralId":9,"motivoId":23}` sem `observacao` → esperado hoje: `obs` fica `null` (bug). Repor Nuno a ATIVO (situação 699: `situacao_laboral_id=1, motivo_sit_lab_id=2, estado='A', obs=null`; funcionário `estado='A', estado_validacao='A'`; tiprel `estado='A'`).
+3. Guard: `SELECT id,nome,flg_estado_contrato FROM RH_T_PARAM_SITUACAO WHERE estado='A'` e ler `ativaContrato/cessaContrato` — decidir com o negócio.
 
 ## Open questions
 
-- Fazer push / abrir PR dos 4 commits — o utilizador ainda não pediu.
+- Problemas 1–3 acima: corrigir código, dados ou regra? Decide o utilizador/analista.
+- Alinhar `alteradoPor` (`anonymousUser` vs nome do utilizador IAM) — adiado pelo utilizador.
+- Push para o remoto e PR contra `develop`: não pedido ainda.
 
 ## Next step
 
-Retomar a validação do Dossiê nas secções ainda não cobertas (carreira, regime, situação laboral,
-dados bancários/familiares), seguindo `docs/caso_uso_teste_gravacao_04_09_26.md` e usando o 958937
-como colaborador de teste.
+Explicar ao utilizador, em detalhe, os 3 problemas pré-existentes da secção própria (causa no código,
+dados envolvidos, impacto e opções de correcção), antes de mexer em qualquer um.

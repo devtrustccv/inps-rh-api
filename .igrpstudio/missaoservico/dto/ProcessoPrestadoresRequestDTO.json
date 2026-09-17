@@ -1,0 +1,14 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoPrestadoresRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "prestadores", "type": "uuid", "objectType": "java", "required": true, "collectionType": "list" },
+    { "name": "notificacao", "type": "MissaoNotificacaoRequest", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "processoEtapaAction", "type": "ProcessStepAction", "objectType": "enum", "required": false, "module": "emprestimo" }
+  ],
+  "id": "msvdto08procprestreq"
+}

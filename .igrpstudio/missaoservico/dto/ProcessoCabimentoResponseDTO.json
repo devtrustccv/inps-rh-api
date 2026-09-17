@@ -1,0 +1,19 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoCabimentoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoMissao", "type": "string", "objectType": "java", "required": false },
+    { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "itens", "type": "ProcessoCabimentoItemResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto29cabresp"
+}

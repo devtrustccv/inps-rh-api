@@ -1,0 +1,12 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "MissaoAvaliacoesRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "avaliacoes", "type": "MissaoAvaliacaoItemRequest", "objectType": "dto", "module": "missaoservico", "collectionType": "list", "required": true }
+  ],
+  "id": "msvdto35avaliacoesreq"
+}

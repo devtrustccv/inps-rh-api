@@ -1,0 +1,12 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoEtapaActionRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "processoEtapaAction", "type": "ProcessStepAction", "objectType": "enum", "required": false, "module": "emprestimo" }
+  ],
+  "id": "msvdto27etapaactionreq"
+}

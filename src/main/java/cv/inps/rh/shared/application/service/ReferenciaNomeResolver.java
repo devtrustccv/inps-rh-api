@@ -4,10 +4,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.javers.core.metamodel.object.GlobalId;
-import org.javers.core.metamodel.object.InstanceId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,10 +11,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Traduz uma referência (FK) do JaVers — guardada como {@link GlobalId}, ex.: {@code SecaoEntity/3} —
- * para um nome legível. Resolução <b>read-time</b>: carrega a entidade pelo id e lê o seu rótulo de
- * exibição. (Ver decisão: mostramos o nome ATUAL da referência, não o histórico; se uma secção for
- * renomeada, os detalhes antigos passam a exibir o nome novo.)
+ * Traduz uma referência (FK) — tipo da entidade + id — para um nome legível: carrega a entidade por
+ * chave primária e lê o seu rótulo de exibição. Usado pelo {@code DetalheAlteracoesService} no momento
+ * em que congela o detalhe, pelo que o nome gravado é o que vigorava quando o maker submeteu.
  *
  * <p>Estratégia híbrida, pensada para ser <b>automática</b> em código gerado que não podemos anotar:
  * <ol>
@@ -34,16 +29,17 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ReferenciaNomeResolver {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReferenciaNomeResolver.class);
-
   /** Getters candidatos a "rótulo de exibição", por ordem de preferência. */
   private static final List<String> GETTERS_CANDIDATOS =
-      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel", "getNmBanco");
+      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel", "getNmBanco",
+          // ParamSituacaoDetalheEntity chama "motivo" ao seu rótulo (coluna MOTIVO). Sem isto a grelha
+          // mostrava o fallback cru — "ParamSituacaoDetalheEntity #23" — ao aprovador.
+          "getMotivo");
 
   /**
-   * Overrides por tipo, para entidades que não sigam a convenção. Chave = nome do tipo JaVers (FQN da
-   * classe da entidade). Só se acrescenta quando uma entidade concreta precisar — tipicamente quando o
-   * rótulo visível é COMPOSTO (nenhum getter único o dá).
+   * Overrides por tipo, para entidades que não sigam a convenção. Chave = FQN da classe da entidade.
+   * Só se acrescenta quando uma entidade concreta precisar — tipicamente quando o rótulo visível é
+   * COMPOSTO (nenhum getter único o dá).
    */
   private static final Map<String, Function<Object, String>> OVERRIDES = Map.of(
       // Escalão: o rótulo do UI ("16A") é nível + letra; nenhum getter único o devolve. Cai para o
@@ -65,32 +61,25 @@ public class ReferenciaNomeResolver {
   private final EntityManager entityManager;
 
   /**
-   * Devolve o nome legível da referência, ou o id cru como fallback. {@code null} se a referência for
-   * {@code null}.
+   * Nome legível de uma referência a partir do <b>tipo + id</b>. O {@code DetalheAlteracoesService} lê o
+   * id do proxy da FK sem o inicializar, e o nome vem daqui — um {@code find()} por chave primária, que
+   * é barato e, ao contrário de {@code proxy.getNome()}, nunca lança {@code LazyInitializationException}.
+   *
+   * <p>Fallback legível ({@code "DirecaoEntity #12"}) se a entidade não existir ou não tiver nenhum
+   * dos getters de nome — a grelha nunca rebenta por causa disto.
    */
-  public String resolver(GlobalId globalId) {
-    if (globalId == null) {
+  public String resolver(Class<?> tipo, Object id) {
+    if (tipo == null || id == null) {
       return null;
     }
-    if (globalId instanceof InstanceId instanceId) {
-      try {
-        Class<?> tipo = Class.forName(instanceId.getTypeName());
-        Long id = Long.valueOf(String.valueOf(instanceId.getCdoId()));
-        Object entidade = entityManager.find(tipo, id);
-        if (entidade != null) {
-          String nome = nomeDe(entidade, instanceId.getTypeName(), tipo);
-          if (preenchido(nome)) {
-            return nome;
-          }
-        }
-      } catch (ReflectiveOperationException | NumberFormatException e) {
-        LOGGER.debug("Não foi possível resolver nome da referência {}: {}", globalId.value(), e.toString());
+    Object entidade = entityManager.find(tipo, id);
+    if (entidade != null) {
+      String nome = nomeDe(entidade, tipo.getName(), tipo);
+      if (preenchido(nome)) {
+        return nome;
       }
-      // Resolução falhou: fallback legível (nome simples do tipo + id), nunca a FQN completa.
-      String tipo = instanceId.getTypeName();
-      return tipo.substring(tipo.lastIndexOf('.') + 1) + " #" + instanceId.getCdoId();
     }
-    return globalId.value(); // não-InstanceId: valor cru do JaVers
+    return tipo.getSimpleName() + " #" + id;
   }
 
   private String nomeDe(Object entidade, String typeName, Class<?> tipo) {

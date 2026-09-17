@@ -15,31 +15,30 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class DecisaoEmprestimoDTO  {
-
-
-  @Valid
-  private BaseDecisaoDTO analiseRhPedido ;
+public class DecisaoEmprestimoDTO {
 
   @Valid
-  private BaseDecisaoDTO analiseFinanceiroPedido ;
+  private BaseDecisaoDTO analiseRhPedido;
 
   @Valid
-  private BaseDecisaoDTO autorizacaoComissaoExecutivaPedido ;
+  private BaseDecisaoDTO analiseFinanceiroPedido;
 
   @Valid
-  private BaseDecisaoDTO analiseRhAdiantamento ;
+  private BaseDecisaoDTO autorizacaoComissaoExecutivaPedido;
 
   @Valid
-  private BaseDecisaoDTO verificacaoAdiantamento ;
+  private BaseDecisaoDTO analiseRhAdiantamento;
 
   @Valid
-  private BaseDecisaoDTO analiseRhRenegociacao ;
+  private BaseDecisaoDTO verificacaoAdiantamento;
 
   @Valid
-  private BaseDecisaoDTO analiseFinanceiroRenegociacao ;
+  private BaseDecisaoDTO analiseRhRenegociacao;
 
   @Valid
-  private BaseDecisaoDTO autorizacaoComissaoExecutivaRenegociacao ;
+  private BaseDecisaoDTO analiseFinanceiroRenegociacao;
+
+  @Valid
+  private BaseDecisaoDTO autorizacaoComissaoExecutivaRenegociacao;
 
 }

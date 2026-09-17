@@ -16,6 +16,16 @@ public interface ValidacaoDetalheEntityRepository extends JpaRepository<Validaca
    */
   List<ValidacaoDetalheEntity> findByValidacaoId_UuidOrderByTabelaNameAscIdAsc(UUID validacaoUuid);
 
+  /**
+   * Ordem de APRESENTAÇÃO da grelha: por tabela, depois por LINHA ({@code TABELA_ID}) e só então pela
+   * ordem de declaração dos campos ({@code ORDEM}).
+   *
+   * <p>Agrupar por linha importa nas coleções: com duas contas bancárias alteradas, a grelha mostrava
+   * "Nº de conta" duas vezes intercalado com os campos da outra conta, sem se perceber a qual pertencia
+   * cada uma. Linhas antigas (sem {@code TABELA_ID}/{@code ORDEM}) caem para o fim pelo id, como antes.
+   */
+  List<ValidacaoDetalheEntity> findByValidacaoId_UuidOrderByTabelaNameAscTabelaIdAscOrdemAscIdAsc(UUID validacaoUuid);
+
   boolean existsByValidacaoId_Uuid(UUID validacaoUuid);
 
   /** Suporta a flag que diz ao frontend se deve mostrar o botão "Detalhe de alterações". */

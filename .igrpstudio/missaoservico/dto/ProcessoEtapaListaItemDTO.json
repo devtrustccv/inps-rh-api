@@ -1,0 +1,22 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoEtapaListaItem",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "nacionalInternacional", "type": "string", "objectType": "java", "required": false },
+    { "name": "destino", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataInicio", "type": "date", "objectType": "java", "required": false },
+    { "name": "dataFim", "type": "date", "objectType": "java", "required": false },
+    { "name": "processoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "tipoProcesso", "type": "string", "objectType": "java", "required": false },
+    { "name": "tipoProcessoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "etapa", "type": "string", "objectType": "java", "required": false },
+    { "name": "etapaDesc", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto31procetapaitem"
+}

@@ -28,53 +28,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "MissaoSubmissaoGravadaResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
         }
       }
-    },
-    {
-      "actionName": "saveAnaliseProcessoMissaoServico",
-      "path": "{uuid}/analise",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "MissaoAnaliseRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "missaoservico"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
     },
     {
       "actionName": "getListaMissaoServico",
@@ -175,9 +138,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -220,34 +185,6 @@
       ]
     },
     {
-      "actionName": "getAnaliseProcessoMissaoServico",
-      "path": "{uuid}/analise",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "MissaoAnaliseResponse",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "missaoservico"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
       "actionName": "saveSubmissaoServico",
       "path": "{uuid}/submissao",
       "method": "PUT",
@@ -270,100 +207,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "getSubmissaoServicoEmissaoRequisicao",
-      "path": "{uui}/emissao-requisicao",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "MissaoEmissaoReqResponse",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "missaoservico"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uui",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "saveSubmissaoServicoEmissaoRequisicao",
-      "path": "{uui}/emissao-requisicao",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "MissaoEmissaoRequisicaoRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "missaoservico"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uui",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "getMissaoServicoLogistica",
-      "path": "{uuid}/logistica",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "MissaoLogisticaResponse",
+                "type": "MissaoSubmissaoGravadaResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -382,47 +226,8 @@
       ]
     },
     {
-      "actionName": "saveMissaoServicoLogistica",
-      "path": "{uuid}/logistica",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "MissaoLogisticaRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "missaoservico"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "getMissaoServicoCabimento",
-      "path": "{uuid}/cabimento",
+      "actionName": "getMissaoAvaliacoes",
+      "path": "{uuid}/avaliacoes",
       "method": "GET",
       "responses": {
         "200": {
@@ -430,7 +235,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "MissaoCabimentoResponse",
+                "type": "MissaoAvaliacoesResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -449,14 +254,14 @@
       ]
     },
     {
-      "actionName": "saveMissaoServicoCabimento",
-      "path": "{uuid}/cabimento",
+      "actionName": "saveMissaoAvaliacoes",
+      "path": "{uuid}/avaliacoes",
       "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "type": "MissaoCabimentoRequest",
+              "type": "MissaoAvaliacoesRequest",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -471,33 +276,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "getMissaoServicoAutorizacao",
-      "path": "{uuid}/autorizacao",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "MissaoAutorizacaoResponse",
+                "type": "MissaoAvaliacoesGravadasResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -516,31 +295,20 @@
       ]
     },
     {
-      "actionName": "saveMissaoServicoAutorizacao",
-      "path": "{uuid}/autorizacao",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "MissaoAutorizacaoRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "missaoservico"
-            }
-          }
-        }
-      },
+      "actionName": "getMissaoCabimentos",
+      "path": "{uuid}/cabimentos",
+      "method": "GET",
       "responses": {
         "200": {
           "name": "OK",
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "MissaoCabimentosResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "missaoservico"
               }
             }
           }
@@ -605,9 +373,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }

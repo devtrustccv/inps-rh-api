@@ -1,0 +1,23 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoRequisicaoItemResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoPrestUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nomePrestador", "type": "string", "objectType": "java", "required": false },
+    { "name": "emailPrestador", "type": "string", "objectType": "java", "required": false },
+    { "name": "selecionado", "type": "boolean", "objectType": "java", "required": false },
+    { "name": "requisicaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrRequisicao", "type": "long", "objectType": "java", "required": false },
+    { "name": "anoRequisicao", "type": "int", "objectType": "java", "required": false },
+    { "name": "notaEncomenda", "type": "string", "objectType": "java", "required": false },
+    { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "colaboradores", "type": "MissaoColaboradorResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "proposta", "type": "AnexoResp", "objectType": "dto", "required": false, "module": "shared" },
+    { "name": "documentoRequisicao", "type": "AnexoResp", "objectType": "dto", "required": false, "module": "shared" }
+  ],
+  "id": "msvdto14procreqitemresp"
+}

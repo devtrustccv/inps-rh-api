@@ -42,6 +42,15 @@ public class MissaoServicoEntity extends AuditEntity {
     @JoinColumn(name = "pais_destino_id", referencedColumnName = "id", nullable = false)
     private GeografiaEntity paisDestinoId;
 
+    // Só em missões nacionais (país de destino = Cabo Verde)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
+    private GeografiaEntity ilhaId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "concelho_id", referencedColumnName = "id")
+    private GeografiaEntity concelhoId;
+
     @Column(name = "flg_destino")
     private Integer flgDestino;
 
@@ -75,8 +84,9 @@ public class MissaoServicoEntity extends AuditEntity {
     @Column(name = "etapa", length = 50, nullable = false)
     private String etapa;
 
+    // A (activa) | I (cancelada) | FINALIZADO (todos os processos activos pagos)
     @NotNull(message = "estado is mandatory")
-    @Column(name = "estado", length = 1, nullable = false)
+    @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
     @Column(name = "motivo_cancelamento", length = 500)

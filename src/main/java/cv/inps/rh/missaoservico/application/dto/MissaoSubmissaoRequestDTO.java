@@ -24,6 +24,9 @@ import java.util.List;
 public class MissaoSubmissaoRequestDTO  {
 
   private Long paisDestinoId;
+  private Long ilhaId;                    // só se o país de destino for Cabo Verde
+  private Long concelhoId;                // só se o país de destino for Cabo Verde
+  private Boolean alojamento;             // a instituição trata do alojamento? define o estado do processo ALOJAMENTO; null = não mexer (criação: sim)
   private String descricaoDestino;
   private String ambitoMissao;
   private LocalDate dataInicio;

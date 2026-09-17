@@ -20,6 +20,9 @@ public class ListaNotificacoesQuery implements Query {
   private String dataEnvioAte;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
+  /** Filtrar pelas notificações de uma entidade: nome da tabela + uuid do registo. */
+  private String referenciaName;
+  private String referenciaUuid;
   @NotBlank(message = "The field <pageNumber> is required")
   private String pageNumber;
   @NotBlank(message = "The field <pageSize> is required")
