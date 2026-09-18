@@ -290,7 +290,15 @@ public class MissaoServicoServiceRead {
             var pd = new MissaoProcessoResumoDTO();
             pd.setUuid(p.getUuid());
             pd.setTipoProcesso(p.getTipoProcesso());
-            pd.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+            // Lista não pode 500 por causa de uma única linha com tipo_processo legado/inválido
+            // (fromCodeOrThrow lança para casos assim) — mesma tolerância já aplicada à etapa
+            // logo acima via EtapaProcesso.fromCode + fallback.
+            var tipoProcessoEnum = Arrays.stream(TipoProcesso.values())
+                .filter(t -> t.name().equals(p.getTipoProcesso()))
+                .findFirst()
+                .orElse(null);
+            pd.setTipoProcessoDesc(
+                tipoProcessoEnum != null ? tipoProcessoEnum.getDescricao() : p.getTipoProcesso());
             pd.setEtapa(p.getEtapa());
             var e = EtapaProcesso.fromCode(p.getEtapa());
             pd.setEtapaDesc(e != null ? e.getDescricao() : p.getEtapa());
