@@ -2,9 +2,11 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
@@ -17,6 +19,7 @@ import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -173,10 +176,22 @@ public class EmprestimoWriteService {
     emprestimoHelper.savePlans(entity, plan);
   }
 
-  public void cancelLoan(String uuid) {
+  public void mudarEstadoEmprestimo(String uuid, String estado, String observacao, List<DocumentoDTO> files) {
+
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
-    entity.setEstado(StatusEmprestimo.CANCELADO.name());
+    entity.setEstado(estado);
+    entity.setObservacao(observacao);
     emprestimoEntityRepository.save(entity);
+
+    if (CollectionUtils.isEmpty(files))
+      return;
+
+    documentService.saveDocuments(
+        files,
+        entity.getTiprel().getFunId(),
+        entity.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"
+    );
   }
 }
 

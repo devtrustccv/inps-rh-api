@@ -705,4 +705,16 @@ public class EmprestimoController {
 
   }
 
+  @PostMapping("/{emprestimoId}/estado")
+  public ResponseEntity<Void> changeStatus(
+      @PathVariable String emprestimoId,
+      @RequestBody @Valid ChangeStatusData data
+
+  ) {
+
+    final var command = new MudarEstadoEmprestimoCommand(emprestimoId, data);
+
+    return commandBus.send(command);
+  }
+
 }
