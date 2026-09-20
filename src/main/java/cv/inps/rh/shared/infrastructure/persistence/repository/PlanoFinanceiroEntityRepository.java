@@ -27,4 +27,16 @@ public interface PlanoFinanceiroEntityRepository extends
            WHERE p.emprestimo.id = :emprestimoId
       """)
   void inativarPlanos(@Param("emprestimoId") Long emprestimoId);
+
+  // Fundo Social/Recuperação geram o plano em estado 'P' (pendente) na
+  // submissão do pedido; a Validação Empréstimo (SIM) ativa-o.
+  @Transactional
+  @Modifying
+  @Query("""
+          UPDATE PlanoFinanceiroEntity p
+             SET p.estado = 'A'
+           WHERE p.emprestimo.id = :emprestimoId
+             AND p.estado = 'P'
+      """)
+  void ativarPlanosPendentes(@Param("emprestimoId") Long emprestimoId);
 }
