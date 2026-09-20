@@ -130,10 +130,13 @@ public class AquisicaoViaturaService {
     var isNextDecision = request.getAction().equals(ProcessStepAction.NEXT);
     if (isNextDecision) {
 
-      if (Optional.ofNullable(request.getResponsavel()).map(AnaliseRhRequestDTO.Responsavel::parecer).isEmpty())
-        throw IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório");
+      var responsavelParecer = Optional.ofNullable(request.getResponsavel())
+          .map(AnaliseRhRequestDTO.Responsavel::parecer)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
 
-      switch (request.getParecer()) {
+      // Only the Validação Responsável (nível 2) actually advances the etapa — the parecer
+      // técnico (request.getParecer(), nível 1) is recorded but never drives the transition.
+      switch (responsavelParecer) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
