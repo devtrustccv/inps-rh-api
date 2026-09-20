@@ -238,12 +238,19 @@ public class AquisicaoViaturaService {
     pedidoEntityRepository.save(order);
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
-        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        default ->
-            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -297,7 +304,9 @@ public class AquisicaoViaturaService {
           loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         }
         case RETIFICACAO -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          // Retificação devolve à etapa imediatamente anterior a esta
+          // (Análise Financeira), não à Análise RH.
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
       }
