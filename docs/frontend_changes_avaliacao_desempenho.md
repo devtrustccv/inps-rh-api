@@ -336,7 +336,67 @@ os singulares continuam a funcionar.
 própria linha**. Na leitura vêm as N linhas, uma por cargo. Com `aplicarATodos: true`
 continua a ser uma só linha com `cargoId: null`.
 
-### 14. Enums novos
+### 14. Correcções da 2.ª bateria (21/09)
+
+Ver `docs/bateria_testes_avaliacao_desempenho_v2_21_09.md`.
+
+**Grelha de definição** (`GET .../avaliacoes/objectivos`) — ganha o colaborador, os períodos
+e o filtro Unidade que o ecrã tem:
+
+```diff
+  {
+-   "periodicidade": null,
++   "periodicidades": ["SEMESTRE1", "SEMESTRE2"],
++   "funId": 958926,
++   "funUuid": "...",
++   "nomeColaborador": "Ivanisa Sofia Delgado Silva",
+    "estado": "A",
++   "estadoDescricao": "Pendente"
+  }
+```
+
+Novo query param `?seccaoId=` (filtro **Unidade**), que antes era ignorado.
+
+**As notas passam a ser validadas.** `avaliacao` e `autoAvaliacao` têm de ser um dos níveis
+do domínio `NIVEIS_AVD`. Antes aceitava-se qualquer número — uma nota de `9999` produzia
+resultado `1205` e classificação nula.
+
+```json
+{ "status": 400,
+  "title": "Avaliação inválida em objectivo 1: 9999. Níveis aceites: [1, 2, 3, 4, 5] (domínio NIVEIS_AVD)." }
+```
+
+Todas as notas do pedido são validadas **antes** de qualquer escrita, para uma nota inválida
+não deixar o período meio gravado.
+
+**Reenviar a definição deixou de duplicar.** Gravar duas vezes os objectivos comuns
+(INPS ou DIREÇÃO) criava avaliações repetidas. Agora reutiliza a existente, acrescenta os
+períodos que faltarem e devolve o aviso em `alertas`. O comportamento já era este para
+INDIVIDUAL.
+
+**O cálculo das competências mudou** — ver §15.
+
+### 15. Cálculo: os pesos comportamental/técnica passam a contar
+
+`PESO_COMPORTAMENTAIS` e `PESO_TECNICA` eram gravados mas nunca entravam na conta. Como as
+duas famílias têm ponderações que somam 100% cada, juntas valiam 200% e o resultado do
+período saía fora da escala — ficando **sem classificação qualitativa**.
+
+```diff
+- competências = Σ(comportamentais) + Σ(técnicas)
++ competências = Σ(comportamentais) × pesoComportamentais% + Σ(técnicas) × pesoTecnica%
+```
+
+Exemplo real (pesos 60/40, ponderações globais 40/40/20):
+
+| | Antes | Agora |
+|---|---|---|
+| Competências | 7.00 | 3.60 |
+| **Nota do período** | **5.14** (fora da escala, sem qualitativa) | **3.78** → BOM |
+
+**Se já tiveres notas calculadas, mudam.** As anteriores estavam inflacionadas.
+
+### 16. Enums novos
 
 Expostos pelo enum exposer em `api/v1/enums`:
 

@@ -213,6 +213,38 @@ public class AvaliacaoPeriodoService {
     detalheRepository.save(detalhe);
   }
 
+  // -------------------------------------------------------------- validação
+
+  /**
+   * Valida uma nota contra os níveis de avaliação do domínio {@link Domains#NIVEIS_AVD}.
+   *
+   * <p>Sem isto, uma nota fora da escala entra no cálculo e produz um resultado que não
+   * cai em nenhum escalão — a avaliação fica com nota e sem classificação qualitativa.</p>
+   *
+   * <p>Enquanto o domínio estiver por preencher (uma linha de exemplo), não se valida,
+   * para não bloquear ambientes ainda por parametrizar.</p>
+   */
+  @Transactional(readOnly = true)
+  public void validarNota(BigDecimal nota, String ondeOcorreu) {
+    if (nota == null) {
+      return;
+    }
+    var niveis = niveisPermitidos();
+    if (niveis.isEmpty()) {
+      return;
+    }
+    if (!niveis.contains(nota.stripTrailingZeros().toPlainString())) {
+      throw IgrpResponseStatusException.badRequest(
+          "Avaliação inválida em " + ondeOcorreu + ": " + nota.toPlainString()
+              + ". Níveis aceites: " + niveis + " (domínio " + Domains.NIVEIS_AVD.getCode() + ").");
+    }
+  }
+
+  private java.util.Set<String> niveisPermitidos() {
+    var valores = dominioService.getDominioMap(Domains.NIVEIS_AVD.getCode()).keySet();
+    return valores.size() <= 1 ? java.util.Set.of() : valores;
+  }
+
   // ------------------------------------------------------------------ util
 
   /** {@code nota x ponderacao / 100}, com zero quando falta algum dos dois. */

@@ -133,17 +133,36 @@ public class AvaliacaoService {
       // Objectivos comuns: sem colaborador. INPS dá uma linha; DIRECAO dá uma por direção,
       // porque o ecrã permite juntar várias direções na mesma gravação.
       for (var instit : resolverDirecoes(dto, abrangencia)) {
+        var institId = instit != null ? instit.getId() : null;
+
+        // Reenviar o mesmo formulário não pode duplicar objectivos: se já existir a
+        // avaliação comum deste ano/abrangência/direção, só se acrescentam os períodos.
+        var existente = avaliacaoRepository
+            .findComuns(dto.getAno(), abrangencia.name(), institId)
+            .stream().findFirst().orElse(null);
+
+        if (existente != null) {
+          periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(existente, pp));
+          alertas.add("Já existiam objectivos " + abrangencia.name()
+              + (instit != null ? " da direção " + instit.getNome() : "")
+              + " no ano " + dto.getAno() + "; foram apenas acrescentados os períodos.");
+          created.add(existente.getUuid().toString());
+          continue;
+        }
+
         var avaliacao = novaAvaliacao(dto, abrangencia, null, instit, secao, cargo, carreira, det);
         avaliacaoRepository.save(avaliacao);
         criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
-            resolverDescricaoManual(instit != null ? instit.getId() : null,
-                dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
+            resolverDescricaoManual(institId, dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
         periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
         created.add(avaliacao.getUuid().toString());
       }
 
-      return sucesso(created, "Objectivos comuns (" + abrangencia.name() + ") definidos em "
-          + created.size() + " registo(s) para " + String.join(", ", periodos) + ".");
+      var respostaComuns = sucesso(created, "Objectivos comuns (" + abrangencia.name()
+          + ") definidos em " + created.size() + " registo(s) para "
+          + String.join(", ", periodos) + ".");
+      alertas.forEach(a -> respostaComuns.getBody().getAlertas().add(a));
+      return respostaComuns;
     }
 
     if (dto.getFunUuids() == null || dto.getFunUuids().isEmpty()) {
@@ -294,6 +313,9 @@ public class AvaliacaoService {
         predicates.add(cb.equal(cb.upper(root.get("abrangencia")),
             query.getAbrangencia().trim().toUpperCase()));
       }
+      if (query.getSeccaoId() != null) {
+        predicates.add(cb.equal(root.get("seccaoId").get("id"), query.getSeccaoId()));
+      }
       if (StringUtils.hasText(query.getEstado())) {
         predicates.add(cb.equal(root.get("estado"), query.getEstado()));
       }
@@ -314,7 +336,17 @@ public class AvaliacaoService {
 
     var response = new WrapperListaDefinicaoObjetivoDTO();
     cv.inps.rh.shared.util.PageMapper.fillPagination(page, response);
-    response.setContent(page.getContent().stream().map(avaliacaoMapper::toResumo).toList());
+    // Um único select para os períodos de toda a página.
+    var periodosPorAvd = periodoService
+        .detalhesDe(page.getContent().stream().map(AvaliacaoEntity::getId).toList())
+        .stream()
+        .collect(Collectors.groupingBy(d -> d.getAvaliacao().getId(),
+            Collectors.mapping(AvaliacaoDetalheEntity::getPeriodicidade, Collectors.toList())));
+
+    response.setContent(page.getContent().stream()
+        .map(a -> avaliacaoMapper.toResumo(a,
+            periodosPorAvd.getOrDefault(a.getId(), List.of()).stream().sorted().toList()))
+        .toList());
     return response;
   }
 

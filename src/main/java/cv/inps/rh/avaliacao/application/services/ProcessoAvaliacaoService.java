@@ -76,6 +76,7 @@ public class ProcessoAvaliacaoService {
   public ResponseEntity<SuccessResponseDTO> gravarAvaliacao(String uuid, AvaliacaoDTO dto) {
     var avaliacao = load(uuid);
     var periodo = periodoService.validarPeriodo(avaliacao.getAno(), periodicidadeDe(dto));
+    validarNotas(dto);
 
     aplicarMedicoes(avaliacao, periodo, dto, (medicao, valores) -> {
       medicao.setRealizado(valores.realizado());
@@ -94,6 +95,7 @@ public class ProcessoAvaliacaoService {
   public ResponseEntity<SuccessResponseDTO> gravarAutoAvaliacao(String uuid, AvaliacaoDTO dto) {
     var avaliacao = load(uuid);
     var periodo = periodoService.validarPeriodo(avaliacao.getAno(), periodicidadeDe(dto));
+    validarNotas(dto);
 
     // A autoavaliação não recalcula o resultado do período: a nota oficial é a do avaliador.
     aplicarMedicoes(avaliacao, periodo, dto, (medicao, valores) -> {
@@ -211,6 +213,39 @@ public class ProcessoAvaliacaoService {
   private record Valores(String realizado, BigDecimal nota) {
   }
 
+  /**
+   * Valida todas as notas do pedido antes de escrever seja o que for, para uma nota
+   * inválida não deixar o período meio gravado.
+   */
+  private void validarNotas(AvaliacaoDTO dto) {
+    if (dto == null) {
+      return;
+    }
+    if (dto.getObjectivos() != null) {
+      dto.getObjectivos().forEach(o -> {
+        if (o != null) periodoService.validarNota(o.getAvaliacao(), "objectivo " + o.getNumero());
+      });
+    }
+    if (dto.getCompetenciasComportamentais() != null) {
+      dto.getCompetenciasComportamentais().forEach(c -> {
+        if (c != null) periodoService.validarNota(c.getAvaliacao(),
+            "competência comportamental " + c.getNumeroOrdem());
+      });
+    }
+    if (dto.getCompetenciasTecnicas() != null) {
+      dto.getCompetenciasTecnicas().forEach(c -> {
+        if (c != null) periodoService.validarNota(c.getAvaliacao(),
+            "competência técnica " + c.getNumeroOrdem());
+      });
+    }
+    if (dto.getAtitudesPessoais() != null) {
+      dto.getAtitudesPessoais().forEach(a -> {
+        if (a != null) periodoService.validarNota(a.getAvaliacao(),
+            "atitude pessoal " + a.getNumeroOrdem());
+      });
+    }
+  }
+
   // ------------------------------------------------- observações e pareceres
 
   @Transactional
@@ -292,11 +327,18 @@ public class ProcessoAvaliacaoService {
             nota(medicoes, ComponenteAvaliacaoRef.OBJECTIVO, o.getId()), o.getPonderacao()))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    // As competências são duas famílias, cada uma com ponderações que somam 100%. Sem as
+    // pesar por PESO_COMPORTAMENTAIS / PESO_TECNICA, juntas valeriam 200% e o resultado do
+    // período saía fora da escala — ficando sem classificação qualitativa.
     var competencias = competenciaRepository.findAllByAvaliacao_Uuid(avaliacao.getUuid());
-    var resultadoComportamentais = somaCompetencias(
-        competencias, COMP_COMPORTAMENTAL, ComponenteAvaliacaoRef.COMPETENCIA_COMPORTAMENTAIS, medicoes);
-    var resultadoTecnicas = somaCompetencias(
-        competencias, COMP_TECNICA, ComponenteAvaliacaoRef.COMPETENCIA_TECNICA, medicoes);
+    var resultadoComportamentais = aplicarPercentagem(
+        somaCompetencias(competencias, COMP_COMPORTAMENTAL,
+            ComponenteAvaliacaoRef.COMPETENCIA_COMPORTAMENTAIS, medicoes),
+        det.getPesoComportamentais());
+    var resultadoTecnicas = aplicarPercentagem(
+        somaCompetencias(competencias, COMP_TECNICA,
+            ComponenteAvaliacaoRef.COMPETENCIA_TECNICA, medicoes),
+        det.getPesoTecnica());
 
     var atitudes = atitudeRepository.findAllByAvaliacao_Uuid(avaliacao.getUuid());
     var resultadoAtitudes = (atitudes == null ? List.<AvaliacaoAtitudePessoalEntity>of() : atitudes).stream()

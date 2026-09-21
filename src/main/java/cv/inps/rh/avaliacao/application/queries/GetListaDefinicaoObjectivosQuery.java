@@ -22,6 +22,9 @@ public class GetListaDefinicaoObjectivosQuery implements Query {
   @NotNull(message = "The field <institId> is required")
   private Long institId;
   @NotNull(message = "The field <cargoId> is required")
+  /** Filtro Unidade do ecrã (RH_T_AVD.SECCAO_ID). */
+  private Long seccaoId;
+
   private Long cargoId;
   private Long carreiraId;
   @NotBlank(message = "The field <pageNumber> is required")

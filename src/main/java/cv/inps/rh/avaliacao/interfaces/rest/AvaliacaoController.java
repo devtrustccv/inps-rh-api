@@ -93,13 +93,14 @@ public class AvaliacaoController {
     @RequestParam(value = "abrangencia", required = false) String abrangencia,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "institId", required = false) Long institId,
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
     @RequestParam(value = "carreiraId", required = false) Long carreiraId,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListaDefinicaoObjectivosQuery(ano, periodicidade, abrangencia, estado, institId, cargoId, carreiraId, pageNumber, pageSize);
+      final var query = new GetListaDefinicaoObjectivosQuery(ano, periodicidade, abrangencia, estado, institId, seccaoId, cargoId, carreiraId, pageNumber, pageSize);
 
       return queryBus.handle(query);
 
