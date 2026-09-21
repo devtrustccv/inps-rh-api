@@ -29,14 +29,6 @@ public class AvaliacaoEntity extends AuditEntity {
   @Column(name = "ANO", nullable = false)
   private Integer ano;
 
-  /**
-   * @deprecated Legado. O eixo temporal passou para RH_T_AVD_DETALHE.PERIODICIDADE e
-   *     RH_T_AVD_PERIODICIDADE.PERIODICIDADE (domínio PERIODICIDADE). A coluna e este campo
-   *     desaparecem quando o módulo deixar de os ler — ver docs/sql/avd_refactor_periodicidade_21_09.sql.
-   */
-  @Deprecated
-  @Column(name = "SEMESTRE", length = 1)
-  private String semestre;                     // '1' | '2'
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "INSTIT_ID")

@@ -34,10 +34,6 @@ public interface AvaliacaoEntityRepository extends
          */
         boolean existsByAno(Integer ano);
 
-        boolean existsByFuncionario_IdAndAnoAndSemestre(Long funId, Integer ano, String semestre);
-
-        boolean existsByFuncionario_UuidAndAnoAndSemestre(UUID uuid, Integer ano, String semestre);
-
         List<AvaliacaoEntity> findAllByFuncionario_IdAndAno(Long funId, Integer ano);
 
         Optional<AvaliacaoEntity> findByUuid(UUID uuid);
