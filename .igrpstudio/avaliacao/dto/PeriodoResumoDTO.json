@@ -1,24 +1,13 @@
 {
   "type": "dto",
   "module": "avaliacao",
-  "name": "Semestre",
+  "name": "PeriodoResumo",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
-      "name": "avaliacaoFinal",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "ponderacao",
+      "name": "custom",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,5 +19,5 @@
       "primaryKey": false
     }
   ],
-  "id": "l92iod97rf"
+  "id": "avd9n2v6y4"
 }

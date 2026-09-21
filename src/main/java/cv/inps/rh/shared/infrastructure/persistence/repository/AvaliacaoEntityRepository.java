@@ -27,11 +27,31 @@ public interface AvaliacaoEntityRepository extends
                         @Param("funId") Long funId,
                         Pageable pageable);
 
-        boolean existsByFuncionario_IdAndAnoAndSemestre(Long funId, Integer ano, String semestre);
-
-        boolean existsByFuncionario_UuidAndAnoAndSemestre(UUID uuid, Integer ano, String semestre);
+        /**
+         * Há alguma avaliação lançada para este ano? Usado como guard da inativação da
+         * parametrização de componentes: uma vez definido um objectivo no ano, o ciclo
+         * já não pode ser desligado.
+         */
+        boolean existsByAno(Integer ano);
 
         List<AvaliacaoEntity> findAllByFuncionario_IdAndAno(Long funId, Integer ano);
+
+        /**
+         * A avaliação de objectivos comuns de um ano e abrangência. Não tem colaborador, e a
+         * direção distingue as de abrangência DIRECAO entre si. Usado para tornar a definição
+         * idempotente: reenviar o mesmo formulário acrescenta períodos em vez de duplicar.
+         */
+        @Query("""
+                            SELECT a FROM AvaliacaoEntity a
+                             WHERE a.ano = :ano
+                               AND UPPER(a.abrangencia) = UPPER(:abrangencia)
+                               AND a.funcionario IS NULL
+                               AND ((:institId IS NULL AND a.institId IS NULL)
+                                    OR a.institId.id = :institId)
+                        """)
+        List<AvaliacaoEntity> findComuns(@Param("ano") Integer ano,
+                        @Param("abrangencia") String abrangencia,
+                        @Param("institId") Long institId);
 
         Optional<AvaliacaoEntity> findByUuid(UUID uuid);
 

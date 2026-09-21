@@ -48,6 +48,13 @@ public class FundoSocialRequestDTO  {
 
   private String finalidade ;
 
+  // Opcionais: quando ausentes, o backend calcula nrPrestacao a partir de
+  // dataInicio/dataFim (como sempre fez) e não gera plano financeiro (que
+  // exige juro). Ver EmprestimoWriteService.saveFundoSocial.
+  private BigDecimal juro ;
+
+  private Long nrPrestacao ;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 

@@ -7,9 +7,14 @@ import cv.inps.rh.parametrizacao.application.dto.TipoMovimentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.mappers.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EntidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EntidadeEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.PesquisaTexto;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +47,9 @@ public class ParametrizacaoService {
 
   private static final String ESTADO_ACTIVO = "ACTIVO";
   private static final Long AMB_APL_ID = 30L;
+  private static final int NOME_PESQUISA_MAX = 150;   // = NOME VARCHAR2(150) em INPSSIGOF.ENTIDADES
+  private static final int LIMITE_PESQUISA_DEFAULT = 50;
+  private static final int LIMITE_PESQUISA_MAX = 200;
 
   public List<TipoMovimentoDTO> getTiposMovimentosRenumeracao() {
     return tipoMovimentoEntityRepository
@@ -75,8 +83,37 @@ public class ParametrizacaoService {
         .toList();
   }
 
-  public List<ParametrizacaoDTO> getEntidades() {
-    return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
+  /**
+   * Entidades do SIGOF. Sem {@code nome} devolve todas (comportamento de sempre). Com {@code nome}:
+   * cada termo tem de aparecer no nome, ignorando maiúsculas e acentos; as que começam pelo primeiro
+   * termo vêm primeiro, depois por ordem alfabética; no máximo {@code limite} resultados.
+   */
+  @Transactional(readOnly = true)
+  public List<ParametrizacaoDTO> getEntidades(String nome, Integer limite) {
+    var termos = PesquisaTexto.termos(nome);
+    if (termos.isEmpty()) {
+      return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
+    }
+    if (nome.trim().length() > NOME_PESQUISA_MAX) {
+      throw IgrpResponseStatusException.badRequest(
+          "O nome a pesquisar não pode ter mais de " + NOME_PESQUISA_MAX + " caracteres.");
+    }
+
+    var max = limite == null ? LIMITE_PESQUISA_DEFAULT : Math.clamp(limite, 1, LIMITE_PESQUISA_MAX);
+    Specification<EntidadeEntity> spec = (root, query, cb) -> {
+      var nomeNormalizado = PesquisaTexto.normalizar(cb, root.get(EntidadeEntity_.nome));
+      var comecaPor = cb.like(nomeNormalizado, PesquisaTexto.comecaPor(termos.getFirst()), PesquisaTexto.ESCAPE);
+      query.orderBy(
+          cb.asc(cb.<Integer>selectCase().when(comecaPor, 0).otherwise(1)),
+          cb.asc(root.get(EntidadeEntity_.nome)),
+          cb.asc(root.get(EntidadeEntity_.id)));
+      return cb.and(termos.stream()
+          .map(t -> cb.like(nomeNormalizado, PesquisaTexto.contem(t), PesquisaTexto.ESCAPE))
+          .toArray(Predicate[]::new));
+    };
+
+    return entidadeEntityRepository.findBy(spec, q -> q.limit(max).all())
+        .stream().map(entidadeMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getBancos() {

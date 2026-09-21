@@ -17,6 +17,7 @@ public class ComponenteAvaliacaoResponseDTO {
   private Long id;
   private String uuid;
   private Integer ano;
+  private String periodicidade;
   private BigDecimal pesoComportamentais;
   private BigDecimal pesoTecnica;
   private BigDecimal ponderacaoObjetivo;

@@ -31,12 +31,15 @@ public class EscalaAvaliacaoService {
 
   private final ParamEscalaAvaliacaoEntityRepository repository;
   private final EscalaAvaliacaoMapper mapper;
+  private final cv.inps.rh.shared.application.service.DominioService dominioService;
 
   public EscalaAvaliacaoService(
       ParamEscalaAvaliacaoEntityRepository repository,
-      EscalaAvaliacaoMapper mapper) {
+      EscalaAvaliacaoMapper mapper,
+      cv.inps.rh.shared.application.service.DominioService dominioService) {
     this.repository = repository;
     this.mapper = mapper;
+    this.dominioService = dominioService;
   }
 
   @Transactional
@@ -48,6 +51,9 @@ public class EscalaAvaliacaoService {
     if (CollectionUtils.isEmpty(rows)) {
       throw IgrpResponseStatusException.badRequest("Lista de escala de avaliação não pode estar vazia");
     }
+
+    validarIntervalos(rows);
+    validarDominios(rows);
 
     var uuids = new ArrayList<String>(rows.size());
     Set<Long> keepIds = new HashSet<>();
@@ -187,6 +193,67 @@ public class EscalaAvaliacaoService {
       return UUID.fromString(raw.trim());
     } catch (Exception e) {
       throw IgrpResponseStatusException.badRequest("UUID inválido: " + raw);
+    }
+  }
+
+  /**
+   * A spec define o nível e a classificação qualitativa por domínio
+   * (NIVEIS_AVD e CLASSIFICACAO_QUALIT_AVD), não como texto livre — é o que permite
+   * ao negócio mudar a régua sem tocar no código.
+   *
+   * <p>Enquanto o domínio estiver por preencher (só com a linha de exemplo), não se
+   * valida: bloquear aqui impediria configurar a escala antes de o negócio definir
+   * os valores.</p>
+   */
+  private void validarDominios(java.util.List<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO> rows) {
+    validarContraDominio(rows, "NIVEIS_AVD", "nível",
+        r -> r.getNivel() != null ? String.valueOf(r.getNivel()) : null);
+    validarContraDominio(rows, "CLASSIFICACAO_QUALIT_AVD", "classificação qualitativa",
+        cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO::getQualitativa);
+  }
+
+  private void validarContraDominio(
+      java.util.List<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO> rows,
+      String dominio, String rotulo,
+      java.util.function.Function<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO, String> extrator) {
+
+    var permitidos = dominioService.getDominioMap(dominio).keySet();
+    if (permitidos.size() <= 1) {
+      return; // domínio ainda por preencher pelo negócio
+    }
+
+    for (var r : rows) {
+      var valor = extrator.apply(r);
+      if (valor != null && !permitidos.contains(valor.trim())) {
+        throw IgrpResponseStatusException.badRequest(
+            "O " + rotulo + " '" + valor + "' não existe no domínio " + dominio
+                + ". Valores aceites: " + permitidos + ".");
+      }
+    }
+  }
+
+  /**
+   * Os escalões têm de formar uma régua sem ambiguidades: nenhum pode começar antes de o
+   * anterior acabar. Com intervalos sobrepostos, a classificação qualitativa de uma nota
+   * dependeria da ordem em que os escalões são lidos — duas notas iguais podiam sair com
+   * classificações diferentes.
+   */
+  private void validarIntervalos(java.util.List<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO> rows) {
+    var comIntervalo = rows.stream()
+        .filter(r -> r.getQuantitativaDe() != null && r.getQuantitativaAte() != null)
+        .sorted(java.util.Comparator.comparing(
+            cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO::getQuantitativaDe))
+        .toList();
+
+    for (int i = 1; i < comIntervalo.size(); i++) {
+      var anterior = comIntervalo.get(i - 1);
+      var atual = comIntervalo.get(i);
+      if (atual.getQuantitativaDe().compareTo(anterior.getQuantitativaAte()) <= 0) {
+        throw IgrpResponseStatusException.badRequest(
+            "Os intervalos da escala não podem sobrepor-se: ["
+                + anterior.getQuantitativaDe() + "-" + anterior.getQuantitativaAte() + "] e ["
+                + atual.getQuantitativaDe() + "-" + atual.getQuantitativaAte() + "].");
+      }
     }
   }
 }

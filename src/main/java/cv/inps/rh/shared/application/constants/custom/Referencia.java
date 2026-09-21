@@ -32,7 +32,8 @@ public enum Referencia {
   REGULARIZACAO("Regularização"),
   GESTAO_LABORAL("Gestão Laboral"),
   ALTERACAO_ESCALAO("Alteração de Escalão"),
-  SOAT("Soat");
+  SOAT("Soat"),
+  EMPRESTIMO("Empréstimo");
 
   private final String descricao;
 

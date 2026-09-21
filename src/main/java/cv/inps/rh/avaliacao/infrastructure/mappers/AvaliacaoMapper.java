@@ -9,7 +9,7 @@ import static java.util.Optional.ofNullable;
 @Component
 public class AvaliacaoMapper {
 
-    public ObjetivoAvaliacaoResumoDTO toResumo(AvaliacaoEntity entity) {
+    public ObjetivoAvaliacaoResumoDTO toResumo(AvaliacaoEntity entity, java.util.List<String> periodos) {
         if (entity == null)
             return null;
 
@@ -17,8 +17,17 @@ public class AvaliacaoMapper {
         dto.setId(entity.getId());
         dto.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
         dto.setAno(entity.getAno());
-        dto.setSemestre(entity.getSemestre());
+        dto.setAbrangencia(entity.getAbrangencia());
         dto.setEstado(entity.getEstado());
+        dto.setPeriodicidades(periodos != null ? periodos : java.util.List.of());
+        dto.setEstadoDescricao(cv.inps.rh.shared.application.constants.EstadoAvaliacao
+                .resolver(entity.getEstado(), periodos != null && !periodos.isEmpty()).getDescricao());
+
+        ofNullable(entity.getFuncionario()).ifPresent(f -> {
+            dto.setFunId(f.getId());
+            dto.setFunUuid(f.getUuid());
+            dto.setNomeColaborador(f.getNome());
+        });
 
         ofNullable(entity.getInstitId()).ifPresent(i -> {
             dto.setInstitId(i.getId());

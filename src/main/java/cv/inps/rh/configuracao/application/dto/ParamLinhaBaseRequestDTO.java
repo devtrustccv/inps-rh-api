@@ -26,6 +26,14 @@ public class ParamLinhaBaseRequestDTO  {
 
   private Long cargoId;                   // obrigatório se aplicarATodos = false
 
+  /**
+   * Cargos a que a linha se aplica. O ecrã tem o cargo em multiselect, e como
+   * RH_T_PARAM_OBJETIVO.CARGO_ID só guarda um, cada cargo escolhido dá origem à sua
+   * própria linha. Alternativa ao {@code cargoId} singular; ignorado quando
+   * {@code aplicarATodos} é verdadeiro.
+   */
+  private java.util.List<Long> cargoIds;
+
   private Long carrPccsId;
 
   @NotNull @DecimalMin("0") @DecimalMax("100")

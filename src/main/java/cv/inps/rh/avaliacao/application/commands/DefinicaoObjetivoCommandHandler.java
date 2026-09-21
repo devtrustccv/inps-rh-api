@@ -3,15 +3,15 @@ package cv.inps.rh.avaliacao.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.avaliacao.application.services.AvaliacaoService;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 
 @Component
-public class DefinicaoObjetivoCommandHandler implements CommandHandler<DefinicaoObjetivoCommand, ResponseEntity<Map<String, ?>>> {
+public class DefinicaoObjetivoCommandHandler implements CommandHandler<DefinicaoObjetivoCommand, ResponseEntity<SuccessResponseDTO>> {
 
   //Registo de Objectivos por Colaborador
 
@@ -25,7 +25,7 @@ public class DefinicaoObjetivoCommandHandler implements CommandHandler<Definicao
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<Map<String, ?>> handle(DefinicaoObjetivoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(DefinicaoObjetivoCommand command) {
 
       LOGGER.debug("DefinicaoObjetivoCommand : {}", command);
 

@@ -1,11 +1,13 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
@@ -15,6 +17,10 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepos
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class ReforcoDividaService {
   private final PedidoEntityRepository pedidoEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoHelper adiantamentoEmprestimoHelper;
+  private final ApplicationAuditorAware auditorAware;
 
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 
@@ -101,13 +108,25 @@ public class ReforcoDividaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      switch (request.getParecer()) {
-        case FAVORAVEL -> {
+    if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      // Retificação do parecer técnico devolve já à etapa anterior — não
+      // depende do responsável nem de action=NEXT.
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+    } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      var responsavelParecer = Optional.ofNullable(request.getResponsavel())
+          .map(AnaliseRhRequestDTO.Responsavel::parecer)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
+
+      // Só a Validação Responsável (nível 2) avança a etapa — Conforme e
+      // Não Conforme avançam ambos; só a Retificação do responsável
+      // devolve à etapa anterior.
+      switch (responsavelParecer) {
+        case FAVORAVEL, DESFAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
-        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
@@ -127,6 +146,13 @@ public class ReforcoDividaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          Optional.ofNullable(request.getResponsavel())
+              .ifPresent(resp -> {
+                obj.setParecerResponsavel(resp.parecer().name());
+                obj.setObservacaoResponsavel(resp.observacao());
+                obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+                obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+              });
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
@@ -162,12 +188,19 @@ public class ReforcoDividaService {
     pedidoEntityRepository.save(order);
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
-        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
-        default ->
-            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -216,11 +249,13 @@ public class ReforcoDividaService {
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
         case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
           loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         }
         case RETIFICACAO -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          // Retificação devolve à etapa imediatamente anterior a esta
+          // (Análise Financeira Reforço), não à Análise RH.
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
       }

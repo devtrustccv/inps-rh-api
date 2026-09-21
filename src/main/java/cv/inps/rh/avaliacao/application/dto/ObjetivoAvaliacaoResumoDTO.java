@@ -14,7 +14,15 @@ public class ObjetivoAvaliacaoResumoDTO {
   private Long id;
   private String uuid;
   private Integer ano;
-  private String semestre;
+  /** Períodos já definidos, pela ordem do ciclo. A grelha mostra-os na coluna própria. */
+  private java.util.List<String> periodicidades;
+
+  private String abrangencia;
+
+  private Long funId;
+  private java.util.UUID funUuid;
+  /** Nome do colaborador. Vazio nas abrangências comuns (INPS / DIREÇÃO). */
+  private String nomeColaborador;
   private Long institId;
   private String institNome;
   private Long seccaoId;
@@ -24,5 +32,7 @@ public class ObjetivoAvaliacaoResumoDTO {
   private Long carrPccsId;
   private String carrPccsNome;
   private String estado;
+  /** Rótulo do estado, como a grelha o mostra. */
+  private String estadoDescricao;
 }
 

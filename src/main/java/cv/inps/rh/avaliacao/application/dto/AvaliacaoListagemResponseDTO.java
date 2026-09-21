@@ -1,3 +1,6 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
+
 package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
@@ -6,8 +9,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+/**
+ * Linha-pai da grelha de avaliação: um colaborador num ano.
+ *
+ * <p>Os períodos deixaram de ser duas colunas fixas de semestre e passaram a ser a lista
+ * {@link #periodos} — a grelha desdobra-a como linhas-filho.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,6 +26,7 @@ import java.util.UUID;
 public class AvaliacaoListagemResponseDTO {
 
   private String uuid;
+  private Integer ano;
   private Long funId;
   private UUID funUuid;
   private String nomeColaborador;
@@ -26,10 +38,19 @@ public class AvaliacaoListagemResponseDTO {
   private String seccaoNome;
   private Long carrPccsId;
   private String carrPccsNome;
+
+  /** INPS | DIRECAO | INDIVIDUAL. */
+  private String abrangencia;
+
   private String estado;                  // 'A' | 'P' | 'C' → controla a cor e o tab
-  private String semestreNota;            // texto composto ex: "1º Sem: 8.5 / 2º Sem: 7.2"
-  private BigDecimal avaliacaoFinalSemestre1;
-  private BigDecimal avaliacaoFinalSemestre2;
+
+  /** Etiqueta que a grelha mostra: Rascunho | Pendente | Em avaliação | Concluído. */
+  private String estadoDescricao;
+
+  /** Linhas-filho: um por período avaliado, pela ordem cronológica. */
+  private List<PeriodoResumoDTO> periodos = new ArrayList<>();
+
   private BigDecimal notaFinal;           // expressiva quantitativa (soma ponderada)
   private String notaFinalQualitativa;
+
 }

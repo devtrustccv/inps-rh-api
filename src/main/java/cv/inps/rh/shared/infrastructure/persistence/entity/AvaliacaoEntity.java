@@ -23,14 +23,12 @@ public class AvaliacaoEntity extends AuditEntity {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "FUN_ID", nullable = false)
+  @JoinColumn(name = "FUN_ID")
   private FuncionarioEntity funcionario;
 
   @Column(name = "ANO", nullable = false)
   private Integer ano;
 
-  @Column(name = "SEMESTRE", length = 1, nullable = false)
-  private String semestre;                     // '1' | '2'
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "INSTIT_ID")
@@ -47,6 +45,10 @@ public class AvaliacaoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "CARR_PCCS_ID")
   private ParamCarreiraEntity carreira;
+
+  /** INPS | DIRECAO | INDIVIDUAL — ver AbrangenciaAvaliacao. */
+  @Column(name = "ABRAGENCIA", length = 100)
+  private String abrangencia;
 
   @Column(name = "ESTADO")
   private String estado;                       // 'A' | 'P' | 'C'
@@ -107,4 +109,8 @@ public class AvaliacaoEntity extends AuditEntity {
 
   @OneToMany(mappedBy = "avaliacao", cascade = CascadeType.ALL)
   private List<AvaliacaoAtitudePessoalEntity> atitudesPessoais;
+
+  /** Um detalhe por período do ciclo — é aqui que vivem os resultados. */
+  @OneToMany(mappedBy = "avaliacao", cascade = CascadeType.ALL)
+  private List<AvaliacaoDetalheEntity> detalhes;
 }

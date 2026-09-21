@@ -15,4 +15,7 @@ public class GetAvaliacaoQuery implements Query {
   @NotBlank(message = "The field <uuid> is required")
   private String uuid;
 
+  /** Período a mostrar. Em branco devolve as componentes sem medições. */
+  private String periodicidade;
+
 }

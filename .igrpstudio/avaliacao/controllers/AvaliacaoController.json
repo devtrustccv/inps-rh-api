@@ -28,9 +28,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -65,7 +67,7 @@
         },
         {
           "type": "string",
-          "name": "semestre",
+          "name": "periodicidade",
           "isRequired": false
         },
         {
@@ -98,6 +100,16 @@
           "type": "string",
           "name": "pageSize",
           "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "abrangencia",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "seccaoId",
           "isRequired": false
         }
       ]
@@ -166,7 +178,7 @@
         },
         {
           "type": "string",
-          "name": "semestre",
+          "name": "periodicidade",
           "isRequired": false
         }
       ]
@@ -225,6 +237,13 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "periodicidade",
+          "isRequired": false
+        }
       ]
     },
     {
@@ -250,9 +269,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -289,9 +310,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -328,9 +351,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -340,6 +365,13 @@
         {
           "name": "uuid",
           "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "periodicidade",
           "isRequired": true
         }
       ]
@@ -367,9 +399,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -379,6 +413,13 @@
         {
           "name": "uuid",
           "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "periodicidade",
           "isRequired": true
         }
       ]
@@ -406,9 +447,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -418,6 +461,13 @@
         {
           "name": "uuid",
           "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "periodicidade",
           "isRequired": true
         }
       ]

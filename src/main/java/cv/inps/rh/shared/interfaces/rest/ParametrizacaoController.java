@@ -9,6 +9,7 @@ import cv.inps.rh.parametrizacao.application.dto.TipoMovimentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.service.ParametrizacaoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,9 +73,17 @@ public class ParametrizacaoController {
   }
 
   @GetMapping("/entidades/ativos")
-  @Operation(summary = "Lista entidades ativas")
-  public ResponseEntity<List<ParametrizacaoDTO>> getEntidadesAtivas() {
-    return ResponseEntity.ok(parametrizacaoService.getEntidades());
+  @Operation(summary = "Lista entidades (SIGOF), com pesquisa opcional por nome",
+      description = "Sem `nome` devolve todas. Com `nome`: cada palavra tem de aparecer no nome da entidade, "
+          + "ignorando maiúsculas e acentos; as que começam pela primeira palavra vêm primeiro, depois por "
+          + "ordem alfabética.")
+  public ResponseEntity<List<ParametrizacaoDTO>> getEntidadesAtivas(
+      @Parameter(description = "Texto a pesquisar no nome (máx. 150 caracteres)", example = "emprestimo")
+      @RequestParam(required = false) String nome,
+      @Parameter(description = "Máximo de resultados quando há `nome` (1–200, por omissão 50)")
+      @RequestParam(required = false) Integer limite
+  ) {
+    return ResponseEntity.ok(parametrizacaoService.getEntidades(nome, limite));
   }
 
   @GetMapping("/bancos/ativos")

@@ -25,15 +25,28 @@ public class BaseAvaliacaoObjetivoDTO  {
   private Integer ano;
   private BigDecimal pesoComportamentais;
   private BigDecimal pesoTecnica;
-  private String semestre;
+  /**
+   * Período concreto do ciclo: SEMESTRE1, TRIMESTRE3, ANUAL, ... (domínio PERIODICIDADE).
+   * Substitui o antigo {@code semestre} ('1'|'2').
+   */
+  private String periodicidade;
+
+  /**
+   * Períodos já definidos para esta avaliação. Só de leitura — é o que permite ao ecrã
+   * saber quais os separadores/períodos a mostrar sem ter de adivinhar pelo ciclo.
+   */
+  private java.util.List<String> periodicidadesDefinidas;
+
+  /** INPS | DIRECAO | INDIVIDUAL. Em branco assume INDIVIDUAL. */
+  private String abrangencia;
   private Long institId;
   private String instituicaoNome;
   private Long seccaoId;
-  private Long seccaoNome;
+  private String seccaoNome;
   private Long cargoId;
-  private Long cargoNome;
+  private String cargoNome;
   private Long carrPccsId;
-  private Long carrPccsNome;
+  private String carrPccsNome;
 
 
 

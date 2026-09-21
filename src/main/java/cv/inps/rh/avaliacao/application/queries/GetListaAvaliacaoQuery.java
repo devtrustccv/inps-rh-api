@@ -27,6 +27,6 @@ public class GetListaAvaliacaoQuery implements Query {
   private String colaborador;
   private Long seccaoId;
   private Long carreiraId;
-  private String semestre;
+  private String periodicidade;
 
 }
