@@ -47,9 +47,19 @@ public class ReforcoDividaService {
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setEmprestimo(loan);
-    newLoan.setNrPrestacao(obj.getNumeroPrestacao());
-    newLoan.setValorEmprestimo(obj.getValorReforco());
-    newLoan.setValorDivida(obj.getValorReforco());
+    // Reforço Capital não muda o nº de prestações — só é enviado quando o
+    // pedido também mexe nas prestações (AUMENTO_PRESTACAO/REDUCAO_PRESTACAO).
+    // Sem isto, ficava null e dava NPE em EmprestimoHelper.
+    newLoan.setNrPrestacao(
+        obj.getNumeroPrestacao() != null ? obj.getNumeroPrestacao() : loan.getNrPrestacao()
+    );
+    // Transporta o saldo/valor do empréstimo anterior — EmprestimoHelper é
+    // quem aplica o delta de valorReforco (soma/mantém consoante o tipo de
+    // situação). Sobrescrever aqui com obj.getValorReforco() corrompia o
+    // saldo (ou dava NPE quando o pedido é só de nº de prestações, sem
+    // valorReforco).
+    newLoan.setValorEmprestimo(loan.getValorEmprestimo());
+    newLoan.setValorDivida(loan.getValorDivida());
     newLoan.setMotivo(obj.getMotivoReforco());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     newLoan.setPedido(loan.getPedido());
