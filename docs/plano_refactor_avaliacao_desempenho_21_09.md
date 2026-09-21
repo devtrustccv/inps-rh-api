@@ -58,11 +58,12 @@ de cada período**. Relação 1:N.
 Novo ecrã "Objectivos Comuns / avaliação". O mesmo formulário serve definição
 e avaliação (`Ponderação` e `Realizadas` só aparecem em avaliação). Gravação:
 
-- Abrangência INSTITUIÇÃO: `RH_T_AVD.FUN_ID = null`, `INSTIT_ID = null`
+- Abrangência INPS: `RH_T_AVD.FUN_ID = null`, `INSTIT_ID = null`
 - Abrangência DIREÇÃO: `RH_T_AVD.FUN_ID = null`, `INSTIT_ID = <direção>`
 - Abrangência INDIVIDUAL: `FUN_ID = <colaborador>`, `INSTIT_ID` preenchido
 
-**`RH_T_AVD.FUN_ID` passa a ser nullable** — hoje é `nullable = false` na entidade.
+`RH_T_AVD.FUN_ID` **já é nullable na BD** — é a entidade JPA que tem
+`nullable = false` a mais e precisa de ser corrigida.
 
 ### 1.5 Parametrização
 - Novo campo `Periodicidade` no registo de componentes →
@@ -81,18 +82,64 @@ e avaliação (`Ponderação` e `Realizadas` só aparecem em avaliação). Grava
   **pai/filho** (pai = colaborador/ano, filho = períodos).
 - Ações "Ver Avaliação Final" e "Autoavaliação" saem da grelha de definição.
 
-## 2. Divergências spec ↔ BD (bloqueiam implementação)
+## 2. Divergências spec ↔ BD — RESOLVIDAS (21/09)
 
-| # | Questão | Detalhe |
+A BD foi inspeccionada: as tabelas novas **já existem** (criadas pelo DBA, com
+sequences `SEQ_AVD_DETALHE` / `SEQ_AVD_PERIODICIDADE` e triggers
+`TRG_AVD_DETALHE` / `TRG_AVD_PERIODICIDADE`). Isso fechou D1–D6:
+
+| # | Questão | Resolução |
 |---|---|---|
-| D1 | `RH_T_PARAM_OBJETIVO_DET.PERIODICIDADE` **não existe** no DDL de 21/09 | A spec funcional grava lá. Falta DDL. |
-| D2 | `RH_T_AVD_DETALHE.SEMESTRE` | A grelha lê `RH_T_AVD_DETALHE.SEMESTRE`, mas a tabela só tem `PERIODICIDADE`. Assumir `PERIODICIDADE`. |
-| D3 | `RH_T_AVD.PERIODICIDADE` | A spec refere-a na autoavaliação; o DDL não mostra a coluna. Confirmar se o eixo vive só em `AVD_DETALHE` / `AVD_PERIODICIDADE`. |
-| D4 | `RH_T_PARAM_MFUNCAO` vs `RH_T_PARAM_MANUAL_FUNC` | A spec usa os dois nomes para a mesma coisa. Código usa `RH_T_PARAM_MANUAL_FUNC`. |
-| D5 | Ponderação final multi-período | `AVD_PONDERACAO_FINAL` só define `SEMESTRE1`/`SEMESTRE2`. Se a periodicidade for trimestral/mensal, falta a tabela de ponderações. |
-| D6 | Colunas legado | Confirmar se `REALIZADO` / `AVALIACAO` / `AUTO_*` saem de `AVD_OBJECTIVO` / `AVD_COMPETENCIA` / `AVD_ATITUDE_PESSOAL` ou ficam duplicadas. |
+| D1 | `RH_T_PARAM_OBJETIVO_DET.PERIODICIDADE` | **Existe** na BD. Era lacuna da doc de Base de Dados, não do modelo. |
+| D2 | `RH_T_AVD_DETALHE.SEMESTRE` | Não existe. É `PERIODICIDADE`. A spec funcional está errada nesse ponto. |
+| D3 | `RH_T_AVD.PERIODICIDADE` | Não existe e não é preciso. `FUN_ID` **já era nullable**. |
+| D4 | `RH_T_PARAM_MFUNCAO` | É `RH_T_PARAM_MANUAL_FUNC`. O nome alternativo na spec é erro de escrita. |
+| D5 | Ponderação multi-período | Resolvido por dados: ver §2.2. |
+| D6 | Colunas legado | Ficam nas filhas (`AVD_OBJECTIVO`, `AVD_COMPETENCIA`, `AVD_ATITUDE_PESSOAL`), sem uso. O Java deixa de as mapear. |
 
-Sem migrations Flyway no projecto — o DDL vai por SQL directo e fica no handoff/commit.
+**F5 (backfill) foi cancelado**: `RH_T_AVD`, `RH_T_AVD_DETALHE` e
+`RH_T_AVD_PERIODICIDADE` estão todas com **0 linhas**. Não há dados legado.
+
+### 2.1 Correcções aplicadas à BD (DEV, 21/09)
+
+SQL registado em `docs/sql/avd_refactor_periodicidade_21_09.sql`
+(não há Flyway — correr à mão nos outros ambientes).
+
+1. `ALTER TABLE RH_T_AVD ADD ABRAGENCIA VARCHAR2(100)` — a spec grava lá, a
+   coluna não existia; as filhas já a tinham.
+2. `ALTER TABLE RH_T_AVD DROP COLUMN SEMESTRE` — ficou órfã com a mudança de eixo.
+3. `RH_T_PARAM_OBJETIVO_DET.PERIODICIDADE`: `'2'` → `'SEMESTRAL'` nos 2 registos.
+   Não se apagaram as linhas porque têm 14 objectivos filhos úteis para teste
+   (o `DELETE` fica comentado no fim do SQL, caso se queira recomeçar do zero).
+4. Grafia do domínio: `SEMESTRO`/`TRIMESTRO` → `SEMESTRE`/`TRIMESTRE`,
+   alinhando com as referências de `AVD_PONDERACAO_FINAL`.
+5. Domínio `PERIODICIDADE`: acrescentado `TRIMESTRE4` (faltava o 4º trimestre).
+6. `AVD_PONDERACAO_FINAL`: acrescentados `TRIMESTRE1..4 = 25` e `ANUAL = 100`.
+
+### 2.2 Contrato final da periodicidade
+
+```
+RH_T_DOMAINS, DOMINIO = 'PERIODICIDADE'   (hierarquia de 2 níveis)
+  REFERENCIA='PERIODICIDADE' → SEMESTRAL | TRIMESTRAL | ANUAL     ← tipos
+  REFERENCIA='SEMESTRAL'     → SEMESTRE1 | SEMESTRE2              ← períodos
+  REFERENCIA='TRIMESTRAL'    → TRIMESTRE1 .. TRIMESTRE4
+  REFERENCIA='ANUAL'         → ANUAL
+
+RH_T_DOMAINS, DOMINIO = 'AVD_PONDERACAO_FINAL'   (peso do período no ano)
+  SEMESTRE1=50  SEMESTRE2=50  TRIMESTRE1..4=25  ANUAL=100
+
+RH_T_PARAM_OBJETIVO_DET.PERIODICIDADE  → o TIPO     (ex.: SEMESTRAL)
+RH_T_AVD_DETALHE.PERIODICIDADE         → o PERÍODO  (ex.: SEMESTRE1)
+RH_T_AVD_PERIODICIDADE.PERIODICIDADE   → o PERÍODO  (ex.: SEMESTRE1)
+```
+
+A nota final do ano = Σ (`AVD_DETALHE.AVALIACAO_FINAL` × ponderação do período),
+com a ponderação obtida por lookup directo da referência em `AVD_PONDERACAO_FINAL`.
+
+### 2.3 Correcção ao desenho de DTOs
+
+O domínio `ABRANGENCIA_AVD` usa **`INPS`**, não `INSTITUICAO`.
+Enum correcto: `INPS | DIRECAO | INDIVIDUAL`.
 
 ## 3. Estado actual do código
 
@@ -123,7 +170,7 @@ Avaliacao (RH_T_AVD)            → identificação: ano, abrangência, colabora
 ### 4.2 DTOs novos / alterados
 
 **Enums** (expostos via enum exposer IGRP em `api/v1/enums`):
-- `Abrangencia` — `INSTITUICAO | DIRECAO | INDIVIDUAL`
+- `Abrangencia` — `INPS | DIRECAO | INDIVIDUAL` (valores do domínio `ABRANGENCIA_AVD`)
 - `ComponenteAvaliacao` — `OBJECTIVO | COMPETENCIA_COMPORTAMENTAL | COMPETENCIA_TECNICA | ATITUDE_PESSOAL`
 - `TipoProcessoAvaliacao` — `DEFINICAO | AVALIACAO`
 - `Periodicidade` — vem do domínio, expor como lookup, não hardcoded
@@ -155,10 +202,7 @@ convenção de sync (sem id cria, omitido apaga, null preserva, `[]` limpa).
 
 ## 5. Faseamento
 
-**F0 — Alinhamento (bloqueante)**
-Levar D1–D6 ao analista/DBA. Obter DDL de `RH_T_AVD_PERIODICIDADE`,
-`RH_T_AVD_DETALHE` e `PARAM_OBJETIVO_DET.PERIODICIDADE`, e os valores do
-domínio `PERIODICIDADE`. Sem isto, F2+ fica bloqueado.
+**F0 — Alinhamento** ✅ concluído a 21/09 (ver §2.1). Nada bloqueado.
 
 **F1 — Parametrização (independente, pode arrancar já)**
 1. `ParamObjetivoDetEntity` + `periodicidade`.
@@ -191,17 +235,17 @@ domínio `PERIODICIDADE`. Sem isto, F2+ fica bloqueado.
 14. Trocar os 6 `Map<String, ?>` por `SuccessResponseDTO`.
 15. Actualizar `docs/frontend_changes_avaliacao_desempenho.md`.
 
-**F5 — Migração de dados**
-16. SQL de backfill: `RH_T_AVD` → `RH_T_AVD_DETALHE` (1 linha por avaliação
-    existente, `PERIODICIDADE = 'SEMESTRE' || SEMESTRE`), e
-    `AVD_OBJECTIVO` / `AVD_COMPETENCIA` / `AVD_ATITUDE_PESSOAL` →
-    `RH_T_AVD_PERIODICIDADE`. Guardar o script em `docs/sql/`.
+**F5 — Migração de dados** ❌ não se aplica: 0 linhas nas tabelas envolvidas.
 
 **F6 — Testes**
 17. Bateria live com verificação em BD por SQL directo depois de cada escrita
     (incluindo confirmar que os 400 não gravaram nada).
 
 ## 6. Ordem crítica
-F1 é independente e pode arrancar já. F2 → F3 → F4 são sequenciais. F5 tem de
-correr **antes** de F4 ir para staging, senão as grelhas aparecem vazias para
-avaliações antigas.
+F1 é independente e pode arrancar já. F2 → F3 → F4 são sequenciais. Sem dados
+legado, não há janela de migração a coordenar — o refactor pode ser limpo.
+
+**Nota para staging/produção**: as tabelas novas e o
+`RH_T_PARAM_OBJETIVO_DET.PERIODICIDADE` foram criados pelo DBA só em DEV.
+Antes de promover, confirmar que existem lá e correr
+`docs/sql/avd_refactor_periodicidade_21_09.sql`.
