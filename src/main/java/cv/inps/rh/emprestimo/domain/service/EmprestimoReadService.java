@@ -76,8 +76,6 @@ public class EmprestimoReadService {
     dto.setNif(entity.getNif());
     dto.setEstado(entity.getEstado());
     dto.setEstadoDesc(StatusEmprestimo.codeDescriptionMap().getOrDefault(entity.getEstado(), entity.getEstado()));
-    dto.setExecutadoPor(entity.getCreatedBy());
-    ofNullable(entity.getCreatedDate()).ifPresent(d -> dto.setDataExecucao(d.toLocalDate()));
 
     var order = entity.getPedido();
     dto.setEtapa(order.getEtapa());
@@ -115,6 +113,15 @@ public class EmprestimoReadService {
     dto.setEmprestimos(another);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
+
+    // Pedido nunca grava PedidoDecisaoEntity (não é etapa de parecer) — a
+    // Execução Etapa aqui vem diretamente do registo de auditoria da
+    // criação do empréstimo (AuditEntity), mas fica dentro de decisao.pedido
+    // para manter o mesmo formato usado pelas restantes etapas.
+    var pedidoExecucao = new BaseDecisaoDTO();
+    pedidoExecucao.setExecutadoPor(entity.getCreatedBy());
+    ofNullable(entity.getCreatedDate()).ifPresent(d -> pedidoExecucao.setData(d.toLocalDate()));
+    allDecisions.setPedido(pedidoExecucao);
 
     var steps = List.of(
         EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),

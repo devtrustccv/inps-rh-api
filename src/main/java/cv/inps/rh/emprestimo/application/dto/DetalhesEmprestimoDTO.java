@@ -59,11 +59,6 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private String etapa;
   private String etapaDesc;
 
-  // Execução Etapa do Pedido (changelog v2 §1) — RH_T_EMPRESTIMO.USER_REGISTO_NAME/DATA_REGISTO,
-  // já gravados pelo AuditEntity na criação do registo.
-  private String executadoPor;
-  private LocalDate dataExecucao;
-
   @Valid
   private List<OutrosEmprestimosDTO> emprestimos = new ArrayList<>();
 
