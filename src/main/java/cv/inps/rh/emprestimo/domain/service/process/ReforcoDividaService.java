@@ -188,12 +188,19 @@ public class ReforcoDividaService {
     pedidoEntityRepository.save(order);
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
-        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
-        default ->
-            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -242,11 +249,13 @@ public class ReforcoDividaService {
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
         case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
           loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         }
         case RETIFICACAO -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          // Retificação devolve à etapa imediatamente anterior a esta
+          // (Análise Financeira Reforço), não à Análise RH.
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
       }
