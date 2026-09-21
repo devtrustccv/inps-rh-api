@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.emprestimo.application.commands.*;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.*;
+import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -373,7 +374,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "fundo-social"
+       value = "outro/{tipoEmprestimo}"
   )
   @Operation(
     summary = "Save fundo social",
@@ -392,11 +393,13 @@ public class EmprestimoController {
     }
   )
 
-  public ResponseEntity<String> saveFundoSocial(@Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
+   public ResponseEntity<String> saveFundoSocial(
+       @PathVariable TipoPedido tipoEmprestimo,
+       @Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
     )
   {
 
-      final var command = new SaveFundoSocialCommand(saveFundoSocialRequest);
+    final var command = new SaveFundoSocialCommand(tipoEmprestimo, saveFundoSocialRequest);
 
       return commandBus.send(command);
 
@@ -700,6 +703,18 @@ public class EmprestimoController {
 
       return commandBus.send(command);
 
+  }
+
+  @PostMapping("/{emprestimoId}/estado")
+  public ResponseEntity<Void> changeStatus(
+      @PathVariable String emprestimoId,
+      @RequestBody @Valid ChangeStatusData data
+
+  ) {
+
+    final var command = new MudarEstadoEmprestimoCommand(emprestimoId, data);
+
+    return commandBus.send(command);
   }
 
 }

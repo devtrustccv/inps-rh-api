@@ -21,7 +21,7 @@
       "name": "tipoMovimentoId",
       "objectType": "java",
       "type": "long",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,

@@ -168,4 +168,7 @@ public class EmprestimoEntity extends AuditEntity {
   @Size(max = 300)
   @Column(name = "NOME_FORNECEDOR", length = 300)
   private String nomeFornecedor;
+
+  @Column(name = "OBSERVACAO", length = 4000)
+  private String observacao;
 }

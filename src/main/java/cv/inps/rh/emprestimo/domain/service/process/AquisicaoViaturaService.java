@@ -11,21 +11,22 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoOutroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class AquisicaoViaturaService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
+  private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
@@ -162,7 +164,7 @@ public class AquisicaoViaturaService {
                 obj.setParecerResponsavel(resp.parecer().name());
                 obj.setObservacaoResponsavel(resp.observacao());
                 obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
-                obj.setDataObservacaoResponsavel(LocalDateTime.now());
+                obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
               });
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -177,6 +179,45 @@ public class AquisicaoViaturaService {
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var fun = order.getFunId();
+
+    var requestIds = request.getOutrosEmprestimos().stream()
+        .map(OutrosEmprestimosDTO::id)
+        .filter(StringUtils::hasText)
+        .collect(Collectors.toSet());
+
+    var paraInativar = emprestimoOutroEntityRepository
+        .findByReferenciaOrigemAndFunAndEstado(order, fun, Estado.A.name())
+        .stream()
+        .filter(existente -> !requestIds.contains(existente.getUuid()))
+        .peek(existente -> existente.setEstado(Estado.I.name()))
+        .toList();
+
+    var others = new ArrayList<>(paraInativar);
+
+    for (var other : request.getOutrosEmprestimos()) {
+
+      final EmprestimoOutroEntity anotherLoan;
+
+      if (StringUtils.hasText(other.id())) {
+        anotherLoan = emprestimoOutroEntityRepository.findByUuidOrThrow(other.id());
+      } else {
+        anotherLoan = new EmprestimoOutroEntity();
+        anotherLoan.setReferenciaOrigem(order);
+        anotherLoan.setFun(fun);
+        anotherLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+        anotherLoan.setEstado(Estado.A.name());
+      }
+      anotherLoan.setTiposEmprestimo(other.tipoEmprestimo());
+      anotherLoan.setDataFim(other.dataTermino());
+      anotherLoan.setDataInicio(other.dataEmprestimo());
+      anotherLoan.setValorEmprestimo(other.valorEmprestimo());
+      anotherLoan.setValorPrestacao(other.valorPrestacaoMensal());
+      others.add(anotherLoan);
+    }
+
+    emprestimoOutroEntityRepository.saveAll(others);
 
     documentService.saveDocuments(
         request.getDocumentos(),

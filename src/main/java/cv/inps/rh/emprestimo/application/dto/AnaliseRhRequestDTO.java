@@ -48,6 +48,9 @@ public class AnaliseRhRequestDTO {
   private ProcessStepAction action;
 
   @Valid
+  private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
+
+  @Valid
   private Responsavel responsavel;
 
   public record Responsavel(
