@@ -9,16 +9,21 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * Avaliação de um período: as componentes com as suas medições, mais o resultado do período.
+ *
+ * <p>A observação geral, o parecer do colaborador e a observação da comissão executiva
+ * deixaram de estar à raiz e passaram para dentro de {@link #periodo}, porque são por
+ * período e não por ano.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 @EqualsAndHashCode(callSuper = true)
 @IgrpDTO
 public class AvaliacaoResponseDTO extends AvaliacaoDTO {
 
-  private ObservacaoGeralDTO observacaoGeral;
-  private ParecerColaboradorDTO parecerColaborador;
-  private ComissaoExecutivaDTO comissaoExecutiva;
+  /** Resultado e pareceres do período pedido. Nulo enquanto não houver avaliação lançada. */
+  private PeriodoAvaliacaoDTO periodo;
 
 }

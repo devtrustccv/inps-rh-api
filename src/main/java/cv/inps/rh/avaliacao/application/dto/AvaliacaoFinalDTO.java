@@ -8,19 +8,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Avaliação final do ano.
+ *
+ * <p>Deixou de ser "primeiro semestre + segundo semestre": o ciclo pode ser semestral,
+ * trimestral ou anual, por isso os contributos vêm numa lista, um por período, pela ordem
+ * cronológica.</p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
 public class AvaliacaoFinalDTO  {
 
-  private SemestreDTO primeiroSemestre;
-  private SemestreDTO segundoSemestre;
+  /** Um por período do ciclo, pela ordem cronológica. */
+  private List<PonderacaoPeriodoDTO> periodos = new ArrayList<>();
 
-  private String avaliacaoExpressivaQuantitativa;
-  private String avaliacaoExpressivaQualitativa;
+  private String avaliacaoExpressivaQuantitativa ;
+
+  private String avaliacaoExpressivaQualitativa ;
 
 }

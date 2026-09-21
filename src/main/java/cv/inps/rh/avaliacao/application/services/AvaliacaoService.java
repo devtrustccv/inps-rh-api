@@ -3,12 +3,15 @@ package cv.inps.rh.avaliacao.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.avaliacao.application.commands.DefinicaoObjetivoCommand;
 import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
+import cv.inps.rh.avaliacao.application.dto.PeriodoResumoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.queries.GetListaAvaliacaoQuery;
 import cv.inps.rh.avaliacao.application.queries.GetListaDefinicaoObjectivosQuery;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoListagemMapper;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
+import cv.inps.rh.shared.application.constants.AbrangenciaAvaliacao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -28,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,6 +54,7 @@ public class AvaliacaoService {
   private final ParamEscalaAvaliacaoEntityRepository escalaAvaliacaoRepository;
   private final AvaliacaoMapper avaliacaoMapper;
   private final AvaliacaoListagemMapper avaliacaoListagemMapper;
+  private final AvaliacaoPeriodoService periodoService;
 
   public AvaliacaoService(
       AvaliacaoEntityRepository avaliacaoRepository,
@@ -65,7 +70,8 @@ public class AvaliacaoService {
       ParamManualFuncaoEntityRepository manualFuncaoRepository,
       ParamEscalaAvaliacaoEntityRepository escalaAvaliacaoRepository,
       AvaliacaoMapper avaliacaoMapper,
-      AvaliacaoListagemMapper avaliacaoListagemMapper) {
+      AvaliacaoListagemMapper avaliacaoListagemMapper,
+      AvaliacaoPeriodoService periodoService) {
     this.avaliacaoRepository = avaliacaoRepository;
     this.objectivoRepository = objectivoRepository;
     this.competenciaRepository = competenciaRepository;
@@ -80,22 +86,33 @@ public class AvaliacaoService {
     this.escalaAvaliacaoRepository = escalaAvaliacaoRepository;
     this.avaliacaoMapper = avaliacaoMapper;
     this.avaliacaoListagemMapper = avaliacaoListagemMapper;
+    this.periodoService = periodoService;
   }
 
   @Transactional
-  public ResponseEntity<Map<String, ?>> definicaoObjetivos(DefinicaoObjetivoCommand command) {
+  public ResponseEntity<SuccessResponseDTO> definicaoObjetivos(DefinicaoObjetivoCommand command) {
 
     var dto = command.getDefinicaoobjectivo();
 
-    if (!StringUtils.hasText(dto.getSemestre()) || (!"1".equals(dto.getSemestre()) && !"2".equals(dto.getSemestre()))) {
-      throw IgrpResponseStatusException.badRequest("semestre deve ser '1' ou '2'");
-    }
+    // Sem abrangência assume-se INDIVIDUAL: é o comportamento anterior ao refactor.
+    var abrangencia = StringUtils.hasText(dto.getAbrangencia())
+        ? AbrangenciaAvaliacao.fromValorOrThrow(dto.getAbrangencia())
+        : AbrangenciaAvaliacao.INDIVIDUAL;
+
+    var periodo = periodoService.validarPeriodo(dto.getAno(), dto.getPeriodicidade());
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "ParamObjetivoDetEntity not found for ano: " + dto.getAno()));
 
-    var instit = instituicaoRepository.findByIdOrThrow(dto.getInstitId());
+    // INPS não tem direção; DIRECAO exige-a; INDIVIDUAL herda-a do contexto do colaborador.
+    if (abrangencia.exigeDirecao() && dto.getInstitId() == null) {
+      throw IgrpResponseStatusException.badRequest(
+          "A abrangência DIRECAO exige a direção (institId).");
+    }
+    var instit = abrangencia == AbrangenciaAvaliacao.INPS || dto.getInstitId() == null
+        ? null
+        : instituicaoRepository.findByIdOrThrow(dto.getInstitId());
 
     var secao = dto.getSeccaoId() != null
         ? secaoRepository.findByIdOrThrow(dto.getSeccaoId())
@@ -111,45 +128,92 @@ public class AvaliacaoService {
         ? carreiraRepository.findByIdOrThrow(dto.getCarrPccsId())
         : null;
 
-    var created = new ArrayList<String>(dto.getFunUuids().size());
-
     var mapParamObjectives = det.getObjetivos().stream()
         .collect(Collectors.toMap(ParamObjetivoEntity::getId, Function.identity()));
 
-    for (var funId : dto.getFunUuids()) {
+    // Objectivos comuns (INPS / DIRECAO) não têm colaborador: geram uma única linha em RH_T_AVD.
+    if (!abrangencia.exigeColaborador()) {
+      var avaliacao = novaAvaliacao(dto, abrangencia, null, instit, secao, cargo, carreira, det);
+      avaliacaoRepository.save(avaliacao);
+      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det);
+      periodoService.obterOuCriarDetalhe(avaliacao, periodo);
 
-      if (avaliacaoRepository.existsByFuncionario_UuidAndAnoAndSemestre(funId, dto.getAno(), dto.getSemestre())) {
+      return sucesso(
+          List.of(avaliacao.getUuid().toString()),
+          "Objectivos comuns (" + abrangencia.name() + ") definidos para " + periodo + ".");
+    }
+
+    if (dto.getFunUuids() == null || dto.getFunUuids().isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "A abrangência INDIVIDUAL exige pelo menos um colaborador.");
+    }
+
+    var created = new ArrayList<String>(dto.getFunUuids().size());
+    var ignorados = new ArrayList<String>();
+
+    for (var funUuid : dto.getFunUuids()) {
+
+      var funcionario = funcionarioRepository.findByUuidOrThrow(funUuid);
+
+      // Já existe avaliação deste colaborador no ano? O ciclo é por ano, não por período:
+      // os períodos seguintes reutilizam a mesma RH_T_AVD e só acrescentam detalhe.
+      var existente = avaliacaoRepository.findAllByFuncionario_IdAndAno(funcionario.getId(), dto.getAno())
+          .stream().findFirst().orElse(null);
+
+      if (existente != null) {
+        periodoService.obterOuCriarDetalhe(existente, periodo);
+        ignorados.add(funcionario.getNome());
         continue;
       }
 
-      var funcionario = funcionarioRepository.findByUuidOrThrow(funId);
-
-      var avaliacao = new AvaliacaoEntity();
-      avaliacao.setUuid(UuidCreator.getTimeOrderedEpoch());
-      avaliacao.setFuncionario(funcionario);
-      avaliacao.setAno(dto.getAno());
-      avaliacao.setSemestre(dto.getSemestre());
-      avaliacao.setInstitId(instit);
-      avaliacao.setSeccaoId(secao);
-      avaliacao.setCargo(cargo);
-      avaliacao.setCarreira(carreira);
-      avaliacao.setEstado(ESTADO_ATIVO);
-      avaliacao.setPesoComportamentais(det.getPesoComportamentais());
-      avaliacao.setPesoTecnica(det.getPesoTecnica());
-
+      var avaliacao = novaAvaliacao(dto, abrangencia, funcionario, instit, secao, cargo, carreira, det);
       avaliacaoRepository.save(avaliacao);
-
-      criarLinhasAvaliacao(
-          avaliacao,
-          det.getObjetivos(),
-          mapParamObjectives, dto, det
-      );
+      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det);
+      periodoService.obterOuCriarDetalhe(avaliacao, periodo);
 
       created.add(avaliacao.getUuid().toString());
     }
 
-    return ResponseEntity.ok(Map.of(
-        "ids", created));
+    var resposta = sucesso(created, created.size() + " objectivo(s) definido(s) para " + periodo + ".");
+    if (!ignorados.isEmpty()) {
+      resposta.getBody().getAlertas().add(
+          "Já existia definição no ano " + dto.getAno() + " para: " + String.join(", ", ignorados)
+              + ". Foi apenas acrescentado o período " + periodo + ".");
+    }
+    return resposta;
+  }
+
+  private AvaliacaoEntity novaAvaliacao(
+      DefinicaoObjectivoDTO dto,
+      AbrangenciaAvaliacao abrangencia,
+      FuncionarioEntity funcionario,
+      DirecaoEntity instit,
+      SecaoEntity secao,
+      ParamCargoEntity cargo,
+      ParamCarreiraEntity carreira,
+      ParamObjetivoDetEntity det) {
+
+    var avaliacao = new AvaliacaoEntity();
+    avaliacao.setUuid(UuidCreator.getTimeOrderedEpoch());
+    avaliacao.setFuncionario(funcionario);
+    avaliacao.setAno(dto.getAno());
+    avaliacao.setAbrangencia(abrangencia.name());
+    avaliacao.setInstitId(instit);
+    avaliacao.setSeccaoId(secao);
+    avaliacao.setCargo(cargo);
+    avaliacao.setCarreira(carreira);
+    avaliacao.setEstado(ESTADO_ATIVO);
+    avaliacao.setPesoComportamentais(det.getPesoComportamentais());
+    avaliacao.setPesoTecnica(det.getPesoTecnica());
+    return avaliacao;
+  }
+
+  private ResponseEntity<SuccessResponseDTO> sucesso(List<String> ids, String mensagem) {
+    var dto = new SuccessResponseDTO();
+    dto.setSucesso(true);
+    dto.setId(ids.isEmpty() ? null : String.join(",", ids));
+    dto.setMensagem(mensagem);
+    return ResponseEntity.ok(dto);
   }
 
   @Transactional(readOnly = true)
@@ -174,8 +238,9 @@ public class AvaliacaoService {
       if (query.getAno() != null) {
         predicates.add(cb.equal(root.get("ano"), query.getAno()));
       }
-      if (StringUtils.hasText(query.getSemestre())) {
-        predicates.add(cb.equal(root.get("semestre"), query.getSemestre()));
+      if (StringUtils.hasText(query.getAbrangencia())) {
+        predicates.add(cb.equal(cb.upper(root.get("abrangencia")),
+            query.getAbrangencia().trim().toUpperCase()));
       }
       if (StringUtils.hasText(query.getEstado())) {
         predicates.add(cb.equal(root.get("estado"), query.getEstado()));
@@ -235,8 +300,14 @@ public class AvaliacaoService {
       if (query.getCarreiraId() != null) {
         predicates.add(cb.equal(root.get("carreira").get("id"), query.getCarreiraId()));
       }
-      if (StringUtils.hasText(query.getSemestre())) {
-        predicates.add(cb.equal(root.get("semestre"), query.getSemestre()));
+      if (StringUtils.hasText(query.getPeriodicidade())) {
+        // O período vive em RH_T_AVD_DETALHE: filtra-se por existência do detalhe.
+        var sub = cq.subquery(Long.class);
+        var det = sub.from(AvaliacaoDetalheEntity.class);
+        sub.select(cb.literal(1L)).where(
+            cb.equal(det.get("avaliacao").get("id"), root.get("id")),
+            cb.equal(cb.upper(det.get("periodicidade")), query.getPeriodicidade().trim().toUpperCase()));
+        predicates.add(cb.exists(sub));
       }
       if (StringUtils.hasText(query.getColaborador())) {
         var raw = query.getColaborador().trim();
@@ -271,28 +342,69 @@ public class AvaliacaoService {
 
     var escala = escalaAvaliacaoRepository.findAll();
 
+    // Um único select para os detalhes de todas as avaliações da página.
+    var detalhesPorAvd = periodoService
+        .detalhesDe(rows.stream().map(AvaliacaoEntity::getId).toList())
+        .stream()
+        .collect(Collectors.groupingBy(d -> d.getAvaliacao().getId()));
+
+    var rotulos = periodoService.descricoesDosPeriodos();
+
     var contentAll = grouped.values().stream().map(list -> {
       var base = list.getFirst();
-      BigDecimal s1 = null;
-      BigDecimal s2 = null;
-      for (var a : list) {
-        if ("1".equals(a.getSemestre()) && a.getAvaliacaoFinal() != null) {
-          s1 = BigDecimal.valueOf(a.getAvaliacaoFinal());
-        } else if ("2".equals(a.getSemestre()) && a.getAvaliacaoFinal() != null) {
-          s2 = BigDecimal.valueOf(a.getAvaliacaoFinal());
-        }
+
+      var detalhes = list.stream()
+          .flatMap(a -> detalhesPorAvd.getOrDefault(a.getId(), List.<AvaliacaoDetalheEntity>of()).stream())
+          .toList();
+
+      // A ordem dos períodos é a do ciclo, não a de inserção; sem parametrização
+      // no ano não há ciclo conhecido e mostram-se os detalhes como estão.
+      List<AvaliacaoDetalheEntity> ordenados;
+      Map<String, BigDecimal> ponderacoes;
+      try {
+        var tipo = periodoService.tipoDoAno(base.getAno());
+        var ordem = tipo.periodos();
+        ordenados = detalhes.stream()
+            .sorted(Comparator.comparingInt(d -> {
+              var i = ordem.indexOf(d.getPeriodicidade());
+              return i < 0 ? Integer.MAX_VALUE : i;
+            }))
+            .toList();
+        ponderacoes = periodoService.ponderacoesDoCiclo(tipo);
+      } catch (RuntimeException e) {
+        ordenados = detalhes;
+        ponderacoes = Map.of();
       }
+
+      var periodos = ordenados.stream().map(d -> {
+        var dto = new PeriodoResumoDTO();
+        dto.setUuid(d.getUuid() != null ? d.getUuid().toString() : null);
+        dto.setPeriodicidade(d.getPeriodicidade());
+        dto.setDescricao(rotulos.getOrDefault(d.getPeriodicidade(), d.getPeriodicidade()));
+        dto.setAvaliacaoFinal(d.getAvaliacaoFinal());
+        dto.setAvaliacaoQualitativa(d.getAvaliacaoQualitativa());
+        dto.setEstado(d.getEstado());
+        return dto;
+      }).toList();
+
+      // Nota do ano: soma dos períodos pesada por AVD_PONDERACAO_FINAL.
+      BigDecimal notaFinal = null;
+      for (var d : ordenados) {
+        if (d.getAvaliacaoFinal() == null) {
+          continue;
+        }
+        var peso = ponderacoes.get(d.getPeriodicidade());
+        var contributo = peso != null
+            ? AvaliacaoPeriodoService.aplicarPercentagem(d.getAvaliacaoFinal(), peso)
+            : d.getAvaliacaoFinal();
+        notaFinal = notaFinal == null ? contributo : notaFinal.add(contributo);
+      }
+      notaFinal = AvaliacaoPeriodoService.escala2(notaFinal);
 
       var estadoGrupo = resolveEstadoGrupo(list);
-
-      var notaFinal = (s1 != null ? s1 : BigDecimal.ZERO).add(s2 != null ? s2 : BigDecimal.ZERO);
-      if (s1 == null && s2 == null) {
-        notaFinal = null;
-      }
-
       var qualitativa = notaFinal != null ? resolveQualitativa(escala, notaFinal) : null;
 
-      return avaliacaoListagemMapper.toListagem(base, estadoGrupo, s1, s2, notaFinal, qualitativa);
+      return avaliacaoListagemMapper.toListagem(base, estadoGrupo, periodos, notaFinal, qualitativa);
     }).toList();
 
     var start = Math.min(pageNumber * pageSize, contentAll.size());
@@ -494,18 +606,18 @@ public class AvaliacaoService {
     return p.getSeccaoId() == null || seccaoId != null;
   }
 
+  /**
+   * Estado do grupo: 'C' se alguma das avaliações do ano já está concluída, 'P' se alguma
+   * está em curso, 'A' caso contrário. Quem decide o 'C' é o
+   * {@code ProcessoAvaliacaoService}, que o marca quando todos os períodos do ciclo têm nota.
+   */
   private String resolveEstadoGrupo(List<AvaliacaoEntity> list) {
-    // Ano completo: 2º semestre concluído (C) — independente do estado do 1º
-    boolean sem2Concluido = list.stream()
-        .anyMatch(a -> "2".equals(a.getSemestre()) && "C".equalsIgnoreCase(a.getEstado()));
-    if (sem2Concluido)
+    if (list.stream().anyMatch(a -> "C".equalsIgnoreCase(a.getEstado()))) {
       return "C";
-
-    // Parcial: 1º semestre avaliado mas sem 2º semestre concluído
-    boolean anyP = list.stream().anyMatch(a -> "P".equalsIgnoreCase(a.getEstado()));
-    if (anyP)
+    }
+    if (list.stream().anyMatch(a -> "P".equalsIgnoreCase(a.getEstado()))) {
       return "P";
-
+    }
     return "A";
   }
 

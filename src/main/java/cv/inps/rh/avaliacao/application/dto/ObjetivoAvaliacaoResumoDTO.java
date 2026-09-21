@@ -14,7 +14,8 @@ public class ObjetivoAvaliacaoResumoDTO {
   private Long id;
   private String uuid;
   private Integer ano;
-  private String semestre;
+  private String periodicidade;
+  private String abrangencia;
   private Long institId;
   private String institNome;
   private Long seccaoId;

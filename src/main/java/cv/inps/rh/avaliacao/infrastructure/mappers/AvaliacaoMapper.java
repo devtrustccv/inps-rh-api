@@ -17,7 +17,7 @@ public class AvaliacaoMapper {
         dto.setId(entity.getId());
         dto.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
         dto.setAno(entity.getAno());
-        dto.setSemestre(entity.getSemestre());
+        dto.setAbrangencia(entity.getAbrangencia());
         dto.setEstado(entity.getEstado());
 
         ofNullable(entity.getInstitId()).ifPresent(i -> {

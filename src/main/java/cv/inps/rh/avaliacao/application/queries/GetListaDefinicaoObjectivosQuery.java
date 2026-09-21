@@ -15,8 +15,8 @@ public class GetListaDefinicaoObjectivosQuery implements Query {
 
   @NotNull(message = "The field <ano> is required")
   private Integer ano;
-  @NotBlank(message = "The field <semestre> is required")
-  private String semestre;
+  private String periodicidade;
+  private String abrangencia;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
   @NotNull(message = "The field <institId> is required")

@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.avaliacao.application.commands.*;
 import cv.inps.rh.avaliacao.application.dto.*;
 import cv.inps.rh.avaliacao.application.queries.*;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +19,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 
 @IgrpController
 @RestController
@@ -50,14 +50,14 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> definicaoObjetivo(@Valid @RequestBody DefinicaoObjectivoDTO definicaoObjetivoRequest
+   public ResponseEntity<SuccessResponseDTO> definicaoObjetivo(@Valid @RequestBody DefinicaoObjectivoDTO definicaoObjetivoRequest
     )
   {
 
@@ -89,7 +89,8 @@ public class AvaliacaoController {
 
    public ResponseEntity<WrapperListaDefinicaoObjetivoDTO> getListaDefinicaoObjectivos(
     @RequestParam(value = "ano", required = false) Integer ano,
-    @RequestParam(value = "semestre", required = false) String semestre,
+    @RequestParam(value = "periodicidade", required = false) String periodicidade,
+    @RequestParam(value = "abrangencia", required = false) String abrangencia,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "institId", required = false) Long institId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
@@ -98,7 +99,7 @@ public class AvaliacaoController {
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, carreiraId, pageNumber, pageSize);
+      final var query = new GetListaDefinicaoObjectivosQuery(ano, periodicidade, abrangencia, estado, institId, cargoId, carreiraId, pageNumber, pageSize);
 
       return queryBus.handle(query);
 
@@ -132,10 +133,10 @@ public class AvaliacaoController {
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "carreiraId", required = false) Long carreiraId,
-    @RequestParam(value = "semestre", required = false) String semestre)
+    @RequestParam(value = "periodicidade", required = false) String periodicidade)
   {
 
-      final var query = new GetListaAvaliacaoQuery(pageNumber, pageSize, ano, direcao, cargo, colaborador, seccaoId, carreiraId, semestre);
+      final var query = new GetListaAvaliacaoQuery(pageNumber, pageSize, ano, direcao, cargo, colaborador, seccaoId, carreiraId, periodicidade);
 
       return queryBus.handle(query);
 
@@ -192,10 +193,11 @@ public class AvaliacaoController {
   )
 
    public ResponseEntity<AvaliacaoResponseDTO> getAvaliacao(
-    @PathVariable(value = "uuid") String uuid)
+    @PathVariable(value = "uuid") String uuid,
+    @RequestParam(value = "periodicidade", required = false) String periodicidade)
   {
 
-      final var query = new GetAvaliacaoQuery(uuid);
+      final var query = new GetAvaliacaoQuery(uuid, periodicidade);
 
       return queryBus.handle(query);
 
@@ -214,14 +216,14 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> avaliacao(@Valid @RequestBody AvaliacaoDTO avaliacaoRequest
+   public ResponseEntity<SuccessResponseDTO> avaliacao(@Valid @RequestBody AvaliacaoDTO avaliacaoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -244,14 +246,14 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> autoAvaliacao(@Valid @RequestBody AvaliacaoDTO autoAvaliacaoRequest
+   public ResponseEntity<SuccessResponseDTO> autoAvaliacao(@Valid @RequestBody AvaliacaoDTO autoAvaliacaoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -274,18 +276,19 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> processoObservacaoGeral(@Valid @RequestBody ObservacaoGeralDTO processoObservacaoGeralRequest
-    , @PathVariable(value = "uuid") String uuid)
+   public ResponseEntity<SuccessResponseDTO> processoObservacaoGeral(@Valid @RequestBody ObservacaoGeralDTO processoObservacaoGeralRequest
+    , @PathVariable(value = "uuid") String uuid
+    , @RequestParam(value = "periodicidade") String periodicidade)
   {
 
-      final var command = new ProcessoObservacaoGeralCommand(processoObservacaoGeralRequest, uuid);
+      final var command = new ProcessoObservacaoGeralCommand(processoObservacaoGeralRequest, uuid, periodicidade);
 
       return commandBus.send(command);
 
@@ -304,18 +307,19 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> processoParecerColaborador(@Valid @RequestBody ParecerColaboradorDTO processoParecerColaboradorRequest
-    , @PathVariable(value = "uuid") String uuid)
+   public ResponseEntity<SuccessResponseDTO> processoParecerColaborador(@Valid @RequestBody ParecerColaboradorDTO processoParecerColaboradorRequest
+    , @PathVariable(value = "uuid") String uuid
+    , @RequestParam(value = "periodicidade") String periodicidade)
   {
 
-      final var command = new ProcessoParecerColaboradorCommand(processoParecerColaboradorRequest, uuid);
+      final var command = new ProcessoParecerColaboradorCommand(processoParecerColaboradorRequest, uuid, periodicidade);
 
       return commandBus.send(command);
 
@@ -334,18 +338,19 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> processoComissaoExecutiva(@Valid @RequestBody ComissaoExecutivaDTO processoComissaoExecutivaRequest
-    , @PathVariable(value = "uuid") String uuid)
+   public ResponseEntity<SuccessResponseDTO> processoComissaoExecutiva(@Valid @RequestBody ComissaoExecutivaDTO processoComissaoExecutivaRequest
+    , @PathVariable(value = "uuid") String uuid
+    , @RequestParam(value = "periodicidade") String periodicidade)
   {
 
-      final var command = new ProcessoComissaoExecutivaCommand(processoComissaoExecutivaRequest, uuid);
+      final var command = new ProcessoComissaoExecutivaCommand(processoComissaoExecutivaRequest, uuid, periodicidade);
 
       return commandBus.send(command);
 

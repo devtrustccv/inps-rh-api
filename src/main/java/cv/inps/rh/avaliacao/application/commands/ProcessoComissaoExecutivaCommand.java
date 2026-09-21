@@ -17,4 +17,8 @@ public class ProcessoComissaoExecutivaCommand implements Command {
   @NotBlank(message = "The field <uuid> is required")
   private String uuid;
 
+  /** Período a que o registo pertence (RH_T_AVD_DETALHE.PERIODICIDADE). */
+  @NotBlank(message = "The field <periodicidade> is required")
+  private String periodicidade;
+
 }

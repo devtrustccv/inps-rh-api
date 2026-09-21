@@ -1,155 +1,272 @@
-# Alterações Front-End — Avaliação de Desempenho
+# Avaliação de Desempenho — alterações de API
 
-**Data:** 2026-05-30  
-**Branch:** develop
+## 2026-09-21 — Refactor SEMESTRE → PERIODICIDADE (breaking)
 
----
+Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_21_09_2026.md`
+(HTML navegável em `docs/spec_avaliacao_desempenho_21_09_2026.html`).
+Plano: `docs/plano_refactor_avaliacao_desempenho_21_09.md`.
 
-## 1. Novos parâmetros de filtro — `GET /avaliacao-desempenho/avaliacoes`
+> **Breaking.** O eixo temporal deixa de ser `semestre` (`"1"` | `"2"`) e passa a ser
+> `periodicidade`, um código do domínio. O ciclo pode agora ser semestral, trimestral ou anual.
 
-Foram adicionados 3 novos parâmetros opcionais de filtro à listagem de avaliações:
+### 1. O modelo novo em duas linhas
 
-| Parâmetro | Tipo | Obrigatório | Descrição |
-|---|---|---|---|
-| `seccaoId` | `Long` | ❌ | Filtrar por secção (`RH_T_AVD.SECCAO_ID`) |
-| `carreiraId` | `Long` | ❌ | Filtrar por carreira (`RH_T_AVD.CARR_PCCS_ID`) |
-| `semestre` | `String` | ❌ | Filtrar por semestre (`"1"` ou `"2"`) |
-
-### Antes
 ```
-GET /avaliacao-desempenho/avaliacoes
-    ?ano=2025
-    &direcao=1
-    &cargo=2
-    &colaborador=<uuid|nome>
-    &pageNumber=0
-    &pageSize=20
+Avaliacao (um colaborador num ano)
+ └─ periodos[]           → um por período do ciclo: notas, entrevista, pareceres
+     └─ componentes      → objectivos / competências / atitude pessoal
+         └─ medição      → realizado, avaliacao, autoRealizado, autoAvaliacao
 ```
 
-### Depois
-```
-GET /avaliacao-desempenho/avaliacoes
-    ?ano=2025
-    &direcao=1
-    &cargo=2
-    &colaborador=<uuid|nome>
-    &seccaoId=5
-    &carreiraId=3
-    &semestre=1
-    &pageNumber=0
-    &pageSize=20
-```
+Antes havia **uma avaliação por semestre**. Agora há **uma avaliação por ano**, com N períodos
+dentro. Um `uuid` de avaliação que antes identificava "o 1º semestre do João" passa a
+identificar "o ano do João" — o período vai à parte, em `periodicidade`.
 
-> Todos os parâmetros existentes continuam a funcionar sem alteração. Os novos são completamente opcionais.
+### 2. Vocabulário da periodicidade
 
----
+O domínio `PERIODICIDADE` tem dois níveis. Obtém-se em `api/v1/enums` / nos domínios:
 
-## 2. Novo parâmetro de filtro — `GET /avaliacao-desempenho/avaliacoes/objectivos`
-
-Adicionado 1 novo parâmetro opcional de filtro à listagem de definição de objectivos:
-
-| Parâmetro | Tipo | Obrigatório | Descrição |
-|---|---|---|---|
-| `carreiraId` | `Long` | ❌ | Filtrar por carreira (`RH_T_AVD.CARR_PCCS_ID`) |
-
-### Antes
-```
-GET /avaliacao-desempenho/avaliacoes/objectivos
-    ?ano=2025
-    &semestre=1
-    &estado=A
-    &institId=1
-    &cargoId=2
-    &pageNumber=0
-    &pageSize=20
-```
-
-### Depois
-```
-GET /avaliacao-desempenho/avaliacoes/objectivos
-    ?ano=2025
-    &semestre=1
-    &estado=A
-    &institId=1
-    &cargoId=2
-    &carreiraId=3
-    &pageNumber=0
-    &pageSize=20
-```
-
----
-
-## 3. Novos campos na resposta — Atitude Pessoal
-
-Os objetos de Atitude Pessoal dentro das respostas de:
-- `GET /avaliacao-desempenho/avaliacoes/{uuid}`
-- `GET /avaliacao-desempenho/avaliacoes/objectivos/{uuid}`
-
-passam a incluir dois campos novos (antes vinham sempre `null`):
-
-| Campo | Tipo | Descrição |
+| Nível | Onde | Valores |
 |---|---|---|
-| `numeroOrdem` | `Integer` | Número de ordem da atitude pessoal (ex: `1`, `2`) |
-| `atitudePessoal` | `String` | Descrição da atitude pessoal |
+| **Tipo** do ciclo | `REFERENCIA = 'PERIODICIDADE'` | `SEMESTRAL`, `TRIMESTRAL`, `ANUAL` |
+| **Período** concreto | `REFERENCIA = <tipo>` | `SEMESTRE1`/`SEMESTRE2`, `TRIMESTRE1`..`TRIMESTRE4`, `ANUAL` |
 
-> **Nota de migração:** Registos criados **antes** da migration `V3__avd_atitude_pessoal_add_columns.sql` ser executada na BD terão estes campos com fallback ao parâmetro de referência (`RH_T_PARAM_OBJETIVO`). Após a migration, os registos novos ficam com os valores guardados directamente.
+O **tipo** escolhe-se uma vez, na parametrização do ano. O **período** é o que se envia em
+todas as chamadas de avaliação. O peso de cada período na nota do ano está no domínio
+`AVD_PONDERACAO_FINAL` (`SEMESTRE1`/`SEMESTRE2` = 50, `TRIMESTRE1..4` = 25, `ANUAL` = 100).
 
----
+> Enviar um período que não pertence ao tipo parametrizado no ano dá **400** com a lista
+> dos valores aceites.
 
-## 4. Correcção — campo `PESO` nas Competências
+### 3. Parametrização de componentes — `configuracao/avaliacao-desempenho/componentes`
 
-O campo `peso` dos objectos `CompetenciaComportamental` e `CompetenciaTecnica` dentro da resposta do processo de avaliação (campo `RH_T_AVD_COMPETENCIA.PESO`) passa a ser correctamente preenchido ao criar a definição de objectivos:
+**Campo novo, obrigatório na criação e edição:**
 
-- **Competências Comportamentais:** `peso = RH_T_PARAM_OBJETIVO_DET.PESO_COMPORTAMENTAIS`
-- **Competências Técnicas:** `peso = RH_T_PARAM_OBJETIVO_DET.PESO_TECNICA`
-
-> **Antes desta correcção:** o campo `peso` chegava sempre `null` no frontend. Agora chega com o valor percentual correcto (ex: `60.00` para 60%).
-
----
-
-## 5. DB Migration necessária
-
-Para que os pontos 3 e 4 funcionem correctamente em produção, é necessário executar a migration:
-
-```sql
--- V3__avd_atitude_pessoal_add_columns.sql
-ALTER TABLE RH_T_AVD_ATITUDE_PESSOAL ADD NUMERO_ORDEM NUMBER;
-ALTER TABLE RH_T_AVD_ATITUDE_PESSOAL ADD DESCRICAO VARCHAR2(300);
+```diff
+  {
+    "ano": 2027,
++   "periodicidade": "SEMESTRAL",
+    "pesoComportamentais": 50,
+    ...
+  }
 ```
 
-O script encontra-se em `src/main/resources/db/migration/V3__avd_atitude_pessoal_add_columns.sql`.
+**`GET` da lista** ganha filtros e dois campos por linha:
 
----
-
-## 6. Correcção crítica — campo `horaFim` no `ObservacaoGeralDTO`
-
-**Endpoint afectado:** `PUT /avaliacao-desempenho/avaliacoes/processos-avaliacao/{uuid}/observacao-geral`
-
-| Campo | Antes (errado) | Depois (correcto) |
+| Novo | Onde | Notas |
 |---|---|---|
-| Hora de fim da entrevista | `"HoraFim"` (H maiúsculo) | `"horaFim"` (h minúsculo) |
+| `?ano=` `?estado=` | query param | opcionais |
+| `periodicidade` | cada linha | o tipo do ciclo |
+| `versao` | cada linha | |
+| `podeInativar` | cada linha | `false` quando já há objectivos definidos no ano — esconder a ação |
 
-Se o frontend enviava `"HoraFim"` com H maiúsculo, o campo era ignorado e ficava `null` na BD. **O campo correcto é `"horaFim"`** (camelCase standard).
+A lista passa a vir ordenada por **ano descendente**.
 
-```json
-// ✅ Correcto
-{
-  "observacaoGeralAvaliacao": "...",
-  "descPlanoDesenvolvimento": "...",
-  "dataInicio": "2026-06-15",
-  "horaInicio": "09:00",
-  "horaFim": "10:30"
-}
+**Dois endpoints novos:**
+
+| Método | Rota | Corpo | Devolve |
+|---|---|---|---|
+| `POST` | `.../componentes/{id}/clonar` | `{ "ano": 2027, "periodicidade": "SEMESTRAL" }` | `201` `SuccessResponse` |
+| `PATCH` | `.../componentes/{id}/inativar` | — | `200` `SuccessResponse` |
+
+`periodicidade` na clonagem é opcional: em branco herda a da origem. Clonar funciona mesmo
+com a origem inativa — é a forma normal de reaproveitar o ano anterior. Inativar dá **409**
+se já existirem objectivos definidos no ano.
+
+### 4. Definição de objectivos — `POST avaliacao-desempenho/avaliacoes/objectivos`
+
+```diff
+  {
+    "ano": 2027,
+-   "semestre": "1",
++   "periodicidade": "SEMESTRE1",
++   "abrangencia": "INDIVIDUAL",
+    "institId": 12,
+    "funUuids": ["..."],
+    ...
+  }
 ```
+
+**`abrangencia` é nova** e muda o que é obrigatório:
+
+| `abrangencia` | `funUuids` | `institId` | Resultado |
+|---|---|---|---|
+| `INPS` | ignorado | ignorado | 1 avaliação comum a toda a instituição |
+| `DIRECAO` | ignorado | **obrigatório** | 1 avaliação comum à direção |
+| `INDIVIDUAL` (default) | **obrigatório** | herdado | 1 avaliação por colaborador |
+
+Em branco assume `INDIVIDUAL`, que é o comportamento anterior.
+
+**A resposta deixou de ser um `Map`:**
+
+```diff
+- { "ids": ["uuid-1", "uuid-2"] }
++ { "sucesso": true, "id": "uuid-1,uuid-2", "mensagem": "...", "alertas": [] }
+```
+
+Quando um colaborador já tinha definição nesse ano, ele **não é ignorado em silêncio** como
+antes: acrescenta-se o período novo à avaliação existente e o nome aparece em `alertas`.
+
+### 5. Avaliação e autoavaliação
+
+`PUT .../processos-avaliacao/{uuid}` e `PUT .../{uuid}/auto-avaliacao` passam a exigir
+`periodicidade` **no corpo** (herdado de `BaseAvaliacaoObjetivo`):
+
+```diff
+  {
++   "periodicidade": "SEMESTRE1",
+    "objectivos": [ ... ],
+    ...
+  }
+```
+
+Nas linhas de cada componente, as notas **mudaram de tipo e ganharam campos calculados**:
+
+```diff
+  {
+    "numero": 1,
+    "ponderacao": 20,
+-   "avaliacao": 4,          // Integer
+-   "autoAvaliacao": 3,      // Integer
++   "avaliacao": 4.00,       // BigDecimal
++   "autoAvaliacao": 3.00,   // BigDecimal
++   "resultado": 0.80,       // read-only: avaliacao x ponderacao / 100
++   "autoResultado": 0.60    // read-only
+  }
+```
+
+`resultado` e `autoResultado` são **só de leitura** — enviá-los não tem efeito.
+
+### 6. Observação geral, parecer e comissão executiva
+
+Os três deixaram de ser do ano e passaram a ser **do período**. Ganham um query param
+obrigatório:
+
+```diff
+- PUT .../processos-avaliacao/{uuid}/observacao-geral
++ PUT .../processos-avaliacao/{uuid}/observacao-geral?periodicidade=SEMESTRE1
+```
+
+Idem para `/parecer-colaborador` e `/comissao-executiva`. O corpo não muda.
+Os três passam a devolver `SuccessResponse` em vez de `Map`.
+
+### 7. Detalhe da avaliação — `GET avaliacao-desempenho/avaliacoes/{uuid}`
+
+Novo query param **opcional** `?periodicidade=SEMESTRE1`:
+
+- **com** período — as componentes vêm com as medições desse período, e vem `periodo` preenchido
+- **sem** período — as componentes vêm **sem notas** (é o que a definição de objectivos precisa)
+
+```diff
+  {
+-   "semestre": "1",
++   "periodicidade": "SEMESTRE1",
++   "abrangencia": "INDIVIDUAL",
+    "objectivos": [ ... ],
+-   "observacaoGeral": { ... },
+-   "parecerColaborador": { ... },
+-   "comissaoExecutiva": { ... }
++   "periodo": {
++     "uuid": "...",
++     "periodicidade": "SEMESTRE1",
++     "descricao": "Semestre 1",
++     "avaliacaoObjectivo": 3.20,
++     "avaliacaoCompetencia": 1.80,
++     "avaliacaoAtitudePessoal": 0.90,
++     "avaliacaoFinal": 5.90,
++     "avaliacaoQualitativa": "Bom",
++     "estado": "A",
++     "observacaoGeral": { ... },
++     "parecerColaborador": { ... },
++     "comissaoExecutiva": { ... }
++   }
+  }
+```
+
+`periodo` vem `null` enquanto não houver avaliação lançada nesse período.
+
+### 8. Grelha de avaliação — `GET avaliacao-desempenho/avaliacoes`
+
+Filtro `?semestre=` → `?periodicidade=`. A linha passa a ser **pai/filho**:
+
+```diff
+  {
+    "uuid": "...",
++   "ano": 2027,
++   "abrangencia": "INDIVIDUAL",
+    "nomeColaborador": "...",
+    "estado": "P",
+-   "semestreNota": "1º Sem: 8.5 / 2º Sem: 7.2",
+-   "avaliacaoFinalSemestre1": 8.5,
+-   "avaliacaoFinalSemestre2": 7.2,
++   "periodos": [
++     { "uuid": "...", "periodicidade": "SEMESTRE1", "descricao": "Semestre 1",
++       "avaliacaoFinal": 8.50, "avaliacaoQualitativa": "Bom", "estado": "A" },
++     { "uuid": "...", "periodicidade": "SEMESTRE2", "descricao": "Semestre 2",
++       "avaliacaoFinal": 7.20, "avaliacaoQualitativa": "Suficiente", "estado": "A" }
++   ],
+    "notaFinal": 7.85,
+    "notaFinalQualitativa": "Bom"
+  }
+```
+
+`periodos` vem pela **ordem cronológica do ciclo** — é a ordem para desdobrar as linhas-filho.
+`notaFinal` é a soma dos períodos já pesada por `AVD_PONDERACAO_FINAL`.
+
+**`estado`** deixou de ser "semestre 2 concluído ⇒ C": passa a `C` quando **todos** os períodos
+do ciclo têm nota, `P` enquanto faltar algum.
+
+### 9. Grelha de definição — `GET avaliacao-desempenho/avaliacoes/objectivos`
+
+Filtro `?semestre=` → `?periodicidade=`, mais `?abrangencia=`. Nas linhas,
+`semestre` → `abrangencia`.
+
+### 10. Avaliação final — `GET avaliacao-desempenho/avaliacoes/{uuid}/avaliacao-final`
+
+Os dois campos fixos de semestre deram lugar a uma lista:
+
+```diff
+  {
+-   "primeiroSemestre": { "avaliacaoFinal": "8.50", "ponderacao": "50" },
+-   "segundoSemestre":  { "avaliacaoFinal": "7.20", "ponderacao": "50" },
++   "periodos": [
++     { "periodicidade": "SEMESTRE1", "descricao": "Semestre 1",
++       "avaliacaoFinal": 8.50, "ponderacao": 50, "contributo": 4.25 },
++     { "periodicidade": "SEMESTRE2", "descricao": "Semestre 2",
++       "avaliacaoFinal": 7.20, "ponderacao": 50, "contributo": 3.60 }
++   ],
+    "avaliacaoExpressivaQuantitativa": "7.85",
+    "avaliacaoExpressivaQualitativa": "Bom"
+  }
+```
+
+`avaliacaoFinal` e `ponderacao` passaram de `String` para número. Vêm **sempre todos os
+períodos do ciclo**, com `avaliacaoFinal: null` nos que ainda não foram avaliados.
+
+### 11. Resumo do que parte
+
+| O que | Antes | Agora |
+|---|---|---|
+| Campo temporal | `semestre: "1"\|"2"` | `periodicidade: "SEMESTRE1"...` |
+| Respostas de escrita | `Map` (`{"id": ...}`) | `SuccessResponse` |
+| Notas das componentes | `Integer` | `BigDecimal` + `resultado` |
+| Pareceres/observação | à raiz, por ano | dentro de `periodo`, por período |
+| Grelha | colunas fixas de semestre | `periodos[]` pai/filho |
+| Avaliação final | `primeiroSemestre`/`segundoSemestre` | `periodos[]` |
+| `SemestreDTO` | existia | removido → `PonderacaoPeriodoDTO` |
+
+### 12. Enums novos
+
+Expostos pelo enum exposer em `api/v1/enums`:
+
+- `TipoPeriodicidade` — `SEMESTRAL | TRIMESTRAL | ANUAL`
+- `AbrangenciaAvaliacao` — `INPS | DIRECAO | INDIVIDUAL`
+- `ComponenteAvaliacaoRef` — `OBJECTIVO | COMPETENCIA_COMPORTAMENTAIS | COMPETENCIA_TECNICA | ATITUDE_PESSOAL`
+- `TipoProcessoAvaliacao` — `DEFINICAO | AVALIACAO`
 
 ---
 
-## 7. Resumo das alterações por endpoint
+## Histórico anterior
 
-| Endpoint | Alteração |
-|---|---|
-| `GET /avaliacao-desempenho/avaliacoes` | Novos params opcionais: `seccaoId`, `carreiraId`, `semestre` |
-| `GET /avaliacao-desempenho/avaliacoes/objectivos` | Novo param opcional: `carreiraId` |
-| `GET /avaliacao-desempenho/avaliacoes/{uuid}` | Atitude Pessoal agora inclui `numeroOrdem` e `atitudePessoal` |
-| `GET /avaliacao-desempenho/avaliacoes/objectivos/{uuid}` | Atitude Pessoal agora inclui `numeroOrdem` e `atitudePessoal` |
-| `POST /avaliacao-desempenho/avaliacoes/objectivos` | Campo `peso` nas competências agora é preenchido correctamente |
+As entradas anteriores a 2026-09-21 descreviam o modelo por semestre e foram substituídas
+por este refactor.

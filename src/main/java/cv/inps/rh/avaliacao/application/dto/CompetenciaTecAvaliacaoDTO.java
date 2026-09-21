@@ -1,6 +1,3 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
-
 package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
@@ -9,17 +6,25 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
+/**
+ * Medição do período para esta componente. Os valores vivem em RH_T_AVD_PERIODICIDADE.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 @EqualsAndHashCode(callSuper = true)
 @IgrpDTO
 public class CompetenciaTecAvaliacaoDTO extends CompetenciaTecnicaDTO {
 
+  private BigDecimal avaliacao;
+  private BigDecimal autoAvaliacao;
 
-  private Integer avaliacao ;
+  /** avaliacao x ponderacao / 100. Só de leitura — calculado pelo backend. */
+  private BigDecimal resultado;
 
-  private Integer autoAvaliacao ;
+  /** autoAvaliacao x ponderacao / 100. Só de leitura. */
+  private BigDecimal autoResultado;
 
 }
