@@ -279,29 +279,55 @@ public class ComponenteAvaliacaoService {
   private List<ParamObjetivoEntity> construirLinhas(ParamObjetivoDetEntity det,
       ComponenteAvaliacaoRequestDTO dto) {
 
-    var linhas = new ArrayList<ParamObjetivoEntity>(dto.getObjectivosInps().size()
-        + dto.getCompetenciasComportamentais().size()
-        + dto.getCompetenciasTecnicas().size()
-        + dto.getAtitudesPessoais().size());
+    var linhas = new ArrayList<ParamObjetivoEntity>();
 
-    dto.getObjectivosInps()
-        .forEach(r -> linhas.add(novaLinha(mapper.toEntity(det, r, COMPONENTE_OBJETIVO))));
+    dto.getObjectivosInps().forEach(r ->
+        porCargo(r, c -> linhas.add(novaLinha(mapper.toEntity(det, r, COMPONENTE_OBJETIVO)))));
 
-    dto.getCompetenciasComportamentais()
-        .forEach(r -> linhas.add(novaLinha(
-            mapper.toEntity(det, r, COMPONENTE_COMP_COMPORTAMENTAL, ABRANGENCIA_DEFAULT))));
+    dto.getCompetenciasComportamentais().forEach(r ->
+        porCargo(r, c -> linhas.add(novaLinha(
+            mapper.toEntity(det, r, COMPONENTE_COMP_COMPORTAMENTAL, ABRANGENCIA_DEFAULT)))));
 
-    dto.getCompetenciasTecnicas()
-        .forEach(r -> linhas.add(novaLinha(
-            mapper.toEntity(det, r, COMPONENTE_COMP_TECNICA, ABRANGENCIA_DEFAULT))));
+    dto.getCompetenciasTecnicas().forEach(r ->
+        porCargo(r, c -> linhas.add(novaLinha(
+            mapper.toEntity(det, r, COMPONENTE_COMP_TECNICA, ABRANGENCIA_DEFAULT)))));
 
     // A atitude pessoal não traz número de ordem no pedido: usa-se a ordem do array.
     for (int i = 0; i < dto.getAtitudesPessoais().size(); i++) {
       var r = dto.getAtitudesPessoais().get(i);
-      linhas.add(novaLinha(mapper.toEntity(det, r, COMPONENTE_ATITUDE, ABRANGENCIA_DEFAULT, i + 1)));
+      var ordem = i + 1;
+      porCargo(r, c -> linhas.add(novaLinha(
+          mapper.toEntity(det, r, COMPONENTE_ATITUDE, ABRANGENCIA_DEFAULT, ordem))));
     }
 
     return linhas;
+  }
+
+  /**
+   * Executa a criação da linha uma vez por cargo escolhido.
+   *
+   * <p>No ecrã o cargo é um multiselect, mas RH_T_PARAM_OBJETIVO.CARGO_ID só guarda um,
+   * por isso cada cargo dá origem à sua própria linha. Com "aplicar a todos", ou com um
+   * único cargo, corre uma vez só. O {@code cargoId} da linha é posicionado antes de cada
+   * passagem para o mapper o ler.</p>
+   */
+  private void porCargo(ParamLinhaBaseRequestDTO linha, java.util.function.Consumer<Long> criar) {
+    var cargos = linha.getCargoIds();
+
+    if (Boolean.TRUE.equals(linha.getAplicarATodos()) || cargos == null || cargos.isEmpty()) {
+      criar.accept(linha.getCargoId());
+      return;
+    }
+
+    var originais = linha.getCargoId();
+    try {
+      cargos.stream().filter(java.util.Objects::nonNull).distinct().forEach(c -> {
+        linha.setCargoId(c);
+        criar.accept(c);
+      });
+    } finally {
+      linha.setCargoId(originais);
+    }
   }
 
   private ParamObjetivoEntity novaLinha(ParamObjetivoEntity e) {

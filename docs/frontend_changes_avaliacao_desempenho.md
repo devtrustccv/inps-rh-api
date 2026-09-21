@@ -299,7 +299,44 @@ Ver `docs/bateria_testes_avaliacao_desempenho_21_09.md`.
 | `PUT .../componentes/{id}` num ano com avaliações | `400` com texto `ORA-02292` | `409` com mensagem explicando que deve clonar |
 | `POST .../escala` com intervalos sobrepostos | `200` (gravava) | `400` identificando os intervalos em conflito |
 
-### 13. Enums novos
+### 13. Campos de multiselect (cobertura da spec)
+
+Três campos do ecrã eram multiselect e a API só aceitava um valor. Todos são **opcionais** —
+os singulares continuam a funcionar.
+
+**Definição de objectivos** (`POST .../avaliacoes/objectivos`):
+
+```diff
+  {
+-   "periodicidade": "SEMESTRE1",
++   "periodicidades": ["SEMESTRE1", "SEMESTRE2"],
+-   "institId": 12,
++   "institIds": [12, 15, 20],
+    "abrangencia": "DIRECAO"
+  }
+```
+
+- `periodicidades[]` — define vários períodos numa gravação; cada um cria o seu detalhe.
+  Se um deles não pertencer ao ciclo do ano, a chamada toda dá **400**.
+- `institIds[]` — só para `abrangencia = DIRECAO`; **cada direção dá origem à sua avaliação**.
+  A resposta traz os uuids separados por vírgula em `id`.
+
+**Parametrização de componentes**, em cada linha de objectivo/competência/atitude:
+
+```diff
+  {
+    "aplicarATodos": false,
+-   "cargoId": 8,
++   "cargoIds": [8, 1, 2],
+    "ponderacao": 100
+  }
+```
+
+`RH_T_PARAM_OBJETIVO.CARGO_ID` só guarda um cargo, por isso **cada cargo escolhido gera a sua
+própria linha**. Na leitura vêm as N linhas, uma por cargo. Com `aplicarATodos: true`
+continua a ser uma só linha com `cargoId: null`.
+
+### 14. Enums novos
 
 Expostos pelo enum exposer em `api/v1/enums`:
 
