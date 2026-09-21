@@ -1,6 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
@@ -107,20 +108,25 @@ public class ReforcoDividaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      // Retificação do parecer técnico devolve já à etapa anterior — não
+      // depende do responsável nem de action=NEXT.
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+    } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
 
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
           .map(AnaliseRhRequestDTO.Responsavel::parecer)
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
 
-      // Only the Validação Responsável (nível 2) actually advances the etapa — the parecer
-      // técnico (request.getParecer(), nível 1) is recorded but never drives the transition.
+      // Só a Validação Responsável (nível 2) avança a etapa — Conforme e
+      // Não Conforme avançam ambos; só a Retificação do responsável
+      // devolve à etapa anterior.
       switch (responsavelParecer) {
-        case FAVORAVEL -> {
+        case FAVORAVEL, DESFAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
-        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
