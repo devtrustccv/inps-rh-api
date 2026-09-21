@@ -30,169 +30,172 @@ alt="C:\Users\joelm\Desktop\Imagens\sergey-zolkin-_UeY8aTI6d0-unsplash (2).jpg" 
 </thead>
 <tbody>
 <tr>
-<td><strong>RH_T_DOMAINS</strong></td>
+<td style="text-align: center;"><strong>RH_T_DOMAINS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DOMINIO</em></td>
+<td style="text-align: center;"><em>DOMINIO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR</em></td>
+<td style="text-align: center;"><em>VALOR</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DESCRICAO</em></td>
+<td style="text-align: center;"><em>DESCRICAO</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA</em></td>
+<td style="text-align: center;"><em>REFERENCIA</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong>:</em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong>:</em></p>
 <p><em><strong>PK</strong>: PK_DOMAINS</em></p></td>
 <td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_DOMAINS</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_DOMAIN</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_TIPOS_DOCUMENTOS</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_TIPOS_DOCUMENTOS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA</em></td>
+<td style="text-align: center;"><em>REFERENCIA</em></td>
 <td colspan="2"><em>VARCHAR()</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CODIGO</em></td>
+<td style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NOME</em></td>
+<td style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td>DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em>PK: PK_TP_DOC</em></p></li>
 </ul>
@@ -202,85 +205,92 @@ SEQ_TIPO_DOCUMENTO</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_TIPO_DOCUMENTO</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_PARAM_NOTIFICACAO</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_PARAM_NOTIFICACAO</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>TIPO_NOTIFICACAO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>TIPO_NOTIFICACAO</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>ASSUNTO</em></td>
+<td colspan="2" style="text-align: center;"><em>ASSUNTO</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>CORPO</em></td>
+<td colspan="2" style="text-align: center;"><em>CORPO</em></td>
 <td><em>VARCHAR(4000)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td>DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong> PK:
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong> PK:
 PK_PARAM_NOTIF</em></p>
 <p><em><strong>INDEX :</strong> IX_PARAM_NOTIF_</em>UUID (UUID)</p></td>
 <td colspan="2"><p><em><strong>SEQUENCIA:</strong>
@@ -288,98 +298,105 @@ SEQ_PARAM_NOTIF</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_PARAM_NOTIF</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><em><strong>RH_T_PARAM_CONFIG</strong></em></td>
+<td colspan="2"
+style="text-align: center;"><em><strong>RH_T_PARAM_CONFIG</strong></em></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>TIPO_CONFIG</em></td>
+<td colspan="2" style="text-align: center;"><em>TIPO_CONFIG</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>ALERTA OU VALIDACAO</strong></em></td>
 </tr>
 <tr>
-<td colspan="2"><em>REFERENCIA</em></td>
+<td colspan="2" style="text-align: center;"><em>REFERENCIA</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>DESCRICAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DESCRICAO</em></td>
 <td><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_NOTIFICACAO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_NOTIFICACAO</em></td>
 <td><em>VARCHAR(3)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_ORDEM_SERVICO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_ORDEM_SERVICO</em></td>
 <td><em>VARCHAR(3)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td>DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT :</strong> PK:
-PK_PARAM_CONFIG</em></p>
+<td colspan="3" style="text-align: center;"><p><em><strong>CONSTRAINT
+:</strong> PK: PK_PARAM_CONFIG</em></p>
 <p><em><strong>INDEX :</strong> IX_PARAM_CONFIG_</em>UUID
 (UUID)</p></td>
 <td colspan="2"><p><em><strong>SEQUENCIA:</strong>
@@ -387,31 +404,32 @@ SEQ_PARAM_CONFIG</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_PARAM_CONFIG</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_TEMPLATE_REPORT</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_TEMPLATE_REPORT</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2">LOGOTYPO</td>
+<td colspan="2" style="text-align: center;">LOGOTYPO</td>
 <td><em><strong>IMAGEM</strong></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2">TITULO</td>
+<td colspan="2" style="text-align: center;">TITULO</td>
 <td><em>VARCHAR(100)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2">SUBTITULO</td>
+<td colspan="2" style="text-align: center;">SUBTITULO</td>
 <td><em>VARCHAR(300)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2">CORPO</td>
+<td colspan="2" style="text-align: center;">CORPO</td>
 <td><em>VARCHAR(1000)</em></td>
 <td></td>
 <td></td>
@@ -442,103 +460,110 @@ style="text-align: center;"><strong>RELACAO</strong></th>
 </thead>
 <tbody>
 <tr>
-<td colspan="2"><em><strong>RH_T_PARAM_VINCULO</strong></em></td>
+<td colspan="2"
+style="text-align: center;"><em><strong>RH_T_PARAM_VINCULO</strong></em></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CODIGO</em></td>
+<td colspan="2" style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR2(20 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR2(100 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_CARREIRA</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_CARREIRA</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_SALARIO</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_SALARIO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_CONTRATO</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_CONTRATO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_TEMPO_SERVICO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_TEMPO_SERVICO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_VINCULO (ID)</strong></em></p></li>
 </ul>
@@ -549,115 +574,124 @@ style="text-align: center;"><strong>RELACAO</strong></th>
 <strong>PARAM_VINCULO</strong></em></p></td>
 </tr>
 <tr>
-<td colspan="2"><em><strong>RH_T_PARAM_CONTRATO</strong></em></td>
+<td colspan="2"
+style="text-align: center;"><em><strong>RH_T_PARAM_CONTRATO</strong></em></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><strong>ID</strong></td>
+<td colspan="2" style="text-align: center;"><strong>ID</strong></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CODIGO</em></td>
+<td colspan="2" style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR2(20)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR2(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NATUREZA</em></td>
+<td colspan="2" style="text-align: center;"><em>NATUREZA</em></td>
 <td colspan="2"><em>VARCHAR2(50)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_RENOVAVEL</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_RENOVAVEL</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>DURACAO_RENOVAVEL</em></td>
+<td colspan="2"
+style="text-align: center;"><em>DURACAO_RENOVAVEL</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>MAX_RENOVACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>MAX_RENOVACAO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>PRAZO_OBRIGATORIO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>PRAZO_OBRIGATORIO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>PARAM_VINCULO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>PARAM_VINCULO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"><strong>RH_T_PARAM_VINCULO</strong>.ID</td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_CONTRATO (ID)</strong></em></p></li>
 <li><p><em>FK = FK_PARAM_CONT_VINC
@@ -670,192 +704,212 @@ SEQ_PARAM_CONTRATO</em></p>
 TRG_<strong>PARAM_CONTRATO</strong></em></p></td>
 </tr>
 <tr>
-<td
-colspan="7"><p><strong><del><em>RH_T_PARAM_SIT_LABORAL</em></del></strong></p>
+<td colspan="7"
+style="text-align: center;"><p><strong><del><em>RH_T_PARAM_SIT_LABORAL</em></del></strong></p>
 <p><em><strong>RH_T_PARAM_SITUACAO</strong></em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>ID</strong></td>
+<td colspan="2" style="text-align: center;"><strong>ID</strong></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CODIGO</em></td>
+<td colspan="2" style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CLASSIFICACAO_AREA</em></td>
+<td colspan="2"
+style="text-align: center;"><em>CLASSIFICACAO_AREA</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = CLASSIFICACAO_SITUACAO</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_ESTADO_CONTRATO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_ESTADO_CONTRATO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = ESTADO_CONTRATO</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_SITUACAO_LABORAL</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_SITUACAO_LABORAL</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_ABONO_BENEFICIO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_ABONO_BENEFICIO</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_AUSENCIA</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_AUSENCIA</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_FALTA</em></td>
+<td colspan="2" style="text-align: center;"><em>FLG_FALTA</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>TIPO_FALTA</em></td>
+<td colspan="2" style="text-align: center;"><em>TIPO_FALTA</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_FALTA_DECONTO_SAL</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_FALTA_DECONTO_SAL</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>TIPO_CONTAGEM_DIAS</em></td>
+<td colspan="2"
+style="text-align: center;"><em>TIPO_CONTAGEM_DIAS</em></td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td colspan="2">DOMAIN = TIPO_CONTAGEM_DIAS</td>
 </tr>
 <tr>
-<td colspan="2"><em>NUM_DIAS_ABONOS</em></td>
+<td colspan="2"
+style="text-align: center;"><em>NUM_DIAS_ABONOS</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NUM_DIAS_DESCONTO_RH</em></td>
+<td colspan="2"
+style="text-align: center;"><em>NUM_DIAS_DESCONTO_RH</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NUM_DIAS_NDESCONTO_RH</em></td>
+<td colspan="2"
+style="text-align: center;"><em>NUM_DIAS_NDESCONTO_RH</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>TIPO_SITUACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SITUACAO_LABORAL</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_REMUNERACAO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_REMUNERACAO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_AFETA_CARREIRA</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_AFETA_CARREIRA</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_REGRESSA_CARREIRA</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_REGRESSA_CARREIRA</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_CONTA_TEMP_SERVICO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_CONTA_TEMP_SERVICO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_CESSA_VINCULO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_CESSA_VINCULO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>FLG_CESSA_PROGRESSAO</em></td>
+<td colspan="2"
+style="text-align: center;"><em>FLG_CESSA_PROGRESSAO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMAIN = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_SITUACAO (ID)</strong></em></p></li>
 <li><p><em><strong>INDEX :</strong> IX_PARAM_SITUAC_</em>UUID
@@ -866,78 +920,83 @@ SEQ_PARAM_SITUACAO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_PARAM_SITUACAO</em></p></td>
 </tr>
 <tr>
-<td
-colspan="7"><p><em><strong><del>RH_T_PARAM_SIT_LABORAL_DET</del></strong></em></p>
+<td colspan="7"
+style="text-align: center;"><p><em><strong><del>RH_T_PARAM_SIT_LABORAL_DET</del></strong></em></p>
 <p><em><strong>RH_T_PARAM_SITUACAO_DET</strong></em></p></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>SITUACAO_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>SITUACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SM</em></td>
 <td colspan="2"><em><strong>RH_T_PARAM_SITUACAO</strong>.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>MOTIVO</em></td>
+<td colspan="2" style="text-align: center;"><em>MOTIVO</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em><strong>PK</strong> <strong>=»</strong> PK_SITUACAO_DET
 (ID)</em></p></li>
@@ -951,85 +1010,91 @@ SEQ_PARAM_SITUACAO_DET</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_PARAM_SITUACAO_DET</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><em><strong>RH_T_PARAM_PCCS</strong></em></td>
+<td colspan="2"
+style="text-align: center;"><em><strong>RH_T_PARAM_PCCS</strong></em></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_INICIO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_FIM</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>OBS</em></td>
+<td colspan="2" style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR2(500),</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR (100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_PCCS (ID)</strong></em></p></li>
 <li><p><em><strong>INDEX:</strong> IX_PARAM_PCCS_</em>UUID
@@ -1040,79 +1105,85 @@ SEQ_PARAM_PCCS</em></p>
 <p><em><strong>TRIGGER = TRG</strong>_PARAM_PCCS</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><em><strong>RH_T_PARAM_CATEGORIA</strong></em></td>
+<td colspan="2"
+style="text-align: center;"><em><strong>RH_T_PARAM_CATEGORIA</strong></em></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>PARAM_CARR_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>PARAM_CARR_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"><em>RH_T_PARAM_CARREIRA.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR2(200),</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_CATEG (ID)</strong></em></p></li>
 <li><p><em><strong>INDEX :</strong> IX_PARAM_CATEG_</em>UUID
@@ -1124,79 +1195,85 @@ SEQ_PARAM_CATEGORIA</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_PARAM_CATEGORIA</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_PARAM_CARREIRA</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_PARAM_CARREIRA</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CODIGO</em></td>
+<td colspan="2" style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2">DOMINIO = STATUS</td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=»</strong> PK_PARAM_</em>CARREIRA
 <em>(ID)</em></p></li>
@@ -1207,85 +1284,91 @@ SEQ_PARAM_CARREIRA</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_ PARAM_CARREIRA</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_PARAM_CARGO</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_PARAM_CARGO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR2(100),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>PARAM_CARR_ ID</em></td>
+<td colspan="2" style="text-align: center;"><em>PARAM_CARR_ ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"><em><strong>RH_T_PARAM_CARREIRA.ID</strong></em></td>
 </tr>
 <tr>
-<td colspan="2"><em>DIRIGENTE</em></td>
+<td colspan="2" style="text-align: center;"><em>DIRIGENTE</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PARAM_</strong></em><strong>CARGO
 <em>(ID)</em></strong></p></li>
@@ -1297,109 +1380,117 @@ SEQ_PARAM_</em>CARGO</p>
 <p><em><strong>TRIGGER =</strong> TRG_PARAM_</em>CARGO</p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_PARAM_ESCALAO</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_PARAM_ESCALAO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>CODIGO</em></td>
+<td colspan="2" style="text-align: center;"><em>CODIGO</em></td>
 <td colspan="2"><em>VARCHAR(10)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>PARAM_CARR_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>PARAM_CARR_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>PARAM_CATEGORIA_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>PARAM_CATEGORIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"><em>RH_T_PARAM_CATEGORIA.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>NIVEL_REFERENCIA</em></td>
+<td colspan="2"
+style="text-align: center;"><em>NIVEL_REFERENCIA</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESCALAO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESCALAO</em></td>
 <td colspan="2"><em>VARCHAR(10)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>VALOR</em></td>
+<td colspan="2" style="text-align: center;"><em>VALOR</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_INICIO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_FIM</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_ESCALAO (ID)</strong></em></p></li>
 <li><p><em>FK = FK_ESC_CARR_PCCS (PARAM_CARR_ ID)</em></p></li>
@@ -1412,93 +1503,99 @@ SEQ_PARAM_ESCALAO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_PARAM_ESCALAO</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_PARAM_LOCAL_TRAB</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_PARAM_LOCAL_TRAB</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>PAIS_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>PAIS_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td
 colspan="2"><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>ILHA_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ILHA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td
 colspan="2"><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>UPS_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>UPS_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"><em><strong>SIPSGLOBAL</strong>.GLB_T_UPS</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_</strong></em><strong>LOCAL_BALCAO
 <em>(ID)</em></strong></p></li>
@@ -1515,79 +1612,85 @@ SEQ_LOCAL_BANCAO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_LOCAL_BALCAO</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>RH_T_SECAO</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>RH_T_SECAO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>ID</em></td>
+<td colspan="2" style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>NOME</em></td>
+<td colspan="2" style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR2(200),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>INSTIT_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>INSTIT_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"><em><strong>INPSSIGOF</strong>.INSTITUICOES.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><em>ESTADO</em></td>
+<td colspan="2" style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2"
+style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="2"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_SESSAO (ID)</strong></em></p></li>
 <li><p><em><mark>FK <strong>=» FK_SESSAO_INSTIT
@@ -1598,76 +1701,78 @@ SEQ_LOCAL_BANCAO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_SESSAO</em></p></td>
 </tr>
 <tr>
-<td colspan="7"><strong>RH_T_VINCULO_MOVIMENTO</strong></td>
+<td colspan="7"
+style="text-align: center;"><strong>RH_T_VINCULO_MOVIMENTO</strong></td>
 </tr>
 <tr>
-<td><em>VINCULO_ID</em></td>
-<td colspan="3"><em>NUMBER</em></td>
+<td style="text-align: center;"><em>VINCULO_ID</em></td>
+<td colspan="3" style="text-align: center;"><em>NUMBER</em></td>
 <td colspan="2"><em><strong>SIM</strong></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TM_ID</em></td>
-<td colspan="3"><em>NUMBER</em></td>
+<td style="text-align: center;"><em>TM_ID</em></td>
+<td colspan="3" style="text-align: center;"><em>NUMBER</em></td>
 <td colspan="2"><em><strong>SIM</strong></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO</em></td>
-<td colspan="3"><em>VARCHAR(10)</em></td>
+<td style="text-align: center;"><em>TIPO</em></td>
+<td colspan="3" style="text-align: center;"><em>VARCHAR(10)</em></td>
 <td colspan="2"><em><strong>SIM</strong></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
-<td colspan="3"><em>VARCHAR2(1),</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
+<td colspan="3" style="text-align: center;"><em>VARCHAR2(1),</em></td>
 <td colspan="2"><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
-<td colspan="3"><em>DATE</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td colspan="3" style="text-align: center;"><em>DATE</em></td>
 <td colspan="2"><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
-<td colspan="3"><em>NUMBER</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td colspan="3" style="text-align: center;"><em>NUMBER</em></td>
 <td colspan="2"><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
-<td colspan="3"><em>VARCHAR(200)</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td colspan="3" style="text-align: center;"><em>VARCHAR(200)</em></td>
 <td colspan="2"><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
-<td colspan="3"><em>NUMBER</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="3" style="text-align: center;"><em>NUMBER</em></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
-<td colspan="3"><em>VARCHAR(200)</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="3" style="text-align: center;"><em>VARCHAR(200)</em></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
-<td colspan="3"><em>DATE</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td colspan="3" style="text-align: center;"><em>DATE</em></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
-<td colspan="3"><em>VARCHAR(100)</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
+<td colspan="3" style="text-align: center;"><em>VARCHAR(100)</em></td>
 <td colspan="2"><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="4"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="4"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_VINCULO_MOV (ID)</strong></em></p></li>
 <li><p><em><mark>FK <strong>=» FK_VINCULO_MOV
@@ -1703,163 +1808,164 @@ SEQ_VINCULO_MOVIMENTO</em></p>
 </thead>
 <tbody>
 <tr>
-<td><strong>RH_T_FUNCIONARIOS</strong></td>
+<td style="text-align: center;"><strong>RH_T_FUNCIONARIOS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_DOCUMENTO_ID</em></td>
+<td style="text-align: center;"><em>TIPO_DOCUMENTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPO_DCOUMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>NUM_DOCUMENTO</em></td>
+<td style="text-align: center;"><em>NUM_DOCUMENTO</em></td>
 <td colspan="2"><em>VARCHAR (50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NOME</em></td>
+<td style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FOTOGRAFIA</em></td>
+<td style="text-align: center;"><em>FOTOGRAFIA</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_NASCIMENTO</em></td>
+<td style="text-align: center;"><em>DATA_NASCIMENTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>SEXO</em></td>
+<td style="text-align: center;"><em>SEXO</em></td>
 <td colspan="2"><em>VARCHAR2(15 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = GENERO</em></td>
 </tr>
 <tr>
-<td><em>NM_MAE</em></td>
+<td style="text-align: center;"><em>NM_MAE</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NM_PAI</em></td>
+<td style="text-align: center;"><em>NM_PAI</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO_CIVIL</em></td>
+<td style="text-align: center;"><em>ESTADO_CIVIL</em></td>
 <td colspan="2"><em>VARCHAR (20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong>=ESTADO_CIVIL</em></td>
 </tr>
 <tr>
-<td><em>NACIONALIDADE</em></td>
+<td style="text-align: center;"><em>NACIONALIDADE</em></td>
 <td colspan="2"><em>VARCHAR2(70 BYTE)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>LOC_NASC_ID</em></td>
+<td style="text-align: center;"><em>LOC_NASC_ID</em></td>
 <td colspan="2"><em>VARCHAR2(50 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>NIF</em></td>
+<td style="text-align: center;"><em>NIF</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NU_SEG_INPS</em></td>
+<td style="text-align: center;"><em>NU_SEG_INPS</em></td>
 <td colspan="2"><em>VARCHAR2(10 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ENT_ID</em></td>
+<td style="text-align: center;"><em>ENT_ID</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID_COLABORADOR</em></td>
+<td style="text-align: center;"><em>ID_COLABORADOR</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO_VALIDACAO</em></td>
+<td style="text-align: center;"><em>ESTADO_VALIDACAO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR2(200 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR2(200 BYTE),</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK =» <strong>PK_FUN</strong> (ID)</em></p></li>
 <li><p><em>UQ=»<strong>UQ_UNICO_DOC (</strong>TIPO_DOCUMENTO,
@@ -1873,85 +1979,87 @@ SEQ_FUNCIONARIO</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_FUNCIONARIO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_DOCUMENTO_PESSOAL</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_DOCUMENTO_PESSOAL</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NUM_DOCUMENTO</em></td>
+<td style="text-align: center;"><em>NUM_DOCUMENTO</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_DOCUMENTO_ID</em></td>
+<td style="text-align: center;"><em>TIPO_DOCUMENTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPO_DOCUMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>: PK_DOC_PESSOAL</strong>(ID)</em></p></li>
 <li><p><em>FK: <strong>FK</strong>_<strong>DOC_FUN
@@ -1964,85 +2072,86 @@ SEQ_DOC_PESSOAL</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_DOC_PESSOAL</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_CONTACTO</strong></td>
+<td style="text-align: center;"><strong>RH_T_CONTACTO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_CONTACTO</em></td>
+<td style="text-align: center;"><em>TIPO_CONTACTO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = TP_CONTACTO</em></td>
 </tr>
 <tr>
-<td><em>CONTACTO</em></td>
+<td style="text-align: center;"><em>CONTACTO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK =» <strong>PK</strong>_<strong>CONTACTO</strong>
 (ID)</em></p></li>
@@ -2054,109 +2163,110 @@ SEQ_DOC_PESSOAL</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_CONTATO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_ENDERECO</strong></td>
+<td style="text-align: center;"><strong>RH_T_ENDERECO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>PAIS_ID</em></td>
+<td style="text-align: center;"><em>PAIS_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>ILHA_ID</em></td>
+<td style="text-align: center;"><em>ILHA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>CONCELHO_ID</em></td>
+<td style="text-align: center;"><em>CONCELHO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>FREGUESIA_ID</em></td>
+<td style="text-align: center;"><em>FREGUESIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>ZONA_ID</em></td>
+<td style="text-align: center;"><em>ZONA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>MORADA</em></td>
+<td style="text-align: center;"><em>MORADA</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td style="text-align: center;"></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_FUNCIONARIOS.ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK =»<strong>PK</strong>_<strong>ENDERECO
 (</strong>ID<strong>)</strong></em></p></li>
@@ -2178,133 +2288,135 @@ _FUN_ENDERECO(</strong>FUN_ID<strong>)</strong></em></p></li>
 <p><em><strong>TRIGGER:</strong> TRG_ENDERECO</em></p></td>
 </tr>
 <tr>
-<td colspan="3"><strong>RH_T_FAMILIARES</strong></td>
+<td colspan="3"
+style="text-align: center;"><strong>RH_T_FAMILIARES</strong></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TP_DOCUMENTO_ID</em></td>
+<td style="text-align: center;"><em>TP_DOCUMENTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><p><em>RH_T_TIPOS_DOCUMENTO.ID</em></p>
 <p><em>REFERENCIA =</em> <strong>DOCUMENTO_PESSOAL’</strong></p></td>
 </tr>
 <tr>
-<td><em>NUM_DOCUMENTO</em></td>
+<td style="text-align: center;"><em>NUM_DOCUMENTO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NOME</em></td>
+<td style="text-align: center;"><em>NOME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_NASCIMENTO</em></td>
+<td style="text-align: center;"><em>DATA_NASCIMENTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>SEXO</em></td>
+<td style="text-align: center;"><em>SEXO</em></td>
 <td colspan="2"><em>VARCHAR(15)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = GENERO</em></td>
 </tr>
 <tr>
-<td><em>GDP_ID</em></td>
+<td style="text-align: center;"><em>GDP_ID</em></td>
 <td colspan="2"><em>VARCHAR(15)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = GRAUS_DE_PARENTESCO</em></td>
 </tr>
 <tr>
-<td><em>DEPENDENCIA</em></td>
+<td style="text-align: center;"><em>DEPENDENCIA</em></td>
 <td colspan="2"><em>VARCHAR(15)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = DEPENDENCIA</em></td>
 </tr>
 <tr>
-<td><em>MEMBRO_AGR</em></td>
+<td style="text-align: center;"><em>MEMBRO_AGR</em></td>
 <td colspan="2"><em>VARCHAR(15)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS=</strong> MEMBRO_AGR</em></td>
 </tr>
 <tr>
-<td><em>NM_PAI</em></td>
+<td style="text-align: center;"><em>NM_PAI</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NM_MAE</em></td>
+<td style="text-align: center;"><em>NM_MAE</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_FUNCIONARIOS.ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK<strong>= PK_FAMILIAR</strong></em></p></li>
 <li><p><em>FK <strong>=» FK_FUN_FAMILIAR_FK </strong></em></p></li>
@@ -2317,120 +2429,122 @@ FUN_ID<strong>)</strong></em></p></li>
 <p><em><strong>TRIGGER:</strong> TRG_FAMILIAR</em></p></td>
 </tr>
 <tr>
-<td colspan="3"><strong>RH_T_HABILITACOES_LITERARIAS</strong></td>
+<td colspan="3"
+style="text-align: center;"><strong>RH_T_HABILITACOES_LITERARIAS</strong></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>PAIS_ID</em></td>
+<td style="text-align: center;"><em>PAIS_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTABLECIMENTO</em></td>
+<td style="text-align: center;"><em>ESTABLECIMENTO</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>AREA</em></td>
+<td style="text-align: center;"><em>AREA</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = AREA_FORMACAO</em></td>
 </tr>
 <tr>
-<td><em>NOME_CURSO</em></td>
+<td style="text-align: center;"><em>NOME_CURSO</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NIVEL</em></td>
+<td style="text-align: center;"><em>NIVEL</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = NIVEL_HABILITACOES</em></td>
 </tr>
 <tr>
-<td>DATA_INICIO</td>
+<td style="text-align: center;">DATA_INICIO</td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_FIM</td>
+<td style="text-align: center;">DATA_FIM</td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>CONCLUIDO</td>
+<td style="text-align: center;">CONCLUIDO</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS =</strong>SIM_NAO_NUMBER</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK<strong>= PK_HABILIT_LIT </strong></em></p></li>
 <li><p><em>FK <strong>=» FK_FUN_HABILIT_LIT
@@ -2444,248 +2558,250 @@ SEQ_HABILIT_LIT</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_HABILIT_LIT</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_TIPOS_RELACIONAMENTO</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_TIPOS_RELACIONAMENTO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CARGO_ID</em></td>
+<td style="text-align: center;"><em>CARGO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_CARGO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>INSTIT_ID</em></td>
+<td style="text-align: center;"><em>INSTIT_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>INPSSIGOF.INTITUICOES.ID</em></td>
 </tr>
 <tr>
-<td><em>SECCAO_ID</em></td>
+<td style="text-align: center;"><em>SECCAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_SECAO.ID</em></td>
 </tr>
 <tr>
-<td><em>CARR_PCC_ID</em></td>
+<td style="text-align: center;"><em>CARR_PCC_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>CATEGORIA_ID</em></td>
+<td style="text-align: center;"><em>CATEGORIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CATEGORIA</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESCALAO_ID</em></td>
+<td style="text-align: center;"><em>ESCALAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_ESCALAO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>VINCULO_ID</em></td>
+<td style="text-align: center;"><em>VINCULO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_VINCULO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>REGIME</em></td>
+<td style="text-align: center;"><em>REGIME</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = REGIME_TRABALHO</em></td>
 </tr>
 <tr>
-<td><em>SALARIO</em></td>
+<td style="text-align: center;"><em>SALARIO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>MOEDA</em></td>
+<td style="text-align: center;"><em>MOEDA</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = MOEDA</em></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>LOC_TRAB_ID</em></td>
+<td style="text-align: center;"><em>LOC_TRAB_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_LOCAL_TRAB</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = STATUS</em></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>CONTRATO_ID</em></td>
+<td style="text-align: center;"><em>CONTRATO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_CONTRATO</strong>.CONTRATO_ID</em></td>
 </tr>
 <tr>
-<td><em>CARREIRA_ID</em></td>
+<td style="text-align: center;"><em>CARREIRA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_CARREIRA</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>MOB_ID</em></td>
+<td style="text-align: center;"><em>MOB_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_MOBILIDADE</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>REGIME_ID</em></td>
+<td style="text-align: center;"><em>REGIME_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_REGIME_TRAB.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>TIPO_CONTRATO_ID</em></td>
+<td style="text-align: center;"><em>TIPO_CONTRATO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CONTRATO.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>TIPREL_ID</em></td>
+<td style="text-align: center;"><em>TIPREL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><p><em>Id do registo anterior</em></p>
 <p><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></p></td>
 </tr>
 <tr>
-<td><em>REFERENTE</em></td>
+<td style="text-align: center;"><em>REFERENTE</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FLG_PROCESSA</em></td>
+<td style="text-align: center;"><em>FLG_PROCESSA</em></td>
 <td colspan="2">VARCHAR(3)</td>
 <td></td>
 <td><em><strong>DOMAINS</strong>: SIM_NAO</em></td>
 </tr>
 <tr>
-<td><em>TIPO_SITUACAO</em></td>
+<td style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td><em><strong>DOMAINS</strong>=</em> TIPO_MOV_LABORAL</td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(300)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ULT_PROC</em></td>
+<td style="text-align: center;"><em>ULT_PROC</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>MOTIVO_SIT_LAB</em></td>
+<td style="text-align: center;"><em>MOTIVO_SIT_LAB</em></td>
 <td colspan="2"><em>VARHCAR(200)</em></td>
 <td></td>
 <td><em><strong>DOMAINS</strong> = MOTIVO_SIT_LABORAL</em></td>
 </tr>
 <tr>
-<td><em>SITUAC_LABORAL_ID</em></td>
+<td style="text-align: center;"><em>SITUAC_LABORAL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_SITUACAO_LABORAL</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TP_CONTRATO</em></td>
+<td style="text-align: center;"><em>TP_CONTRATO</em></td>
 <td colspan="2"><em>VARCHAR(20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = TP_CONTRATO</em></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO_CONTRATO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO_CONTRATO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM_CONTRATO</em></td>
+<td style="text-align: center;"><em>DATA_FIM_CONTRATO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em><strong>PK=</strong> PK_TIPREL</em></p></li>
 <li><p><em><strong>FK</strong>= FK_TIPREL_CONTRATO
@@ -2718,114 +2834,116 @@ _VINCULO(VINCULO_ID)</del></em></p></li>
 <p><strong><em>TRIGGER:</em> TRG_ TIPOS_RELACIONAMENTO</strong></p></td>
 </tr>
 <tr>
-<td colspan="3"><strong>RH_T_DEF_REMUNERACOES</strong></td>
+<td colspan="3"
+style="text-align: center;"><strong>RH_T_DEF_REMUNERACOES</strong></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TM_ID</em></td>
+<td style="text-align: center;"><em>TM_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>INPSSIGOF</strong>.rh_tipo_movimentos</em></td>
 </tr>
 <tr>
-<td><em>PERCENTAGEM</em></td>
+<td style="text-align: center;"><em>PERCENTAGEM</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR</em></td>
+<td style="text-align: center;"><em>VALOR</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPREL_ID</em></td>
+<td style="text-align: center;"><em>TIPREL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT :</strong></em></p>
+<td colspan="3" style="text-align: center;"><p><em><strong>CONSTRAINT
+:</strong></em></p>
 <ul>
 <li><p><em>PK<strong>=PK_DEF_REMUN
 (</strong>ID<strong>)</strong></em></p></li>
@@ -2838,85 +2956,91 @@ _VINCULO(VINCULO_ID)</del></em></p></li>
 <p><em><strong>TRIGGER:</strong> TRG_ DEF_REMUNERACAO</em></p></td>
 </tr>
 <tr>
-<td><strong><del>RH_T_REMUN_TIPREL</del></strong></td>
+<td
+style="text-align: center;"><strong><del>RH_T_REMUN_TIPREL</del></strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>ID</del></em></td>
+<td style="text-align: center;"><em><del>ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>REM_ID</del></em></td>
+<td style="text-align: center;"><em><del>REM_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td><em><del><strong>RH_T_DEF_REMUNERACAO</strong>.ID</del></em></td>
 </tr>
 <tr>
-<td><em><del>TIPREL_ID</del></em></td>
+<td style="text-align: center;"><em><del>TIPREL_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td><em><del><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</del></em></td>
 </tr>
 <tr>
-<td><em><del>ESTADO</del></em></td>
+<td style="text-align: center;"><em><del>ESTADO</del></em></td>
 <td colspan="2"><em><del>VARCHAR2(1),</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>DATA_REGISTO</del></em></td>
+<td style="text-align: center;"><em><del>DATA_REGISTO</del></em></td>
 <td colspan="2"><em><del>DATE</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_REGISTO_ID</del></em></td>
+<td style="text-align: center;"><em><del>USER_REGISTO_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_REGISTO_NAME</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_REGISTO_NAME</del></em></td>
 <td colspan="2"><em><del>VARCHAR(200)</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_ALTERACAO_ID</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_ALTERACAO_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_ALTERACAO_NAME</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_ALTERACAO_NAME</del></em></td>
 <td colspan="2"><em><del>VARCHAR(200)</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>DATA_ALTERACAO</del></em></td>
+<td style="text-align: center;"><em><del>DATA_ALTERACAO</del></em></td>
 <td colspan="2"><em><del>DATE</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>OBS</del></em></td>
+<td style="text-align: center;"><em><del>OBS</del></em></td>
 <td colspan="2"><em><del>VARCHAR(400)</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>UUID</del></em></td>
+<td style="text-align: center;"><em><del>UUID</del></em></td>
 <td colspan="2"><em><del>VARCHAR(100)</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong><del>CONSTRAINT :</del></strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong><del>CONSTRAINT
+:</del></strong></em></p>
 <ul>
 <li><p><em><del>PK<strong>=PK_REMUN_TIPREL
 (</strong>ID<strong>)</strong></del></em></p></li>
@@ -2933,109 +3057,111 @@ SEQ_REMUN_TIPREL</del></em></p>
 REMUN_TIPREL</del></em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_DEF_PAGAMENTOS</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_DEF_PAGAMENTOS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TM_ID</em></td>
+<td style="text-align: center;"><em>TM_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>INPSSIGOF.RH_TIPOS_MOVIMENTO.ID</em></td>
 </tr>
 <tr>
-<td><em>VALOR</em></td>
+<td style="text-align: center;"><em>VALOR</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TIPREL_ID</em></td>
+<td style="text-align: center;"><em>TIPREL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR2(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT :</strong></em></p>
+<td colspan="3" style="text-align: center;"><p><em><strong>CONSTRAINT
+:</strong></em></p>
 <ul>
 <li><p><em>PK<strong>=PK_DEF_PAGAM
 (</strong>ID<strong>)</strong></em></p></li>
@@ -3049,85 +3175,91 @@ REMUN_TIPREL</del></em></p></td>
 <p><em><strong>TRIGGER:</strong> TRG_ DEF_PAGAMENTOS</em></p></td>
 </tr>
 <tr>
-<td><strong><del>RH_T_PAG_TIPREL</del></strong></td>
+<td
+style="text-align: center;"><strong><del>RH_T_PAG_TIPREL</del></strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>ID</del></em></td>
+<td style="text-align: center;"><em><del>ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><del>SIM</del></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>PAG_ID</del></em></td>
+<td style="text-align: center;"><em><del>PAG_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><del>SIM</del></td>
 <td><del><strong>RH_T_DEF_PAGAMENTO</strong>.ID</del></td>
 </tr>
 <tr>
-<td><em><del>TIPREL_ID</del></em></td>
+<td style="text-align: center;"><em><del>TIPREL_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><del>SIM</del></td>
 <td><del><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</del></td>
 </tr>
 <tr>
-<td><em><del>ESTADO</del></em></td>
+<td style="text-align: center;"><em><del>ESTADO</del></em></td>
 <td colspan="2"><em><del>VARCHAR2(1),</del></em></td>
 <td><del>SIM</del></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>DATA_REGISTO</del></em></td>
+<td style="text-align: center;"><em><del>DATA_REGISTO</del></em></td>
 <td colspan="2"><em><del>DATE</del></em></td>
 <td><del>SIM</del></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_REGISTO_ID</del></em></td>
+<td style="text-align: center;"><em><del>USER_REGISTO_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td><del>SIM</del></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_REGISTO_NAME</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_REGISTO_NAME</del></em></td>
 <td colspan="2"><em><del>VARCHAR(200)</del></em></td>
 <td><del>SIM</del></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_ALTERACAO_ID</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_ALTERACAO_ID</del></em></td>
 <td colspan="2"><em><del>NUMBER</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>USER_ALTERACAO_NAME</del></em></td>
+<td
+style="text-align: center;"><em><del>USER_ALTERACAO_NAME</del></em></td>
 <td colspan="2"><em><del>VARCHAR(200)</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>DATA_ALTERACAO</del></em></td>
+<td style="text-align: center;"><em><del>DATA_ALTERACAO</del></em></td>
 <td colspan="2"><em><del>DATE</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>OBS</del></em></td>
+<td style="text-align: center;"><em><del>OBS</del></em></td>
 <td colspan="2"><em><del>VARCHAR(400)</del></em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><del>UUID</del></em></td>
+<td style="text-align: center;"><em><del>UUID</del></em></td>
 <td colspan="2"><em><del>VARCHAR(100)</del></em></td>
 <td><em><del>SIM</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong><del>CONSTRAINT :</del></strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong><del>CONSTRAINT
+:</del></strong></em></p>
 <ul>
 <li><p><em><del>PK<strong>=PK_PAG_TIPREL
 (</strong>ID<strong>)</strong></del></em></p></li>
@@ -3143,133 +3275,135 @@ SEQ_DEF_PAG_TIPREL</del></em></p>
 <p><del><em><strong>TRIGGER:</strong></em> TRG_PAG_TIPREL</del></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_CONTRATO_VINCULO</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_CONTRATO_VINCULO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>VINCULO_ID</em></td>
+<td style="text-align: center;"><em>VINCULO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_PARAM_VINCULO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TP_CONTRATO_ID</em></td>
+<td style="text-align: center;"><em>TP_CONTRATO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CONTRATO.ID</strong></em></td>
 </tr>
 <tr>
-<td><em>SITUACAO_LABORAL</em></td>
+<td style="text-align: center;"><em>SITUACAO_LABORAL</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DURACAO</em></td>
+<td style="text-align: center;"><em>DURACAO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA INICIO</em></td>
+<td style="text-align: center;"><em>DATA INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA FIM</em></td>
+<td style="text-align: center;"><em>DATA FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VERSAO</em></td>
+<td style="text-align: center;"><em>VERSAO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CONTRATO_ID</em></td>
+<td style="text-align: center;"><em>CONTRATO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_CONTRATO</strong>.CONTRATO_ID</em></td>
 </tr>
 <tr>
-<td><em>TP_CONTRATO</em></td>
+<td style="text-align: center;"><em>TP_CONTRATO</em></td>
 <td colspan="2"><em>VARCHAR2(20)</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS = TP_CONTRATO</strong></em></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em><strong>PK:</strong> PK_CONTRATO (ID)</em></p></li>
 <li><p><em><strong>FK</strong> : FK_CONTRATO_FUN (FUN_ID)</em></p></li>
@@ -3283,103 +3417,105 @@ SEQ_DEF_PAG_TIPREL</del></em></p>
 <p><em><strong>TRIGGER:</strong></em> TRG_CONTRATO</p></td>
 </tr>
 <tr>
-<td><strong>RH_T_DADOS_BANCARIOS</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_DADOS_BANCARIOS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ENT_ID</em></td>
+<td style="text-align: center;"><em>ENT_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>INPSSIGOF</strong>.ENTIDADE</em></td>
 </tr>
 <tr>
-<td><em>NUM_CONTA</em></td>
+<td style="text-align: center;"><em>NUM_CONTA</em></td>
 <td colspan="2"><em>NUMBER(11,0)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT :</strong></em></p>
+<td colspan="3" style="text-align: center;"><p><em><strong>CONSTRAINT
+:</strong></em></p>
 <ul>
 <li><p><em>PK<strong>=PK_DADOS_BANCO
 (</strong>ID<strong>)</strong></em></p></li>
@@ -3391,97 +3527,98 @@ DADOS_BANCARIOS</em></p>
 <p><em><strong>SEQUENCIA:</strong> SEQ_DADOS_BANCO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_DOCUMENTO</strong></td>
+<td style="text-align: center;"><strong>RH_T_DOCUMENTO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TP_DOCUMENTO_ID</em></td>
+<td style="text-align: center;"><em>TP_DOCUMENTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_TIPO_DOCUMENTO.ID</em></td>
 </tr>
 <tr>
-<td><em>DOC_ID</em></td>
+<td style="text-align: center;"><em>DOC_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_FUNCIONARIOS.ID</em></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_NAME</em></td>
+<td style="text-align: center;"><em>REFERENCIA_NAME</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_ID</em></td>
+<td style="text-align: center;"><em>REFERENCIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT :</strong></em></p>
+<td colspan="3" style="text-align: center;"><p><em><strong>CONSTRAINT
+:</strong></em></p>
 <ul>
 <li><p><em>PK<strong>=PK_DOCUMENTO_ID
 (</strong>ID<strong>)</strong></em></p></li>
@@ -3493,103 +3630,104 @@ SEQ_DOCUMENTO</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_ DOCUMENTO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_VALIDACAO</strong></td>
+<td style="text-align: center;"><strong>RH_T_VALIDACAO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_ACCAO</em></td>
+<td style="text-align: center;"><em>TIPO_ACCAO</em></td>
 <td colspan="2"><em>VARCHAR2(20),</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = TIPO_ACAO</em></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_NAME</em></td>
+<td style="text-align: center;"><em>REFERENCIA_NAME</em></td>
 <td colspan="2"><em>VARCHAR2(100),</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>DOMAINS</strong> = ACCAO_REFERENTE</em></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_ID</em></td>
+<td style="text-align: center;"><em>REFERENCIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TIPREL_ID</em></td>
+<td style="text-align: center;"><em>TIPREL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_VALIDACAO
 (</strong>ID<strong>)</strong></em></p></li>
@@ -3603,61 +3741,63 @@ SEQ_DOCUMENTO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_VALIDACAO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_VALIDACAO_DETALHE</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_VALIDACAO_DETALHE</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALIDACAO_ID</em></td>
+<td style="text-align: center;"><em>VALIDACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_VALIDACAO.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>CAMPO_ALTERADO</em></td>
+<td style="text-align: center;"><em>CAMPO_ALTERADO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_ANTERIOR</em></td>
+<td style="text-align: center;"><em>VALOR_ANTERIOR</em></td>
 <td colspan="2"><em>VARCHAR(500)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_NOVO</em></td>
+<td style="text-align: center;"><em>VALOR_NOVO</em></td>
 <td colspan="2"><em>VARCHAR(500)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TABELA_NAME</em></td>
+<td style="text-align: center;"><em>TABELA_NAME</em></td>
 <td colspan="2"><em>VARCHAR2(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TABELA _ID</em></td>
+<td style="text-align: center;"><em>TABELA _ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em><strong>PK: PK</strong></em></p></li>
 </ul></td>
@@ -3665,97 +3805,98 @@ SEQ_DOCUMENTO</em></p>
 <p><em><strong>TRIGGER</strong></em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_LOG</strong></td>
+<td style="text-align: center;"><strong>RH_T_LOG</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_ACCAO</em></td>
+<td style="text-align: center;"><em>TIPO_ACCAO</em></td>
 <td colspan="2"><em>VARCHAR2(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TABELA_NAME</em></td>
+<td style="text-align: center;"><em>TABELA_NAME</em></td>
 <td colspan="2"><em>VARCHAR2(50)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TABELA _ID</em></td>
+<td style="text-align: center;"><em>TABELA _ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TIPREL_ID</em></td>
+<td style="text-align: center;"><em>TIPREL_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_LOG_ID
 (</strong>ID<strong>)</strong></em></p></li>
@@ -3766,55 +3907,56 @@ SEQ_DOCUMENTO</em></p>
 <p><em><strong>TRIGGER = TRG_LOG</strong></em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_LOG_DETALHE</strong></td>
+<td style="text-align: center;"><strong>RH_T_LOG_DETALHE</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>LOG_ID</em></td>
+<td style="text-align: center;"><em>LOG_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_LOG</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>CAMPO_ALTERADO</em></td>
+<td style="text-align: center;"><em>CAMPO_ALTERADO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_ANTERIOR</em></td>
+<td style="text-align: center;"><em>VALOR_ANTERIOR</em></td>
 <td colspan="2"><em>VARCHAR(500)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_NOVO</em></td>
+<td style="text-align: center;"><em>VALOR_NOVO</em></td>
 <td colspan="2"><em>VARCHAR(500)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DADOS_REGISTO</em></td>
+<td style="text-align: center;"><em>DADOS_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_LOG_DET_ID (ID)</strong></em></p></li>
 <li><p><em>FK =»FK_LOG_ID (LOG_ID)</em></p></li>
@@ -3825,169 +3967,171 @@ SEQ_LOG_DETALHE</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_LOG_DETALHE</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_PROCESSO_DISCIPLINAR</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_PROCESSO_DISCIPLINAR</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td colspan="2">NUMBER</td>
 <td>SIM</td>
 <td></td>
 </tr>
 <tr>
-<td>TIPREL_ID</td>
+<td style="text-align: center;">TIPREL_ID</td>
 <td colspan="2">NUMBER</td>
 <td>SIM</td>
 <td><em><strong>RH_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>FUN_ID</td>
+<td style="text-align: center;">FUN_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td>NUM_PROCESSO</td>
+<td style="text-align: center;">NUM_PROCESSO</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ENTIDADE</td>
+<td style="text-align: center;">ENTIDADE</td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TP_PROCESSO</td>
+<td style="text-align: center;">TP_PROCESSO</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>PENA_DISCP</td>
+<td style="text-align: center;">PENA_DISCP</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATE_INIC_PD</td>
+<td style="text-align: center;">DATE_INIC_PD</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATE_FIM_PD</td>
+<td style="text-align: center;">DATE_FIM_PD</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATE_INIC_PENA</td>
+<td style="text-align: center;">DATE_INIC_PENA</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATE_FIM_PENA</td>
+<td style="text-align: center;">DATE_FIM_PENA</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>NUM_BO</td>
+<td style="text-align: center;">NUM_BO</td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_PUBL_BO</td>
+<td style="text-align: center;">DATA_PUBL_BO</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>NUM_ORDEM_SERV</td>
+<td style="text-align: center;">NUM_ORDEM_SERV</td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_ORDEM_SERV</td>
+<td style="text-align: center;">DATA_ORDEM_SERV</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>NUM_OFA</td>
+<td style="text-align: center;">NUM_OFA</td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_EMISS_OFA</td>
+<td style="text-align: center;">DATA_EMISS_OFA</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_REGISTO</td>
+<td style="text-align: center;">DATA_REGISTO</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_REGISTO_ID</td>
+<td style="text-align: center;">USER_REGISTO_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_REGISTO_NAME</td>
+<td style="text-align: center;">USER_REGISTO_NAME</td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_ALTERACAO_ID</td>
+<td style="text-align: center;">USER_ALTERACAO_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_ALTERACAO_NAME</td>
+<td style="text-align: center;">USER_ALTERACAO_NAME</td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_ALTERACAO</td>
+<td style="text-align: center;">DATA_ALTERACAO</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=» PK_PROC_DISCP (ID)</strong></em></p></li>
 <li><p><em>FK = FK_PROC_DISCC_FUN (FUN_ID)</em></p></li>
@@ -3999,103 +4143,105 @@ SEQ_PROCESSO_DISCIP</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_PROCESSO_DISCIPLINAR</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_FORMACAO_FEITOS</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_FORMACAO_FEITOS</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>PAIS_ID</em></td>
+<td style="text-align: center;"><em>PAIS_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>SIPSGLOBAL</strong>.GLB_T_GEOGRAFIA.ID</em></td>
 </tr>
 <tr>
-<td><em>ESTABELECIMENTO</em></td>
+<td style="text-align: center;"><em>ESTABELECIMENTO</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>RHTPFOR</em></td>
+<td style="text-align: center;"><em>RHTPFOR</em></td>
 <td colspan="2"><em>VARCHAR (50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CURSO</em></td>
+<td style="text-align: center;"><em>CURSO</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NIVEL</em></td>
+<td style="text-align: center;"><em>NIVEL</em></td>
 <td colspan="2"><em>VARCHAR (10)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=»</strong> PK_FORM_FEITO
 <strong>(ID)</strong></em></p></li>
@@ -4107,109 +4253,111 @@ SEQ_FORMCACAO_FEITO</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_FORMACAO_FEITO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_EXPERIENCIA_PROF</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_EXPERIENCIA_PROF</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>PAIS_ID</em></td>
+<td style="text-align: center;"><em>PAIS_ID</em></td>
 <td colspan="2"><em>number</em></td>
 <td></td>
 <td><em><strong>SIPSGLOBAL.GLB_T_GEOGRAFIA.</strong>ID</em></td>
 </tr>
 <tr>
-<td><em>EMPRESA</em></td>
+<td style="text-align: center;"><em>EMPRESA</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CARGO</em></td>
+<td style="text-align: center;"><em>CARGO</em></td>
 <td colspan="2"><em>VARCHAR (200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"><em>VARCHAR2(1),</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_FUNCIONARIO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><p><em><strong>CONSTRAINT</strong></em></p>
+<td
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK <strong>=»</strong> PK_EXP_PROF
 <strong>(ID)</strong></em></p></li>
@@ -4221,97 +4369,98 @@ EXPERIENCIA_PROF</em></p>
 <p><em><strong>TRIGGER =</strong> TRG_EXPERIENCIA_PROF</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_REGIME_TRAB</strong></td>
+<td style="text-align: center;"><strong>RH_T_REGIME_TRAB</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>FUN_ID</td>
+<td style="text-align: center;">FUN_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_FUNCIONARIO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>TIPO_REGIME</td>
+<td style="text-align: center;">TIPO_REGIME</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_FIM</td>
+<td style="text-align: center;">DATA_FIM</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_SITUACAO</em></td>
+<td style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2">VARCHAR(100)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK : PK_REGIME_TRAB</em></p></li>
 <li><p><em>FK: FK_REGIME_FUN (FUN_ID)</em></p></li>
@@ -4322,91 +4471,92 @@ SEQ_REGIME_TRAB</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_REGIME_TRAB</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_REGIME_MODAL</strong></td>
+<td style="text-align: center;"><strong>RH_T_REGIME_MODAL</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REGIME_ID</em></td>
+<td style="text-align: center;"><em>REGIME_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_REGIME_TRAB</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>MODALIDADE</em></td>
+<td style="text-align: center;"><em>MODALIDADE</em></td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DIAS_SEMANA</td>
+<td style="text-align: center;">DIAS_SEMANA</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>NUM_HORAS</td>
+<td style="text-align: center;">NUM_HORAS</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em><strong>PK</strong> : PK_REGIME_MODAL</em></p></li>
 <li><p><em><strong>FK</strong>: FK_REGIME_MODAL_TRAB
@@ -4418,103 +4568,104 @@ REGIME_MODAL</em></p>
 <p><em><strong>TRIGGER :</strong> TRG_REGIME_MODAL</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_MOBILIDADE</strong></td>
+<td style="text-align: center;"><strong>RH_T_MOBILIDADE</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em><strong>ID</strong></em></td>
+<td style="text-align: center;"><em><strong>ID</strong></em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>INSTID_ID</em></td>
+<td style="text-align: center;"><em>INSTID_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em>INPSSIGOF.INSTITUICOES.ID</em></td>
 </tr>
 <tr>
-<td><em>LOCAL_TRAB_ID</em></td>
+<td style="text-align: center;"><em>LOCAL_TRAB_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_PARAM_LOCAL_TRAB</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>SECAO_ID</em></td>
+<td style="text-align: center;"><em>SECAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_SECAO</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>FUN_ID</em></td>
+<td style="text-align: center;"><em>FUN_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>TIPO_SITUACAO</em></td>
+<td style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2">VARCHAR(100)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><p><em><strong>CONSTRAINT</strong></em></p>
+<td
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK: PK_MOBILIDADE</em></p></li>
 <li><p><em>FK: FK_MOB_FUN (FUN_ID)</em></p></li>
@@ -4529,133 +4680,134 @@ SEQ_MOBILIDADE</em></p>
 <p><em><strong>TRIGGER</strong>:TRG_MOBILIDADE</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_CARREIRA</strong></td>
+<td style="text-align: center;"><strong>RH_T_CARREIRA</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>CARGO_ID</td>
+<td style="text-align: center;">CARGO_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CARGO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>CARR_PCCS_ID</td>
+<td style="text-align: center;">CARR_PCCS_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
 </tr>
 <tr>
-<td>CATEGORIA_ID</td>
+<td style="text-align: center;">CATEGORIA_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_T_PARAM_CATEGORIA</strong>.ID</em></td>
 </tr>
 <tr>
-<td>ESCALAO_ID</td>
+<td style="text-align: center;">ESCALAO_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_T_PARAM_ESCALAO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>SALARIO</td>
+<td style="text-align: center;">SALARIO</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>CONTR_VINCULO_ID</td>
+<td style="text-align: center;">CONTR_VINCULO_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><em><strong>RH_T_CONTRATO_VINCULO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>FLG_PROCESSA</td>
+<td style="text-align: center;">FLG_PROCESSA</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td><strong>DOMAINS</strong>: SIM_NAO_NUMBER</td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2">VARCHAR(1)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_SITUACAO</em></td>
+<td style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2">VARCHAR(100)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_REGISTO</td>
+<td style="text-align: center;">DATA_REGISTO</td>
 <td colspan="2">DATE</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_REGISTO_ID</td>
+<td style="text-align: center;">USER_REGISTO_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_REGISTO_NAME</td>
+<td style="text-align: center;">USER_REGISTO_NAME</td>
 <td colspan="2">VARCHAR(200)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_ALTERACAO_ID</td>
+<td style="text-align: center;">USER_ALTERACAO_ID</td>
 <td colspan="2">NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USER_ALTERACAO_NAME</td>
+<td style="text-align: center;">USER_ALTERACAO_NAME</td>
 <td colspan="2">VARCHAR(200)</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong>:</em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong>:</em></p>
 <ul>
 <li><p><em>PK: PK_CARREIRA</em></p></li>
 <li><p><em>FK: FK_CARR_CARGO (CARGO_ID)</em></p></li>
@@ -4670,61 +4822,62 @@ SEQ_CARREIRA</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_CARREIRA</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_SUBSTITUICAO</strong></td>
+<td style="text-align: center;"><strong>RH_T_SUBSTITUICAO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>SUBSTITUIDO_TIPREL_ID</td>
-<td colspan="2"><em>NUMBER</em></td>
-<td></td>
-<td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
-</tr>
-<tr>
-<td>SUBSTITUTO_TIPREL_ID</td>
+<td style="text-align: center;">SUBSTITUIDO_TIPREL_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>DATA_INICIO</td>
+<td style="text-align: center;">SUBSTITUTO_TIPREL_ID</td>
+<td colspan="2"><em>NUMBER</em></td>
+<td></td>
+<td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
+</tr>
+<tr>
+<td style="text-align: center;">DATA_INICIO</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_FIM</td>
+<td style="text-align: center;">DATA_FIM</td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>MOTIVO</td>
+<td style="text-align: center;">MOTIVO</td>
 <td colspan="2"><em>VARCHAR2(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong>:</em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong>:</em></p>
 <ul>
 <li><p><em>PK: PK_SUBSTITUICAO</em></p></li>
 <li><p><em>FK: FK_SUBSTIT_TIPRELDE (</em>TIPREL_ID_DE<em>)</em></p></li>
@@ -4736,67 +4889,69 @@ SEQ_SUBSTITUICAO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_SUBSTITUICAO</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_SUBSTITUICAO_DETALHE</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_SUBSTITUICAO_DETALHE</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>MES_ANO</em></td>
+<td style="text-align: center;"><em>MES_ANO</em></td>
 <td colspan="2"><em>VARCHAR()</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NR_DIAS</em></td>
+<td style="text-align: center;"><em>NR_DIAS</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_DO_SUBSTITUTO</em></td>
+<td style="text-align: center;"><em>VALOR_DO_SUBSTITUTO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>VALOR_DO_SUBSTITUIDO</em></td>
+<td style="text-align: center;"><em>VALOR_DO_SUBSTITUIDO</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>SUBSTITUICAO_ID</em></td>
+<td style="text-align: center;"><em>SUBSTITUICAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><strong>RH_T_SUBSTITUICAO.</strong>ID</td>
 </tr>
 <tr>
-<td><em>ESTADO</em></td>
+<td style="text-align: center;"><em>ESTADO</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p><em><strong>CONSTRAINT</strong>:</em></p>
+<td colspan="2"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong>:</em></p>
 <ul>
 <li><p><em>PK: PK_SUBSTIT_DET</em></p></li>
 <li><p><em>FK: FK_SUBS_DET_SUSBT</em></p></li>
@@ -4807,115 +4962,116 @@ SEQ_</em>SUBSTITUICAO_DETALHE</p></td>
 TGR_</em>SUBSTITUICAO_DETALHE</td>
 </tr>
 <tr>
-<td><strong>RH_T_ORDEM_SERVICO</strong></td>
+<td style="text-align: center;"><strong>RH_T_ORDEM_SERVICO</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>NU_ORDEM</td>
+<td style="text-align: center;">NU_ORDEM</td>
 <td colspan="2"><em>VARCHAR(50)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DESCRICAO</td>
+<td style="text-align: center;">DESCRICAO</td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>REFERENTE</td>
+<td style="text-align: center;">REFERENTE</td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>FUN_ID</td>
+<td style="text-align: center;">FUN_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td>TIREPL_ID</td>
+<td style="text-align: center;">TIREPL_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>VALIDACAO_ID</td>
+<td style="text-align: center;">VALIDACAO_ID</td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_VALIDACAO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>REFERENTE</td>
+<td style="text-align: center;">REFERENTE</td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK: PK_ORDEM_SERV</em></p></li>
 <li><p><em>FK: FK_ODERM_FUN(FUN_ID)</em></p></li>
@@ -4927,107 +5083,109 @@ SEQ_OREDEM_SERVICO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_ORDEM_SERVICO</em></p></td>
 </tr>
 <tr>
-<td colspan="5"><strong>RH_T_SITUACAO_LABORAL
+<td colspan="5"
+style="text-align: center;"><strong>RH_T_SITUACAO_LABORAL
 <mark>(AQUI)</mark></strong></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>SITUACAO_LABORAL_ID</em></td>
+<td style="text-align: center;"><em>SITUACAO_LABORAL_ID</em></td>
 <td colspan="2"><em>VARHCAR(50)</em></td>
 <td><em>SIM</em></td>
 <td><em>RH_T_PARAM_SITUACAO.ID</em></td>
 </tr>
 <tr>
-<td><em>MOTIVO_SIT_LAB</em></td>
+<td style="text-align: center;"><em>MOTIVO_SIT_LAB</em></td>
 <td colspan="2"><em>VARHCAR(200)</em></td>
 <td></td>
 <td><em><strong>DOMAINS</strong> = MOTIVO_SIT_LABORAL</em></td>
 </tr>
 <tr>
-<td><em>MOTIVO_SIT_LAB_ID</em></td>
+<td style="text-align: center;"><em>MOTIVO_SIT_LAB_ID</em></td>
 <td colspan="2"></td>
 <td></td>
 <td><em><strong>RH_T_PARAM_SITUACAO_DET</strong></em></td>
 </tr>
 <tr>
-<td><em>DATA_INICIO</em></td>
+<td style="text-align: center;"><em>DATA_INICIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_FIM</em></td>
+<td style="text-align: center;"><em>DATA_FIM</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>CONTR_VINCULO_ID</em></td>
+<td style="text-align: center;"><em>CONTR_VINCULO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_CONTRATO_VINCULO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>OBS</em></td>
+<td style="text-align: center;"><em>OBS</em></td>
 <td colspan="2"><em>VARCHAR(400)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em>PK: PK_SITUACAO_LABORAL</em></p></li>
 <li><p><em>FK: FK_SITUACAO_PARAM_SIT (SITUACAO_LABORAL_ID)</em></p></li>
@@ -5041,121 +5199,122 @@ SEQ_SITUACAO_LABORAL</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_SITUACAO_LABORAL</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_ALERTA</strong></td>
+<td style="text-align: center;"><strong>RH_T_ALERTA</strong></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA</em></td>
+<td style="text-align: center;"><em>REFERENCIA</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_NAME</em></td>
+<td style="text-align: center;"><em>REFERENCIA_NAME</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA_ID</em></td>
+<td style="text-align: center;"><em>REFERENCIA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_ALERTA</em></td>
+<td style="text-align: center;"><em>TIPO_ALERTA</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>TIPO_SITUACAO</em></td>
+<td style="text-align: center;"><em>TIPO_SITUACAO</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td><em>Indica se a alerta é informativo</em></td>
 </tr>
 <tr>
-<td><em>DESCRICAO</em></td>
+<td style="text-align: center;"><em>DESCRICAO</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>FLG_NOTIFICACAO</td>
+<td style="text-align: center;">FLG_NOTIFICACAO</td>
 <td colspan="2"><em>VARCHAR(3)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>FLG_TRATAMENTO</td>
+<td style="text-align: center;">FLG_TRATAMENTO</td>
 <td colspan="2"><em>VARCHAR(3)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>PRIORIDADE</td>
+<td style="text-align: center;">PRIORIDADE</td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT</strong></em></p>
 <ul>
 <li><p><em>PK: PK_ALERTA</em></p></li>
 </ul>
@@ -5170,109 +5329,110 @@ SEQ_SITUACAO_LABORAL</em></p>
 <td></td>
 </tr>
 <tr>
-<td><em>ID</em></td>
+<td style="text-align: center;"><em>ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>REFERENCIA</em></td>
+<td style="text-align: center;"><em>REFERENCIA</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>MESSAGE</em></td>
+<td style="text-align: center;"><em>MESSAGE</em></td>
 <td colspan="2"><em>VARCHAR(4000)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ASSUNTO</em></td>
+<td style="text-align: center;"><em>ASSUNTO</em></td>
 <td colspan="2"><em>VARCHAR(300)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>EMAIL</em></td>
+<td style="text-align: center;"><em>EMAIL</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>NOME_RECEPTOR</em></td>
+<td style="text-align: center;"><em>NOME_RECEPTOR</em></td>
 <td colspan="2"></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ENVIO</em></td>
+<td style="text-align: center;"><em>DATA_ENVIO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>URL</em></td>
+<td style="text-align: center;"><em>URL</em></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td colspan="2"><em>VARCHAR(1)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td colspan="2"><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td colspan="2"><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>UUID</em></td>
+<td style="text-align: center;"><em>UUID</em></td>
 <td colspan="2"><em>VARCHAR(100)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>ALERTA_ID</em></td>
+<td style="text-align: center;"><em>ALERTA_ID</em></td>
 <td colspan="2"><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_ALERTA</strong>.ID</em></td>
 </tr>
 <tr>
-<td colspan="3"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="3"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em>PK: PK_NOTIFICACAO</em></p></li>
 </ul>
@@ -5282,7 +5442,7 @@ SEQ_NOTIFICACAO</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_NOTIFICACAO</em></p></td>
 </tr>
 <tr>
-<td></td>
+<td style="text-align: center;"></td>
 <td colspan="2"></td>
 <td></td>
 <td></td>
@@ -5309,115 +5469,116 @@ SEQ_NOTIFICACAO</em></p>
 </thead>
 <tbody>
 <tr>
-<td><strong>RH_T_PROC_SALARIOS</strong></td>
+<td style="text-align: center;"><strong>RH_T_PROC_SALARIOS</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_DE</td>
+<td style="text-align: center;">DATA_DE</td>
 <td><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_ATE</td>
+<td style="text-align: center;">DATA_ATE</td>
 <td><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>CC_ID</td>
+<td style="text-align: center;">CC_ID</td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>INPSSIGOF.CENTROS_CUSTO</em></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td><em>VARCHAR2(5 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_PROC_PROVISORIO</td>
+<td style="text-align: center;">DATA_PROC_PROVISORIO</td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_PROC_DEFINITIVO</td>
+<td style="text-align: center;">DATA_PROC_DEFINITIVO</td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>OBS</td>
+<td style="text-align: center;">OBS</td>
 <td><em>VARCHAR2(200 BYTE),</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>FLG_FECHADO</td>
+<td style="text-align: center;">FLG_FECHADO</td>
 <td><em>VARCHAR2(1 BYTE)</em></td>
 <td></td>
 <td><em>FLG_FECHADO" IS '1= "FECHADO"; NULL = ABERTO'</em></td>
 </tr>
 <tr>
-<td>CAB_1_ID</td>
+<td style="text-align: center;">CAB_1_ID</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>RH_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_PROC_SALARIOS</td>
 <td><em>NUNMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_REGISTO</em></td>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
 <td><em>DATE</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_ID</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td><em>DATA_ALTERACAO</em></td>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p><em><strong>CONSTRAINT:</strong></em></p>
+<td colspan="2"
+style="text-align: center;"><p><em><strong>CONSTRAINT:</strong></em></p>
 <ul>
 <li><p><em><strong>PK</strong>: PK_PRSALS</em></p></li>
 <li><p><em><strong>FK</strong>: FK_PROC_CC</em></p></li>
@@ -5427,109 +5588,110 @@ SEQ_PROC_SALARIOS</em></p>
 <p><em><strong>TRIGGER:</strong> TRG_</em>PROC_SALARIOS</p></td>
 </tr>
 <tr>
-<td><strong>RH_T_PROC_FUNCIONARIOS</strong></td>
+<td
+style="text-align: center;"><strong>RH_T_PROC_FUNCIONARIOS</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_PROCESSAMENTO</td>
+<td style="text-align: center;">DATA_PROCESSAMENTO</td>
 <td>DATE</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_REFERENCIA_DE</td>
+<td style="text-align: center;">DATA_REFERENCIA_DE</td>
 <td>DATE</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_REFERENCIA_ATE</td>
+<td style="text-align: center;">DATA_REFERENCIA_ATE</td>
 <td>DATE</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TOTAL_REMUNERACOES</td>
+<td style="text-align: center;">TOTAL_REMUNERACOES</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TOTAL_PAGAMENTOS</td>
+<td style="text-align: center;">TOTAL_PAGAMENTOS</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td>VARCHAR2(3 BYTE)</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>PRSALS_ID</td>
+<td style="text-align: center;">PRSALS_ID</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td><strong>RH_T_PROC_SALARIOS.ID</strong></td>
 </tr>
 <tr>
-<td>TOT_REMUN_COLLECT</td>
+<td style="text-align: center;">TOT_REMUN_COLLECT</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>TOT_LIQUIDO</td>
+<td style="text-align: center;">TOT_LIQUIDO</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TOT_REMUN_SOCIAL</td>
+<td style="text-align: center;">TOT_REMUN_SOCIAL</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TIPREL_ID</td>
+<td style="text-align: center;">TIPREL_ID</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID</em></td>
 </tr>
 <tr>
-<td>RHB_ID</td>
+<td style="text-align: center;">RHB_ID</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td><em><strong>RH_T_DADOS_BANCARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td>NU_CONTA</td>
+<td style="text-align: center;">NU_CONTA</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>NIB</td>
+<td style="text-align: center;">NIB</td>
 <td>VARCHAR2(21 BYTE),</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>CAB_1_ID</td>
+<td style="text-align: center;">CAB_1_ID</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_PROC_FUNC</p></li>
 <li><p>FK: FK_ PROC_FUNC_PRSALS_ID (PRSALS_ID)</p></li>
@@ -5541,61 +5703,61 @@ SEQ_PROC_FUNCIONARIO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_ PROC_FUNCIONARIOS</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_PAGAMENTOS</strong></td>
+<td style="text-align: center;"><strong>RH_T_PAGAMENTOS</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>id</td>
+<td style="text-align: center;">id</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>valor</td>
+<td style="text-align: center;">valor</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>data_ref</td>
+<td style="text-align: center;">data_ref</td>
 <td>DATE</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>estado</td>
+<td style="text-align: center;">estado</td>
 <td>VARCHAR2(3 BYTE)</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>prsal_id</td>
+<td style="text-align: center;">prsal_id</td>
 <td>NUMBER</td>
 <td><em><strong>SIM</strong></em></td>
 <td><em><strong>RH_T_PROC_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td>defp_id</td>
+<td style="text-align: center;">defp_id</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td><em>RH_T_DEF_PAGAMENTOS.ID</em></td>
 </tr>
 <tr>
-<td>percentagem</td>
+<td style="text-align: center;">percentagem</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID_UPLOAD</td>
+<td style="text-align: center;">ID_UPLOAD</td>
 <td>NUMBER</td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_PAGAMENTO (ID)</p></li>
 <li><p>FK: FK_PAG_PROC_FUNC (PRSAL_ID)</p></li>
@@ -5606,31 +5768,31 @@ SEQ_PAGAMENTOS</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_ PAGAMENTOS</em></p></td>
 </tr>
 <tr>
-<td><strong>RH_T_REMUNERACOES</strong></td>
+<td style="text-align: center;"><strong>RH_T_REMUNERACOES</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>VALOR</td>
+<td style="text-align: center;">VALOR</td>
 <td>NUMBER</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_REF</td>
+<td style="text-align: center;">DATA_REF</td>
 <td>DATE</td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td>VARCHAR2(3 BYTE)</td>
 <td><em>SIM</em></td>
 <td></td>
@@ -5678,7 +5840,7 @@ SEQ_PAGAMENTOS</em></p>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_REMUNERACOES</p></li>
 <li><p>FK: FK_REM_PROC_FUN</p></li>
@@ -5798,7 +5960,7 @@ style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS</strong></em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_SUB_FERIAS</p></li>
 <li><p>FK: FK_SUB_FERIA_FUN_ID(FUN_ID)</p></li>
@@ -5884,7 +6046,8 @@ style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS_DET</strong></em></td
 <td><em><strong>RH_T_SUBSIDIO_FERIAS</strong>.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<td colspan="2"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_SUB_FERIAS_DET</p></li>
 <li><p>FK: FK_SUB_FERIA_ID (SUB_FERIAS_ID)</p></li>
@@ -5975,7 +6138,8 @@ style="text-align: left;"><em><strong>RH_T_SUBSISDIO_NATAL</strong></em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<td colspan="2"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_SUB_NATAL</p></li>
 <li><p>FK: FK_SUB_NATAL_FUN_ID(<strong>FUN_ID</strong>)</p></li>
@@ -6020,6 +6184,416 @@ SEQ_SUBSIDIO_NATAL</em></p>
 </tbody>
 </table>
 
+### SOAT
+
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 24%" />
+<col style="width: 21%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>CAMPOS</strong></th>
+<th style="text-align: center;"><strong>TIPO</strong></th>
+<th style="text-align: center;"><strong>OBRIGATORIEDADE</strong></th>
+<th style="text-align: center;"><strong>RELACAO</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>RH_T_SOAT</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>ANO_REFERENTE</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>MES_REFERENCIA</em></td>
+<td><em>VARCHAR2</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td><em>VARCHAR (1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR (200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR (200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>UUID</em></td>
+<td><em>VARCHAR (100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
+<ul>
+<li><p><strong>PK: PK_</strong>SOAT</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_SOAT_</em>UUID (UUID)</p>
+<p><em><strong>INDEX :</strong> IX_SOAT_ESTADO</em> (ESTADO)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>SOAT</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>SOAT</p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>RH_T_SOAT_DETALHE</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">SOAT_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong>RH_T_SOAT</strong>.ID</td>
+</tr>
+<tr>
+<td style="text-align: center;">FUN_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong>RH_T_FUNCIONARIOS</strong>.ID</td>
+</tr>
+<tr>
+<td style="text-align: center;">PROCSAL_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong>RH_T_PROC_FUNCIONARIOS.</strong>ID</td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DIR_SERV_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DIAS_TRAB_ATUAL</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DIAS_TRAB_ANTES</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SALARIO_BASE_ATUAL</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SALARIO_BASE_ANTES</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td><em>VARCHAR (1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR (200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>UUID</em></td>
+<td><em>VARCHAR (100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
+<ul>
+<li><p><strong>PK: PK_</strong>SOAT_DETALHE</p></li>
+<li><p><strong>FK: FK_</strong>SOAT_DET (SOAT_ID)</p></li>
+<li><p><strong>FK: FK_</strong>SOAT_DET_FUN(FUN_ID)</p></li>
+<li><p><strong>FK: FK_</strong>SOAT_DET_FUNPR(PROCSAL_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_SOAT_DET_</em>UUID (UUID)</p>
+<p><em><strong>INDEX :</strong> IX_SOAT_DET_ESTADO</em>
+(ESTADO)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>SOAT_DETALHE</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>SOAT_DETALHE</p></td>
+</tr>
+<tr>
+<td colspan="4"
+style="text-align: center;"><strong>RH_T_DADOS_INSTITUICAO</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">NOME</td>
+<td><em>VARCHAR2(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">NIF</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">COD_CAE</td>
+<td><em>VARCHAR2(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ATIVIDADE_ECONOMICA</td>
+<td><em>VARCHAR2(300)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">NUM_CERTIDAO_COMERCIAL</td>
+<td><em>VARCHAR2(100)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">DATA_VALIDADE</td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">TELEFONE</td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">LOCALIDADE</td>
+<td><em>VARCHAR2(300)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">EMAIL</td>
+<td><em>VARCHAR2(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">MORADA</td>
+<td><em>VARCHAR2(300)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">CONCELHO_ID</td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>UUID</em></td>
+<td><em>VARCHAR (100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
+<ul>
+<li><p>PK: PK_DADOS_INSTITUICAO</p></li>
+</ul></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>
+DADOS_INSTITUICAO</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em> DADOS_INSTITUICAO</p></td>
+</tr>
+<tr>
+<td colspan="4"
+style="text-align: center;"><strong>RH_T_DADOS_APOLICE</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">DADOS_INSTITUICAO_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong>RH_T_DADOS_INSTITUICAO</strong>.ID</td>
+</tr>
+<tr>
+<td style="text-align: center;">NUM_APOLICE</td>
+<td><em>VARCHAR2(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ILHA_ID</td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">DATA_APOLICE</td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
+<ul>
+<li><p>PK: PK_DADOS_APOLICE</p></li>
+<li><p>FK: <em>FK_DADOS_INSTIT_APOLICE
+(</em>DADOS_INSTITUICAO_ID<em>)</em></p></li>
+</ul></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>DADOS_APOLICE</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>DADOS_APOLICE</p></td>
+</tr>
+</tbody>
+</table>
+
 ## ASSIDUIDADE
 
 <table>
@@ -6039,109 +6613,109 @@ SEQ_SUBSIDIO_NATAL</em></p>
 </thead>
 <tbody>
 <tr>
-<td><strong>RH_MOVIMENTOS</strong></td>
+<td style="text-align: center;"><strong>RH_MOVIMENTOS</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID</td>
+<td style="text-align: center;">ID</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DT_MOVIMENTO</td>
+<td style="text-align: center;">DT_MOVIMENTO</td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>HORA_MOVIMENTO</td>
+<td style="text-align: center;">HORA_MOVIMENTO</td>
 <td><em>VARCHAR2(20 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID_COLABORADOR</td>
+<td style="text-align: center;">ID_COLABORADOR</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td><em><strong>RH_T_FUNCIONARIO</strong>.ID_COLABORADOR</em></td>
 </tr>
 <tr>
-<td>NOME_COLABORADOR</td>
+<td style="text-align: center;">NOME_COLABORADOR</td>
 <td><em>VARCHAR2(300 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TP_MOVIMENTO</td>
+<td style="text-align: center;">TP_MOVIMENTO</td>
 <td><em>VARCHAR2(20 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TP_MOVIMENTO_DESC</td>
+<td style="text-align: center;">TP_MOVIMENTO_DESC</td>
 <td><em>VARCHAR2(50 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>VERIFY_MODE</td>
+<td style="text-align: center;">VERIFY_MODE</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>IN_OUT_MODE</td>
+<td style="text-align: center;">IN_OUT_MODE</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>WORK_CODE</td>
+<td style="text-align: center;">WORK_CODE</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DT_REGISTO</td>
+<td style="text-align: center;">DT_REGISTO</td>
 <td><em>DATE</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>USR_REGISTO</td>
+<td style="text-align: center;">USR_REGISTO</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>DATA_HORA</td>
+<td style="text-align: center;">DATA_HORA</td>
 <td><em>VARCHAR2(50 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>PROCESSADO</td>
-<td><em>NUMBER(*,0) DEFAULT 0</em></td>
+<td style="text-align: center;">PROCESSADO</td>
+<td><em>NUMBER (*,0) DEFAULT 0</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TP_MOVIMENTO_MAQUINA</td>
+<td style="text-align: center;">TP_MOVIMENTO_MAQUINA</td>
 <td><em>VARCHAR2(20 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>TP_MOVIMENTO_MAQUINA_DESC</td>
+<td style="text-align: center;">TP_MOVIMENTO_MAQUINA_DESC</td>
 <td><em>VARCHAR2(20 BYTE)</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>ID_EQUIP_CONTR_ACESSO</td>
+<td style="text-align: center;">ID_EQUIP_CONTR_ACESSO</td>
 <td><em>NUMBER</em></td>
 <td></td>
 <td></td>
@@ -6155,13 +6729,13 @@ style="text-align: left;"><strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">ID</td>
-<td style="text-align: left;"><em>NUMBER(16,0)</em></td>
+<td style="text-align: left;"><em>NUMBER (16,0)</em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">FUNCIONARIO_ID</td>
-<td style="text-align: left;"><em>NUMBER(16,0)</em></td>
+<td style="text-align: left;"><em>NUMBER (16,0)</em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"><em>RH_T_FUNCIONARIOS.ID</em></td>
 </tr>
@@ -6173,13 +6747,13 @@ style="text-align: left;"><strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">MES</td>
-<td style="text-align: left;"><em>NUMBER(16,0)</em></td>
+<td style="text-align: left;"><em>NUMBER (16,0)</em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">ANO</td>
-<td style="text-align: left;"><em>NUMBER(16,0)</em></td>
+<td style="text-align: left;"><em>NUMBER (16,0)</em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -6432,7 +7006,7 @@ style="text-align: left;"><strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong></td>
 <td style="text-align: left;"><em>UUID</em></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_TIPO_FALTA</p></li>
 </ul></td>
@@ -6471,7 +7045,7 @@ SEQ_TIPO_FALTA</em></p>
 <td style="text-align: left;"><em>RH_T_SECAO.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_RESPONSAVEL</p></li>
 <li><p>FK: FK_RESPONS_FUN (FUN_ID)</p></li>
@@ -6631,7 +7205,7 @@ style="text-align: left;"><em>RH_ASSIDUIDADE_SINTESE_DIARIA.ID</em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_FALTA</p></li>
 <li><p>FK: FK_FALTA_TIPREL (TIPREL_ID)</p></li>
@@ -6731,7 +7305,7 @@ ETAPA_PROCESSO</em></td>
 style="text-align: left;"><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_PEDIDO</p></li>
 <li><p>FK: FK_PEDIDO_FUN (FUN_ID)</p></li>
@@ -6867,7 +7441,7 @@ REFERENCIA = PARECER_RESPONSAVEL</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_DISPENSA</p></li>
 <li><p>FK: FK_DISPENSA_TIPREL (TIPREL_ID)</p></li>
@@ -6961,7 +7535,7 @@ REFERENCIA = PARECER_RESPONSAVEL</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_HORA_EXTRA</p></li>
 <li><p>FK: FK_HORAS_TIPREL (TIPREL_ID)</p></li>
@@ -7038,7 +7612,7 @@ SEQ_HORA_EXTRA</em></p>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_ANO</p></li>
 </ul></td>
@@ -7130,7 +7704,7 @@ SEQ_HORA_EXTRA</em></p>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_FERIAS (ID)</p></li>
 <li><p>FK: FK_FERIAS_FUN (FUN_ID)</p></li>
@@ -7224,7 +7798,7 @@ SEQ_HORA_EXTRA</em></p>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_FERIAS_MAPA (ID)</p></li>
 <li><p>FK: FK_FERIAS_MAPA_FUN (FUN_ID)</p></li>
@@ -7379,7 +7953,7 @@ SEQ_FERIAS_MAPA</em></p>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_FERIAS_GOZ (ID)</p></li>
 <li><p>FK: FK_FERIAS_GOZ_FUN (FUN_ID)</p></li>
@@ -7403,15 +7977,15 @@ style="text-align: left;"><strong>RH_T_ABONOS_BENEFICIOS</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_INICIO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"><em><del>DATA_INICIO</del></em></td>
+<td style="text-align: left;"><em><del>DATE</del></em></td>
+<td style="text-align: left;"><em><del>SIM</del></em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_FIM</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"><em><del>DATA_FIM</del></em></td>
+<td style="text-align: left;"><em><del>DATE</del></em></td>
+<td style="text-align: left;"><em><del>SIM</del></em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
@@ -7487,7 +8061,7 @@ style="text-align: left;"><strong>RH_T_ABONOS_BENEFICIOS</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_ABONO_BENEFICIO (ID)</p></li>
 <li><p>FK: FK_ABONO_FUN (FUN_ID)</p></li>
@@ -7497,6 +8071,100 @@ style="text-align: left;"><strong>RH_T_ABONOS_BENEFICIOS</strong></td>
 <td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_ABONO_BENEFICIO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_ABONO_BENEFICIO</em></p></td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>RH_T_ABONOS_BENEFICIOS_DET</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_INICIO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_FIM</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>ABONO_BENEF_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td
+style="text-align: left;"><strong>RH_T_ABONOS_BENEFICIOS.ID</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">ESTADO</td>
+<td style="text-align: left;"><em>VARCHAR(1)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
+<ul>
+<li><p>PK : PK_ABONO_BENEFICIO_DET (ID)</p></li>
+<li><p>FK: FK_ABONO_BENEFDET (<em>ABONO_BENEF_ID</em>)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em>
+ABONO_BENEFICIO_DET<em>_</em>UUID (UUID)</p>
+<p><em><strong>INDEX :</strong> IX_</em>
+ABONO_BENEFICIO_DET<em>_</em>EST (ESTADO)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_ABONO_BENEFICIO_DET</em></p>
+<p><em><strong>TRIGGER</strong>: TRG_ABONO_BENEFICIO_DET</em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>RH_T_AUSENCIA</strong></td>
@@ -7598,11 +8266,10 @@ REGISTO</em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_AUSENCIA (ID)</p></li>
 <li><p>FK: FK_SIT_AUSENCIA (PARAM_SIT_ID)</p></li>
-<li></li>
 </ul></td>
 <td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_AUSENCIA</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_AUSENCIA</em></p></td>
@@ -7705,7 +8372,7 @@ style="text-align: left;"><strong>RH_T_REGULARIZACAO_SDO</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td colspan="2"><p>CONSTRAINTS:</p>
+<td colspan="2" style="text-align: center;"><p>CONSTRAINTS:</p>
 <ul>
 <li><p>PK : PK_REGULARIZACAO (ID)</p></li>
 <li><p>FK: FK_REGULAPROC_FUN (<em>PROC_FUN_ID</em>)</p></li>
@@ -7728,379 +8395,395 @@ SEQ_REGULARIZACAO_SDO</em></p>
 
 ## EMPRESTIMO
 
-<table>
+<table style="width:100%;">
 <colgroup>
-<col style="width: 28%" />
+<col style="width: 26%" />
+<col style="width: 2%" />
 <col style="width: 23%" />
 <col style="width: 21%" />
-<col style="width: 25%" />
+<col style="width: 1%" />
+<col style="width: 23%" />
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>CAMPOS</strong></th>
+<th colspan="2" style="text-align: center;"><strong>CAMPOS</strong></th>
 <th style="text-align: center;"><strong>TIPO</strong></th>
 <th style="text-align: center;"><strong>OBRIGATORIEDADE</strong></th>
-<th style="text-align: center;"><strong>RELACAO</strong></th>
+<th colspan="2"
+style="text-align: center;"><strong>RELACAO</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td
+<td colspan="2"
 style="text-align: left;"><strong>RH_T_PARAM_EMPRESTIMO</strong></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">ID</td>
+<td colspan="2" style="text-align: left;">ID</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">CARR_PCCS_ID</td>
+<td colspan="2" style="text-align: left;">CARR_PCCS_ID</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td
+<td colspan="2"
 style="text-align: left;"><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">VALOR_LIMITE</td>
+<td colspan="2" style="text-align: left;">VALOR_LIMITE</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">NUMERO_LIMITE</td>
+<td colspan="2" style="text-align: left;">NUMERO_LIMITE</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">ESTADO</td>
+<td colspan="2" style="text-align: left;">ESTADO</td>
 <td style="text-align: left;"><em>VARCHAR(1)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: left;"><em>DATA_REGISTO</em></td>
 <td style="text-align: left;"><em>DATE</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td colspan="2" style="text-align: left;"><em>USER_REGISTO_ID</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>UUID</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
+style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="3"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_PARAM_EMPRESTIMO</p></li>
 <li><p>FK: FK_CARR_P_EMPREST (CARR_PCCS_ID)</p></li>
 </ul>
 <p><em><strong>INDEX :</strong> IX_PARAM_EMPREST_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_PARAM_EMPRESTIMO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_PARAM_EMPRESTIMO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>RH_T_EMPRESTIMO</strong></td>
+<td colspan="2"
+style="text-align: left;"><strong>RH_T_EMPRESTIMO</strong></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>ID</em></td>
+<td colspan="2" style="text-align: left;"><em>ID</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>TIPREL_ID</em></td>
+<td colspan="2" style="text-align: left;"><em>TIPREL_ID</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"><em>RH_T_TIPOS_RELACIONAMENTO.ID</em></td>
+<td colspan="2"
+style="text-align: left;"><em>RH_T_TIPOS_RELACIONAMENTO.ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>MARCA</em></td>
+<td colspan="2" style="text-align: left;"><em>MARCA</em></td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>ANO_FABRICO</em></td>
+<td colspan="2" style="text-align: left;"><em>ANO_FABRICO</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>CILINCRADA</em></td>
+<td colspan="2" style="text-align: left;"><em>CILINCRADA</em></td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>TIPO_VIATURA</em></td>
+<td colspan="2" style="text-align: left;"><em>TIPO_VIATURA</em></td>
 <td style="text-align: left;"><em>VARCHAR(50)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>COMBUSTIVEL</em></td>
+<td colspan="2" style="text-align: left;"><em>COMBUSTIVEL</em></td>
 <td style="text-align: left;"><em>VARCHAR(50)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>ESTADO_VIATURA</em></td>
+<td colspan="2" style="text-align: left;"><em>ESTADO_VIATURA</em></td>
 <td style="text-align: left;"><em>VARCHAR(50)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>VALOR_EMPRESTIMO</em></td>
+<td colspan="2" style="text-align: left;"><em>VALOR_EMPRESTIMO</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>VALOR_DIVIDA</em></td>
+<td colspan="2" style="text-align: left;"><em>VALOR_DIVIDA</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>NR_PRESTACAO</em></td>
+<td colspan="2" style="text-align: left;"><em>NR_PRESTACAO</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>TIPO_EMPRESTIMO</em></td>
+<td colspan="2" style="text-align: left;"><em>TIPO_EMPRESTIMO</em></td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_INICIO</em></td>
+<td colspan="2" style="text-align: left;"><em>DATA_INICIO</em></td>
 <td style="text-align: left;"><em>DATE</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_FIM</em></td>
+<td colspan="2" style="text-align: left;"><em>DATA_FIM</em></td>
 <td style="text-align: left;"><em>DATE</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>JURO</em></td>
+<td colspan="2" style="text-align: left;"><em>JURO</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">VALOR_PRESTACAO</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DESC_CABIMENTACAO_ORCAMENTAL</em></td>
-<td style="text-align: left;"><em>VARCHAR(300)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DESC_TAXA_ESFORCO</em></td>
-<td style="text-align: left;"><em>VARCHAR(500)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">EMPRESTIMO_ID</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"><em>RH_T_EMPRESTIMO.ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">VERSAO</td>
+<td colspan="2" style="text-align: left;">VALOR_PRESTACAO</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">PEDIDO_ID</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"><em>RH_T_PEDIDO.ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">RENOGOCIACAO</td>
-<td style="text-align: left;"><em>VARCHAR(10)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>TM_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td
-style="text-align: left;"><em>INPSSIGOF.RH_TIPOS_MOVIMENTO.ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>FINALIDADE</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>VALOR_ADIANTADO</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>TIPO_RENOGOCIACAO</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>MOTIVO_FECHO</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>VALOR_REFORCO</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em><strong>VALOR_PAGO</strong></em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em><strong>MOTIVO</strong></em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td
-style="text-align: left;"><em><strong>TIPO_SITUACAO</strong></em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">BANCO</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"><em>RH_T_BANCO.ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">NIB</td>
-<td style="text-align: left;"><em>VARCHAR(21)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">SWIFT</td>
-<td style="text-align: left;"><em>VARCHAR(50)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">ESTADO</td>
-<td style="text-align: left;"><em>VARCHAR(1)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_REGISTO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>UUID</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
+style="text-align: left;"><em>DESC_CABIMENTACAO_ORCAMENTAL</em></td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>DESC_TAXA_ESFORCO</em></td>
+<td style="text-align: left;"><em>VARCHAR(500)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">EMPRESTIMO_ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2"
+style="text-align: left;"><em>RH_T_EMPRESTIMO.ID</em></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">VERSAO</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">PEDIDO_ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"><em>RH_T_PEDIDO.ID</em></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">RENOGOCIACAO</td>
+<td style="text-align: left;"><em>VARCHAR(10)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>TM_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2"
+style="text-align: left;"><em>INPSSIGOF.RH_TIPOS_MOVIMENTO.ID</em></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>FINALIDADE</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>VALOR_ADIANTADO</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>TIPO_RENOGOCIACAO</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>MOTIVO_FECHO</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>VALOR_REFORCO</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em><strong>VALOR_PAGO</strong></em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em><strong>MOTIVO</strong></em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em><strong>TIPO_SITUACAO</strong></em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">BANCO</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"><em>RH_T_BANCO.ID</em></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">NIB</td>
+<td style="text-align: left;"><em>VARCHAR(21)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">SWIFT</td>
+<td style="text-align: left;"><em>VARCHAR(50)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">ESTADO</td>
+<td style="text-align: left;"><em>VARCHAR(1)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="3"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_EMPRESTIMO</p></li>
 <li><p>FK: FK_TIPREL_EMPREST (TIPREL_ID)</p></li>
@@ -8110,124 +8793,127 @@ style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
 <li><p><em>FK: FK_BANC_EMPREST(BANCO_ID)</em></p></li>
 </ul>
 <p><em><strong>INDEX :</strong> IX_EMPREST_</em>UUID (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_EMPRESTIMO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_EMPRESTIMO</em></p></td>
 </tr>
 <tr>
-<td
+<td colspan="2"
 style="text-align: left;"><strong>RH_T_PLANO_FINANCEIRO</strong></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>ID</em></td>
+<td colspan="2" style="text-align: left;"><em>ID</em></td>
 <td style="text-align: left;"><em>NUMER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>EMPRESTIMO_ID</em></td>
+<td colspan="2" style="text-align: left;"><em>EMPRESTIMO_ID</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">NR_ORDEM_PRESTACAO</td>
+<td colspan="2" style="text-align: left;">NR_ORDEM_PRESTACAO</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_PAGAMENTO</em></td>
+<td colspan="2" style="text-align: left;"><em>DATA_PAGAMENTO</em></td>
 <td style="text-align: left;"><em>DATE</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">VALOR_PRINCIPAL</td>
+<td colspan="2" style="text-align: left;">VALOR_PRINCIPAL</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">VALOR_JUROS</td>
+<td colspan="2" style="text-align: left;">VALOR_JUROS</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>FLG_PAGO</strong></td>
+<td colspan="2" style="text-align: left;"><strong>FLG_PAGO</strong></td>
 <td style="text-align: left;"><em>VARCHAR(10)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>VALOR_PAGO</strong></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DEFP_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td
-style="text-align: left;"><em><strong>RH_T_DEF_PAGAMENTO</strong>.ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">ESTADO</td>
-<td style="text-align: left;"><em>VARCHAR(1)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_REGISTO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>UUID</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
+style="text-align: left;"><strong>VALOR_PAGO</strong></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DEFP_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2"
+style="text-align: left;"><em><strong>RH_T_DEF_PAGAMENTO</strong>.ID</em></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;">ESTADO</td>
+<td style="text-align: left;"><em>VARCHAR(1)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="3"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_PLANO_EMPRESTIMO</p></li>
 <li><p>FK: FK_DEF_PLANOEMPREST (DEFP_ID)</p></li>
@@ -8236,114 +8922,244 @@ style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
 </ul>
 <p><em><strong>INDEX :</strong> IX_PLANOEMPREST_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_PLANO_FINANCEIRO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_PLANO_FINANCEIRO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>RH_T_PEDIDO_DECISAO</strong></td>
+<td colspan="2"
+style="text-align: left;"><strong>RH_T_PEDIDO_DECISAO</strong></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">ID</td>
+<td colspan="2" style="text-align: left;">ID</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">PEDIDO_ID</td>
+<td colspan="2" style="text-align: left;">PEDIDO_ID</td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"><em>RH_T_PEDIDO.ID</em></td>
+<td colspan="2" style="text-align: left;"><em>RH_T_PEDIDO.ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">DECISAO</td>
+<td colspan="2" style="text-align: left;">DECISAO</td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">OBS</td>
+<td colspan="2" style="text-align: left;">OBS</td>
 <td style="text-align: left;"><em>VARCHAR(500)</em></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">ETAPA</td>
+<td colspan="2" style="text-align: left;">ETAPA</td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">REFERENCIA</td>
+<td colspan="2" style="text-align: left;">REFERENCIA</td>
 <td style="text-align: left;"><em>VARCHAR(100)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">ESTADO</td>
+<td colspan="2" style="text-align: left;">ESTADO</td>
 <td style="text-align: left;"><em>VARCHAR(1)</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: left;"><em>DATA_REGISTO</em></td>
 <td style="text-align: left;"><em>DATE</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td colspan="2" style="text-align: left;"><em>USER_REGISTO_ID</em></td>
 <td style="text-align: left;"><em>NUMBER</em></td>
 <td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
-<td style="text-align: left;"><em>NUMBER</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
-<td style="text-align: left;"><em>DATE</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>UUID</em></td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
+style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td colspan="2" style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="3"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_DECISAO_PEDIDO</p></li>
 <li><p>FK: FK_PED_DPEDIDO (PEDIDO_ID)</p></li>
 </ul>
 <p><em><strong>INDEX :</strong> IX_DECISAO_PEDIDO_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_DECISAO_PEDIDO</em></p>
 <p><em><strong>TRIGGER</strong>: TRG_DECISAO_PEDIDO</em></p></td>
+</tr>
+<tr>
+<td
+style="text-align: center;"><strong>RH_T_EMPRESTIMO_OUTROS</strong></td>
+<td colspan="2" style="text-align: center;"></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ID</td>
+<td colspan="2" style="text-align: center;">NUMBER</td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">TIPOS_EMPRSTIMO</td>
+<td colspan="2" style="text-align: center;"><em>VARCHAR(100)</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">DATA_INICIO</td>
+<td colspan="2" style="text-align: center;">DATE</td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">DATA_FIM</td>
+<td colspan="2" style="text-align: center;">DATE</td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">VALOR_EMPRESTIMO</td>
+<td colspan="2" style="text-align: center;">NUMBER</td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">REFERENCIA_ORIGEM_ID</td>
+<td colspan="2" style="text-align: center;">NUMBER</td>
+<td colspan="2"><em>SIM</em></td>
+<td><em><strong>RH_T_PEDIDO.</strong>ID</em></td>
+</tr>
+<tr>
+<td style="text-align: center;">FUN_ID</td>
+<td colspan="2" style="text-align: center;">NUMBER</td>
+<td colspan="2"><em>SIM</em></td>
+<td><em><strong>RH_T_FUNCIONARIOS</strong>.ID</em></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td colspan="2" style="text-align: center;"><em>VARCHAR (1)</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATE</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>NUMBER</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td colspan="2" style="text-align: center;"><em>VARCHAR(200)</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td colspan="2" style="text-align: center;"><em>NUMBER</em></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td colspan="2" style="text-align: center;"><em>VARCHAR(200)</em></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td colspan="2" style="text-align: center;"><em>DATE</em></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>UUID</em></td>
+<td colspan="2" style="text-align: center;"><em>VARCHAR(100)</em></td>
+<td colspan="2"><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="3"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK: PK_EMPREST_OUTROS</p></li>
+<li><p>FK: FK_EMPRES_OUT_ORIGEM (PEDIDO_ID)</p></li>
+</ul>
+<p><em><strong>INDEX:</strong> IX_EMPREST_OUTRO_</em>UUID
+(UUID)</p></td>
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
+SEQ_EMPRESTIMO_OUTRO</em></p>
+<p><em><strong>TRIGGER</strong>: TRG_EMPRESTIMO_OUTRO</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td colspan="2" style="text-align: center;"></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td colspan="2" style="text-align: center;"></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td colspan="2" style="text-align: center;"></td>
+<td colspan="2"></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -8452,8 +9268,7 @@ style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
 </ul>
 <p><em><strong>INDEX :</strong> IX_SIM_EVOL_CARR_</em>UUID
 (UUID)</p></td>
-<td colspan="3"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>SIM_EVOLUCAO_CARREIRA</p>
 <p><em><strong>TRIGGER</strong>: TRG_SIM_EVOLUCAO_CARREIRA</em></p></td>
 </tr>
@@ -8590,8 +9405,7 @@ style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
 </ul>
 <p><em><strong>INDEX :</strong> IX_VAL_EVOL_CARR_</em>UUID
 (UUID)</p></td>
-<td colspan="3"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_VAL</em>_EVOLUCAO_CARREIRA</p>
 <p><em><strong>TRIGGER</strong>: TRG_VAL_EVOLUCAO_CARREIRA</em></p></td>
 </tr>
@@ -8725,38 +9539,37 @@ style="text-align: left;"><p><strong>CONSTRAINTS</strong>:</p>
 <li><p>FK: FK_EVOL_CARR_OS</p></li>
 </ul>
 <p><em><strong>INDEX :</strong> IX_EVOL_CARR_</em>UUID (UUID)</p></td>
-<td colspan="3"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="3"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>EVOLUCAO_CARREIRA</p>
 <p><em><strong>TRIGGER</strong>: TRG_EVOLUCAO_CARREIRA</em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -8814,7 +9627,7 @@ SEQ_</em>EVOLUCAO_CARREIRA</p>
 </tr>
 <tr>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
 <td colspan="2" style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -8936,8 +9749,7 @@ SEQ_</em>EVOLUCAO_CARREIRA</p>
 </ul>
 <p><em><strong>INDEX :</strong> IX_PARAM_OBJECTO_DET_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>PARAM_OBJETIVO_DET</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>PARAM_OBJETIVO_DET</p></td>
 </tr>
@@ -9084,8 +9896,7 @@ style="text-align: left;"><em><strong>RH_T_SECCAO.ID</strong></em></td>
 </ul>
 <p><em><strong>INDEX :</strong> IX_PARAM_OBJECTO_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>PARAM_OBJETIVO</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>PARAM_OBJETIVO</p></td>
 </tr>
@@ -9186,8 +9997,7 @@ SEQ_</em>PARAM_OBJETIVO</p>
 </ul>
 <p><em><strong>INDEX :</strong> IX_</em>PARAM_ESCALA<em>_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>PARAM_ESCALA</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>PARAM_ESCALA</p></td>
 </tr>
@@ -9255,8 +10065,7 @@ style="text-align: left;"><em><strong>INPSSIGOF.INSTITUICOES.ID</strong></em></t
 </ul>
 <p><em><strong>INDEX :</strong> IX_</em>PARAM_MANUAL_F<em>_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>PARAM_MANUAL_FUNC</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>PARAM_MANUAL_FUNC</p></td>
 </tr>
@@ -9286,35 +10095,35 @@ SEQ_</em>PARAM_MANUAL_FUNC</p>
 style="text-align: left;"><em><strong>INPSSIGOF.INSTITUICOES</strong>.ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">SECCAO_ID</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>SECCAO_ID</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_SECCAO.ID</strong></em></td>
+style="text-align: left;"><em><strong><del>RH_T_SECCAO.ID</del></strong></em></td>
 </tr>
 <tr>
-<td style="text-align: left;">CARGO_ID</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>CARGO_ID</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_PARAM_CARGO</strong>.ID</em></td>
+style="text-align: left;"><em><del><strong>RH_T_PARAM_CARGO</strong>.ID</del></em></td>
 </tr>
 <tr>
-<td style="text-align: left;">CARR_PCCS_ID</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>CARR_PCCS_ID</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
+style="text-align: left;"><em><del><strong>RH_T_PARAM_CARREIRA</strong>.ID</del></em></td>
 </tr>
 <tr>
-<td style="text-align: left;">SEMESTRE</td>
-<td style="text-align: left;"><em>VARCHAR(1)</em></td>
-<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"><del>SEMESTRE</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(1)</del></em></td>
+<td style="text-align: left;"><em><del>SIM</del></em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">AVALIACAO_FINAL</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>AVALIACAO_FINAL</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -9326,14 +10135,14 @@ style="text-align: left;"><em><strong>RH_T_PARAM_CARREIRA</strong>.ID</em></td>
 style="text-align: left;"><em><strong>RH_T_FUNCIONARIOS.</strong>ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">PESO_COMPORTAMENTAIS</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>PESO_COMPORTAMENTAIS</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">PESO_TECNICA</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>PESO_TECNICA</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -9398,62 +10207,62 @@ style="text-align: left;"><em><strong>RH_T_FUNCIONARIOS.</strong>ID</em></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">AVALIACAO_ATITUDE_PESS</td>
-<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><del>AVALIACAO_ATITUDE_PESS</del></td>
+<td style="text-align: left;"><em><del>NUMBER</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">AVALIACAO_QUALITATIVA</td>
-<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><del>AVALIACAO_QUALITATIVA</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(100)</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">OBSERVACAO_GERAL</td>
-<td style="text-align: left;"><em>VARCHAR(500)</em></td>
+<td style="text-align: left;"><del>OBSERVACAO_GERAL</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(500)</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">DESCRICAO_PLANO</td>
-<td style="text-align: left;"><em>VARCHAR(500)</em></td>
+<td style="text-align: left;"><del>DESCRICAO_PLANO</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(500)</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">DATA_INICIO_ENTREVISTA</td>
-<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><del>DATA_INICIO_ENTREVISTA</del></td>
+<td style="text-align: left;"><em><del>DATE</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">HORA_INICIO_ENTREVISTA</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">HORA_FIM_ENTREVISTA</td>
+<td style="text-align: left;"><del>HORA_INICIO_ENTREVISTA</del></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">PARECER_COLABORADOR</td>
-<td style="text-align: left;"><em>VARCHAR(500)</em></td>
+<td style="text-align: left;"><del>HORA_FIM_ENTREVISTA</del></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">JUSTIFICACAO_MOTIVO</td>
-<td style="text-align: left;"><em>VARCHAR(200)</em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">OBS_COMISSAO_EXEC</td>
-<td style="text-align: left;"><em>VARCHAR(500)</em></td>
+<td style="text-align: left;"><del>PARECER_COLABORADOR</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(500)</del></em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><del>JUSTIFICACAO_MOTIVO</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(200)</del></em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><del>OBS_COMISSAO_EXEC</del></td>
+<td style="text-align: left;"><em><del>VARCHAR(500)</del></em></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -9468,10 +10277,306 @@ style="text-align: left;"><em><strong>RH_T_FUNCIONARIOS.</strong>ID</em></td>
 <li><p>FK: FK_AVD_SECCAO (SECCAO_ID)</p></li>
 </ul>
 <p><em><strong>INDEX :</strong> IX_AVD_</em>UUID (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
-SEQ_</em>AVD</p>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>AVD</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>AVD</p></td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>RH_T_AVD_PERIODICIDADE</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVD_ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"><em><strong>RH_T_AVD.ID</strong></em></td>
+</tr>
+<tr>
+<td style="text-align: left;">PERIODICIDADE</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AUTO_REALIZADO</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AUTO_AVALIACAO</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">REFERENCIA</td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">REFERENCIA_ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">TIPO_PROCESSO</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">REALIZADO</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ESTADO</td>
+<td style="text-align: left;"><em>VARCHAR(1)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_AVD_PERIODICIDADE</p></li>
+<li><p>FK: FK_AVD_ID_PERIODO (AVD_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong></em></p>
+<ul>
+<li><p><em>IX_AVD_PERIODO_</em>UUID (UUID)</p></li>
+<li><p><em>IX_AVD_PERIODO_</em>PER(PERIODICIDADE)</p></li>
+<li><p><em>IX_AVD_PERIODO_</em>REF (REFERENCIA)</p></li>
+<li><p><em>IX_AVD_PERIODO_</em>REF_ID (REFERENCIA)</p></li>
+<li><p><em>IX_AVD_PERIODO_</em>PROC (TIPO_PROCESSO)</p></li>
+</ul></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>AVD_PERIODICIDADE</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>AVD_PERIODICIDADE</p></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>RH_T_AVD_DETALHE</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVD_ID</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"><em><strong>RH_T_AVD.ID</strong></em></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO_OBJECTIVO</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO_COMPETENCIA</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO_ATITUDE_PESS</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO_FINAL</td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">AVALIACAO_QUALITATIVA</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">PERIODICIDADE</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">OBSERVACAO_GERAL</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">DESCRICAO_PLANO</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">DATA_INICIO_ENTREVISTA</td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">HORA_INICIO_ENTREVISTA</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">HORA_FIM_ENTREVISTA</td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">PARECER_COLABORADOR</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">JUSTIFICACAO_MOTIVO</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">OBS_COMISSAO_EXEC</td>
+<td style="text-align: left;"><em>VARCHAR(300)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ESTADO</td>
+<td style="text-align: left;"><em>VARCHAR(1)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_REGISTO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_REGISTO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_ID</em></td>
+<td style="text-align: left;"><em>NUMBER</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>USER_ALTERACAO_NAME</em></td>
+<td style="text-align: left;"><em>VARCHAR(200)</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>DATA_ALTERACAO</em></td>
+<td style="text-align: left;"><em>DATE</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>UUID</em></td>
+<td style="text-align: left;"><em>VARCHAR(100)</em></td>
+<td style="text-align: left;"><em>SIM</em></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_AVD_DETALHE</p></li>
+<li><p>FK: FK_AVD_ID_DET (AVD_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong></em></p>
+<ul>
+<li><p><em>IX_AVD_DETALHE_</em>UUID (UUID)</p></li>
+<li><p><em>IX_AVD_DETALHE_</em>PERIODIC (PERIODICIDADE)</p></li>
+</ul></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>AVD_DETALHE</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>AVD_DETALHE</p></td>
 </tr>
 <tr>
 <td style="text-align: left;">RH_T_AVD_OBJECTIVO</td>
@@ -9609,8 +10714,7 @@ style="text-align: left;"><em><strong>RH_T_PARAM_OBJECTIVO</strong>.ID</em></td>
 </ul>
 <p><em><strong>INDEX :</strong> IX_</em>AVD_OBJETIVO<em>_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>AVD_OBJECTIVO</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>AVD_OBJECTIVO</p></td>
 </tr>
@@ -9738,8 +10842,7 @@ style="text-align: left;"><em><strong>RH_T_PARAM_OBJECTIVO</strong>.ID</em></td>
 </ul>
 <p><em><strong>INDEX :</strong> IX_</em>AVD_COMPTEC<em>_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>AVD_COMPORTAMENTAL</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>AVD_COMPORTAMENTAL</p></td>
 </tr>
@@ -9843,8 +10946,7 @@ style="text-align: left;"><em><strong>RH_T_PARAM_OBJECTIVO</strong>.ID</em></td>
 </ul>
 <p><em><strong>INDEX :</strong> IX_</em>AVD_AT_PESS<em>_</em>UUID
 (UUID)</p></td>
-<td colspan="2"
-style="text-align: left;"><p><em><strong>SEQUENCIA</strong>:
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
 SEQ_</em>AVD_ATITUDE_PESS</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>AVD_ATITUDE_PESS</p></td>
 </tr>
@@ -9886,6 +10988,18 @@ SEQ_</em>AVD_ATITUDE_PESS</p>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><em>INPSGLOBAL.GLB_T_GEOGRAFIA.ID</em></td>
+</tr>
+<tr>
+<td><em><mark>Ilha_id</mark></em></td>
+<td><em><mark>NUMBER</mark></em></td>
+<td></td>
+<td><em><mark>INPSGLOBAL.GLB_T_GEOGRAFIA.ID</mark></em></td>
+</tr>
+<tr>
+<td><em><mark>Concelho_id</mark></em></td>
+<td><em><mark>NUMBER</mark></em></td>
+<td></td>
+<td><em><mark>INPSGLOBAL.GLB_T_GEOGRAFIA.ID</mark></em></td>
 </tr>
 <tr>
 <td>FLG_DESTINO</td>
@@ -10013,10 +11127,10 @@ SEQ_MISSAO_SERVICO</em></p>
 <td></td>
 </tr>
 <tr>
-<td>ENT_ID</td>
+<td><em><mark>PARAM_PREST_ID</mark></em></td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
-<td><em>INPSSIGOF.ENTIDADE.ID</em></td>
+<td><em><strong>RH_T_PARAM_PRESTADOR.</strong>ID</em></td>
 </tr>
 <tr>
 <td>NOME</td>
@@ -10031,10 +11145,16 @@ SEQ_MISSAO_SERVICO</em></p>
 <td></td>
 </tr>
 <tr>
-<td><em>MISSAO_SERV_ID</em></td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td><em><strong>RH_T_MISSAO_SERVICO.</strong>ID</em></td>
+<td><em><mark><del>MISSAO_SERV_ID</del></mark></em></td>
+<td><em><mark><del>NUMBER</del></mark></em></td>
+<td><em><mark><del>SIM</del></mark></em></td>
+<td><em><mark><del><strong>RH_T_MISSAO_SERVICO.</strong>ID</del></mark></em></td>
+</tr>
+<tr>
+<td><em><mark>MISSAO_PREST_ID</mark></em></td>
+<td><em><mark>NUMBER</mark></em></td>
+<td><em><mark>SIM</mark></em></td>
+<td><em><strong><mark>RH_T_MISSAO_PROCESSO.ID</mark></strong></em></td>
 </tr>
 <tr>
 <td>ESTADO</td>
@@ -10287,7 +11407,7 @@ TRG_</em><strong>MISSAO_REQUISICAO</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td>PRESTADOR_SERV_ID</td>
+<td>MISSAO_PREST_ID</td>
 <td><em>NUMBER</em></td>
 <td><em>SIM</em></td>
 <td><strong>RH_T_MISSAO_PRESTADOR.</strong>ID</td>
@@ -10359,10 +11479,16 @@ TRG_</em><strong>MISSAO_REQUISICAO</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td>MISSAO_SERV_ID</td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td><em><strong>RH_T_MISSAO_SERVICO</strong>.ID</em></td>
+<td><mark><del>MISSAO_SERV_ID</del></mark></td>
+<td><em><mark><del>NUMBER</del></mark></em></td>
+<td><em><mark><del>SIM</del></mark></em></td>
+<td><em><mark><del><strong>RH_T_MISSAO_SERVICO</strong>.ID</del></mark></em></td>
+</tr>
+<tr>
+<td><em><mark>MISSAO_PROCESSO_ID</mark></em></td>
+<td><em><mark>NUMBER</mark></em></td>
+<td><em><mark>SIM</mark></em></td>
+<td><em><strong><mark>RH_T_MISSAO_PROCESSO.ID</mark></strong></em></td>
 </tr>
 <tr>
 <td>FLG_ALOJAMENTO</td>
@@ -10475,6 +11601,12 @@ SEQ_</em>MISSAO_lOGISTICA</p>
 <td></td>
 </tr>
 <tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
 <td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_MISSAO_lOGISTICA_DET</p></li>
@@ -10488,40 +11620,7 @@ SEQ_</em>MISSAO_lOGISTICA_DET</p>
 <p><em><strong>TRIGGER</strong>: TRG_</em>MISSAO_lOGISTICA_DET</p></td>
 </tr>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-## Aumento Salarial 
-
-<table style="width:100%;">
-<colgroup>
-<col style="width: 28%" />
-<col style="width: 24%" />
-<col style="width: 22%" />
-<col style="width: 24%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>CAMPOS</strong></th>
-<th style="text-align: center;"><strong>TIPO</strong></th>
-<th style="text-align: center;"><strong>OBRIGATORIEDADE</strong></th>
-<th style="text-align: center;"><strong>RELACAO</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>RH_T_AUMENTO_SALARIAL</strong></td>
+<td><strong>RH_T _PARAM_PRESTADOR</strong></td>
 <td></td>
 <td></td>
 <td></td>
@@ -10533,169 +11632,26 @@ SEQ_</em>MISSAO_lOGISTICA_DET</p>
 <td></td>
 </tr>
 <tr>
-<td><em>DESCRICAO</em></td>
+<td><em>ENT_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><em><strong>INPSSIGOF.ENTIDADES</strong>.ID</em></td>
+</tr>
+<tr>
+<td><em>EMAIL</em></td>
 <td><em>VARCHAR(200)</em></td>
 <td><em>SIM</em></td>
 <td></td>
 </tr>
 <tr>
-<td><em>MOTIVO</em></td>
-<td><em>VARCHAR(200)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>DATA_REFERENTE</em></td>
-<td><em>DATE</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>FLG_RETROATIVO</em></td>
-<td><em>VARCHAR(3)</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>DATA_RETROATIVO</em></td>
-<td><em>DATE</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>FORMA_AUMENTO</em></td>
-<td><em>VARCHAR(50)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>VALOR</em></td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>AUMENTO_GRELHA_SALARIAL</em></td>
-<td><em>VARCHAR(50)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>CRITERIOS_ELEGIBILIDADE</em></td>
-<td><em>VARCHAR(50)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td>ESTADO</td>
-<td><em>VARCHAR(1)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>DATA_REGISTO</em></td>
-<td><em>DATE</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>USER_REGISTO_ID</em></td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>USER_REGISTO_NAME</em></td>
-<td><em>VARCHAR(200)</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>USER_ALTERACAO_ID</em></td>
+<td><em>ILHA_ID</em></td>
 <td><em>NUMBER</em></td>
 <td></td>
-<td></td>
+<td><em><strong>SIPSGLOBAL.GLB_T_GEOGRAFIA</strong>.ID</em></td>
 </tr>
 <tr>
-<td><em>USER_ALTERACAO_NAME</em></td>
-<td><em>VARCHAR(200)</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>DATA_ALTERACAO</em></td>
-<td><em>DATE</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
-<ul>
-<li><p>PK : PK_AUMENTO_SALARIAL</p></li>
-</ul>
-<p><em><strong>INDEX :</strong> IX_</em>AUMENTO_SALARIAL<em>_</em>UUID
-(UUID)</p></td>
-<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
-SEQ_</em>AUMENTO_SALARIAL</p>
-<p><em><strong>TRIGGER</strong>: TRG_</em>AUMENTO_SALARIAL</p></td>
-</tr>
-<tr>
-<td>RH_T_AUMENTO_SALARIAL_DET</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>ID</em></td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td></td>
-</tr>
-<tr>
-<td><em>AUMENTO_SALARIAL_ID</em></td>
-<td><em>NUMBER</em></td>
-<td><em>SIM</em></td>
-<td><strong><em>RH_T_</em>AUMENTO_SALARIAL</strong>.ID</td>
-</tr>
-<tr>
-<td><em>INSTIT_ID</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>SECCAO_ID</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>VINCULO_ID</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>SITUACAO_LABORAL_ID</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>LOCAL_TRAB_ID</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>SALARIO_DE</em></td>
-<td><em>NUMBER</em></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><em>SALARIO_ATE</em></td>
-<td><em>NUMBER</em></td>
+<td><em>MORADA</em></td>
+<td><em>VARCHAR(300)</em></td>
 <td></td>
 <td></td>
 </tr>
@@ -10749,6 +11705,676 @@ SEQ_</em>AUMENTO_SALARIAL</p>
 </tr>
 <tr>
 <td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_PARAM_PRESTADOR</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em> PARAM_PRESTADOR <em>_</em>UUID
+(UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>
+PARAM_PRESTADOR</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em> PARAM_PRESTADOR</p></td>
+</tr>
+<tr>
+<td><strong>RH_T _PARAM_PRESTADOR_DET</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>PARAM_PREST_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong>RH_T _PARAM_PRESTADOR.ID</strong></td>
+</tr>
+<tr>
+<td><em>EMAIL</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_ PARAM_PRESTADOR_DET</p></li>
+<li><p>FK: FK_ PARAM_PRESTADOR_DET (PARAM_PREST_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em> PARAM_PRESTADOR_DET
+<em>_</em>UUID (UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>
+PARAM_PRESTADOR_DET</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em> PARAM_PRESTADOR_DET</p></td>
+</tr>
+<tr>
+<td><strong>RH_T _MISSAO_PRESTADOR_AVAL</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>SISTEMA_QUALIDADE</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>PRAZO_FORNECIMENTO</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>QUALIDADE_PRODUTO</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>CAPACIDADE_RESPOSTA</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>PRECO</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>TOTAL</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>DESIGNACAO</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>MISSAO_PRESTADOR_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><em><strong>RH_T_MISSAO_PRESTADOR</strong>.ID</em></td>
+</tr>
+<tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_MISSAO_PREST_AVAL</p></li>
+<li><p>FK: FK_ MISSAO_PREST_AVAL (MISSAO_PRESTADOR_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em> MISSAO_PREST_AVAL
+<em>_</em>UUID (UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>MISSAO_PRESTADOR_AVAL</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>MISSAO_PRESTADOR_AVAL</p></td>
+</tr>
+<tr>
+<td><strong>RH_T_MISSAO_PROCESSO</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>TIPO_PROCESSO</td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>MISSA_SERVICO_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><em><strong>RH_T_MISSAO_SERVICO</strong>.ID</em></td>
+</tr>
+<tr>
+<td>ETAPA</td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_ MISSAO_PROCESSO</p></li>
+<li><p>FK: FK_ MISSAO_PROCESSO (MISSA_SERVICO_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em> MISSAO_PROCESSO <em>_</em>UUID
+(UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>
+MISSAO_PROCESSO</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em> MISSAO_PROCESSO</p></td>
+</tr>
+<tr>
+<td><strong>RH_T_MISSSAO_PROCESSO_DET</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>PARECER</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>OBSERVACAO</td>
+<td><em>VARCHAR(500)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>REPONSAVEL</td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>MISSAO_PROCESSO_ID</td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><em><strong>RH_T_MISSAO_PROCESSO</strong>.ID</em></td>
+</tr>
+<tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td>ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_ MISSAO_PROCESSO_DET</p></li>
+<li><p>FK: FK_ MISSAO_PROCESSO_DET (MISSA_SERVICO_ID)</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em> MISSAO_PROCESSO <em>_</em>UUID
+(UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>: SEQ_</em>
+MISSAO_PROCESSO_DET</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>MISSAO_PROCESSO_DET</p></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+## Aumento Salarial 
+
+<table style="width:100%;">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 24%" />
+<col style="width: 22%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>CAMPOS</strong></th>
+<th style="text-align: center;"><strong>TIPO</strong></th>
+<th style="text-align: center;"><strong>OBRIGATORIEDADE</strong></th>
+<th style="text-align: center;"><strong>RELACAO</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td
+style="text-align: center;"><strong>RH_T_AUMENTO_SALARIAL</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DESCRICAO</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>MOTIVO</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REFERENTE</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>FLG_RETROATIVO</em></td>
+<td><em>VARCHAR(3)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_RETROATIVO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>FORMA_AUMENTO</em></td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>VALOR</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>AUMENTO_GRELHA_SALARIAL</em></td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>CRITERIOS_ELEGIBILIDADE</em></td>
+<td><em>VARCHAR(50)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
+<ul>
+<li><p>PK : PK_AUMENTO_SALARIAL</p></li>
+</ul>
+<p><em><strong>INDEX :</strong> IX_</em>AUMENTO_SALARIAL<em>_</em>UUID
+(UUID)</p></td>
+<td colspan="2"><p><em><strong>SEQUENCIA</strong>:
+SEQ_</em>AUMENTO_SALARIAL</p>
+<p><em><strong>TRIGGER</strong>: TRG_</em>AUMENTO_SALARIAL</p></td>
+</tr>
+<tr>
+<td style="text-align: center;">RH_T_AUMENTO_SALARIAL_DET</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>AUMENTO_SALARIAL_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td><strong><em>RH_T_</em>AUMENTO_SALARIAL</strong>.ID</td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>INSTIT_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SECCAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>VINCULO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SITUACAO_LABORAL_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>LOCAL_TRAB_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SALARIO_DE</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>SALARIO_ATE</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">ESTADO</td>
+<td><em>VARCHAR(1)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_REGISTO</em></td>
+<td><em>DATE</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_REGISTO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_ID</em></td>
+<td><em>NUMBER</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>USER_ALTERACAO_NAME</em></td>
+<td><em>VARCHAR(200)</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>DATA_ALTERACAO</em></td>
+<td><em>DATE</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em>UUID</em></td>
+<td><em>VARCHAR(100)</em></td>
+<td><em>SIM</em></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: center;"><p><strong>CONSTRAINTS</strong>:</p>
 <ul>
 <li><p>PK : PK_AUMENTO_SALARIAL_DET</p></li>
 <li><p>FK: FK_AUMENTO_SALARIAL (<em>AUMENTO_SALARIAL_ID</em>)</p></li>
@@ -12091,7 +13717,7 @@ style="text-align: left;"><strong>CLASSIFICACAO_QUALIT_AVD1</strong></td>
 </thead>
 <tbody>
 <tr>
-<td>Tipo Movimento REMUNERACAO</td>
+<td style="text-align: center;">Tipo Movimento REMUNERACAO</td>
 <td>GET_MOVIMENTO_REMUNERACAO (P_TIPO)</td>
 <td><p>SELECT a.id AS ID, a.descricao AS NOME</p>
 <p>FROM inpsrhsigof..rh_tipo_movimentos a, inpsrh.itens_actos b,
@@ -12108,7 +13734,7 @@ inpsrh.itens_tipo c</p>
 <p>P_TIPO = 'REM' OU 'ABA'</p></td>
 </tr>
 <tr>
-<td>Tipo Movimento REMUNERACAO</td>
+<td style="text-align: center;">Tipo Movimento REMUNERACAO</td>
 <td>GET_MOVIMENTO_DESCONTO (P_TIPO)</td>
 <td><p>SELECT a.id, a.descricao AS NOME</p>
 <p>NOME</p>
@@ -12125,22 +13751,22 @@ sipsglobal.inpsrh.itens_tipo c</p>
 <p>P_TIPO = 'PAG'OU 'IMP'</p></td>
 </tr>
 <tr>
-<td>Tipo Vinculo</td>
+<td style="text-align: center;">Tipo Vinculo</td>
 <td>GET_TIPO_VINCULO</td>
 <td>SELECT ID, NOME FROM RH_T_PARAM_VINCULO</td>
 </tr>
 <tr>
-<td>Escalao</td>
+<td style="text-align: center;">Escalao</td>
 <td>GET_ESCALAO</td>
 <td>RH_T_PARAM_ESCALAO</td>
 </tr>
 <tr>
-<td>SALARIO</td>
+<td style="text-align: center;">SALARIO</td>
 <td>GET_SALARIO</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SALARIO</td>
 </tr>
 <tr>
-<td>DIREÇÃO</td>
+<td style="text-align: center;">DIREÇÃO</td>
 <td>GET_DIRECAO_SERVICO</td>
 <td><p>SELECT T.ID,</p>
 <p>'(' ||T.CODIGO ||') ' ||TRIM(REGEXP_REPLACE(T.nome, '^Processar
@@ -12157,7 +13783,7 @@ T3.INSTIT_ID = T2.ID )</p>
 <p>);</p></td>
 </tr>
 <tr>
-<td>CENTRO_CUSTO</td>
+<td style="text-align: center;">CENTRO_CUSTO</td>
 <td>GET_NOME_CENTRO_CUSTO (P_ INSTIT_ID)</td>
 <td><p>Pendente Parametrização</p>
 <p>Devolve (ID, NOME)</p>
@@ -12167,86 +13793,86 @@ inpssigof.entidades b</p>
 <p>and a.instit_id = :p_instit_id</p></td>
 </tr>
 <tr>
-<td>SECCAO</td>
+<td style="text-align: center;">SECCAO</td>
 <td>GET_SECCAO (P_ INSTIT_ID)</td>
 <td><p>Pendente Parametrização</p>
 <p>Devolve (ID, NOME)</p>
 <p>RH_T_SECCAO</p></td>
 </tr>
 <tr>
-<td>CARREIRA</td>
+<td style="text-align: center;">CARREIRA</td>
 <td>GET_CARREIRA (P_CARGO)</td>
 <td><p>Pendente Parametrização</p>
 <p>Devolve (ID, NOME)</p>
 <p>RH_T_PARAM_CARREIRA</p></td>
 </tr>
 <tr>
-<td>CATEGORIA</td>
+<td style="text-align: center;">CATEGORIA</td>
 <td>GET_CATEGORIA(P_CARREIRA)</td>
 <td><p>Pendente Parametrização</p>
 <p>Devolve (ID, NOME)</p>
 <p>RH_T_PARAM_CATEGORIA</p></td>
 </tr>
 <tr>
-<td>SALARIO BASE</td>
+<td style="text-align: center;">SALARIO BASE</td>
 <td>GET_MOVIMENTO_SALL</td>
 <td><p>SELECT ID</p>
 <p>FROM sipsglobal. rh_tipo_movimentos</p>
 <p>WHERE short_desc = 'SALL' AND amb_apl_id = 30;</p></td>
 </tr>
 <tr>
-<td>IUR</td>
+<td style="text-align: center;">IUR</td>
 <td>GET_MOVIMENTO_IUR</td>
 <td><p>SELECT ID</p>
 <p>FROM rh_tipo_movimentos</p>
 <p>WHERE short_desc = 'IUR' AND amb_apl_id = 30;</p></td>
 </tr>
 <tr>
-<td>INPS</td>
+<td style="text-align: center;">INPS</td>
 <td>GET_MOVIMENTO_INPS</td>
 <td><p>SELECT ID</p>
 <p>FROM rh_tipo_movimentos</p>
 <p>WHERE short_desc = 'INPS' AND amb_apl_id = 30;</p></td>
 </tr>
 <tr>
-<td>GEOGRAFIA</td>
+<td style="text-align: center;">GEOGRAFIA</td>
 <td>GET_GEOGRAFIA (P_NIVEL )</td>
 <td><p>SELECT ID, NOME FROM SIPSGLOBAL.GLB_T_GEOGRAFIA</p>
 <p>WHERE NIVEL_DETALHE = : P_NIVEL</p></td>
 </tr>
 <tr>
-<td>LOCAL DE TRABALHO</td>
+<td style="text-align: center;">LOCAL DE TRABALHO</td>
 <td>GET_LOCAL_TRABALHO</td>
 <td>SELECT ID, NOME FROM RH_T_LOCAL_TRABALHO</td>
 </tr>
 <tr>
-<td>PAIS DO LOCAL DE TRABALHO</td>
+<td style="text-align: center;">PAIS DO LOCAL DE TRABALHO</td>
 <td>GET_PAIS_LOCAL_TRAB(P_LOCAL_TRABALHO)</td>
 <td>SELEC B.NOME FROM RH_T_LOCAL_TRABALHO A,
 SIPSGLOBAL"."GLB_T_GEOGRAFIA B WHERE A.PAIS_ID = B.ID AND A.ID = :
 P_LOCAL_TRABALHO</td>
 </tr>
 <tr>
-<td>Local trabalho</td>
+<td style="text-align: center;">Local trabalho</td>
 <td>GET_PAIS_ILHA_TRAB(P_LOCAL_TRABALHO)</td>
 <td>SELEC B.NOME FROM RH_T_LOCAL_TRABALHO A,
 SIPSGLOBAL"."GLB_T_GEOGRAFIA B WHERE A.ILHA_ID = B.ID AND A.ID = :
 P_LOCAL_TRABALHO</td>
 </tr>
 <tr>
-<td>Nome colaborador</td>
+<td style="text-align: center;">Nome colaborador</td>
 <td>GET_NOME_COLABORADOR(P_ <em>TIPREL_ID</em>)</td>
 <td>SELECT NOME FROM RH_V_DOSSIE WHERE TIPREL_ID =: P_
 <em>TIPREL_ID</em></td>
 </tr>
 <tr>
-<td>NOME CARGO</td>
+<td style="text-align: center;">NOME CARGO</td>
 <td>GET_NOME_CARGO</td>
 <td>SELECT CARGO FROM RH_V_DOSSIE WHERE TIPREL_ID =: P_
 <em>TIPREL_ID</em></td>
 </tr>
 <tr>
-<td>Nome de Local</td>
+<td style="text-align: center;">Nome de Local</td>
 <td>getLocalUserMovimento(</td>
 <td><p>function getLocalUserMovimento(p_id_equipamento number)return
 varchar2</p>
@@ -12261,7 +13887,7 @@ rhe WHERE rhe.id = p_id_equipamento and rownum = 1;</p>
 <p>end;</p></td>
 </tr>
 <tr>
-<td>getIDDC</td>
+<td style="text-align: center;">getIDDC</td>
 <td>getIDDC</td>
 <td><p>function getIDDC(p_nu_dc number) return number</p>
 <p>is</p>
@@ -12296,12 +13922,12 @@ dc.nu_dc = p_nu_dc;</p>
 </thead>
 <tbody>
 <tr>
-<td>ReFERENCIAS DE VISTAS ANTIGAS</td>
+<td style="text-align: center;">ReFERENCIAS DE VISTAS ANTIGAS</td>
 <td>V_RH : CADASTRO</td>
 <td></td>
 </tr>
 <tr>
-<td>Dados Pessoais e Mobilidade</td>
+<td style="text-align: center;">Dados Pessoais e Mobilidade</td>
 <td>RH_V_DOSSIE</td>
 <td><ul>
 <li><p><em>ULTIMO_VINCULO</em></p></li>
@@ -12354,12 +13980,12 @@ dc.nu_dc = p_nu_dc;</p>
 </ul></td>
 </tr>
 <tr>
-<td>Contacto do funcionario</td>
+<td style="text-align: center;">Contacto do funcionario</td>
 <td>RH_V_CONTATO</td>
 <td></td>
 </tr>
 <tr>
-<td>Lista mobilidade</td>
+<td style="text-align: center;">Lista mobilidade</td>
 <td><mark>RH_V_MOBILIDADE</mark></td>
 <td><ul>
 <li><p><em>TIPO_SITUACAO_DESC</em></p></li>
@@ -12378,7 +14004,7 @@ dc.nu_dc = p_nu_dc;</p>
 </ul></td>
 </tr>
 <tr>
-<td>Lista Carreira</td>
+<td style="text-align: center;">Lista Carreira</td>
 <td><mark>RH_V_CARREIRA</mark></td>
 <td><ul>
 <li><p>DATA_INICIO</p></li>
@@ -12401,7 +14027,7 @@ dc.nu_dc = p_nu_dc;</p>
 </ul></td>
 </tr>
 <tr>
-<td>Historico Laboral</td>
+<td style="text-align: center;">Historico Laboral</td>
 <td>RH_V_HIST_LABORAL</td>
 <td><ul>
 <li><p>TIPREL_ID</p></li>
@@ -12451,7 +14077,7 @@ dc.nu_dc = p_nu_dc;</p>
 </ul></td>
 </tr>
 <tr>
-<td>RENDIMENTOS E ENCARGOS</td>
+<td style="text-align: center;">RENDIMENTOS E ENCARGOS</td>
 <td>RH_V_REND_ENC</td>
 <td><ul>
 <li><p>ESTADO</p></li>
