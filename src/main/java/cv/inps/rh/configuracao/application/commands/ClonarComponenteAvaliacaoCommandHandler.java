@@ -9,25 +9,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
-public class CreateComponentesAvaliacaoCommandHandler implements CommandHandler<CreateComponentesAvaliacaoCommand, ResponseEntity<SuccessResponseDTO>> {
+public class ClonarComponenteAvaliacaoCommandHandler
+    implements CommandHandler<ClonarComponenteAvaliacaoCommand, ResponseEntity<SuccessResponseDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(CreateComponentesAvaliacaoCommandHandler.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(ClonarComponenteAvaliacaoCommandHandler.class);
 
    private final ComponenteAvaliacaoService componenteAvaliacaoService;
 
-   public CreateComponentesAvaliacaoCommandHandler(ComponenteAvaliacaoService componenteAvaliacaoService) {
+   public ClonarComponenteAvaliacaoCommandHandler(ComponenteAvaliacaoService componenteAvaliacaoService) {
       this.componenteAvaliacaoService = componenteAvaliacaoService;
-
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<SuccessResponseDTO> handle(CreateComponentesAvaliacaoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(ClonarComponenteAvaliacaoCommand command) {
 
-      LOGGER.debug("CreateComponentesAvaliacaoCommand : {}", command);
+      LOGGER.debug("ClonarComponenteAvaliacaoCommand : {}", command);
 
-      return componenteAvaliacaoService.registar(command);
+      return componenteAvaliacaoService.clonar(command);
    }
 
 }

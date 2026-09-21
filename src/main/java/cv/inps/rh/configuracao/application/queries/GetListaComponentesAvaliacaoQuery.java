@@ -17,4 +17,10 @@ public class GetListaComponentesAvaliacaoQuery implements Query {
   @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
 
+  /** Filtro opcional por ano do ciclo. */
+  private Integer ano;
+
+  /** Filtro opcional por estado ('A' ativo, 'I' inativo). */
+  private String estado;
+
 }

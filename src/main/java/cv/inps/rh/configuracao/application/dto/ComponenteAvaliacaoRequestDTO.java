@@ -4,6 +4,7 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,13 @@ public class ComponenteAvaliacaoRequestDTO {
 
   @NotNull
   private Integer ano;
+
+  /**
+   * Tipo de periodicidade do ciclo: SEMESTRAL, TRIMESTRAL ou ANUAL
+   * (domínio PERIODICIDADE, REFERENCIA = 'PERIODICIDADE').
+   */
+  @NotBlank
+  private String periodicidade;
 
   @NotNull
   @DecimalMin("0")

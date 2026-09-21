@@ -15,8 +15,12 @@ ALTER TABLE RH_T_AVD ADD ABRAGENCIA VARCHAR2(100);
 
 -- 2) SEMESTRE fica orfao: o eixo temporal passa para
 --    RH_T_AVD_DETALHE.PERIODICIDADE / RH_T_AVD_PERIODICIDADE.PERIODICIDADE.
---    Tabela estava vazia (0 linhas) quando isto correu.
-ALTER TABLE RH_T_AVD DROP COLUMN SEMESTRE;
+--    NAO CORRER AINDA. 16 ficheiros do modulo avaliacao ainda leem
+--    AvaliacaoEntity.semestre; o drop so pode acontecer no fim da fase F3,
+--    quando o codigo deixar de o usar. Ate la a coluna fica (nullable,
+--    tabela vazia). Ver F3 no plano de refactor.
+--
+-- ALTER TABLE RH_T_AVD DROP COLUMN SEMESTRE;
 
 -- 3) PERIODICIDADE na parametrizacao guardava '2' (lixo da versao anterior),
 --    que nao corresponde a nenhum valor do dominio. Passa a guardar o TIPO.

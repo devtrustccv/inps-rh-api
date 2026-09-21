@@ -27,6 +27,13 @@ public interface AvaliacaoEntityRepository extends
                         @Param("funId") Long funId,
                         Pageable pageable);
 
+        /**
+         * Há alguma avaliação lançada para este ano? Usado como guard da inativação da
+         * parametrização de componentes: uma vez definido um objectivo no ano, o ciclo
+         * já não pode ser desligado.
+         */
+        boolean existsByAno(Integer ano);
+
         boolean existsByFuncionario_IdAndAnoAndSemestre(Long funId, Integer ano, String semestre);
 
         boolean existsByFuncionario_UuidAndAnoAndSemestre(UUID uuid, Integer ano, String semestre);

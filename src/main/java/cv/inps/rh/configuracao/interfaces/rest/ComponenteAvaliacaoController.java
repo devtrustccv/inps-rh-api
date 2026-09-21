@@ -6,14 +6,18 @@ package cv.inps.rh.configuracao.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.commands.ClonarComponenteAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.commands.CreateComponentesAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.commands.InativarComponenteAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.commands.UpdateComponenteAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.dto.ClonarComponenteAvaliacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListComponenteAvaliacaoDTO;
 import cv.inps.rh.configuracao.application.queries.GetComponenetAvaliacaoAtualQuery;
 import cv.inps.rh.configuracao.application.queries.GetComponenteAvaliacaoQuery;
 import cv.inps.rh.configuracao.application.queries.GetListaComponentesAvaliacaoQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +27,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 
 @IgrpController
 @RestController
@@ -55,14 +58,14 @@ public class ComponenteAvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> createComponentesAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO createComponentesAvaliacaoRequest
+   public ResponseEntity<SuccessResponseDTO> createComponentesAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO createComponentesAvaliacaoRequest
     )
   {
 
@@ -124,10 +127,12 @@ public class ComponenteAvaliacaoController {
 
    public ResponseEntity<WrapperListComponenteAvaliacaoDTO> getListaComponentesAvaliacao(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListaComponentesAvaliacaoQuery(pageNumber, pageSize);
+      final var query = new GetListaComponentesAvaliacaoQuery(pageNumber, pageSize, ano, estado);
 
       return queryBus.handle(query);
 
@@ -146,14 +151,14 @@ public class ComponenteAvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> updateComponenteAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO updateComponenteAvaliacaoRequest
+   public ResponseEntity<SuccessResponseDTO> updateComponenteAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO updateComponenteAvaliacaoRequest
        , @PathVariable String id)
   {
 
@@ -190,6 +195,70 @@ public class ComponenteAvaliacaoController {
       final var query = new GetComponenetAvaliacaoAtualQuery();
 
       return queryBus.handle(query);
+
+  }
+
+
+   @PostMapping(
+   value = "avaliacao-desempenho/componentes/{id}/clonar"
+  )
+  @Operation(
+    summary = "Clonar componente avaliacao",
+    description = "Cria uma nova parametrizacao para outro ano, copiando o cabecalho e "
+        + "todas as linhas da origem. Funciona mesmo que a origem esteja inativa.",
+    responses = {
+      @ApiResponse(
+          responseCode = "201",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<SuccessResponseDTO> clonarComponenteAvaliacao(
+       @PathVariable String id,
+       @Valid @RequestBody ClonarComponenteAvaliacaoRequestDTO clonarComponenteAvaliacaoRequest)
+  {
+
+      final var command = new ClonarComponenteAvaliacaoCommand(id, clonarComponenteAvaliacaoRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PatchMapping(
+   value = "avaliacao-desempenho/componentes/{id}/inativar"
+  )
+  @Operation(
+    summary = "Inativar componente avaliacao",
+    description = "Inativa a parametrizacao de um ano. So e possivel enquanto nao houver "
+        + "nenhum objectivo definido nesse ano.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<SuccessResponseDTO> inativarComponenteAvaliacao(
+       @PathVariable String id)
+  {
+
+      final var command = new InativarComponenteAvaliacaoCommand(id);
+
+      return commandBus.send(command);
 
   }
 

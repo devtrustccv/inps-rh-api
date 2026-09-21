@@ -34,6 +34,15 @@ public class ParamObjetivoDetEntity extends AuditEntity {
   @Column(name = "ANO", nullable = false)
   private Integer ano;
 
+  /**
+   * Tipo de periodicidade do ciclo de avaliação: SEMESTRAL, TRIMESTRAL ou ANUAL
+   * (domínio PERIODICIDADE, REFERENCIA = 'PERIODICIDADE'). Determina quantos
+   * períodos o ano tem; os períodos concretos (SEMESTRE1, TRIMESTRE1, ...) são
+   * gravados em RH_T_AVD_DETALHE.PERIODICIDADE.
+   */
+  @Column(name = "PERIODICIDADE", length = 100)
+  private String periodicidade;
+
   @Column(name = "PESO_COMPORTAMENTAIS", precision = 5, scale = 2)
   private BigDecimal pesoComportamentais;
 
