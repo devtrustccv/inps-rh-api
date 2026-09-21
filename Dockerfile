@@ -1,7 +1,4 @@
-# ============================================================
-# BUILD - Maven + Java 26
-# ============================================================
-FROM cgr.dev/chainguard/maven:3.9-jdk26-dev AS build
+FROM maven:3.9.16-eclipse-temurin-26 AS build
 
 WORKDIR /app
 
@@ -24,10 +21,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     && ls -lh target
 
 
-# ============================================================
-# RUNTIME - Java 26
-# ============================================================
-FROM cgr.dev/chainguard/jre:openjdk-26
+FROM eclipse-temurin:26-jdk-alpine
 
 WORKDIR /app
 

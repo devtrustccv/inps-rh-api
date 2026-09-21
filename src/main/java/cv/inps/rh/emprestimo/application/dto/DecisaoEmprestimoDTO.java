@@ -17,6 +17,13 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class DecisaoEmprestimoDTO {
 
+  // Pedido não é uma etapa de parecer (sem Conforme/Não Conforme), por isso
+  // "parecer"/"responsavel" ficam sempre null aqui — só executadoPor/data
+  // são usados, para manter a Execução Etapa do Pedido no mesmo padrão
+  // (dentro de decisao.<etapa>) usado por todas as outras etapas.
+  @Valid
+  private BaseDecisaoDTO pedido;
+
   @Valid
   private BaseDecisaoDTO analiseRhPedido;
 
