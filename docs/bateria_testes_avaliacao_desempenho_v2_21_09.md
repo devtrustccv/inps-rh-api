@@ -189,8 +189,19 @@ Grelha pai/filho final, com as etiquetas do ecrã:
 
 Avaliação final: 3.78×50% + 4.76×50% = **4.27 → MUITO_BOM** ✔
 
-## 6. Por rever
+## 6. A escala é parametrização, não uma decisão pendente
 
-A régua da escala usada nos testes (0–5) foi escolhida por mim para ser compatível com notas
-de 1 a 5. **O negócio tem de confirmar** a régua definitiva — dela depende a classificação
-qualitativa de todas as avaliações. O código não impõe nenhuma.
+A régua da escala define-se no ecrã "Registar Escala" — é o utilizador que a configura, como
+qualquer outra parametrização. Usei 0–5 nos testes por ser compatível com notas de 1 a 5,
+mas não há aqui nada por decidir em engenharia.
+
+O que **era** um problema, e foi corrigido: se os intervalos configurados não cobrirem o
+resultado calculado, a avaliação gravava com nota e **sem classificação qualitativa**, com
+`200 OK` e em silêncio.
+
+| | Antes | Agora |
+|---|---|---|
+| Escala 50–100, nota 3.78 | grava, qualitativa `null`, sem aviso | grava + **alerta** a dizer que reveja os intervalos |
+| Escala 0–5, nota 3.78 | — | grava, qualitativa BOM, sem alerta |
+
+Não se bloqueia (a escala é livre), mas deixa de passar despercebido.

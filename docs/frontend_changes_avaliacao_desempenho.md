@@ -399,7 +399,23 @@ Exemplo real (pesos 60/40, ponderações globais 40/40/20):
 
 **Se já tiveres notas calculadas, mudam.** As anteriores estavam inflacionadas.
 
-### 16. Enums novos
+### 16. Aviso quando a nota não cai na escala
+
+A escala é livre e parametrizável, por isso o backend não a impõe. Mas se os intervalos
+configurados não cobrirem o resultado calculado, a avaliação ficava gravada **com nota e sem
+classificação qualitativa**, com `200 OK` e sem nada a assinalar.
+
+Agora avisa, sem bloquear:
+
+```json
+{ "sucesso": true,
+  "mensagem": "Avaliação do período SEMESTRE1 gravada.",
+  "alertas": ["A nota 3.78 não cai em nenhum escalão da escala configurada, pelo que a avaliação ficou sem classificação qualitativa. Reveja os intervalos em Registar Escala."] }
+```
+
+**Mostrem este `alertas` ao utilizador** — é o único sinal de que a escala está mal configurada.
+
+### 17. Enums novos
 
 Expostos pelo enum exposer em `api/v1/enums`:
 

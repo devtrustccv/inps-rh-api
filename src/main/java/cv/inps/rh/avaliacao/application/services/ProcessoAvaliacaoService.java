@@ -83,12 +83,19 @@ public class ProcessoAvaliacaoService {
       medicao.setAvaliacaoValor(valores.nota());
     });
 
-    recalcularPeriodo(avaliacao, periodo);
+    var semEscalao = recalcularPeriodo(avaliacao, periodo);
     atualizarEstado(avaliacao, periodo);
     avaliacaoRepository.save(avaliacao);
 
-    return ResponseEntity.ok(sucesso(avaliacao,
-        "Avaliação do período " + periodo + " gravada."));
+    var resposta = sucesso(avaliacao, "Avaliação do período " + periodo + " gravada.");
+    if (semEscalao != null) {
+      // A escala é livre e parametrizável, por isso não se bloqueia — mas deixar passar em
+      // silêncio uma nota sem classificação esconde uma escala mal configurada.
+      resposta.getAlertas().add("A nota " + semEscalao.toPlainString()
+          + " não cai em nenhum escalão da escala configurada, pelo que a avaliação ficou sem"
+          + " classificação qualitativa. Reveja os intervalos em Registar Escala.");
+    }
+    return ResponseEntity.ok(resposta);
   }
 
   @Transactional
@@ -308,14 +315,14 @@ public class ProcessoAvaliacaoService {
    * família é depois pesada pela ponderação global do ano (objectivos / competências /
    * atitude pessoal), definida em RH_T_PARAM_OBJETIVO_DET.</p>
    */
-  private void recalcularPeriodo(AvaliacaoEntity avaliacao, String periodo) {
+  private BigDecimal recalcularPeriodo(AvaliacaoEntity avaliacao, String periodo) {
     var ano = avaliacao.getAno();
     if (ano == null) {
-      return;
+      return null;
     }
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(ano).orElse(null);
     if (det == null) {
-      return;
+      return null;
     }
 
     var medicoes = periodoService.medicoesDoPeriodo(avaliacao.getId(), periodo);
@@ -361,6 +368,7 @@ public class ProcessoAvaliacaoService {
     detalhe.setAvaliacaoFinal(escala2(avaliacaoFinal));
     detalhe.setAvaliacaoQualitativa(resolveQualitativa(escalaRepository.findAll(), avaliacaoFinal));
     periodoService.guardarDetalhe(detalhe);
+    return detalhe.getAvaliacaoQualitativa() == null ? detalhe.getAvaliacaoFinal() : null;
   }
 
   private BigDecimal somaCompetencias(List<AvaliacaoCompetenciaEntity> competencias, String componente,
