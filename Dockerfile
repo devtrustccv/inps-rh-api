@@ -1,15 +1,38 @@
-FROM cgr.dev/chainguard/maven:latest-dev AS build
+# ============================================================
+# BUILD
+# ============================================================
+FROM cgr.dev/chainguard/maven:3.9-jdk26-dev AS build
+
 WORKDIR /app
+
+# Verificar Java e Maven
+RUN java -version && mvn -version
+
+# Copiar primeiro o pom para aproveitar o cache Docker
 COPY pom.xml ./
-RUN --mount=type=cache,target=/root/.m2 mvn -B -q dependency:go-offline
+
+# Baixar dependências
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -q dependency:go-offline
+
+# Copiar código fonte
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 mvn -B -DskipTests clean package \
- && ls -lh target
+
+# Compilar e gerar JAR
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -DskipTests clean package \
+    && ls -lh target
 
 
-FROM cgr.dev/chainguard/jre:latest
+# ============================================================
+# RUNTIME
+# ============================================================
+FROM cgr.dev/chainguard/jre:openjdk-26
+
 WORKDIR /app
+
 COPY --from=build /app/target/*.jar /app/app.jar
-#COPY opentelemetry-javaagent.jar /app/otel/opentelemetry-javaagent.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
