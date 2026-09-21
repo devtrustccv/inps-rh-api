@@ -49,6 +49,8 @@ public class EscalaAvaliacaoService {
       throw IgrpResponseStatusException.badRequest("Lista de escala de avaliação não pode estar vazia");
     }
 
+    validarIntervalos(rows);
+
     var uuids = new ArrayList<String>(rows.size());
     Set<Long> keepIds = new HashSet<>();
 
@@ -187,6 +189,31 @@ public class EscalaAvaliacaoService {
       return UUID.fromString(raw.trim());
     } catch (Exception e) {
       throw IgrpResponseStatusException.badRequest("UUID inválido: " + raw);
+    }
+  }
+
+  /**
+   * Os escalões têm de formar uma régua sem ambiguidades: nenhum pode começar antes de o
+   * anterior acabar. Com intervalos sobrepostos, a classificação qualitativa de uma nota
+   * dependeria da ordem em que os escalões são lidos — duas notas iguais podiam sair com
+   * classificações diferentes.
+   */
+  private void validarIntervalos(java.util.List<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO> rows) {
+    var comIntervalo = rows.stream()
+        .filter(r -> r.getQuantitativaDe() != null && r.getQuantitativaAte() != null)
+        .sorted(java.util.Comparator.comparing(
+            cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO::getQuantitativaDe))
+        .toList();
+
+    for (int i = 1; i < comIntervalo.size(); i++) {
+      var anterior = comIntervalo.get(i - 1);
+      var atual = comIntervalo.get(i);
+      if (atual.getQuantitativaDe().compareTo(anterior.getQuantitativaAte()) <= 0) {
+        throw IgrpResponseStatusException.badRequest(
+            "Os intervalos da escala não podem sobrepor-se: ["
+                + anterior.getQuantitativaDe() + "-" + anterior.getQuantitativaAte() + "] e ["
+                + atual.getQuantitativaDe() + "-" + atual.getQuantitativaAte() + "].");
+      }
     }
   }
 }

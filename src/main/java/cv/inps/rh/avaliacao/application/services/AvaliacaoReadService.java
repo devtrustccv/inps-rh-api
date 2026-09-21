@@ -206,12 +206,30 @@ public class AvaliacaoReadService {
     target.setPesoComportamentais(entity.getPesoComportamentais());
     target.setPesoTecnica(entity.getPesoTecnica());
     target.setPeriodicidade(periodo);
+    target.setPeriodicidadesDefinidas(periodoService.detalhesDe(entity.getId()).stream()
+        .map(d -> d.getPeriodicidade())
+        .sorted()
+        .toList());
     target.setAbrangencia(entity.getAbrangencia());
     target.setEstado(entity.getEstado());
-    ofNullable(entity.getInstitId()).ifPresent(i -> target.setInstitId(i.getId()));
-    ofNullable(entity.getSeccaoId()).ifPresent(s -> target.setSeccaoId(s.getId()));
-    ofNullable(entity.getCargo()).ifPresent(c -> target.setCargoId(c.getId()));
-    ofNullable(entity.getCarreira()).ifPresent(c -> target.setCarrPccsId(c.getId()));
+    // O ecrã de avaliação mostra Direção / Unidade / Carreira / Cargo pelo nome,
+    // por isso o id sozinho não chega ao cliente.
+    ofNullable(entity.getInstitId()).ifPresent(i -> {
+      target.setInstitId(i.getId());
+      target.setInstituicaoNome(i.getNome());
+    });
+    ofNullable(entity.getSeccaoId()).ifPresent(s -> {
+      target.setSeccaoId(s.getId());
+      target.setSeccaoNome(s.getNome());
+    });
+    ofNullable(entity.getCargo()).ifPresent(c -> {
+      target.setCargoId(c.getId());
+      target.setCargoNome(c.getNome());
+    });
+    ofNullable(entity.getCarreira()).ifPresent(c -> {
+      target.setCarrPccsId(c.getId());
+      target.setCarrPccsNome(c.getNome());
+    });
     ofNullable(entity.getFuncionario()).ifPresent(f -> {
       target.setNomeColaborador(f.getNome());
       target.setUuidColaborador(f.getUuid());
@@ -221,6 +239,7 @@ public class AvaliacaoReadService {
   private ObjectivoAvaliacaoDTO toObjectivo(AvaliacaoObjectivoEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new ObjectivoAvaliacaoDTO();
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumero(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setObjectivo(e.getObjectivos());

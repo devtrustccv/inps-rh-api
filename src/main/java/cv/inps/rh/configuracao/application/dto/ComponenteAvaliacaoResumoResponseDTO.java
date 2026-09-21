@@ -17,12 +17,16 @@ public class ComponenteAvaliacaoResumoResponseDTO {
   private String uuid;
   private Integer ano;
   private String periodicidade;
+  /** Rótulo legível: "Semestral", "Trimestral", "Anual". */
+  private String periodicidadeDescricao;
   private BigDecimal pesoComportamentais;
   private BigDecimal pesoTecnica;
   private BigDecimal ponderacaoObjetivo;
   private BigDecimal ponderacaoCompetencia;
   private BigDecimal ponderacaoAtitudePessoal;
   private String estado;
+  /** Rótulo legível do estado: "Ativo" / "Inativo". */
+  private String estadoDescricao;
   private Integer versao;
 
   /**

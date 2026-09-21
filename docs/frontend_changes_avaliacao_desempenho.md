@@ -255,7 +255,51 @@ períodos do ciclo**, com `avaliacaoFinal: null` nos que ainda não foram avalia
 | Avaliação final | `primeiroSemestre`/`segundoSemestre` | `periodos[]` |
 | `SemestreDTO` | existia | removido → `PonderacaoPeriodoDTO` |
 
-### 12. Enums novos
+### 12. Campos acrescentados depois da bateria de testes (21/09)
+
+Ver `docs/bateria_testes_avaliacao_desempenho_21_09.md`.
+
+**Grelha de componentes** ganha os rótulos legíveis que o ecrã mostra:
+
+```diff
+  {
+    "periodicidade": "SEMESTRAL",
++   "periodicidadeDescricao": "Semestral",
+    "estado": "A",
++   "estadoDescricao": "Ativo"
+  }
+```
+
+**Detalhe da avaliação** (`GET .../avaliacoes/{uuid}`):
+
+```diff
+  {
++   "instituicaoNome": "DRHDO",
++   "seccaoNome": "Unidade de Gestão Administrativa e Logística",
++   "cargoNome": "Coordenador de Unidades e Tesoureiro",
++   "carrPccsNome": "Coordenador",
++   "periodicidadesDefinidas": ["SEMESTRE1", "SEMESTRE2"],
+    "objectivos": [
+-     { "paramId": null, ... }
++     { "paramId": 73, ... }
+    ]
+  }
+```
+
+- `seccaoNome`, `cargoNome` e `carrPccsNome` estavam declarados como **`Long`** e nunca eram
+  preenchidos; passam a `String` com o nome. **Se o vosso cliente tipado os tinha como número,
+  isto parte.**
+- `periodicidadesDefinidas` diz que períodos já existem, para o ecrã saber que separadores mostrar.
+- `paramId` volta a vir preenchido na leitura, para permitir ler → editar → gravar.
+
+**Dois erros mudaram de código:**
+
+| Situação | Antes | Agora |
+|---|---|---|
+| `PUT .../componentes/{id}` num ano com avaliações | `400` com texto `ORA-02292` | `409` com mensagem explicando que deve clonar |
+| `POST .../escala` com intervalos sobrepostos | `200` (gravava) | `400` identificando os intervalos em conflito |
+
+### 13. Enums novos
 
 Expostos pelo enum exposer em `api/v1/enums`:
 

@@ -102,6 +102,15 @@ public class ComponenteAvaliacaoService {
       throw IgrpResponseStatusException.conflict("Já existe parametrização para o ano: " + dto.getAno());
     }
 
+    // As linhas sao apagadas e recriadas; se ja houver avaliacoes a apontar para elas
+    // a BD recusa (FK_AVD_PARAM_OBJECTIVO). Recusar aqui da uma mensagem util em vez
+    // de deixar escapar um ORA-02292 para o cliente.
+    if (avaliacaoRepository.existsByAno(det.getAno())) {
+      throw IgrpResponseStatusException.conflict(
+          "Não é possível editar: já existem objectivos definidos para o ano " + det.getAno()
+              + ". Clone a parametrização para um ano novo.");
+    }
+
     var periodicidade = TipoPeriodicidade.fromValorOrThrow(dto.getPeriodicidade());
     validarPesosEPonderacoes(dto);
 
@@ -338,12 +347,14 @@ public class ComponenteAvaliacaoService {
     dto.setUuid(det.getUuid() != null ? det.getUuid().toString() : null);
     dto.setAno(det.getAno());
     dto.setPeriodicidade(det.getPeriodicidade());
+    dto.setPeriodicidadeDescricao(descricaoPeriodicidade(det.getPeriodicidade()));
     dto.setPesoComportamentais(det.getPesoComportamentais());
     dto.setPesoTecnica(det.getPesoTecnica());
     dto.setPonderacaoObjetivo(det.getPonderacaoObjetivo());
     dto.setPonderacaoCompetencia(det.getPonderacaoCompetencia());
     dto.setPonderacaoAtitudePessoal(det.getPonderacaoAtitudePess());
     dto.setEstado(det.getEstado());
+    dto.setEstadoDescricao(ESTADO_INATIVO.equalsIgnoreCase(det.getEstado()) ? "Inativo" : "Ativo");
     dto.setVersao(det.getVersao());
     dto.setPodeInativar(podeInativar && !ESTADO_INATIVO.equalsIgnoreCase(det.getEstado()));
     return dto;
@@ -427,6 +438,15 @@ public class ComponenteAvaliacaoService {
     dto.setPonderacao(e.getPonderacao());
     dto.setComponente(e.getComponente());
     dto.setEstado(e.getEstado());
+  }
+
+  /** "SEMESTRAL" -> "Semestral". A grelha mostra o rótulo, não o código. */
+  private String descricaoPeriodicidade(String codigo) {
+    if (!StringUtils.hasText(codigo)) {
+      return null;
+    }
+    var c = codigo.trim();
+    return c.charAt(0) + c.substring(1).toLowerCase();
   }
 
   private UUID parseUuid(String raw) {
