@@ -76,6 +76,8 @@ public class EmprestimoReadService {
     dto.setNif(entity.getNif());
     dto.setEstado(entity.getEstado());
     dto.setEstadoDesc(StatusEmprestimo.codeDescriptionMap().getOrDefault(entity.getEstado(), entity.getEstado()));
+    dto.setExecutadoPor(entity.getCreatedBy());
+    ofNullable(entity.getCreatedDate()).ifPresent(d -> dto.setDataExecucao(d.toLocalDate()));
 
     var order = entity.getPedido();
     dto.setEtapa(order.getEtapa());
