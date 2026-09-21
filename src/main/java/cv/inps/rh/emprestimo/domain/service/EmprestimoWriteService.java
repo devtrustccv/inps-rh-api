@@ -5,6 +5,7 @@ import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimo
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
+import cv.inps.rh.emprestimo.application.dto.ValidarEmprestimoRequestDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
@@ -12,6 +13,8 @@ import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -45,6 +48,8 @@ public class EmprestimoWriteService {
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoHelper emprestimoHelper;
+  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 
@@ -89,16 +94,26 @@ public class EmprestimoWriteService {
       entity.setFinalidade(request.getFinalidade());
       entity.setTipoEmprestimo(tipoPedido.name());
       entity.setTipoSituacao(tipoPedido.name());
+      // RH_T_EMPRESTIMO.NIF é NOT NULL na BD (pensado para o fornecedor da
+      // viatura em Aquisição Viatura) mas não se aplica a Fundo
+      // Social/Recuperação — sem isto o INSERT falha com ORA-01400. String
+      // vazia não serve: o Oracle trata VARCHAR2 '' como NULL.
+      entity.setNif("N/A");
       entity.setVersao(1L);
       entity.setTiprel(currentRelation);
-      entity.setNrPrestacao(DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim()));
+      entity.setNrPrestacao(
+          request.getNrPrestacao() != null
+              ? request.getNrPrestacao()
+              : DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim())
+      );
+      entity.setJuro(request.getJuro());
 
       var funId = currentRelation.getFunId();
 
       var order = new PedidoEntity();
       order.setFunId(funId);
       order.setUuid(UuidCreator.getTimeOrderedEpoch());
-      order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
+      order.setTipoPedido(tipoPedido.name());
       order.setOrigem("RH");
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       order.setEstado(StatusEmprestimo.POR_SUBMETER.name());
@@ -112,6 +127,23 @@ public class EmprestimoWriteService {
           entity.getUuid(),
           tipoPedido.name()
       );
+
+      // Taxa Juro é obrigatória para calcular o plano financeiro — sem ela
+      // (pedidos antigos/sem juro definido) fica por gerar, como até aqui.
+      if (entity.getJuro() != null && entity.getNrPrestacao() != null) {
+        generateSaveFinancialPlanForFundoSocial(entity, Estado.P.name());
+      }
+
+      var validacao = new ValidacaoEntity();
+      validacao.setUuid(UUID.randomUUID());
+      validacao.setTipoAccao(TipoAcao.INSERT.name());
+      validacao.setReferenciaName(Referencia.EMPRESTIMO.name());
+      validacao.setReferenciaId(entity.getId());
+      validacao.setReferenciaUuid(UUID.fromString(entity.getUuid()));
+      validacao.setFunId(funId);
+      validacao.setTiprelId(null);
+      validacao.setEstado(Estado.P);
+      validacaoEntityRepository.save(validacao);
 
       TipoMovimentoEntity tipoMovimento = request.getTipoMovimentoId() != null ? tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()) : null;
       if (tipoMovimento != null) {
@@ -163,8 +195,7 @@ public class EmprestimoWriteService {
     );
   }
 
-  // TODO 17/09/2026 15:40 will be used later
-  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity) {
+  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity, String estado) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(
         entity.getValorEmprestimo(),
@@ -173,7 +204,7 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
-    emprestimoHelper.savePlans(entity, plan);
+    emprestimoHelper.savePlans(entity, plan, estado);
   }
 
   public void mudarEstadoEmprestimo(String uuid, String estado, String observacao, List<DocumentoDTO> files) {
@@ -191,6 +222,65 @@ public class EmprestimoWriteService {
         entity.getTiprel().getFunId(),
         entity.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"
+    );
+  }
+
+  // Fundo Social / Recuperação: decide o pedido criado em saveFundoSocial
+  // (que fica sempre em POR_SUBMETER com o plano financeiro pendente 'P').
+  public void validarEmprestimo(String uuid, ValidarEmprestimoRequestDTO request) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    if (!StatusEmprestimo.POR_SUBMETER.name().equals(entity.getEstado()))
+      throw IgrpResponseStatusException.badRequest("Só é possível validar empréstimos em estado Por Submeter");
+
+    if (!TipoPedido.FUNDO_SOCIAL.name().equals(entity.getTipoEmprestimo())
+        && !TipoPedido.RECUPERACAO.name().equals(entity.getTipoEmprestimo()))
+      throw IgrpResponseStatusException.badRequest("Validação só se aplica a Fundo Social ou Recuperação");
+
+    // Dominio VALIDAR_REGISTO (já existente e usado noutros módulos, ex.
+    // validacao-with-os-form.tsx): SIM | NAO | CORRIGIR.
+    final Estado validacaoEstado;
+    switch (request.getValidar().toUpperCase()) {
+      case "SIM" -> {
+        entity.setEstado(StatusEmprestimo.ATIVO.name());
+        planoFinanceiroEntityRepository.ativarPlanosPendentes(entity.getId());
+        validacaoEstado = Estado.A;
+      }
+      case "CORRIGIR" -> {
+        entity.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        validacaoEstado = Estado.I;
+      }
+      case "NAO" -> {
+        entity.setEstado(StatusEmprestimo.CANCELADO.name());
+        validacaoEstado = Estado.I;
+      }
+      default -> throw IgrpResponseStatusException.badRequest("Valor de validação inválido: %s".formatted(request.getValidar()));
+    }
+    emprestimoEntityRepository.save(entity);
+
+    var pendingValidacao = validacaoEntityRepository.findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(
+        UUID.fromString(entity.getUuid()), Estado.P, TipoAcao.INSERT.name(), Referencia.EMPRESTIMO.name());
+
+    pendingValidacao.ifPresentOrElse(
+        v -> {
+          v.setEstado(validacaoEstado);
+          v.setObs(request.getObservacao());
+          validacaoEntityRepository.save(v);
+        },
+        () -> {
+          var newValidacao = new ValidacaoEntity();
+          newValidacao.setUuid(UUID.randomUUID());
+          newValidacao.setTipoAccao(TipoAcao.INSERT.name());
+          newValidacao.setReferenciaName(Referencia.EMPRESTIMO.name());
+          newValidacao.setReferenciaId(entity.getId());
+          newValidacao.setReferenciaUuid(UUID.fromString(entity.getUuid()));
+          newValidacao.setFunId(entity.getTiprel().getFunId());
+          newValidacao.setTiprelId(null);
+          newValidacao.setEstado(validacaoEstado);
+          newValidacao.setObs(request.getObservacao());
+          validacaoEntityRepository.save(newValidacao);
+        }
     );
   }
 }

@@ -140,11 +140,18 @@ public class EmprestimoHelper {
   }
 
   public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
+    savePlans(entity, plan, Estado.A.name());
+  }
+
+  // Fundo Social / Recuperação geram o plano já na submissão do pedido, mas
+  // só o ativam depois da Validação Empréstimo — daí o estado ser
+  // parametrizável em vez de sempre 'A' (Ativo).
+  public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan, String estado) {
     var plans = plan.stream()
         .map(obj -> {
           var newPlan = new PlanoFinanceiroEntity();
           newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newPlan.setEstado(Estado.A.name());
+          newPlan.setEstado(estado);
           newPlan.setEmprestimo(entity);
           newPlan.setDataPagamento(obj.dataPagamento());
           newPlan.setNrOrdemPrestacao(obj.numero());
