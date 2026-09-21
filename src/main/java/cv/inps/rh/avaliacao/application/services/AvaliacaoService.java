@@ -56,6 +56,7 @@ public class AvaliacaoService {
   private final AvaliacaoMapper avaliacaoMapper;
   private final AvaliacaoListagemMapper avaliacaoListagemMapper;
   private final AvaliacaoPeriodoService periodoService;
+  private final RhVRelacaoLaboralEntityRepository relacaoLaboralRepository;
 
   public AvaliacaoService(
       AvaliacaoEntityRepository avaliacaoRepository,
@@ -72,7 +73,8 @@ public class AvaliacaoService {
       ParamEscalaAvaliacaoEntityRepository escalaAvaliacaoRepository,
       AvaliacaoMapper avaliacaoMapper,
       AvaliacaoListagemMapper avaliacaoListagemMapper,
-      AvaliacaoPeriodoService periodoService) {
+      AvaliacaoPeriodoService periodoService,
+      RhVRelacaoLaboralEntityRepository relacaoLaboralRepository) {
     this.avaliacaoRepository = avaliacaoRepository;
     this.objectivoRepository = objectivoRepository;
     this.competenciaRepository = competenciaRepository;
@@ -88,6 +90,7 @@ public class AvaliacaoService {
     this.avaliacaoMapper = avaliacaoMapper;
     this.avaliacaoListagemMapper = avaliacaoListagemMapper;
     this.periodoService = periodoService;
+    this.relacaoLaboralRepository = relacaoLaboralRepository;
   }
 
   @Transactional
@@ -170,7 +173,7 @@ public class AvaliacaoService {
       avaliacaoRepository.save(avaliacao);
       criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
           resolverDescricaoManual(instit != null ? instit.getId() : null,
-              dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
+              dto.getSeccaoId(), cargoDoColaborador(funUuid, dto.getCargoId()), dto.getCarrPccsId()));
       periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
 
       created.add(avaliacao.getUuid().toString());
@@ -605,6 +608,21 @@ public class AvaliacaoService {
         atitudeRepository.save(e);
       }
     }*/
+  }
+
+  /**
+   * O cargo a usar para procurar o manual de funções.
+   *
+   * <p>A spec diz "cujo cargo = cargo do colaborador", por isso lê-se da relação laboral
+   * corrente (EST_ACT_ADM = 1). O cargo do formulário só entra quando o colaborador não
+   * tem relação corrente — caso em que é a única indicação disponível.</p>
+   */
+  private Long cargoDoColaborador(UUID funUuid, Long cargoDoFormulario) {
+    return relacaoLaboralRepository
+        .findFirstByFuncionarioUuidAndEstActAdm(funUuid.toString(), 1L)
+        .map(RhVRelacaoLaboralEntity::getCargoId)
+        .filter(java.util.Objects::nonNull)
+        .orElse(cargoDoFormulario);
   }
 
   /** O primeiro valor com texto, pela ordem dada. */

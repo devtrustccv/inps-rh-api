@@ -12,6 +12,13 @@ public interface RhVRelacaoLaboralEntityRepository extends
     JpaRepository<RhVRelacaoLaboralEntity, String>,
     JpaSpecificationExecutor<RhVRelacaoLaboralEntity> {
 
+  /**
+   * A relação laboral corrente do colaborador ({@code EST_ACT_ADM = 1}). É daqui que sai o
+   * cargo quando é preciso resolver o manual de funções "cujo cargo = cargo do colaborador".
+   */
+  java.util.Optional<RhVRelacaoLaboralEntity> findFirstByFuncionarioUuidAndEstActAdm(
+      String funcionarioUuid, Long estActAdm);
+
   default RhVRelacaoLaboralEntity findByIdOrThrow(String id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("RhVRelacaoLaboralEntity not found for id: " + id));

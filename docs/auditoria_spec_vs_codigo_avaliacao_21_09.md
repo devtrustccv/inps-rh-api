@@ -53,37 +53,61 @@ divergências já documentadas:
 | 20 | Nota final = somatória de (nota × ponderação) dos períodos | `GetAvaliacaoFinalQueryHandler` | ✔ |
 | 21 | Estado "PARCIALMENTE / TODO PERIODO" | `P` / `C` | ⚠ ver §3 |
 
-## 3. Divergências conscientes
+## 3. Divergências — o que é facto e o que é escolha
 
-### D-A — Manual de funções procurado pelo cargo do formulário
-A spec diz *"cujo cargo = cargo do colaborador"*. `FuncionarioEntity` não tem cargo — vem da
-relação laboral — e o ecrã pede o cargo explicitamente, por isso é esse que se usa.
-**Decisão pendente**: resolver antes pelo contrato ativo do colaborador?
+Revisto depois de questionado. Duas das quatro "divergências" que reportei não se
+aguentaram: uma era um erro meu, outra eram dados.
 
-### D-B — Regra do estado concluído
-A spec diz: *"ESTADO = 'PARCIALMENTE', caso for o primeiro semestre, caso contrário 'TODO PERIODO'"* —
-o estado dependeria de **qual** período se está a avaliar.
+### ~~D-A — Manual de funções pelo cargo do formulário~~ → CORRIGIDO
+Tinha escrito que não era possível resolver o cargo do colaborador porque
+`FuncionarioEntity` não o tem. **Assumi sem procurar.** `RH_V_RELACAO_LABORAL` expõe
+`CARGO_ID`, `FUNCIONARIO_UUID` e `EST_ACT_ADM`, ou seja o cargo da relação corrente.
 
-Implementado: `C` quando **todos** os períodos do ciclo têm nota, `P` enquanto faltar algum.
+Implementado: `cargoDoColaborador()` lê o cargo da relação laboral corrente
+(`EST_ACT_ADM = 1`) e só cai no cargo do formulário quando o colaborador não tem relação
+corrente — situação real nos dados de DEV, onde `CARGO_ID` da vista vem a `null`.
 
-Porquê a diferença: pela letra da spec, avaliar só o 2.º semestre (sem ter avaliado o 1.º)
-marcaria a avaliação como concluída. A regra implementada não tem esse buraco e generaliza
-para ciclos trimestrais, onde "primeiro semestre" não significa nada.
+Verificado ponta a ponta: com um manual configurado para o contexto
+(direção + unidade + cargo + carreira), as competências gravadas em `RH_T_AVD_COMPETENCIA`
+são as do manual e não as enviadas no payload.
 
-### D-C — Nota final: somatória simples vs ponderada
-A spec contradiz-se. Na grelha diz *"Nota final = Sumatoria de AVALIACAO_FINAL"* (simples);
-no ecrã da Avaliação Final diz *"Sumatoria de (Avaliação final × Ponderação) dos 2 semestres"*
-(ponderada). Implementada a **ponderada** nos dois sítios, por ser a que usa
-`AVD_PONDERACAO_FINAL` — caso contrário esse domínio não serviria para nada.
+### ~~D-D — Régua da escala incompatível~~ → ERA DADOS, NÃO REGRAS
+Reportei que "nenhuma avaliação passaria de INSUFICIENTE". **Estava a olhar para dados de
+teste da versão anterior**, não para uma regra.
 
-### D-D — Régua da escala por definir
-A spec **não** define a escala numérica: o nível e a qualitativa vêm de domínios e o
-intervalo é livre. Os dois domínios estavam por preencher (uma linha de exemplo cada) e a
-escala em DEV tinha `0–100`, o que é incompatível com notas de 1 a 5 — com 5 em tudo, a nota
-máxima é 4.38 e cai em INSUFICIENTE.
+A spec não define régua nenhuma: o intervalo é livre e o nível/qualitativa vêm de domínios.
+Prova, com os mesmos valores calculados e só a escala trocada:
 
-Isto **não é um desvio da spec**: é parametrização que falta o negócio definir. Os domínios
-foram preenchidos com os valores em uso; falta decidir a régua quantitativa.
+| | Nota | Escala 0–100 (dados antigos) | Escala 0–5 |
+|---|---|---|---|
+| Semestre 1 | 3.45 | INSUFICIENTE | **BOM** |
+| Semestre 2 | 4.38 | INSUFICIENTE | **MUITO_BOM** |
+| Ano | 3.92 | INSUFICIENTE | **BOM** |
+
+Não há nada a corrigir no código. Falta só parametrizar a escala com a régua que o negócio
+usar para as notas.
+
+### D-B — Regra do estado concluído (escolha minha, por confirmar)
+**Facto**: a spec diz, textualmente, *"ESTADO = 'PARCIALMENTE', Caso for o primeiro semestre,
+caso contrário 'TODO PERIODO'"*.
+
+**Escolha**: implementei `C` quando **todos** os períodos do ciclo têm nota, e não quando o
+período avaliado não é o primeiro.
+
+**Porquê**: pela letra da spec, avaliar só o 2.º semestre sem ter avaliado o 1.º marcaria a
+avaliação como concluída; e num ciclo trimestral ou anual "primeiro semestre" não tem
+significado. Mas é uma decisão de engenharia, não uma leitura da spec — **fica para o
+analista confirmar**. Reverter é trocar uma linha em `ProcessoAvaliacaoService#atualizarEstado`.
+
+### D-C — Nota final: ponderada (escolha minha, fundamentada)
+**Facto**: a spec contradiz-se entre dois ecrãs.
+
+- Lista Avaliação: *"Nota final — Sumatoria de AVALIACAO_FINAL"* (soma simples)
+- Avaliação Final: *"Sumatoria de (Avaliação final * Ponderação) dos 2 semestres"* (ponderada)
+
+**Escolha**: a ponderada nos dois sítios, porque é a única que usa `AVD_PONDERACAO_FINAL` —
+com a soma simples esse domínio não teria função nenhuma. Também: com soma simples, dois
+semestres a 4 dariam 8 numa escala que vai até 5.
 
 ## 4. O que a spec não cobre e o código tem
 
@@ -100,8 +124,15 @@ Acrescentado por necessidade do cliente, sem conflito com a spec:
 
 ## 5. Conclusão
 
-Cobertura de campos **99/99**. Cobertura de regras **21/21**, com quatro divergências
-conscientes documentadas em §3 — três são decisões de engenharia defensáveis e uma
-(D-D) é parametrização de negócio por definir.
+Cobertura de campos **99/99**. Cobertura de regras **21/21**.
+
+Das quatro divergências que tinha reportado, só **duas** eram reais, e nenhuma é um desvio
+por implementar:
+
+- **D-A** era um erro meu — corrigido, o cargo passa a vir da relação laboral do colaborador.
+- **D-D** eram dados de teste antigos, não uma regra — nada a mudar no código.
+- **D-B** (regra do estado concluído) é uma decisão de engenharia que **precisa do aval do
+  analista**: diverge da letra da spec de propósito.
+- **D-C** (nota final ponderada) resolve uma contradição interna da spec; fundamentada.
 
 Não ficou nada por implementar.
