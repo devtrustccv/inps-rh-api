@@ -1,36 +1,37 @@
 # ============================================================
-# BUILD
+# BUILD - Maven + Java 26
 # ============================================================
 FROM cgr.dev/chainguard/maven:3.9-jdk26-dev AS build
 
 WORKDIR /app
 
-# Verificar Java e Maven
+# Verificar versões
 RUN java -version && mvn -version
 
-# Copiar primeiro o pom para aproveitar o cache Docker
+# Copiar POM
 COPY pom.xml ./
 
-# Baixar dependências
+# Baixar dependências e aproveitar cache do Maven
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -q dependency:go-offline
 
 # Copiar código fonte
 COPY src ./src
 
-# Compilar e gerar JAR
+# Build da aplicação
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -DskipTests clean package \
     && ls -lh target
 
 
 # ============================================================
-# RUNTIME
+# RUNTIME - Java 26
 # ============================================================
 FROM cgr.dev/chainguard/jre:openjdk-26
 
 WORKDIR /app
 
+# Copiar o JAR gerado
 COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
