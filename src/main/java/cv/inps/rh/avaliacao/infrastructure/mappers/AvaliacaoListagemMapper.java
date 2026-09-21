@@ -60,6 +60,8 @@ public class AvaliacaoListagemMapper {
         });
 
         dto.setEstado(estado);
+        dto.setEstadoDescricao(cv.inps.rh.shared.application.constants.EstadoAvaliacao
+                .resolver(estado, periodos != null && !periodos.isEmpty()).getDescricao());
         dto.setPeriodos(periodos != null ? periodos : List.of());
         dto.setNotaFinal(notaFinal);
         dto.setNotaFinalQualitativa(notaFinalQualitativa);

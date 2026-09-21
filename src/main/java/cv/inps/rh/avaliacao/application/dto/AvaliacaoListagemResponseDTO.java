@@ -44,6 +44,9 @@ public class AvaliacaoListagemResponseDTO {
 
   private String estado;                  // 'A' | 'P' | 'C' → controla a cor e o tab
 
+  /** Etiqueta que a grelha mostra: Rascunho | Pendente | Em avaliação | Concluído. */
+  private String estadoDescricao;
+
   /** Linhas-filho: um por período avaliado, pela ordem cronológica. */
   private List<PeriodoResumoDTO> periodos = new ArrayList<>();
 

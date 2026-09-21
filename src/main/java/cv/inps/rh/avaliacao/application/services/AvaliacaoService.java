@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.LinkedHashSet;
 import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -99,20 +100,11 @@ public class AvaliacaoService {
         ? AbrangenciaAvaliacao.fromValorOrThrow(dto.getAbrangencia())
         : AbrangenciaAvaliacao.INDIVIDUAL;
 
-    var periodo = periodoService.validarPeriodo(dto.getAno(), dto.getPeriodicidade());
+    var periodos = resolverPeriodos(dto);
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "ParamObjetivoDetEntity not found for ano: " + dto.getAno()));
-
-    // INPS não tem direção; DIRECAO exige-a; INDIVIDUAL herda-a do contexto do colaborador.
-    if (abrangencia.exigeDirecao() && dto.getInstitId() == null) {
-      throw IgrpResponseStatusException.badRequest(
-          "A abrangência DIRECAO exige a direção (institId).");
-    }
-    var instit = abrangencia == AbrangenciaAvaliacao.INPS || dto.getInstitId() == null
-        ? null
-        : instituicaoRepository.findByIdOrThrow(dto.getInstitId());
 
     var secao = dto.getSeccaoId() != null
         ? secaoRepository.findByIdOrThrow(dto.getSeccaoId())
@@ -131,16 +123,24 @@ public class AvaliacaoService {
     var mapParamObjectives = det.getObjetivos().stream()
         .collect(Collectors.toMap(ParamObjetivoEntity::getId, Function.identity()));
 
-    // Objectivos comuns (INPS / DIRECAO) não têm colaborador: geram uma única linha em RH_T_AVD.
-    if (!abrangencia.exigeColaborador()) {
-      var avaliacao = novaAvaliacao(dto, abrangencia, null, instit, secao, cargo, carreira, det);
-      avaliacaoRepository.save(avaliacao);
-      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det);
-      periodoService.obterOuCriarDetalhe(avaliacao, periodo);
+    var created = new ArrayList<String>();
+    var alertas = new ArrayList<String>();
 
-      return sucesso(
-          List.of(avaliacao.getUuid().toString()),
-          "Objectivos comuns (" + abrangencia.name() + ") definidos para " + periodo + ".");
+    if (!abrangencia.exigeColaborador()) {
+      // Objectivos comuns: sem colaborador. INPS dá uma linha; DIRECAO dá uma por direção,
+      // porque o ecrã permite juntar várias direções na mesma gravação.
+      for (var instit : resolverDirecoes(dto, abrangencia)) {
+        var avaliacao = novaAvaliacao(dto, abrangencia, null, instit, secao, cargo, carreira, det);
+        avaliacaoRepository.save(avaliacao);
+        criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
+            resolverDescricaoManual(instit != null ? instit.getId() : null,
+                dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
+        periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
+        created.add(avaliacao.getUuid().toString());
+      }
+
+      return sucesso(created, "Objectivos comuns (" + abrangencia.name() + ") definidos em "
+          + created.size() + " registo(s) para " + String.join(", ", periodos) + ".");
     }
 
     if (dto.getFunUuids() == null || dto.getFunUuids().isEmpty()) {
@@ -148,39 +148,88 @@ public class AvaliacaoService {
           "A abrangência INDIVIDUAL exige pelo menos um colaborador.");
     }
 
-    var created = new ArrayList<String>(dto.getFunUuids().size());
+    var instit = dto.getInstitId() != null ? instituicaoRepository.findByIdOrThrow(dto.getInstitId()) : null;
     var ignorados = new ArrayList<String>();
 
     for (var funUuid : dto.getFunUuids()) {
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(funUuid);
 
-      // Já existe avaliação deste colaborador no ano? O ciclo é por ano, não por período:
-      // os períodos seguintes reutilizam a mesma RH_T_AVD e só acrescentam detalhe.
+      // O ciclo é por ano, não por período: se já existir avaliação do colaborador nesse ano,
+      // os períodos novos acrescentam-se a ela em vez de criar um registo duplicado.
       var existente = avaliacaoRepository.findAllByFuncionario_IdAndAno(funcionario.getId(), dto.getAno())
           .stream().findFirst().orElse(null);
 
       if (existente != null) {
-        periodoService.obterOuCriarDetalhe(existente, periodo);
+        periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(existente, pp));
         ignorados.add(funcionario.getNome());
         continue;
       }
 
       var avaliacao = novaAvaliacao(dto, abrangencia, funcionario, instit, secao, cargo, carreira, det);
       avaliacaoRepository.save(avaliacao);
-      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det);
-      periodoService.obterOuCriarDetalhe(avaliacao, periodo);
+      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
+          resolverDescricaoManual(instit != null ? instit.getId() : null,
+              dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
+      periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
 
       created.add(avaliacao.getUuid().toString());
     }
 
-    var resposta = sucesso(created, created.size() + " objectivo(s) definido(s) para " + periodo + ".");
+    var resposta = sucesso(created, created.size() + " objectivo(s) definido(s) para "
+        + String.join(", ", periodos) + ".");
     if (!ignorados.isEmpty()) {
       resposta.getBody().getAlertas().add(
           "Já existia definição no ano " + dto.getAno() + " para: " + String.join(", ", ignorados)
-              + ". Foi apenas acrescentado o período " + periodo + ".");
+              + ". Foram apenas acrescentados os períodos " + String.join(", ", periodos) + ".");
     }
+    alertas.forEach(a -> resposta.getBody().getAlertas().add(a));
     return resposta;
+  }
+
+  /**
+   * Os períodos a definir. O ecrã dos objectivos comuns é multiselect e o do registo
+   * individual é um select simples, por isso aceita-se a lista ou o campo singular.
+   * Todos são validados contra o ciclo parametrizado no ano.
+   */
+  private List<String> resolverPeriodos(DefinicaoObjectivoDTO dto) {
+    var pedidos = dto.getPeriodicidades() != null && !dto.getPeriodicidades().isEmpty()
+        ? dto.getPeriodicidades()
+        : (StringUtils.hasText(dto.getPeriodicidade()) ? List.of(dto.getPeriodicidade()) : List.<String>of());
+
+    if (pedidos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "É obrigatório indicar pelo menos um período (periodicidade ou periodicidades).");
+    }
+
+    var validados = new LinkedHashSet<String>();
+    pedidos.forEach(pp -> validados.add(periodoService.validarPeriodo(dto.getAno(), pp)));
+    return List.copyOf(validados);
+  }
+
+  /**
+   * As direções a abranger. INPS não tem nenhuma (uma linha com INSTIT_ID nulo);
+   * DIRECAO exige pelo menos uma e aceita várias, porque o ecrã tem
+   * "+ Adicionar Direção à Lista".
+   */
+  private List<DirecaoEntity> resolverDirecoes(DefinicaoObjectivoDTO dto, AbrangenciaAvaliacao abrangencia) {
+    if (abrangencia != AbrangenciaAvaliacao.DIRECAO) {
+      return java.util.Collections.singletonList(null);
+    }
+
+    var ids = new LinkedHashSet<Long>();
+    if (dto.getInstitIds() != null) {
+      dto.getInstitIds().stream().filter(java.util.Objects::nonNull).forEach(ids::add);
+    }
+    if (dto.getInstitId() != null) {
+      ids.add(dto.getInstitId());
+    }
+    if (ids.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "A abrangência DIRECAO exige pelo menos uma direção (institId ou institIds).");
+    }
+
+    return ids.stream().map(instituicaoRepository::findByIdOrThrow).toList();
   }
 
   private AvaliacaoEntity novaAvaliacao(
@@ -422,11 +471,10 @@ public class AvaliacaoService {
       List<ParamObjetivoEntity> params,
       Map<Long, ParamObjetivoEntity> mapParamObjectives,
       DefinicaoObjectivoDTO dto,
-      ParamObjetivoDetEntity det) {
+      ParamObjetivoDetEntity det,
+      String manualDescricao) {
     if (params == null)
       return;
-
-    //var manualDescricao = resolverDescricaoManual(institId, seccaoId, cargoId, carrPccsId);
 
     dto.getObjectivos().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
@@ -439,8 +487,14 @@ public class AvaliacaoService {
       e.setParamObjetivo(p);
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
-      e.setObjectivos("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia()) ? obj.getObjectivo() : p.getDescricao());
-      e.setKpi("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia()) ? obj.getKpi() : p.getKpi());
+      // Spec: na abrangência INDIVIDUAL a descrição vem do manual de funções do cargo;
+      // nas restantes vem da parametrização. O que o ecrã enviar só serve de recurso
+      // quando não há manual configurado para aquele cargo.
+      var individual = "INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia());
+      e.setObjectivos(individual
+          ? primeiroPreenchido(manualDescricao, obj.getObjectivo(), p.getDescricao())
+          : p.getDescricao());
+      e.setKpi(individual ? primeiroPreenchido(obj.getKpi(), p.getKpi()) : p.getKpi());
       e.setMeta(obj.getMeta());
       e.setPonderacao(p.getPonderacao());
       objectivoRepository.save(e);
@@ -457,7 +511,8 @@ public class AvaliacaoService {
       e.setParamObjetivo(p);
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
-      e.setDescricao(obj.getCompetencia());
+      // Spec: "Preenchido apartir de Tabela RH_T_PARAM_MFUNCAO, CUJO cargo = cargo do colaborador"
+      e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoComportamentais());
@@ -475,7 +530,7 @@ public class AvaliacaoService {
       e.setParamObjetivo(p);
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
-      e.setDescricao(obj.getCompetencia());
+      e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoTecnica());
@@ -550,6 +605,16 @@ public class AvaliacaoService {
         atitudeRepository.save(e);
       }
     }*/
+  }
+
+  /** O primeiro valor com texto, pela ordem dada. */
+  private String primeiroPreenchido(String... valores) {
+    for (var v : valores) {
+      if (StringUtils.hasText(v)) {
+        return v;
+      }
+    }
+    return null;
   }
 
   private String resolverDescricaoManual(Long institId, Long seccaoId, Long cargoId, Long carrPccsId) {
