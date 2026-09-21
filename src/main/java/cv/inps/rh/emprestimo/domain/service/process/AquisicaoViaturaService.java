@@ -240,7 +240,9 @@ public class AquisicaoViaturaService {
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+          // Avança de facto para a próxima etapa — estava a definir-se
+          // para si própria (bug pré-existente), nunca avançava.
+          order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
         }
         case DESFAVORAVEL -> {
