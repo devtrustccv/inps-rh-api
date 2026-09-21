@@ -218,8 +218,11 @@ do ciclo têm nota, `P` enquanto faltar algum.
 
 ### 9. Grelha de definição — `GET avaliacao-desempenho/avaliacoes/objectivos`
 
-Filtro `?semestre=` → `?periodicidade=`, mais `?abrangencia=`. Nas linhas,
-`semestre` → `abrangencia`.
+Filtro `?semestre=` → `?periodicidade=`, mais `?abrangencia=` e `?seccaoId=` (Unidade).
+Nas linhas, `semestre` → `abrangencia`.
+
+> Esta grelha recebeu mais campos depois da 2.ª bateria — o colaborador, os períodos e o
+> estado legível. **Ver §14**, que tem a forma final.
 
 ### 10. Avaliação final — `GET avaliacao-desempenho/avaliacoes/{uuid}/avaliacao-final`
 
