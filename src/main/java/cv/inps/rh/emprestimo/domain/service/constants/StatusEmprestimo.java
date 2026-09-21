@@ -20,7 +20,8 @@ public enum StatusEmprestimo {
   CABIMENTADO("Cabimentado"),
   AGUARDA_PAGAMENTO("Aguarda Pagamento"),
   ATIVO("Ativo"),
-  ARQUIVADO("Arquivado");
+  ARQUIVADO("Arquivado"),
+  DESISTENCIA("Desistência");
 
   private final String description;
 

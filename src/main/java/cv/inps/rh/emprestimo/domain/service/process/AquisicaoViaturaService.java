@@ -1,6 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
@@ -128,17 +129,27 @@ public class AquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
 
     var isNextDecision = request.getAction().equals(ProcessStepAction.NEXT);
-    if (isNextDecision) {
 
-      if (Optional.ofNullable(request.getResponsavel()).map(AnaliseRhRequestDTO.Responsavel::parecer).isEmpty())
-        throw IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório");
+    if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      // Retificação do parecer técnico devolve já à etapa anterior — não
+      // depende do responsável nem de action=NEXT (Gravar ou Seguinte têm
+      // o mesmo efeito aqui).
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+    } else if (isNextDecision) {
 
-      switch (request.getParecer()) {
-        case FAVORAVEL -> {
+      var responsavelParecer = Optional.ofNullable(request.getResponsavel())
+          .map(AnaliseRhRequestDTO.Responsavel::parecer)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
+
+      // Só a Validação Responsável (nível 2) avança a etapa — Conforme e
+      // Não Conforme avançam ambos para Análise Financeira; só a
+      // Retificação do responsável devolve à etapa anterior.
+      switch (responsavelParecer) {
+        case FAVORAVEL, DESFAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
-        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
@@ -238,12 +249,21 @@ public class AquisicaoViaturaService {
     pedidoEntityRepository.save(order);
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
-        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        default ->
-            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+        // Conforme avança de facto para a próxima etapa — estava a
+        // definir-se para si própria (bug pré-existente), nunca avançava.
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
+        }
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -297,7 +317,9 @@ public class AquisicaoViaturaService {
           loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         }
         case RETIFICACAO -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          // Retificação devolve à etapa imediatamente anterior a esta
+          // (Análise Financeira), não à Análise RH.
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
       }

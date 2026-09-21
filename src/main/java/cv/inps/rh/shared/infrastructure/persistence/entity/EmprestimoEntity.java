@@ -168,4 +168,10 @@ public class EmprestimoEntity extends AuditEntity {
   @Size(max = 300)
   @Column(name = "NOME_FORNECEDOR", length = 300)
   private String nomeFornecedor;
+
+  // Coluna real em RH_T_EMPRESTIMO chama-se OBS (VARCHAR2(300)), não
+  // OBSERVACAO — mapeamento estava incorreto e causava ORA-00904 em
+  // qualquer leitura de empréstimo (ex.: GET /emprestimo/{id}).
+  @Column(name = "OBS", length = 300)
+  private String observacao;
 }

@@ -405,6 +405,36 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "/{emprestimoId}/validar"
+  )
+  @Operation(
+    summary = "Validar emprestimo",
+    description = "Validar emprestimo (Fundo Social / Recuperacao)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> validarEmprestimo(@Valid @RequestBody ValidarEmprestimoRequestDTO validarEmprestimoRequest
+    , @PathVariable String emprestimoId)
+  {
+
+    final var command = new ValidarEmprestimoCommand(emprestimoId, validarEmprestimoRequest);
+
+      return commandBus.send(command);
+
+  }
+
    @GetMapping(
    value = "{emprestimoId}/historico-pagamento"
   )
@@ -703,6 +733,18 @@ public class EmprestimoController {
 
       return commandBus.send(command);
 
+  }
+
+  @PostMapping("/{emprestimoId}/estado")
+  public ResponseEntity<Void> changeStatus(
+      @PathVariable String emprestimoId,
+      @RequestBody @Valid ChangeStatusData data
+
+  ) {
+
+    final var command = new MudarEstadoEmprestimoCommand(emprestimoId, data);
+
+    return commandBus.send(command);
   }
 
 }
