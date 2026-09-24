@@ -243,6 +243,7 @@ public class EmprestimoReadService {
         .map(obj -> new PlanoFinanceiroRowDTO(
             obj.getNrOrdemPrestacao(),
             obj.getEstado(),
+            obj.getFlgPago(),
             obj.getDataPagamento(),
             obj.getSaldoInicial(),
             NumberUtils.sum(obj.getValorPrincipal(), obj.getValorJuros()),
