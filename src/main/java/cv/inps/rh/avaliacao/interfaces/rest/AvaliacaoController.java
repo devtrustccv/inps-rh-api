@@ -387,4 +387,98 @@ public class AvaliacaoController {
 
   }
 
+   @GetMapping(
+   value = "objectivos-comuns"
+  )
+  @Operation(
+    summary = "Get lista objectivos comuns",
+    description = "Get lista objectivos comuns",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaObjectivosComunsDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<WrapperListaObjectivosComunsDTO> getListaObjectivosComuns(
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
+  {
+
+      final var query = new GetListaObjectivosComunsQuery(ano, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "objectivos-comuns/{ano}"
+  )
+  @Operation(
+    summary = "Get objectivos comuns",
+    description = "Get objectivos comuns",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ObjectivosComunsDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ObjectivosComunsDTO> getObjectivosComuns(
+    @PathVariable(value = "ano") Integer ano,
+    @RequestParam(value = "periodicidade", required = false) String periodicidade)
+  {
+
+      final var query = new GetObjectivosComunsQuery(ano, periodicidade);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "objectivos-comuns/{ano}/avaliacoes/{periodicidade}"
+  )
+  @Operation(
+    summary = "Avaliacao objectivos comuns",
+    description = "Avaliacao objectivos comuns",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<SuccessResponseDTO> avaliacaoObjectivosComuns(@Valid @RequestBody AvaliacaoObjectivosComunsDTO avaliacaoObjectivosComunsRequest
+    , @PathVariable(value = "ano") Integer ano
+    , @PathVariable(value = "periodicidade") String periodicidade)
+  {
+
+      final var command = new AvaliacaoObjectivosComunsCommand(avaliacaoObjectivosComunsRequest, ano, periodicidade);
+
+      return commandBus.send(command);
+
+  }
+
 }

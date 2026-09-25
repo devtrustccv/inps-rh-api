@@ -19,10 +19,12 @@ import java.util.UUID;
 public class DefinicaoObjectivoDTO extends BaseAvaliacaoObjetivoDTO {
 
   /**
-   * Períodos a definir de uma vez. O ecrã dos objectivos comuns é um multiselect
-   * ("Semestre 1 ×  Semestre 2 ×"), o do registo individual é um select simples — daí
-   * aceitar-se tanto esta lista como o {@code periodicidade} singular herdado da base.
-   * Quando os dois vêm preenchidos, esta lista manda.
+   * Períodos a definir de uma vez, só para {@code abrangencia = INDIVIDUAL}. Aceita-se esta
+   * lista ou o {@code periodicidade} singular herdado da base; quando os dois vêm
+   * preenchidos, esta lista manda.
+   *
+   * <p>Nos objectivos comuns (INPS / DIRECAO) é ignorado: a spec diz que a periodicidade
+   * "deve aparecer somente no momento de avaliação".</p>
    */
   private List<String> periodicidades;
 

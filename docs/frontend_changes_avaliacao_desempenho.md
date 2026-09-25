@@ -1,5 +1,133 @@
 # Avaliação de Desempenho — alterações de API
 
+## 2026-09-24 — Lista "Objectivos / Avaliação Comuns"
+
+Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_24_09_2026.md`
+(imagens em `docs/imagens de avaliacao de desempenho 24_09/`: image13 menu, image15 lista,
+image19 formulário). Plano: `docs/plano_objectivos_comuns_24_09.md`.
+
+A spec de 24/09 acrescenta o separador **Objectivos / Avaliação Comuns**, com uma lista
+por ano. Os objectivos comuns de um ano são várias avaliações sem colaborador (uma do INPS
+e uma por direção), por isso os endpoints novos são chaveados por **ano**, e não por `uuid`.
+
+### 1. Lista — `GET avaliacao-desempenho/avaliacoes/objectivos-comuns` (novo)
+
+Query params: `ano` (opcional), `pageNumber` (0), `pageSize` (20).
+
+```json
+{
+  "content": [
+    {
+      "ano": 2025,
+      "periodos": [
+        { "periodicidade": "SEMESTRE1", "descricao": "Semestre 1" },
+        { "periodicidade": "SEMESTRE2", "descricao": "Semestre 2" }
+      ]
+    }
+  ],
+  "pageNumber": 0, "pageSize": 20, "totalElements": 1, "totalPages": 1, "first": true, "last": true
+}
+```
+
+- **Linha pai:** um ano com objectivos comuns. Ordem: ano descendente.
+- **Filhos (`periodos`):** os períodos **já avaliados**
+  (`RH_T_AVD_PERIODICIDADE.PERIODICIDADE`), pela ordem do ciclo. Um ano definido mas ainda
+  não avaliado vem com `periodos: []`.
+
+Ações do ecrã:
+
+| Ação | Chamada |
+|---|---|
+| **+ Novo Objectivo** | `POST .../objectivos` com `abrangencia = INPS` e com `DIRECAO` (ver §4) |
+| **Avaliação** (linha do ano) | `GET .../objectivos-comuns/{ano}` → escolher o período → `PUT .../objectivos-comuns/{ano}/avaliacoes/{periodicidade}` |
+| **Ver Objectivo / Avaliação** (linha do período) | `GET .../objectivos-comuns/{ano}?periodicidade={periodicidade}` |
+
+### 2. Objectivos do ano — `GET .../objectivos-comuns/{ano}?periodicidade=` (novo)
+
+```json
+{
+  "ano": 2025,
+  "periodicidade": "SEMESTRE1",
+  "periodicidadeDescricao": "Semestre 1",
+  "instituicao": {
+    "uuid": "…", "abrangencia": "INPS", "institId": null, "institNome": null,
+    "objectivos": [
+      { "id": "uuid-linha", "paramId": 73, "numero": 1, "abrangencia": "INPS",
+        "objectivo": "Arrecadar as contribuições…", "kpi": "…", "meta": "95%",
+        "ponderacao": 10.00, "realizado": "93%", "avaliacao": 4.00, "resultado": 0.40 }
+    ]
+  },
+  "direcoes": [
+    { "uuid": "…", "abrangencia": "DIRECAO", "institId": 12, "institNome": "Direção de Recursos Humanos",
+      "objectivos": [ { "...": "mesma forma" } ] }
+  ]
+}
+```
+
+- **Sem `periodicidade`:** as linhas vêm sem `realizado`, `avaliacao` e `resultado`. É o
+  que o ecrã mostra ao abrir a "Avaliação", antes de se escolher o período.
+- **Com `periodicidade`:** as linhas trazem as medições desse período.
+- `resultado` é só de leitura: `ponderacao × avaliacao / 100`.
+- `instituicao` vem `null` se o ano só tiver objectivos de direção. As direções vêm
+  ordenadas pelo nome.
+- `id` de cada linha é o que se envia no PUT (§3).
+- **400** se o período não pertencer ao ciclo do ano. **404** se o ano não tiver objectivos comuns.
+
+Pela spec, a **Periodicidade**, a **Ponderação** e o **Realizado** só aparecem no modo
+avaliação. No modo definição ("+ Novo Objectivo") não se mostram.
+
+### 3. Avaliar — `PUT .../objectivos-comuns/{ano}/avaliacoes/{periodicidade}` (novo)
+
+```json
+{
+  "instituicao": [ { "id": "uuid-linha", "realizado": "93%", "avaliacao": 4 } ],
+  "direcoes":    [ { "id": "uuid-linha", "realizado": "100%", "avaliacao": 5 } ]
+}
+```
+
+- Uma só chamada para o botão Guardar, gravada **numa transação**: ou fica tudo gravado,
+  ou nada.
+- `id` é o `id` da linha devolvido no GET (§2). As linhas de `instituicao` têm de ser INPS e
+  as de `direcoes` têm de ser DIRECAO, todas do ano do path.
+- As notas são validadas contra `NIVEIS_AVD` **antes** de qualquer escrita, tal como na
+  avaliação individual.
+- Grava **só** `RH_T_AVD_PERIODICIDADE` (`REFERENCIA = OBJECTIVO`, `TIPO_PROCESSO = AVALIACAO`),
+  como diz a spec. Não calcula nota global nem mexe no estado.
+- Reenviar o mesmo período substitui os valores.
+- Resposta: `SuccessResponse` com `id` = ano.
+
+| Situação | Resposta |
+|---|---|
+| Período fora do ciclo do ano | 400 |
+| Corpo sem linhas | 400 |
+| `id` repetido, de outro ano ou no bloco errado | 400 |
+| Nota fora de `NIVEIS_AVD` | 400, sem nada gravado |
+| Ano sem objectivos comuns | 404 |
+
+### 4. `POST .../objectivos` com `abrangencia = INPS | DIRECAO` — muda
+
+A spec diz que a periodicidade "deve aparecer **somente no momento de avaliação**" e que
+"esse registo é somente em avaliação":
+
+```diff
+  {
+    "ano": 2025,
+    "abrangencia": "INPS",
+-   "periodicidades": ["SEMESTRE1", "SEMESTRE2"],
+    "objectivos": [ ... ]
+  }
+```
+
+- `periodicidade` e `periodicidades[]` deixam de ser obrigatórios nos comuns e passam a
+  ser **ignorados**.
+- A definição dos comuns já não cria registos por período. Esses registos nascem na
+  avaliação (§3).
+- Reenviar um ano já definido continua a não duplicar: devolve o uuid existente com um
+  aviso em `alertas`.
+- `INDIVIDUAL` **não muda**: continua a exigir o período.
+
+---
+
 ## 2026-09-21 — Refactor SEMESTRE → PERIODICIDADE (breaking)
 
 Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_21_09_2026.md`

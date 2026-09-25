@@ -103,8 +103,6 @@ public class AvaliacaoService {
         ? AbrangenciaAvaliacao.fromValorOrThrow(dto.getAbrangencia())
         : AbrangenciaAvaliacao.INDIVIDUAL;
 
-    var periodos = resolverPeriodos(dto);
-
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "ParamObjetivoDetEntity not found for ano: " + dto.getAno()));
@@ -132,20 +130,21 @@ public class AvaliacaoService {
     if (!abrangencia.exigeColaborador()) {
       // Objectivos comuns: sem colaborador. INPS dá uma linha; DIRECAO dá uma por direção,
       // porque o ecrã permite juntar várias direções na mesma gravação.
+      // Spec: a periodicidade "deve aparecer somente no momento de avaliação" e "esse
+      // registo é somente em avaliação" — a definição é anual e não cria nada por período.
       for (var instit : resolverDirecoes(dto, abrangencia)) {
         var institId = instit != null ? instit.getId() : null;
 
         // Reenviar o mesmo formulário não pode duplicar objectivos: se já existir a
-        // avaliação comum deste ano/abrangência/direção, só se acrescentam os períodos.
+        // avaliação comum deste ano/abrangência/direção, fica como está.
         var existente = avaliacaoRepository
             .findComuns(dto.getAno(), abrangencia.name(), institId)
             .stream().findFirst().orElse(null);
 
         if (existente != null) {
-          periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(existente, pp));
           alertas.add("Já existiam objectivos " + abrangencia.name()
               + (instit != null ? " da direção " + instit.getNome() : "")
-              + " no ano " + dto.getAno() + "; foram apenas acrescentados os períodos.");
+              + " no ano " + dto.getAno() + "; não foram alterados.");
           created.add(existente.getUuid().toString());
           continue;
         }
@@ -154,16 +153,16 @@ public class AvaliacaoService {
         avaliacaoRepository.save(avaliacao);
         criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
             resolverDescricaoManual(institId, dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId()));
-        periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
         created.add(avaliacao.getUuid().toString());
       }
 
       var respostaComuns = sucesso(created, "Objectivos comuns (" + abrangencia.name()
-          + ") definidos em " + created.size() + " registo(s) para "
-          + String.join(", ", periodos) + ".");
+          + ") definidos em " + created.size() + " registo(s) para o ano " + dto.getAno() + ".");
       alertas.forEach(a -> respostaComuns.getBody().getAlertas().add(a));
       return respostaComuns;
     }
+
+    var periodos = resolverPeriodos(dto);
 
     if (dto.getFunUuids() == null || dto.getFunUuids().isEmpty()) {
       throw IgrpResponseStatusException.badRequest(

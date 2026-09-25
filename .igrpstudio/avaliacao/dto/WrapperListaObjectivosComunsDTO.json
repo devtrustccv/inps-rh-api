@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "avaliacao",
+  "name": "WrapperListaObjectivosComuns",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "ObjectivosComunsAno",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "avaliacao"
+    }
+  ],
+  "id": "zff47zfmvi"
+}
