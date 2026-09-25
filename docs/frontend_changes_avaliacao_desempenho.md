@@ -125,6 +125,9 @@ A spec diz que a periodicidade "deve aparecer **somente no momento de avaliaçã
 - Reenviar um ano já definido continua a não duplicar: devolve o uuid existente com um
   aviso em `alertas`.
 - `INDIVIDUAL` **não muda**: continua a exigir o período.
+- As listas `competenciasComportamentais`, `competenciasTecnicas` e `atitudesPessoais`
+  (e `objectivos`) podem ser omitidas. O formulário dos comuns não tem competências nem
+  atitudes. Antes, omiti-las dava **500**; agora são tratadas como vazias.
 
 ---
 

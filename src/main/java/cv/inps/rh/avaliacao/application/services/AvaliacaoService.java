@@ -510,7 +510,7 @@ public class AvaliacaoService {
     if (params == null)
       return;
 
-    dto.getObjectivos().forEach(obj -> {
+    listaOuVazia(dto.getObjectivos()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
           "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
@@ -534,7 +534,7 @@ public class AvaliacaoService {
       objectivoRepository.save(e);
     });
 
-    dto.getCompetenciasComportamentais().forEach(obj -> {
+    listaOuVazia(dto.getCompetenciasComportamentais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
           "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
@@ -553,7 +553,7 @@ public class AvaliacaoService {
       competenciaRepository.save(e);
     });
 
-    dto.getCompetenciasTecnicas().forEach(obj -> {
+    listaOuVazia(dto.getCompetenciasTecnicas()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
           "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
@@ -571,7 +571,7 @@ public class AvaliacaoService {
       competenciaRepository.save(e);
     });
 
-    dto.getAtitudesPessoais().forEach(obj -> {
+    listaOuVazia(dto.getAtitudesPessoais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
           "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
@@ -654,6 +654,14 @@ public class AvaliacaoService {
         .map(RhVRelacaoLaboralEntity::getCargoId)
         .filter(java.util.Objects::nonNull)
         .orElse(cargoDoFormulario);
+  }
+
+  /**
+   * Uma lista do pedido que o cliente pode omitir: o formulário dos objectivos comuns não tem
+   * competências nem atitudes, por isso essas listas podem nem vir no corpo.
+   */
+  private static <T> List<T> listaOuVazia(List<T> lista) {
+    return lista != null ? lista : List.of();
   }
 
   /** O primeiro valor com texto, pela ordem dada. */
