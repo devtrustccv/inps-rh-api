@@ -374,7 +374,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-       value = "outro/{tipoEmprestimo}"
+       value = "outro/{tipoPedido}/tipoEmprestimo"
   )
   @Operation(
     summary = "Save fundo social",
@@ -394,12 +394,13 @@ public class EmprestimoController {
   )
 
    public ResponseEntity<String> saveFundoSocial(
+       @PathVariable TipoPedido tipoPedido,
        @PathVariable TipoPedido tipoEmprestimo,
        @Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
     )
   {
 
-    final var command = new SaveFundoSocialCommand(tipoEmprestimo, saveFundoSocialRequest);
+    final var command = new SaveFundoSocialCommand(tipoPedido, tipoEmprestimo, saveFundoSocialRequest);
 
       return commandBus.send(command);
 

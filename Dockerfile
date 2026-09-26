@@ -1,28 +1,31 @@
-FROM cgr.dev/chainguard/maven:3.9-jdk26-dev AS build
+FROM maven:3.9.16-eclipse-temurin-26 AS build
 
 WORKDIR /app
 
-# Verificar versões utilizadas no build
+# Verificar versões
 RUN java -version && mvn -version
 
+# Copiar POM
 COPY pom.xml ./
 
-# Cache das dependências Maven
+# Baixar dependências e aproveitar cache do Maven
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -q dependency:go-offline
 
+# Copiar código fonte
 COPY src ./src
 
-# Build
+# Build da aplicação
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -DskipTests clean package \
     && ls -lh target
 
 
-FROM cgr.dev/chainguard/jre:openjdk-26.0.2.1-dev
+FROM eclipse-temurin:26-jdk-alpine
 
 WORKDIR /app
 
+# Copiar o JAR gerado
 COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080

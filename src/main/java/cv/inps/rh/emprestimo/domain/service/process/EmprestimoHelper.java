@@ -59,7 +59,7 @@ public class EmprestimoHelper {
     List<PlanoFinanceiroRowDTO> newPlans = new ArrayList<>();
 
     switch (tipoSituacao) {
-      case REFORCO_AUMENTO_VALOR -> {
+      case REFORCO_AUMENTO_VALOR, REFORCO_CAPITAL -> {
 
         var numeroPrestacoes = (newLoan.getNrPrestacao() - numberOfPaidPlans);
 
@@ -75,7 +75,12 @@ public class EmprestimoHelper {
             firstNewPlanNumber
         );
       }
-      case REFORCO_AUMENTO_PRESTACAO, ADIANTAMENTO_DIMINUICAO_PRESTACAO -> {
+      case REFORCO_AUMENTO_PRESTACAO, ADIANTAMENTO_DIMINUICAO_PRESTACAO,
+          AUMENTO_PRESTACAO, REDUCAO_PRESTACAO -> {
+        // Alterar o nº de prestações é a mesma operação matemática nos dois
+        // sentidos — generateFinancialPlan só amortiza o saldo em dívida
+        // atual sobre o novo prazo, sem assumir se é maior ou menor que o
+        // prazo anterior.
 
         newLoan.setNrPrestacao(newNumeroPrestacao);
         emprestimoEntityRepository.save(newLoan);
@@ -139,19 +144,16 @@ public class EmprestimoHelper {
     savePlans(newLoan, newPlans);
   }
 
-  public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
-    savePlans(entity, plan, Estado.A.name());
-  }
-
   // Fundo Social / Recuperação geram o plano já na submissão do pedido, mas
   // só o ativam depois da Validação Empréstimo — daí o estado ser
   // parametrizável em vez de sempre 'A' (Ativo).
-  public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan, String estado) {
+  public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
     var plans = plan.stream()
         .map(obj -> {
           var newPlan = new PlanoFinanceiroEntity();
           newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newPlan.setEstado(estado);
+          newPlan.setEstado(obj.estado());
+          newPlan.setFlgPago(obj.flagPago());
           newPlan.setEmprestimo(entity);
           newPlan.setDataPagamento(obj.dataPagamento());
           newPlan.setNrOrdemPrestacao(obj.numero());

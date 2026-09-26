@@ -1,6 +1,8 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FinancialPlanHelper {
 
@@ -77,7 +80,8 @@ public class FinancialPlanHelper {
       plano.add(
           new PlanoFinanceiroRowDTO(
               numeroPrestacao,
-              "",
+              Estado.A.name(),
+              null,
               dataPagamento,
               saldoInicial.setScale(0, RoundingMode.HALF_UP),
               pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
@@ -139,7 +143,8 @@ public class FinancialPlanHelper {
       plano.add(
           new PlanoFinanceiroRowDTO(
               (long) i,
-              "",
+              Estado.P.name(),
+              null,
               dataPagamento,
               saldoInicial.setScale(0, RoundingMode.HALF_UP),
               pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
@@ -150,6 +155,34 @@ public class FinancialPlanHelper {
       );
 
       saldoInicial = saldoFinal;
+    }
+
+    return plano;
+  }
+
+  public static List<PlanoFinanceiroRowDTO> generateFinancialPlanForRecuperacao(FundoSocialRequestDTO row) {
+
+    var plano = new ArrayList<PlanoFinanceiroRowDTO>();
+
+    long numeroPrestacoesPagos = Optional.ofNullable(row.getNrPrestacaoPaga()).orElse(0L);
+    int numeroPrestacoesPagasCounter = 0;
+
+    for (int i = 1; i <= row.getNrPrestacao(); i++) {
+      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter <= numeroPrestacoesPagos ? "PAGO" : null;
+      plano.add(
+          new PlanoFinanceiroRowDTO(
+              (long) i,
+              Estado.A.name(),
+              flagPago,
+              row.getDataInicio(),
+              row.getValorTotalEmprestimo(),
+              row.getValorPrestacaoMensal(),
+              row.getValorPrestacaoMensal(),
+              row.getJuro(),
+              row.getValorTotalEmprestimo()
+          )
+      );
+      numeroPrestacoesPagasCounter++;
     }
 
     return plano;
