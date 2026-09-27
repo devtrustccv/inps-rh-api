@@ -59,6 +59,20 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private String etapa;
   private String etapaDesc;
 
+  // Fundo Social / Recuperação (validação no frontend): tipoPedido vem de
+  // RH_T_PEDIDO (RECUPERACAO distingue a Recuperação de um Fundo Social
+  // normal), tipoEmprestimo de RH_T_EMPRESTIMO; nrPrestacaoPaga = linhas do
+  // plano com FLG_PAGO = 'PAGO'.
+  private String tipoPedido;
+
+  private String tipoEmprestimo;
+
+  private Long tipoMovimentoId;
+
+  private String finalidade;
+
+  private Long nrPrestacaoPaga;
+
   @Valid
   private List<OutrosEmprestimosDTO> emprestimos = new ArrayList<>();
 

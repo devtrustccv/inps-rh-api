@@ -19,9 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -85,6 +88,17 @@ public class EmprestimoReadService {
       dto.setBancoId(o.getId());
       dto.setNumeroContaBanco(o.getNuConta());
     });
+
+    dto.setTipoPedido(order.getTipoPedido());
+    dto.setTipoEmprestimo(entity.getTipoEmprestimo());
+    dto.setTipoMovimentoId(entity.getTmId());
+    dto.setFinalidade(entity.getFinalidade());
+    dto.setNrPrestacaoPaga(
+        planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
+            .stream()
+            .filter(p -> "PAGO".equalsIgnoreCase(p.getFlgPago()))
+            .count()
+    );
 
     var otherLoans = emprestimoOutroEntityRepository.findByReferenciaOrigemAndFunAndEstado(order, order.getFunId(), Estado.A.name())
         .stream()
@@ -229,29 +243,47 @@ public class EmprestimoReadService {
     plan.setPeriodoEmprestimo(loan.getNrPrestacao() != null ? (loan.getNrPrestacao() / 12) : null);
     plan.setDataInicio(loan.getDataInicio());
     plan.setNumeroPagamento(loan.getNrPrestacao());
-    plan.setJurosTotal(loan.getValorJuroTotal());
-    plan.setCustoTotalEmprestimo(formatter.format(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo())));
-    plan.setPagamentoMensal(loan.getValorPrestacao() == null ? "" : formatter.format(loan.getValorPrestacao()));
 
+    List<PlanoFinanceiroRowDTO> rows;
     if (plan.getDataInicio() == null) {
-      plan.setRows(emprestimoWriteService.generateFinancialPlan(loan, LocalDate.now(ZoneId.systemDefault())));
-      return plan;
+      rows = emprestimoWriteService.generateFinancialPlan(loan, LocalDate.now(ZoneId.systemDefault()));
+    } else {
+      rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
+          .stream()
+          .map(obj -> new PlanoFinanceiroRowDTO(
+              obj.getNrOrdemPrestacao(),
+              obj.getEstado(),
+              obj.getFlgPago(),
+              obj.getDataPagamento(),
+              obj.getSaldoInicial(),
+              NumberUtils.sum(obj.getValorPrincipal(), obj.getValorJuros()),
+              obj.getValorPrincipal(),
+              obj.getValorJuros(),
+              obj.getSaldoFinal()
+          )).toList();
     }
-
-    var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
-        .stream()
-        .map(obj -> new PlanoFinanceiroRowDTO(
-            obj.getNrOrdemPrestacao(),
-            obj.getEstado(),
-            obj.getFlgPago(),
-            obj.getDataPagamento(),
-            obj.getSaldoInicial(),
-            NumberUtils.sum(obj.getValorPrincipal(), obj.getValorJuros()),
-            obj.getValorPrincipal(),
-            obj.getValorJuros(),
-            obj.getSaldoFinal()
-        )).toList();
     plan.setRows(rows);
+
+    // Juros Total / Pagamento Mensal: a entidade só os tem depois do
+    // contrato (VALOR_JURO_TOTAL, VALOR_PRESTACAO); até lá derivam-se do
+    // próprio plano. Juros = total a pagar - capital (vale também para o
+    // Fundo Social, cujas linhas trazem juros = null com o juro embutido na
+    // prestação).
+    var jurosTotal = loan.getValorJuroTotal();
+    if (jurosTotal == null && !rows.isEmpty() && loan.getValorEmprestimo() != null) {
+      var totalPago = rows.stream()
+          .map(PlanoFinanceiroRowDTO::pagamento)
+          .filter(Objects::nonNull)
+          .reduce(BigDecimal.ZERO, BigDecimal::add);
+      jurosTotal = totalPago.subtract(loan.getValorEmprestimo()).max(BigDecimal.ZERO);
+    }
+    var pagamentoMensal = loan.getValorPrestacao() != null
+        ? loan.getValorPrestacao()
+        : rows.stream().map(PlanoFinanceiroRowDTO::pagamento).filter(Objects::nonNull).findFirst().orElse(null);
+
+    plan.setJurosTotal(jurosTotal);
+    plan.setCustoTotalEmprestimo(formatter.format(NumberUtils.sum(jurosTotal, loan.getValorEmprestimo())));
+    plan.setPagamentoMensal(pagamentoMensal == null ? "" : formatter.format(pagamentoMensal));
 
     return plan;
   }
@@ -269,15 +301,21 @@ public class EmprestimoReadService {
         .stream()
         .map(p -> new HistoricoPagamentoRowDTO(
             p.getDataRef(),
-            usDecimalFormatter.format(p.getValor())
+            formatOrZero(usDecimalFormatter, p.getValor())
         ))
         .toList();
 
     var history = new HistoricoPagamentoDTO();
     history.setPagamentos(rows);
-    history.setValorTotalPago(usDecimalFormatter.format(loan.getValorPago()));
-    history.setSaldoDivida(usDecimalFormatter.format(loan.getValorDivida()));
+    history.setValorTotalPago(formatOrZero(usDecimalFormatter, loan.getValorPago()));
+    history.setSaldoDivida(formatOrZero(usDecimalFormatter, loan.getValorDivida()));
     return history;
+  }
+
+  // DecimalFormat.format(null) lança "Cannot format given Object as a Number"
+  // — empréstimos ainda sem pagamentos têm VALOR_PAGO a null.
+  private static String formatOrZero(DecimalFormat formatter, BigDecimal value) {
+    return formatter.format(value == null ? BigDecimal.ZERO : value);
   }
 }
 

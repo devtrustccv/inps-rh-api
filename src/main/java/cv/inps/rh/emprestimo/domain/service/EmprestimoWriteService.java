@@ -245,8 +245,12 @@ public class EmprestimoWriteService {
     if (!StatusEmprestimo.POR_SUBMETER.name().equals(entity.getEstado()))
       throw IgrpResponseStatusException.badRequest("Só é possível validar empréstimos em estado Por Submeter");
 
-    if (!TipoPedido.FUNDO_SOCIAL.name().equals(entity.getTipoEmprestimo())
-        && !TipoPedido.RECUPERACAO.name().equals(entity.getTipoEmprestimo()))
+    // Desde saveOutroEmprestimo(tipoPedido, tipoEmprestimo), uma Recuperação
+    // grava o tipo real do empréstimo (AQUISICAO_VIATURA | FUNDO_SOCIAL) em
+    // TIPO_EMPRESTIMO — o que a distingue é o tipo do pedido.
+    var tipoPedido = entity.getPedido() != null ? entity.getPedido().getTipoPedido() : null;
+    if (!TipoPedido.FUNDO_SOCIAL.name().equals(tipoPedido)
+        && !TipoPedido.RECUPERACAO.name().equals(tipoPedido))
       throw IgrpResponseStatusException.badRequest("Validação só se aplica a Fundo Social ou Recuperação");
 
     // Dominio VALIDAR_REGISTO (já existente e usado noutros módulos, ex.
