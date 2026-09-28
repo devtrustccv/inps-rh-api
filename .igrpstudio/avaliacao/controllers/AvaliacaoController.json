@@ -499,6 +499,127 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getListaObjectivosComuns",
+      "path": "objectivos-comuns",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaObjectivosComuns",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getObjectivosComuns",
+      "path": "objectivos-comuns/{ano}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ObjectivosComuns",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "ano",
+          "type": "integer",
+          "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "periodicidade",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "avaliacaoObjectivosComuns",
+      "path": "objectivos-comuns/{ano}/avaliacoes/{periodicidade}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AvaliacaoObjectivosComuns",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SuccessResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "ano",
+          "type": "integer",
+          "isRequired": true
+        },
+        {
+          "name": "periodicidade",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao-getDefinicaoObjetivo-getAvaliacao"

@@ -39,6 +39,12 @@ public record PesquisaColaboradorResponseDTO(
 
     Integer nivelReferencia,
 
-    String escalao
+    String escalao,
+
+    // RH_T_TIPOS_RELACIONAMENTO.FLG_PROCESSA — 0 quando o colaborador já
+    // está marcado para não entrar no próximo processamento salarial;
+    // usado pelo ecrã "Marcar Funcionário Para Não Processar" para saber
+    // com que estado a checkbox de cada linha deve arrancar.
+    Integer flgProcessa
 ) {
 }

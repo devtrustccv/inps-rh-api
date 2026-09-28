@@ -14,6 +14,8 @@ public record PlanoFinanceiroRowDTO(
 
     String estado,
 
+    String flagPago,
+
     LocalDate dataPagamento,
 
     @JsonSerialize(using = PlanoFinanceiroSerializer.class)

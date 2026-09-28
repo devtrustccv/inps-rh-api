@@ -16,6 +16,8 @@ public class SaveFundoSocialCommand implements Command {
 
   private TipoPedido tipoPedido;
 
+  private TipoPedido tipoEmprestimo;
+
   private List<FundoSocialRequestDTO> fundosocialrequest;
 
 }

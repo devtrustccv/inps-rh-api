@@ -17,4 +17,6 @@ public interface AvaliacaoObjectivoEntityRepository extends
     Optional<AvaliacaoObjectivoEntity> findByUuid(UUID uuid);
 
     List<AvaliacaoObjectivoEntity> findAllByAvaliacaoObj_Uuid(UUID uuid);
+
+    List<AvaliacaoObjectivoEntity> findAllByAvaliacaoObj_IdIn(List<Long> avdIds);
 }

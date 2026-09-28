@@ -55,6 +55,8 @@ public class FundoSocialRequestDTO  {
 
   private Long nrPrestacao ;
 
+  private Long nrPrestacaoPaga;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 

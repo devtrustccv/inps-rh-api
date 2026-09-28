@@ -23,13 +23,15 @@ public class PesquisaService {
 
     var pageRequest = PageRequestUtil.buildPageRequest(query.getPage(), query.getSize());
 
-    var directionId = StringUtils.hasText(query.getDireccao()) ? Long.valueOf(query.getDireccao()) : null;
+    // Pesquisa normal por texto (nome da direção), não um lookup por id —
+    // ecrã "Marcar Funcionário Para Não Processar".
+    var direcaoNome = StringUtils.hasText(query.getDireccao()) ? query.getDireccao() : null;
     var nome = StringUtils.hasText(query.getNome()) ? query.getNome() : null;
     var uuidFuncionario = StringUtils.hasText(query.getUuidFuncionario()) ? UUID.fromString(query.getUuidFuncionario()) : null;
     var processado = StringUtils.hasText(query.getProcessado()) ? 1 : null;
 
     var page = tiposRelacionamentoEntityRepository.pesquisaColaborador(
-        directionId,
+        direcaoNome,
         nome,
         uuidFuncionario,
         processado,

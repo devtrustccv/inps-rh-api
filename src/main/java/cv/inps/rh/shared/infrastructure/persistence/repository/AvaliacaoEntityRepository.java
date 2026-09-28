@@ -53,6 +53,39 @@ public interface AvaliacaoEntityRepository extends
                         @Param("abrangencia") String abrangencia,
                         @Param("institId") Long institId);
 
+        /**
+         * Os anos com objectivos comuns (INPS ou DIRECAO, sem colaborador), do mais recente
+         * para o mais antigo. É a linha pai da lista "Objectivos / Avaliação Comuns".
+         */
+        @Query(value = """
+                            SELECT DISTINCT a.ano FROM AvaliacaoEntity a
+                             WHERE a.funcionario IS NULL
+                               AND UPPER(a.abrangencia) IN ('INPS', 'DIRECAO')
+                               AND (a.estado IS NULL OR a.estado <> 'E')
+                               AND (:ano IS NULL OR a.ano = :ano)
+                             ORDER BY a.ano DESC
+                        """,
+                        countQuery = """
+                            SELECT COUNT(DISTINCT a.ano) FROM AvaliacaoEntity a
+                             WHERE a.funcionario IS NULL
+                               AND UPPER(a.abrangencia) IN ('INPS', 'DIRECAO')
+                               AND (a.estado IS NULL OR a.estado <> 'E')
+                               AND (:ano IS NULL OR a.ano = :ano)
+                        """)
+        org.springframework.data.domain.Page<Integer> findAnosComuns(@Param("ano") Integer ano, Pageable pageable);
+
+        /** Os objectivos comuns de um ano: o do INPS e um por direção. */
+        @Query("""
+                            SELECT a FROM AvaliacaoEntity a
+                              LEFT JOIN FETCH a.institId
+                             WHERE a.ano = :ano
+                               AND a.funcionario IS NULL
+                               AND UPPER(a.abrangencia) IN ('INPS', 'DIRECAO')
+                               AND (a.estado IS NULL OR a.estado <> 'E')
+                             ORDER BY a.id
+                        """)
+        List<AvaliacaoEntity> findComunsDoAno(@Param("ano") Integer ano);
+
         Optional<AvaliacaoEntity> findByUuid(UUID uuid);
 
         default AvaliacaoEntity findByUuidOrThrow(UUID uuid) {

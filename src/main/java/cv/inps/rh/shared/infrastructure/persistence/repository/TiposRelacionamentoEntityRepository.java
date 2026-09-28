@@ -167,7 +167,8 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
              cargo.nome,
              esc.valor,
              esc.nivelReferencia,
-             esc.escalao
+             esc.escalao,
+             t.flgProcessa
       )
       FROM TiposRelacionamentoEntity t
        JOIN t.funId f
@@ -182,12 +183,12 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
       WHERE t.estActAdm = 1
          AND f.estado NOT IN (Estado.I, Estado.P)
          AND (:processado IS NULL OR t.flgProcessa = :processado)
-         AND (:directionId IS NULL OR i.id = :directionId)
+         AND (:direcaoNome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :direcaoNome, '%')))
          AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
          AND (:uuidFuncionario IS NULL OR f.uuid = :uuidFuncionario)
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
-      @Param("directionId") Long directionId,
+      @Param("direcaoNome") String direcaoNome,
       @Param("nome") String nome,
       @Param("uuidFuncionario") UUID uuidFuncionario,
       @Param("processado") Integer processado,
