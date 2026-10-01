@@ -168,7 +168,7 @@ public class FinancialPlanHelper {
     int numeroPrestacoesPagasCounter = 0;
 
     for (int i = 1; i <= row.getNrPrestacao(); i++) {
-      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter <= numeroPrestacoesPagos ? "PAGO" : null;
+      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter < numeroPrestacoesPagos ? "PAGO" : null;
       plano.add(
           new PlanoFinanceiroRowDTO(
               (long) i,
