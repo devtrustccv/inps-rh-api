@@ -45,14 +45,26 @@ public class ProcessamentoSalarialWriteService {
 
   @Transactional
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
+    setFlgProcessa(funcionariosIds, 0);
+  }
 
+  // Reverte a exclusão: volta a marcar os funcionários indicados como aptos
+  // a processar (RH_T_TIPOS_RELACIONAMENTO.FLG_PROCESSA = 1). Sem isto, o
+  // ecrã "Marcar Funcionário Para Não Processar" não tinha forma de
+  // reincluir quem já estava excluído.
+  @Transactional
+  public void incluirFuncionariosProcessados(List<String> funcionariosIds) {
+    setFlgProcessa(funcionariosIds, 1);
+  }
+
+  private void setFlgProcessa(List<String> funcionariosIds, int flgProcessa) {
     var ids = funcionariosIds.stream().map(UUID::fromString).toList();
 
     var relations = tiposRelacionamentoEntityRepository.findRelacionamentosAtuaisByFuncionarioUuids(ids);
     if (relations.isEmpty())
       return;
 
-    relations.forEach(r -> r.setFlgProcessa(0));
+    relations.forEach(r -> r.setFlgProcessa(flgProcessa));
     tiposRelacionamentoEntityRepository.saveAll(relations);
   }
 

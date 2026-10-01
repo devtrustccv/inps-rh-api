@@ -56,6 +56,27 @@ public class ProcessoSalarialController {
     return commandBus.send(command);
   }
 
+  @PostMapping(value = "/folha/funcionarios/incluir")
+  @Operation(
+      summary = "Incluir funcionarios processamento salarial",
+      description = "Incluir funcionarios processamento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+          ),
+      }
+  )
+  public ResponseEntity<String> incluirFuncionariosProcessamentoSalarial(
+      @Valid @RequestBody MarcarNaoProcessadoRequestDTO incluirFuncionariosProcessamentoSalarialRequest
+  ) {
+    final var command = new IncluirFuncionariosProcessamentoSalarialCommand(
+        incluirFuncionariosProcessamentoSalarialRequest
+    );
+
+    return commandBus.send(command);
+  }
+
   @GetMapping
   @Operation(
       summary = "Get processamento salarial",

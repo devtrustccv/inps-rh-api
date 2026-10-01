@@ -52,6 +52,9 @@ public class FuncionarioEntity extends AuditEntity {
     @Column(name="nome")
     private String nome;
 
+  @Column(name = "nome_normalizado")
+  private String nomeNormalizado;
+
 
     @Column(name="fotografia")
     private String fotografia;

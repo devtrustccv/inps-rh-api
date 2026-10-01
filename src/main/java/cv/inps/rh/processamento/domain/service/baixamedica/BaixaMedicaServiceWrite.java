@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.sql.Types;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -116,11 +117,15 @@ public class BaixaMedicaServiceWrite {
       ausenciaRepository.save(ausencia);
     }
 
-    var calculo = chamarProcedure(tiprel.getId(), req.getDataInicio(), req.getDataFim(),
-        req.getTipoLicenca(), req.getDataInicioFalta());
+    var calculo = chamarProcedure(
+        tiprel.getId(), req.getDataInicio(), req.getDataFim(),
+        req.getTipoLicenca(), req.getDataInicioFalta()
+    );
 
     if (calculo.getMsgError() != null && !calculo.getMsgError().isBlank())
       throw IgrpResponseStatusException.badRequest(calculo.getMsgError());
+
+    var fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     for (var item : calculo.getFaltasMensais()) {
       var falta = new FaltaEntity();
@@ -129,11 +134,10 @@ public class BaixaMedicaServiceWrite {
       falta.setParamSitId(paramSit);
       falta.setHorasAusencia("+0 00:00:00");
       // O procedure retorna datas em formato dd/MM/yyyy
-      var fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
       if (item.getDataInicioFalta() != null && !item.getDataInicioFalta().isBlank())
         falta.setDataInicio(java.time.LocalDate.parse(item.getDataInicioFalta(), fmt).atStartOfDay());
       if (item.getDataFimFalta() != null && !item.getDataFimFalta().isBlank())
-        falta.setDataFim(java.time.LocalDate.parse(item.getDataFimFalta(), fmt).atStartOfDay());
+        falta.setDataFim(java.time.LocalDate.parse(item.getDataFimFalta(), fmt).atTime(LocalTime.MAX));
       if (item.getValorDesc() != null && !item.getValorDesc().isBlank())
         falta.setValor(new java.math.BigDecimal(item.getValorDesc()));
       falta.setEstado(Estado.P);
@@ -171,6 +175,7 @@ public class BaixaMedicaServiceWrite {
         periodoRow.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       }
 
+      periodoRow.setFlgContinuidade(periodo.getContinuidade());
       periodoRow.setDataInicio(periodo.getDataInicio());
       periodoRow.setDataFim(periodo.getDataFim());
       periodoRow.setAbonoBenef(abono);

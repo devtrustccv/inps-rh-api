@@ -65,4 +65,12 @@ public class RhVListaProcessamentoEntity {
 
   @Column(name = "TIPO_PROCESSAMENTO")
   private String tipoProcessamento;
+
+  @NotNull
+  @Column(name = "DATA_REGISTO", nullable = false)
+  private LocalDate dataRegisto;
+
+  @NotNull
+  @Column(name = "DIRECAO_ID", nullable = false)
+  private Long direcaoId;
 }

@@ -5,12 +5,14 @@ import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.util.InpsStringUtils;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Locale;
 
 @Component
 @RequiredArgsConstructor
@@ -129,15 +131,20 @@ public class FuncionarioMapper {
     fun.setEstadoValidacao(estado != null ? estado.name() : "P");
     fun.setTipoDocumentoId(tipoDocumento);
     fun.setNumDocumento(ValidationUtil.trimToNull(dadosPessoais.getNumDocumento()));
-    fun.setNome(ValidationUtil.trimToNull(dadosPessoais.getNome()));
+
+    var name = ValidationUtil.trimToNull(dadosPessoais.getNome());
+    fun.setNome(name);
+    var normalizedName = InpsStringUtils.normalizeText(name);
+    fun.setNomeNormalizado(normalizedName != null ? normalizedName.toLowerCase(Locale.ROOT) : name);
+
     fun.setFotografia(ValidationUtil.trimToNull(dadosPessoais.getUrlFoto()));
     fun.setDataNascimento(dadosPessoais.getDataNascimento());
     fun.setSexo(ValidationUtil.trimToNull(dadosPessoais.getGenero()));
-    fun.setNmMae(ValidationUtil.trimToNull(dadosPessoais.getNomeMae()));
     fun.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
+    fun.setNmMae(ValidationUtil.trimToNull(dadosPessoais.getNomeMae()));
     fun.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
-    fun.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
     fun.setLocalidade(ValidationUtil.trimToNull(dadosPessoais.getLocalidade()));
+    fun.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
     fun.setLocNascId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
     fun.setNif(dadosPessoais.getNif());
     fun.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
@@ -157,10 +164,7 @@ public class FuncionarioMapper {
     }
 
     if (dadosPessoais.getContactos() != null) {
-      var list = dadosPessoais.getContactos().stream().map(c -> {
-        var ce = contactoMapper.toEntity(c, Estado.P,fun);
-        return ce;
-      }).toList();
+      var list = dadosPessoais.getContactos().stream().map(c -> contactoMapper.toEntity(c, Estado.P, fun)).toList();
       fun.setContactos(list);
     }
 
@@ -175,12 +179,17 @@ public class FuncionarioMapper {
     var tipoDocumento = ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
 
     funParam.setIdColaborador(dadosPessoais.getIdColaborador());
-    funParam.setTipoDocumentoId(tipoDocumento);
     funParam.setNumDocumento(ValidationUtil.trimToNull(dadosPessoais.getNumDocumento()));
-    funParam.setNome(ValidationUtil.trimToNull(dadosPessoais.getNome()));
+    funParam.setTipoDocumentoId(tipoDocumento);
+
+    var name = ValidationUtil.trimToNull(dadosPessoais.getNome());
+    funParam.setNome(name);
+    var normalizedName = InpsStringUtils.normalizeText(name);
+    funParam.setNomeNormalizado(normalizedName != null ? normalizedName.toLowerCase(Locale.ROOT) : name);
+
     funParam.setFotografia(ValidationUtil.trimToNull(dadosPessoais.getUrlFoto()));
-    funParam.setDataNascimento(dadosPessoais.getDataNascimento());
     funParam.setSexo(ValidationUtil.trimToNull(dadosPessoais.getGenero()));
+    funParam.setDataNascimento(dadosPessoais.getDataNascimento());
     funParam.setNmMae(ValidationUtil.trimToNull(dadosPessoais.getNomeMae()));
     funParam.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
     funParam.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
@@ -211,8 +220,6 @@ public class FuncionarioMapper {
     return funParam;
 
   }
-
-
 
 
 }

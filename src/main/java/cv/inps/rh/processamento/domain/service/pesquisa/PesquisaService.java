@@ -5,12 +5,14 @@ import cv.inps.rh.processamento.application.dto.WrapperPesquisaColaboradorDTO;
 import cv.inps.rh.processamento.application.queries.PesquisaCentroCustoQuery;
 import cv.inps.rh.processamento.application.queries.PesquisaColaboradorQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.InpsStringUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import cv.inps.rh.shared.util.PageRequestUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -26,7 +28,9 @@ public class PesquisaService {
     // Pesquisa normal por texto (nome da direção), não um lookup por id —
     // ecrã "Marcar Funcionário Para Não Processar".
     var direcaoNome = StringUtils.hasText(query.getDireccao()) ? query.getDireccao() : null;
-    var nome = StringUtils.hasText(query.getNome()) ? query.getNome() : null;
+    var nome = StringUtils.hasText(query.getNome()) ?
+        "%".concat(InpsStringUtils.normalizeText(query.getNome()).toLowerCase(Locale.ROOT)).concat("%") :
+        null;
     var uuidFuncionario = StringUtils.hasText(query.getUuidFuncionario()) ? UUID.fromString(query.getUuidFuncionario()) : null;
     var processado = StringUtils.hasText(query.getProcessado()) ? 1 : null;
 
