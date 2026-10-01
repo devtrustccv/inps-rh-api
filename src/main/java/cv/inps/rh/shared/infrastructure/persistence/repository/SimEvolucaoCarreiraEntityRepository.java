@@ -26,6 +26,7 @@ public interface SimEvolucaoCarreiraEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO(
+          e.id,
           e.uuid,
           e.tipo,
           e.dataReferente,

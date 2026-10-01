@@ -32,6 +32,7 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
 
   @Query("""
       SELECT new cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO(
+          e.id,
           e.uuid,
           e.tipo,
           e.dataReferente,
