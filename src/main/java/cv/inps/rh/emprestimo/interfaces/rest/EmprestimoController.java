@@ -374,7 +374,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-       value = "outro/{tipoPedido}/tipoEmprestimo"
+       value = "outro/{tipoPedido}/{tipoEmprestimo}"
   )
   @Operation(
     summary = "Save fundo social",

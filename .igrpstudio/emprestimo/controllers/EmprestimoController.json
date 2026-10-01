@@ -404,7 +404,7 @@
     },
     {
       "actionName": "saveFundoSocial",
-      "path": "fundo-social",
+      "path": "outro/{tipoPedido}/{tipoEmprestimo}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -432,7 +432,19 @@
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "tipoPedido",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoEmprestimo",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "getHistoricoPagamento",
