@@ -184,7 +184,7 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
          AND f.estado NOT IN (Estado.I, Estado.P)
          AND (:processado IS NULL OR t.flgProcessa = :processado)
          AND (:direcaoNome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :direcaoNome, '%')))
-         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+         AND (:nome IS NULL OR f.nomeNormalizado LIKE :nome)
          AND (:uuidFuncionario IS NULL OR f.uuid = :uuidFuncionario)
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(

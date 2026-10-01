@@ -1,11 +1,6 @@
 package cv.inps.rh.funcionario.application.rules;
 
-import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
-import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
-import cv.inps.rh.funcionario.application.dto.DadosPessoaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
-import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
-import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -14,9 +9,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRep
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoMovimentoEntityRepository;
 import cv.inps.rh.shared.service.NifSearchService;
-import cv.inps.rh.shared.service.model.nif.EntriesDTO;
 import cv.inps.rh.shared.service.model.nif.EntryDTO;
 import cv.inps.rh.shared.service.model.nif.RootResponseDTO;
+import cv.inps.rh.shared.util.InpsStringUtils;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,13 +24,7 @@ import org.springframework.web.client.RestClientException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -191,7 +180,7 @@ public class ColaboradorValidationRules {
   }
 
   private static String normalizarParaComparacao(String v) {
-    String n = NifSearchService.normalizeName(v);
+    String n = InpsStringUtils.normalizeText(v);
     if (n == null) return null;
     n = n.trim().toUpperCase();
     return n.isEmpty() ? null : n;
