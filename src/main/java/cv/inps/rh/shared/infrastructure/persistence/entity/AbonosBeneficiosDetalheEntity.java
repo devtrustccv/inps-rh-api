@@ -46,4 +46,8 @@ public class AbonosBeneficiosDetalheEntity extends AuditEntity {
   @NotNull
   @Column(name = "UUID", nullable = false, length = 100)
   private String uuid;
+
+  @Size(max = 20)
+  @Column(name = "FLG_CONTINUIDADE", length = 20)
+  private String flgContinuidade;
 }

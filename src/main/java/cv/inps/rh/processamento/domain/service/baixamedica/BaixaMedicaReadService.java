@@ -50,7 +50,7 @@ public class BaixaMedicaReadService {
         .stream()
         .map(obj -> {
           var periodo = new PeriodoLicensaRowDTO();
-          periodo.setContinuidade(null);
+          periodo.setContinuidade(obj.getFlgContinuidade());
           periodo.setDataInicio(obj.getDataInicio());
           periodo.setDataFim(obj.getDataFim());
           periodo.setId(obj.getUuid());
