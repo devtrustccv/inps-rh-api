@@ -12,12 +12,9 @@ import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuer
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVListaProcessamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import oracle.jdbc.OracleCallableStatement;
 import oracle.jdbc.OracleTypes;
@@ -37,20 +34,18 @@ public class ProcessamentoSalarialReadService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialReadService.class);
 
-  private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
   private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
   private final RhVListaProcessamentoEntityRepository listaProcessamentoEntityRepository;
   private final ObjectMapper objectMapper;
   private final DataSource dataSource;
 
-  @PersistenceContext
-  private EntityManager entityManager;
-
-
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
-    var pageRequest = PageRequest.of(Integer.parseInt(query.getPage()), Integer.parseInt(query.getSize()));
+    var pageRequest = PageRequest.of(
+        Integer.parseInt(query.getPage()),
+        Integer.parseInt(query.getSize())
+    );
 
     var startDate = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
     var endDate = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
@@ -58,7 +53,14 @@ public class ProcessamentoSalarialReadService {
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;
 
-    var page = listaProcessamentoEntityRepository.list(startDate, endDate, directionId, type, status, pageRequest);
+    var page = listaProcessamentoEntityRepository.list(
+        startDate,
+        endDate,
+        directionId,
+        type,
+        status,
+        pageRequest
+    );
 
     var response = new WrapperProcessamentoSalarialDTO();
     PageMapper.fillPagination(page, response);

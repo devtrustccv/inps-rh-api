@@ -29,11 +29,12 @@ public interface RhVListaProcessamentoEntityRepository extends JpaRepository<RhV
          p.tipoProcessamento
       )
       FROM RhVListaProcessamentoEntity p
-      WHERE ((:estado IS NULL AND p.estado <> 'E') OR (:estado IS NOT NULL AND p.estado = :estado))
+      WHERE ((:estado IS NULL AND p.estadoCodigo <> 'ELIMINADO') OR (:estado IS NOT NULL AND p.estadoCodigo = :estado))
            AND (:startDate IS NULL OR p.dataDe >= :startDate)
            AND (:endDate IS NULL OR p.dataAte <= :endDate)
-           AND (:directionId IS NULL OR p.codigoCc = :directionId)
+           AND (:directionId IS NULL OR p.direcaoId = :directionId)
            AND (:type IS NULL OR p.tipoProcessamento = :type)
+           ORDER BY p.dataRegisto DESC
       """)
   Page<ProcessamentoSalarialDTO> list(
       @Param("startDate") LocalDate startDate,
