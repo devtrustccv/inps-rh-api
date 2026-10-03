@@ -7,6 +7,7 @@ import cv.inps.rh.progressaopromocao.application.queries.GetListaValidacaoProgre
 import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.InpsStringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -31,7 +33,9 @@ public class ProgressaoPromocaoReadService {
         query.getProgressaoPromocao(),
         DateFormatter.stringToLocalDate(query.getDataDe()),
         DateFormatter.stringToLocalDate(query.getDataAte()),
-        ofNullable(query.getColaborador()).map(String::trim).orElse(null),
+        ofNullable(query.getColaborador()).map(InpsStringUtils::normalizeText)
+            .map(obj -> "%".concat(obj).concat("%").toLowerCase(Locale.ROOT))
+            .orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
         "S",
         buildPageable(query.getPage(), query.getSize())
@@ -43,7 +47,9 @@ public class ProgressaoPromocaoReadService {
         query.getProgressaoPromocao(),
         DateFormatter.stringToLocalDate(query.getDataDe()),
         DateFormatter.stringToLocalDate(query.getDataAte()),
-        ofNullable(query.getColaborador()).map(String::trim).orElse(null),
+        ofNullable(query.getColaborador()).map(InpsStringUtils::normalizeText)
+            .map(obj -> "%".concat(obj).concat("%").toLowerCase(Locale.ROOT))
+            .orElse(null),
         StringUtils.hasText(query.getColaboradorId()) ? UUID.fromString(query.getColaboradorId()) : null,
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
         buildPageable(query.getPage(), query.getSize())
@@ -55,7 +61,9 @@ public class ProgressaoPromocaoReadService {
         query.getProgressaoPromocao(),
         DateFormatter.stringToLocalDate(query.getDataDe()),
         DateFormatter.stringToLocalDate(query.getDataAte()),
-        ofNullable(query.getColaborador()).map(String::trim).orElse(null),
+        ofNullable(query.getColaborador()).map(InpsStringUtils::normalizeText)
+            .map(obj -> "%".concat(obj).concat("%").toLowerCase(Locale.ROOT))
+            .orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
         null,
         buildPageable(query.getPage(), query.getSize())

@@ -50,7 +50,7 @@ public interface SimEvolucaoCarreiraEntityRepository extends
         AND (:dataDe IS NULL OR e.dataReferente >= :dataDe)
         AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
         AND (:carreiraId IS NULL OR cd.id = :carreiraId)
-        AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+        AND (:nome IS NULL OR f.nomeNormalizado LIKE :nome)
         AND (:funcionarioId IS NULL OR f.uuid = : funcionarioId)
       """)
   Page<ProgressaoPromocaoRowDTO> findProgressaoPromocaoWithFilters(

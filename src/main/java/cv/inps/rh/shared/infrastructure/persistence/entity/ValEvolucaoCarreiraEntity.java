@@ -78,5 +78,9 @@ public class ValEvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "FILE_ID")
   private String fileId;
 
+  @Size(max = 500)
+  @Column(name = "OBS_MOTIVO_ALTERACAO", length = 500)
+  private String obsMotivoAlteracao;
+
 
 }

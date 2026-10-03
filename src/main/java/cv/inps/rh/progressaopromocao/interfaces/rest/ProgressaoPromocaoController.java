@@ -8,6 +8,7 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.progressaopromocao.application.commands.*;
 import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
+import cv.inps.rh.progressaopromocao.application.dto.EditarSimulacaoDTO;
 import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
 import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
 import cv.inps.rh.progressaopromocao.application.queries.GetHistoricoProgressaPromocaoQuery;
@@ -231,6 +232,24 @@ public class ProgressaoPromocaoController {
   )
   public ResponseEntity<String> validarSimulacao(@Valid @RequestBody HistoricoIdsDTO validarSimulacaoRequest) {
     final var command = new ValidarSimulacaoCommand(validarSimulacaoRequest);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "editar-simulacao")
+  @Operation(
+      summary = "Editar simulacao",
+      description = "Editar simulacao",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+          ),
+      }
+  )
+  public ResponseEntity<String> editarSimulacao(@Valid @RequestBody EditarSimulacaoDTO editarSimulacaoDTO) {
+
+    final var command = new EditarSimulacaoCommand(editarSimulacaoDTO);
 
     return commandBus.send(command);
   }
