@@ -59,8 +59,8 @@ public class SimEvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "FLG_HISTORICO", length = 1)
   private String flgHistorico;
 
-  @Size(max = 1)
-  @Column(name = "FLG_ELEGIVEL", length = 1)
+  @Size(max = 3)
+  @Column(name = "FLG_ELEGIVEL", length = 3)
   private String flgElegivel;
 
   @Size(max = 500)

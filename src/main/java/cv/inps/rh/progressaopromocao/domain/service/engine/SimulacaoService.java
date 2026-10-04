@@ -59,6 +59,7 @@ public class SimulacaoService {
     e.setDataReferente(LocalDate.now());
     e.setTipo(type.name());
     e.setAvaliacaoMedia(media);
+    e.setFlgElegivel("SIM");
 
     simEvolucaoCarreiraEntityRepository.save(e);
   }
