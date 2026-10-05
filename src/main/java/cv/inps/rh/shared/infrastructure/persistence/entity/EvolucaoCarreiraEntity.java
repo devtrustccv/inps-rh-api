@@ -53,8 +53,8 @@ public class EvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "OBSERVACAO", length = 500)
   private String observacao;
 
-  @Size(max = 1)
-  @Column(name = "TIPO", length = 1)
+  @Size(max = 20)
+  @Column(name = "TIPO", length = 20)
   private String tipo;
 
   @Size(max = 1)

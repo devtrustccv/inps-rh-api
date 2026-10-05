@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public class PromocaoService {
     } else
       LOGGER.debug("Media <{}> abaixo do limite", media);
 
-    var dataProgressao = c.getDataInicio().plusYears(3).minusDays(c.getDiasEmSituacaoLaboral());
+    var dataProgressao = c.getDataInicio().plusYears(3).minusDays(Optional.ofNullable(c.getDiasEmSituacaoLaboral()).orElse(0));
     var atingiuTempoProgressao = dataProgressao.isBefore(LocalDate.now());
     if (atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para promocao");

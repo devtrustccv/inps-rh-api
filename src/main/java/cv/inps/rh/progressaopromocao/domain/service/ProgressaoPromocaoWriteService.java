@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
@@ -85,6 +86,29 @@ public class ProgressaoPromocaoWriteService {
 
     ev.setOrdemServicoId(id);
     evolucaoCarreiraEntityRepository.save(ev);
+  }
+
+  public void editarSimulacao(Long id, String elegivel, EstadoValidacao validacao, String observacao) {
+
+    var row = simEvolucaoCarreiraEntityRepository.findByIdOrThrow(id);
+    row.setFlgElegivel(elegivel);
+    row.setObsMotivoAlteracao(observacao);
+    simEvolucaoCarreiraEntityRepository.save(row);
+
+    if (validacao == EstadoValidacao.SIM) {
+      var obj = new ValEvolucaoCarreiraEntity();
+      obj.setCarreiraIdDe(row.getCarreiraIdDe());
+      obj.setEscalaoIdDe(row.getEscalaoIdDe());
+      obj.setEscalaoIdPara(row.getEscalaoIdPara());
+      obj.setTiprel(row.getTiprel());
+      obj.setDataReferente(row.getDataReferente());
+      obj.setObservacao(row.getObservacao());
+      obj.setTipo(row.getTipo());
+      obj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      obj.setEstado(Estado.A.name());
+      obj.setObsMotivoAlteracao(observacao);
+      valEvolucaoCarreiraEntityRepository.save(obj);
+    }
   }
 
   public void validar(List<Long> ids) {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -25,7 +26,7 @@ public class ProgressaoService {
     LOGGER.debug("\n--------------------------------------------------PROGRESSAO-------------------------------------------------------------------------");
     LOGGER.debug("{}", c);
 
-    var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos()).minusDays(c.getDiasEmSituacaoLaboral());
+    var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos()).minusDays(Optional.ofNullable(c.getDiasEmSituacaoLaboral()).orElse(0));
     var atingiuTempoProgressao = dataMinProgressao.isBefore(LocalDate.now());
     if (!atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para progressao");

@@ -55,11 +55,10 @@ public class ValEvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "OBSERVACAO", length = 500)
   private String observacao;
 
-  @Size(max = 1)
+  @Size(max = 20)
   @NotNull
-  @Column(name = "TIPO", nullable = false, length = 1)
+  @Column(name = "TIPO", nullable = false, length = 20)
   private String tipo;
-
   @Size(max = 1)
   @Column(name = "ESTADO", length = 1)
   private String estado;
@@ -77,6 +76,10 @@ public class ValEvolucaoCarreiraEntity extends AuditEntity {
 
   @Column(name = "FILE_ID")
   private String fileId;
+
+  @Size(max = 500)
+  @Column(name = "OBS_MOTIVO_ALTERACAO", length = 500)
+  private String obsMotivoAlteracao;
 
 
 }
