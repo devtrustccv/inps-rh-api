@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,9 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
 
     LOGGER.debug("GetParamSituacoesLaboraisByVinculoQuery: {}", query);
 
-     var result = paramSitLaboralEntityRepository.findAllByVinculoId(query.getVinculoId())
+     // Mesmo critério da associação em Parametrização (ParamVinculoService):
+     // associações removidas ficam com ESTADO = 'E' (soft-delete) e não podem ser listadas.
+     var result = paramSitLaboralEntityRepository.findAllByVinculoIdAndEstadoNot(query.getVinculoId(), Estado.E.name())
          .stream()
          .filter(obj -> obj.getParamSit().getFlgSituacaoLaboral().equals(1))
          .filter(obj -> Objects.isNull(query.getFlgAbonoBeneficio()) || obj.getParamSit().getFlgAbonoBeneficio().equals(!query.getFlgAbonoBeneficio().isEmpty() ? Integer.parseInt(query.getFlgAbonoBeneficio()) : null))
