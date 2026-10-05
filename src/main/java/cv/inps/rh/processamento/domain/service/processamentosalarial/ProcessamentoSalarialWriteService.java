@@ -265,6 +265,10 @@ public class ProcessamentoSalarialWriteService {
         .map(String::valueOf)
         .toArray(String[]::new);
 
+    if (ccIds.length == 0) {
+      ccIds = new String[]{null};
+    }
+
     var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?) }";
 
     try (var connection = dataSource.getConnection()) {
