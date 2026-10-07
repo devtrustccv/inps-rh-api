@@ -56,6 +56,9 @@ public class NotificarDestinatariosService {
     var funcionario = funcionarioRepository.findByUuidOrThrow(UUID.fromString(request.getFuncionarioId()));
 
     var destinatarios = destinatarioResolver.resolver(funcionario, tipos);
+    // Sem email: grava-se na mesma (estado "Pendente", fica no portal do funcionário) — a
+    // notificação tem de ficar registada em RH_T_NOTIFICACAO mesmo quando não há email.
+    var pendentes = destinatarioResolver.resolverSemEmail(funcionario, tipos);
 
     // Tipos que ficaram sem endereço: o utilizador já não escolhe emails, por isso tem de saber
     // qual dos destinatários que pediu não foi notificado — e porquê — em vez de ver só um total.
@@ -64,14 +67,28 @@ public class NotificarDestinatariosService {
         .filter(tipo -> destinatarios.stream().noneMatch(d -> tipo.equals(d.tipo())))
         .toList();
 
+    var vars = Map.of(
+        "nome", funcionario.getNome() != null ? funcionario.getNome() : "");
+
+    if (!pendentes.isEmpty()) {
+      notificacaoDispatchService.enviarParaDestinatarios(
+          request.getTipoNotificacao(),
+          pendentes,
+          request.getMensagem(),
+          request.getReferenciaId(),
+          request.getReferenciaName(),
+          StringUtils.hasText(request.getReferenciaUuid()) ? UUID.fromString(request.getReferenciaUuid()) : null,
+          vars);
+    }
+
     if (destinatarios.isEmpty()) {
       LOGGER.warn("Notificação {} para funcionário {} sem destinatários com email — tipos pedidos: {}",
           request.getTipoNotificacao(), request.getFuncionarioId(), omitidos);
-      return resposta(0, "Nenhum destinatário com email foi encontrado.", List.of(), omitidos);
+      return resposta(0, pendentes.size(), pendentes.isEmpty()
+          ? "Nenhum destinatário com email foi encontrado."
+          : "Nenhum destinatário com email: notificação registada como pendente para " + pendentes.size() + " destinatário(s).",
+          List.of(), omitidos);
     }
-
-    var vars = Map.of(
-        "nome", funcionario.getNome() != null ? funcionario.getNome() : "");
 
     notificacaoDispatchService.enviarParaDestinatarios(
         request.getTipoNotificacao(),
@@ -93,8 +110,9 @@ public class NotificarDestinatariosService {
         })
         .toList();
 
-    return resposta(destinatarios.size(),
-        "Notificação enviada para " + destinatarios.size() + " destinatário(s).",
+    return resposta(destinatarios.size(), pendentes.size(),
+        "Notificação enviada para " + destinatarios.size() + " destinatário(s)."
+            + (pendentes.isEmpty() ? "" : " " + pendentes.size() + " registada(s) como pendente (sem email)."),
         enviadosPara, omitidos);
   }
 
@@ -120,11 +138,12 @@ public class NotificarDestinatariosService {
     return tipos;
   }
 
-  private Map<String, ?> resposta(int enviados, String message,
+  private Map<String, ?> resposta(int enviados, int pendentes, String message,
                                   List<Map<String, String>> destinatarios, List<String> semEmail) {
     // LinkedHashMap e não Map.of: a resposta tem de manter a ordem e aceitar listas vazias.
     var body = new LinkedHashMap<String, Object>();
     body.put("enviados", enviados);
+    body.put("pendentes", pendentes);
     body.put("message", message);
     body.put("destinatarios", destinatarios);
     body.put("semEmail", semEmail);
