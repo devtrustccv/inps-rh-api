@@ -146,11 +146,28 @@ public class TipoRelRemPagHelper {
       List<DefPagamentoEntity> novosPagamentos,
       Set<Long> excluirRemIds,
       Set<Long> excluirPagIds) {
+    transferirParaNovoTipoRelacionamento(tipoRelAtual, novoTipoRel, novasRemuneracoes, novosPagamentos,
+        excluirRemIds, excluirPagIds, java.time.LocalDate.now());
+  }
+
+  /**
+   * Variante com a data de referência do critério "expirado" (DATA_FIM anterior à referência não
+   * transita). As restantes variantes usam hoje; a renovação retroativa passa o fim do contrato
+   * anterior, para não excluir os def que estavam em vigor nessa data.
+   */
+  public void transferirParaNovoTipoRelacionamento(
+      TiposRelacionamentoEntity tipoRelAtual,
+      TiposRelacionamentoEntity novoTipoRel,
+      List<DefinicaoRemuneracaoEntity> novasRemuneracoes,
+      List<DefPagamentoEntity> novosPagamentos,
+      Set<Long> excluirRemIds,
+      Set<Long> excluirPagIds,
+      java.time.LocalDate referencia) {
 
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
-    var hoje = java.time.LocalDate.now();
+    var hoje = referencia != null ? referencia : java.time.LocalDate.now();
     var excluirRem = excluirRemIds != null ? excluirRemIds : java.util.Collections.<Long>emptySet();
     var excluirPag = excluirPagIds != null ? excluirPagIds : java.util.Collections.<Long>emptySet();
 

@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
+import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
@@ -110,7 +111,7 @@ public class ValidacaoRenovacaoContratoService {
         // dos def (senão a extensão reviveria os expirados e o filtro não os excluiria).
         estenderDatasDimensoes(tiposRelacionamento, contrato.getDataInicio(), contrato.getDataFim());
       }
-      mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
+      mudarEstado(funcionario, aprovado ? Estado.A : Estado.I, aprovado ? dto.getDadosRenovacao() : null);
       // Alerta de origem (se existir): SIM fecha-o (estado='I', situação resolvida — doc TRANSVERSAL);
       // NÃO repõe flg_tratamento='N' para voltar à grelha "por tratar".
       marcarAlerta(contrato, aprovado);
@@ -124,12 +125,14 @@ public class ValidacaoRenovacaoContratoService {
     if (!EstadoValidacao.NAO.equals(dto.getValidacao())) {
       var antigo = tiposRelacionamento.getTiprelId();
       if (antigo != null) {
+        var referencia = referenciaNaoTerminado(dto.getDadosRenovacao());
         tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(
-            antigo, tiposRelacionamento, java.util.List.of(), java.util.List.of());
+            antigo, tiposRelacionamento, java.util.List.of(), java.util.List.of(),
+            java.util.Set.of(), java.util.Set.of(), referencia);
         // Use case (DEF_REMUNERACOES/PAGAMENTOS "atualizar data fim"): estende a DATA_FIM dos def que
         // TRANSITARAM (os não-terminados). Depois do transferir → não revive os expirados.
         if (EstadoValidacao.SIM.equals(dto.getValidacao()))
-          estenderDatasDefNaoTerminados(antigo, contrato.getDataFim());
+          estenderDatasDefNaoTerminados(antigo, contrato.getDataFim(), referencia);
       }
     }
 
@@ -165,14 +168,27 @@ public class ValidacaoRenovacaoContratoService {
    * predicado do transferir). Os expirados NÃO transitaram e não se lhes toca (ficam expirados no
    * tiprel anterior). Chamado DEPOIS do transferir (que não altera DATA_FIM), sobre a data original.
    */
-  private void estenderDatasDefNaoTerminados(TiposRelacionamentoEntity antigo, LocalDate dataFim) {
-    var hoje = LocalDate.now();
+  private void estenderDatasDefNaoTerminados(TiposRelacionamentoEntity antigo, LocalDate dataFim,
+      LocalDate referencia) {
     funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId()).stream()
-        .filter(r -> r.getDataFim() == null || !r.getDataFim().isBefore(hoje))
+        .filter(r -> r.getDataFim() == null || !r.getDataFim().isBefore(referencia))
         .forEach(r -> r.setDataFim(dataFim));
     funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId()).stream()
-        .filter(p -> p.getDataFim() == null || !p.getDataFim().isBefore(hoje))
+        .filter(p -> p.getDataFim() == null || !p.getDataFim().isBefore(referencia))
         .forEach(p -> p.setDataFim(dataFim));
+  }
+
+  /**
+   * Data de referência do critério "não terminado" dos def: o fim do contrato anterior (dia antes do
+   * início da renovação) quando é anterior a hoje — renovação retroativa, em que os def do contrato
+   * anterior já têm DATA_FIM no passado mas estavam em vigor até à renovação. Caso contrário, hoje
+   * (comportamento das renovações correntes).
+   */
+  private LocalDate referenciaNaoTerminado(RenovarContratoReqDTO dados) {
+    var hoje = LocalDate.now();
+    if (dados == null || dados.getDataInicio() == null) return hoje;
+    var fimAnterior = dados.getDataInicio().minusDays(1);
+    return fimAnterior.isBefore(hoje) ? fimAnterior : hoje;
   }
 
   /**
@@ -195,7 +211,7 @@ public class ValidacaoRenovacaoContratoService {
         });
   }
 
-  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado, RenovarContratoReqDTO dadosAprovados) {
 
     var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
@@ -206,7 +222,7 @@ public class ValidacaoRenovacaoContratoService {
         // Renovação: o contrato mantém-se A (vínculo em vigor); só o histórico da proposta (P)
         // transita. transicionarEstado localizaria o histórico pelo estado do contrato (A) e nunca
         // tocaria na proposta — usar o caminho dedicado à renovação.
-        contratoHistoricoWriteService.transicionarRenovacao(contrato, estado);
+        contratoHistoricoWriteService.transicionarRenovacao(contrato, estado, dadosAprovados);
       }
     }
 
