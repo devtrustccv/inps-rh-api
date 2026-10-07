@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -154,6 +155,9 @@ public class FuncionarioMapper {
     docPessoal.setFunId(fun);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    docPessoal.setDataEmissao(dadosPessoais.getDataEmissaoDocumento());
+    docPessoal.setDataValidade(dadosPessoais.getDataValidadeDocumento());
+    docPessoal.setLocEmissId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getLocalEmissaoDocumentoId()));
     docPessoal.setUuid(UuidCreator.getTimeOrderedEpoch());
     fun.setDocumentoPessoal(docPessoal);
 
@@ -200,9 +204,25 @@ public class FuncionarioMapper {
     funParam.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
 
     DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
+    // Emissão/validade/local only come from the document search: keep the stored
+    // values when the same document is resubmitted without them, reset when the
+    // document itself changed.
+    boolean mesmoDocumento = docPessoal.getId() != null
+        && Objects.equals(docPessoal.getNumDocumento(), dadosPessoais.getNumDocumento())
+        && docPessoal.getTipoDocumentoId() != null
+        && Objects.equals(docPessoal.getTipoDocumentoId().getId(), dadosPessoais.getTipoDocumentoId());
     docPessoal.setFunId(funParam);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    if (!mesmoDocumento || dadosPessoais.getDataEmissaoDocumento() != null) {
+      docPessoal.setDataEmissao(dadosPessoais.getDataEmissaoDocumento());
+    }
+    if (!mesmoDocumento || dadosPessoais.getDataValidadeDocumento() != null) {
+      docPessoal.setDataValidade(dadosPessoais.getDataValidadeDocumento());
+    }
+    if (!mesmoDocumento || dadosPessoais.getLocalEmissaoDocumentoId() != null) {
+      docPessoal.setLocEmissId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getLocalEmissaoDocumentoId()));
+    }
     docPessoal.setUuid(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().valor());
     docPessoal.setEstado(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getEstado() : Estado.P);
     funParam.setDocumentoPessoal(docPessoal);

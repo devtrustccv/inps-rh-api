@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -35,6 +36,16 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @NotBlank(message = "numDocumento is mandatory")
     @Column(name="num_documento", nullable = false)
     private String numDocumento;
+
+    @Column(name="data_emissao")
+    private LocalDate dataEmissao;
+
+    @Column(name="data_validade")
+    private LocalDate dataValidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loc_emiss_id", referencedColumnName = "id")
+    private GeografiaEntity locEmissId;
 
 
 
