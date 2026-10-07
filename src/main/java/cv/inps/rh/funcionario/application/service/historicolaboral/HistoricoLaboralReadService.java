@@ -284,20 +284,41 @@ public class HistoricoLaboralReadService {
     return dto;
   }
 
+  private static String parteCombo(String valor) {
+    return valor != null && !valor.isBlank() ? valor.trim() : "-";
+  }
+
+  // Escalão como no combo de escalões (ParamEscalaoMapper): "nível de referência/escalão", ex. "9/A"
+  private static String escalaoLabel(
+      cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity escalao) {
+    if (escalao == null) return null;
+    return java.util.stream.Stream.of(
+            escalao.getNivelReferencia() != null ? escalao.getNivelReferencia().toString().trim() : "",
+            escalao.getEscalao() != null ? escalao.getEscalao().trim() : "")
+        .filter(s -> !s.isEmpty())
+        .collect(java.util.stream.Collectors.joining("/"));
+  }
+
   public List<ComboItemDTO> getRelacaoLaboralCombo(GetRelacaoLaboralComboQuery query) {
     var uuid = UUID.fromString(query.getFuncionarioId());
     return tiposRelacionamentoEntityRepository
-        .findAllAtivosComboByFuncionarioUuid(uuid)
+        .findAllComboByFuncionarioUuid(uuid)
         .stream()
         .map(t -> {
           var item = new ComboItemDTO();
           var contrato = t.getContrVinculoId();
-          var tipoContratoNome = (contrato != null && contrato.getTpContratoId() != null)
-              ? contrato.getTpContratoId().getNome() : "";
-          var vinculoNome = (contrato != null && contrato.getVinculoId() != null)
-              ? contrato.getVinculoId().getNome() : "";
+          var sl = t.getSituacLaboralId();
+          // Escalão: com carreira vem do escalão da carreira; PCCS sem carreira grava-o no tiprel
+          // (mesma regra do DadosContratuaisMapper).
+          var escalao = t.getCarreiraId() != null ? t.getCarreiraId().getEscalaoId() : t.getEscalaoId();
+          // Formato: Contrato / Vínculo / Situação Laboral / Escalão ("-" quando não aplicável)
+          var label = String.join(" / ",
+              parteCombo(contrato != null && contrato.getTpContratoId() != null ? contrato.getTpContratoId().getNome() : null),
+              parteCombo(contrato != null && contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null),
+              parteCombo(sl != null && sl.getSituacaoLaboralId() != null ? sl.getSituacaoLaboralId().getNome() : null),
+              parteCombo(escalaoLabel(escalao)));
           item.setValue(t.getUuid().toString());
-          item.setLabel(tipoContratoNome + " / " + vinculoNome);
+          item.setLabel(label);
           return item;
         })
         .toList();
