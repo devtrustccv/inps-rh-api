@@ -108,7 +108,7 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
         ? Long.valueOf(filters.get("paisId"))
         : null;
 
-    var paisPage = geografiaRepository.findCountries(
+    var paisPage = geografiaRepository.findCountriesWithEstabelecimentos(
         paisId,
         StringUtils.hasText(nome) ? ConfigurationUtils.normalizeAndSetToLowerCaseText(nome) : null,
         pageable

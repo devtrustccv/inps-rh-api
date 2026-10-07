@@ -50,4 +50,20 @@ public interface GeografiaEntityRepository extends
       @Param("name") String name,
       Pageable pageable
   );
+
+  // Apenas países com pelo menos um estabelecimento ativo associado
+  @Query("""
+      SELECT e
+      FROM GeografiaEntity e
+      WHERE e.nivelDetalhe = 1 AND (:paisId IS NULL OR e.id = :paisId) AND (:name IS NULL OR LOWER(e.nomeNorm) LIKE :name)
+        AND EXISTS (
+          SELECT 1 FROM EstabelecimentoEntity est
+          WHERE est.pais.id = e.id AND est.estado = 'A'
+        )
+      """)
+  Page<GeografiaEntity> findCountriesWithEstabelecimentos(
+      @Param("paisId") Long paisId,
+      @Param("name") String name,
+      Pageable pageable
+  );
 }

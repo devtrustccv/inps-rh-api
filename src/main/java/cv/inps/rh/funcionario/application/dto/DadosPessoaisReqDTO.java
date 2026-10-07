@@ -32,6 +32,15 @@ public class DadosPessoaisReqDTO  {
   private String numDocumento ;
 
 
+  private LocalDate dataEmissaoDocumento ;
+
+
+  private LocalDate dataValidadeDocumento ;
+
+
+  private Long localEmissaoDocumentoId ;
+
+
   private String nome ;
 
 
