@@ -40,6 +40,15 @@ public class DadosPessoaisRespDTO  {
   private String numDocumento ;
 
 
+  private LocalDate dataEmissaoDocumento ;
+
+
+  private LocalDate dataValidadeDocumento ;
+
+
+  private Long localEmissaoDocumentoId ;
+
+
   private String nome ;
 
 

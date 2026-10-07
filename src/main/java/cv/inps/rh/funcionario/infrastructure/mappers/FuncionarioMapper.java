@@ -47,6 +47,12 @@ public class FuncionarioMapper {
     dadosPessoais.setLocalidade(entity.getLocalidade());
     dadosPessoais.setTipoDocumentoId(entity.getTipoDocumentoId() != null ? entity.getTipoDocumentoId().getId() : null);
     dadosPessoais.setNumDocumento(entity.getNumDocumento());
+    var docPessoal = entity.getDocumentoPessoal();
+    if (docPessoal != null) {
+      dadosPessoais.setDataEmissaoDocumento(docPessoal.getDataEmissao());
+      dadosPessoais.setDataValidadeDocumento(docPessoal.getDataValidade());
+      dadosPessoais.setLocalEmissaoDocumentoId(docPessoal.getLocEmissId() != null ? docPessoal.getLocEmissId().getId() : null);
+    }
     dadosPessoais.setNif(entity.getNif() != null ? entity.getNif() : null);
     dadosPessoais.setNumSegurado(entity.getNuSegInps());
     if (entity.getLocNascId() != null) {
