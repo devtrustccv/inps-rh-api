@@ -95,6 +95,8 @@ public class HistoricoLaboralWriteService {
     if (temSituacao(dto)) {
       var novaSit = new SituacaoLaboralEntity();
       populateSituacao(novaSit, dto);
+      // Situação = a do formulário; sem "Data Início Situação" assume a data do registo (hoje).
+      if (novaSit.getDataInicio() == null) novaSit.setDataInicio(hoje);
       novaSit.setEstado(Estado.A);
       novaSit.setUuid(IdentificadorUnico.create().valor());
       novaSit.setContrVinculoId(atual.getContrVinculoId());
