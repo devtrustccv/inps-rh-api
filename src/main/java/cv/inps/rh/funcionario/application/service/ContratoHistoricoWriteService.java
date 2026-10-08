@@ -45,7 +45,11 @@ public class ContratoHistoricoWriteService {
    * propostas, nao "criado com ...".
    */
   public java.util.Optional<ContratoHistoricoEntity> historicoActual(ContratoEntity contrato) {
-    return contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId());
+    // Em vigor = est_act_adm=1 (ou, na falta, o A mais recente). NÃO a versão mais alta: depois de uma
+    // renovação rejeitada, a versão mais alta é a proposta em I e o "antes" mostraria as datas dela.
+    return contratoHistoricoEntityRepository.findFirstByContratoId_IdAndEstActAdmOrderByVersaoDesc(contrato.getId(), 1)
+        .or(() -> contratoHistoricoEntityRepository.findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.A))
+        .or(() -> contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId()));
   }
 
   /** Congela o diff da renovacao (historico anterior -> proposta) em RH_T_VALIDACAO_DETALHE. */
