@@ -159,6 +159,14 @@ public class DadosContratuaisMapper {
         ? tiposRelacionamento.getCarreiraId().getEscalaoId()
         : tiposRelacionamento.getEscalaoId();
 
+    // Vínculo sem carreira + PCCS: não há RH_T_CARREIRA, mas o ecrã mostra Carreira e só lista os
+    // escalões da carreira escolhida. Devolve a carreira do próprio escalão (ParamEscalao.paramCarrId),
+    // só para exibição — sem isto o Escalão gravado aparecia vazio ao abrir o registo.
+    if (tiposRelacionamento.getCarreiraId() == null && escRef != null && escRef.getParamCarrId() != null) {
+      dcr.setCarreiraId(escRef.getParamCarrId().getId());
+      dcr.setCarreiraDesc(escRef.getParamCarrId().getNome());
+    }
+
     dcr.setEscalaoReferenciaId(escRef != null ? escRef.getId() : null);
 
     dcr.setEscalaoReferenciaDesc(escRef != null ? escRef.getEscalao() : null);
