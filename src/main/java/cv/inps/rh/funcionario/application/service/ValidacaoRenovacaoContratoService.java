@@ -101,6 +101,12 @@ public class ValidacaoRenovacaoContratoService {
     }
 
     if (dto.getValidacao() != null) {
+      // Só se decide (SIM/NAO) sobre uma renovação PENDENTE: tiprel atual em P + validação P. Sem isto,
+      // um NAO sem proposta inativava o tiprel em vigor e um SIM reescrevia as datas do contrato.
+      if (tiposRelacionamento.getEstado() != Estado.P
+          || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO)) {
+        throw IgrpResponseStatusException.badRequest("Não há renovação pendente para validar.");
+      }
       var aprovado = dto.getValidacao().equals(EstadoValidacao.SIM);
       // As novas datas da renovacao so devem ser gravadas no contrato quando a
       // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
@@ -110,8 +116,15 @@ public class ValidacaoRenovacaoContratoService {
         // estendidos DEPOIS do transferir, para o filtro "não-terminado" avaliar a DATA_FIM ORIGINAL
         // dos def (senão a extensão reviveria os expirados e o filtro não os excluiria).
         estenderDatasDimensoes(tiposRelacionamento, contrato.getDataInicio(), contrato.getDataFim());
+        // O tiprel anterior foi fechado no REGISTO em (início proposto − 1). Se o maker corrigiu o início
+        // (CORRIGIR → reenvio) ou o checker o mudou, recalcula-se com o início APROVADO: sem isto ficava
+        // um buraco (ou sobreposição) entre o tiprel anterior e o renovado.
+        var anterior = tiposRelacionamento.getTiprelId();
+        if (anterior != null && contrato.getDataInicio() != null)
+          anterior.setDataFim(contrato.getDataInicio().minusDays(1));
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I, aprovado ? dto.getDadosRenovacao() : null);
+      if (!aprovado) reverterRegistoRenovacao(tiposRelacionamento, contrato);
       // Alerta de origem (se existir): SIM fecha-o (estado='I', situação resolvida — doc TRANSVERSAL);
       // NÃO repõe flg_tratamento='N' para voltar à grelha "por tratar".
       marcarAlerta(contrato, aprovado);
@@ -136,10 +149,26 @@ public class ValidacaoRenovacaoContratoService {
       }
     }
 
-    var mensagem = EstadoValidacao.SIM.equals(dto.getValidacao())
-        ? "Renovação de contrato validada."
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidacao()) ? "Renovação de contrato validada."
+        : EstadoValidacao.NAO.equals(dto.getValidacao()) ? "Renovação de contrato rejeitada."
         : "Renovação de contrato actualizada.";
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
+  }
+
+  /**
+   * Revert do registo da renovação numa validação NEGATIVA (mesmo padrão de
+   * ValidarContratoService.reverterRegistoNovoContrato): o tiprel proposto (já I via mudarEstado)
+   * deixa de ser o atual e o tiprel anterior — fechado no registo com est_act_adm=0 e
+   * DATA_FIM = início da renovação − 1 — volta a ser o atual. DATA_FIM reposta = a do contrato, que
+   * a renovação não altera enquanto pendente. Os DEF nunca saíram do tiprel anterior e o histórico
+   * em vigor nunca foi tocado; a proposta fica no histórico em I (registo da rejeição).
+   */
+  private void reverterRegistoRenovacao(TiposRelacionamentoEntity proposto, ContratoEntity contrato) {
+    proposto.setEstActAdm(0);
+    var anterior = proposto.getTiprelId();
+    if (anterior == null) return;
+    anterior.setEstActAdm(1);
+    anterior.setDataFim(contrato.getDataFim());
   }
 
   /**
