@@ -141,12 +141,13 @@ public class NovoContratoService {
     CarreiraEntity carreira = null;
     if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
 
-      CarreiraEntity atual = tipoRelacionamentoAtual.getCarreiraId() != null ? tipoRelacionamentoAtual.getCarreiraId() : null;
-      if (atual != null) {
-        carreira = mudaCarreiraOuManter(atual, dadosContratuais);
-        carreira.setContrVinculoId(contratoNovo);
-        contratoNovo.getCarreiras().add(carreira);
-      }
+      // Cria SEMPRE a carreira escolhida no formulário. Antes só era criada se o tiprel anterior já tivesse
+      // carreira — um contrato anterior sem carreira (ou vínculo diferente) perdia carreira e escalão.
+      // mudaCarreiraOuManter fecha a anterior (DATA_FIM = início - 1) só quando ela existe.
+      CarreiraEntity atual = tipoRelacionamentoAtual.getCarreiraId();
+      carreira = mudaCarreiraOuManter(atual, dadosContratuais);
+      carreira.setContrVinculoId(contratoNovo);
+      contratoNovo.getCarreiras().add(carreira);
 
     }
 
