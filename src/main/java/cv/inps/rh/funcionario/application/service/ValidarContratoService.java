@@ -324,9 +324,9 @@ public class ValidarContratoService {
    * e o contrato/tiprel/carreira/mobilidade/regime ANTERIORES (fechados no registo) voltam a ativos.
    * Os registos do NOVO contrato ja foram para 'I' via mudarEstado.
    *
-   * <p>So se REATIVA o contrato anterior se ele ainda estiver EM VIGOR (dentro do prazo) — mesma
-   * logica do guard D2 (existeContratoEmVigor). Se ja tinha terminado, a rejeicao do novo contrato
-   * NAO o ressuscita: o colaborador fica sem relacao ativa (correto, o anterior expirou).
+   * <p>O tiprel anterior volta SEMPRE a ser o último vínculo (est_act_adm=1), sem condição de datas.
+   * O contrato anterior NÃO é reativado: o Novo Contrato só é permitido sem contrato Ativo, logo ele
+   * já estava inativo antes do registo — fica como estava (reativá-lo bloqueava um novo registo).
    */
   private void reverterRegistoNovoContrato(TiposRelacionamentoEntity novoTiprel) {
     novoTiprel.setEstActAdm(0);
@@ -335,19 +335,15 @@ public class ValidarContratoService {
     var contratoAntigo = antigo.getContrVinculoId();
     if (contratoAntigo == null) return;
 
-    var hoje = LocalDate.now();
-    boolean emVigor = contratoAntigo.getDataFim() == null
-        || !contratoAntigo.getDataFim().isBefore(hoje);
-    if (!emVigor) return;
-
     // data_fim reposto = data_fim do contrato anterior (o registo tinha-o sobrescrito com a data de
     // inicio do novo); nunca null, para nao perder o termo do contrato.
     var df = contratoAntigo.getDataFim();
     antigo.setEstActAdm(1);
     antigo.setDataFim(df);
-    contratoAntigo.setEstado(Estado.A);
     if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(df);
-    if (antigo.getMobId() != null) antigo.getMobId().setDataFim(df);
+    // Mobilidade reutilizada (sem mudança de colocação) não foi fechada no registo: fica como está.
+    if (antigo.getMobId() != null && !mobilidadeMapper.partilhadaComAnterior(novoTiprel))
+      antigo.getMobId().setDataFim(df);
     if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(df);
   }
 

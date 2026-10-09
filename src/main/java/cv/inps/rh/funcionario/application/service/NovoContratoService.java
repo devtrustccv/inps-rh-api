@@ -84,8 +84,8 @@ public class NovoContratoService {
     // D2 (DOSSIÊ, Novo Contrato): "o botão Novo Contrato só deve ficar visível caso NÃO exista um
     // contrato ativo". Enforçado no backend via query: um contrato em vigor (estado A e ainda dentro
     // do prazo) bloqueia o novo — a alteração de um contrato em vigor faz-se pela Renovação.
-    var hoje = LocalDate.now();
-    if (contratoEntityRepository.existeContratoEmVigor(funcionario, Estado.A, hoje)) {
+    // Só o ESTADO conta (questão das datas fica em aberto): bloqueia se existir um contrato Ativo.
+    if (contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A)) {
       throw IgrpResponseStatusException.badRequest(
           "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
     }
