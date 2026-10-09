@@ -63,30 +63,11 @@ public class HistoricoLaboralWriteService {
 
     var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    // "Processado" (EXISTS em RH_T_PROC_FUNCIONARIOS por TIPREL_ID): nao processado -> UPDATE
-    // in-place da situacao; processado -> novo registo/tiprel (preserva o historico salarial).
-    boolean processado = processamentoFuncionarioRepository.existsByTiprel_Id(atual.getId());
-
-    if (!processado) {
-      if (temSituacao(dto)) {
-        var sitLab = atual.getSituacLaboralId();
-        if (sitLab == null) {
-          sitLab = new SituacaoLaboralEntity();
-          sitLab.setUuid(IdentificadorUnico.create().valor());
-          sitLab.setContrVinculoId(atual.getContrVinculoId());
-          atual.setSituacLaboralId(sitLab);
-        }
-        populateSituacao(sitLab, dto);
-        sitLab.setEstado(Estado.A);
-        situacaoLaboralEntityRepository.save(sitLab);
-        derivarFlgProcessa(atual, sitLab);
-        // In-place (nao processado): mantem-se o TIPO_SITUACAO/OBS/REFERENTE do tiprel (ex.: "INICIO").
-        // So o ramo processado (tiprel novo) carimba "MUDANCA_SITUACAO_LABORAL" — como AlterarSituacaoLaboral.
-        funcionarioEntityRepository.saveAndFlush(funcionario);
-        ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
-      }
-      funcionarioEntityRepository.save(funcionario);
-      return new SuccessResponseDTO(true, atual.getUuid().toString(), "Relação laboral registada.", List.of());
+    // "Nova Situação Laboral" é SEMPRE um registo novo (novo tiprel + nova situação), processado ou
+    // não — antes, um tiprel sem processamento era actualizado in place e o ecrã dizia "registada"
+    // sem ter criado linha nenhuma. A edição da linha existente é o fluxo próprio (atualizar).
+    if (!temSituacao(dto) || dto.getSituacaoLaboral() == null) {
+      throw IgrpResponseStatusException.badRequest("Indique a situação laboral a registar.");
     }
 
     var hoje = LocalDate.now();
@@ -114,6 +95,8 @@ public class HistoricoLaboralWriteService {
     if (temSituacao(dto)) {
       var novaSit = new SituacaoLaboralEntity();
       populateSituacao(novaSit, dto);
+      // Situação = a do formulário; sem "Data Início Situação" assume a data do registo (hoje).
+      if (novaSit.getDataInicio() == null) novaSit.setDataInicio(hoje);
       novaSit.setEstado(Estado.A);
       novaSit.setUuid(IdentificadorUnico.create().valor());
       novaSit.setContrVinculoId(atual.getContrVinculoId());
@@ -140,7 +123,7 @@ public class HistoricoLaboralWriteService {
     }
 
     funcionarioEntityRepository.save(funcionario);
-    return new SuccessResponseDTO(true, novoRelacionamento.getUuid().toString(), "Relação laboral registada.", List.of());
+    return new SuccessResponseDTO(true, novoRelacionamento.getUuid().toString(), "Situação laboral registada.", List.of());
   }
 
   @Transactional

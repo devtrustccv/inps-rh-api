@@ -129,7 +129,21 @@ public class ValidarContratoService {
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();
-    mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    if (mobilidadeMapper.partilhadaComAnterior(tiposRelacionamento)) {
+      // Mobilidade reutilizada do contrato em vigor (sem mudança de colocação): não se reescreve. Se a
+      // colocação foi alterada na correção/validação, passa a ser um movimento — encerra-se a em vigor
+      // (como no registo; o revert de um NAO repõe-lhe a DATA_FIM) e cria-se uma nova para o contrato.
+      if (!mobilidadeMapper.mesmaColocacao(mobilidade, dadosContratuais)) {
+        mobilidade.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
+        var nova = mobilidadeMapper.toMobilidade(dadosContratuais, tiposRelacionamento.getEstado());
+        nova.setFunId(funcionario);
+        nova.setTipoSituacao("CONTINUIDADE");
+        funcionario.getMobilidades().add(nova);
+        tiposRelacionamento.setMobId(nova);
+      }
+    } else {
+      mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    }
 
     var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
     if (carreira != null) {
@@ -310,9 +324,9 @@ public class ValidarContratoService {
    * e o contrato/tiprel/carreira/mobilidade/regime ANTERIORES (fechados no registo) voltam a ativos.
    * Os registos do NOVO contrato ja foram para 'I' via mudarEstado.
    *
-   * <p>So se REATIVA o contrato anterior se ele ainda estiver EM VIGOR (dentro do prazo) — mesma
-   * logica do guard D2 (existeContratoEmVigor). Se ja tinha terminado, a rejeicao do novo contrato
-   * NAO o ressuscita: o colaborador fica sem relacao ativa (correto, o anterior expirou).
+   * <p>O tiprel anterior volta SEMPRE a ser o último vínculo (est_act_adm=1), sem condição de datas.
+   * O contrato anterior NÃO é reativado: o Novo Contrato só é permitido sem contrato Ativo, logo ele
+   * já estava inativo antes do registo — fica como estava (reativá-lo bloqueava um novo registo).
    */
   private void reverterRegistoNovoContrato(TiposRelacionamentoEntity novoTiprel) {
     novoTiprel.setEstActAdm(0);
@@ -321,19 +335,15 @@ public class ValidarContratoService {
     var contratoAntigo = antigo.getContrVinculoId();
     if (contratoAntigo == null) return;
 
-    var hoje = LocalDate.now();
-    boolean emVigor = contratoAntigo.getDataFim() == null
-        || !contratoAntigo.getDataFim().isBefore(hoje);
-    if (!emVigor) return;
-
     // data_fim reposto = data_fim do contrato anterior (o registo tinha-o sobrescrito com a data de
     // inicio do novo); nunca null, para nao perder o termo do contrato.
     var df = contratoAntigo.getDataFim();
     antigo.setEstActAdm(1);
     antigo.setDataFim(df);
-    contratoAntigo.setEstado(Estado.A);
     if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(df);
-    if (antigo.getMobId() != null) antigo.getMobId().setDataFim(df);
+    // Mobilidade reutilizada (sem mudança de colocação) não foi fechada no registo: fica como está.
+    if (antigo.getMobId() != null && !mobilidadeMapper.partilhadaComAnterior(novoTiprel))
+      antigo.getMobId().setDataFim(df);
     if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(df);
   }
 
@@ -368,7 +378,13 @@ public class ValidarContratoService {
       }
 
       var mob = tr.getMobId();
-      if (mob != null)
+      // Mobilidade partilhada com o contrato em vigor (Novo Contrato sem mudança de colocação): está
+      // ativa e pertence também ao tiprel anterior — o estado do novo contrato não lhe toca. Na
+      // aprovação só se lhe estende a DATA_FIM até ao fim do novo contrato.
+      if (mobilidadeMapper.partilhadaComAnterior(tr)) {
+        if (estado == Estado.A && tr.getContrVinculoId() != null)
+          mob.setDataFim(tr.getContrVinculoId().getDataFim());
+      } else if (mob != null)
         mob.setEstado(estado);
 
       var carreira = tr.getCarreiraId() != null ? tr.getCarreiraId() : null;

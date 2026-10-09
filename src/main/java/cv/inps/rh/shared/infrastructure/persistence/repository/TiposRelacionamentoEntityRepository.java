@@ -122,6 +122,25 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
       """)
   List<TiposRelacionamentoEntity> findAllAtivosComboByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 
+  // Combo "Relação Laboral" (Remunerações/Descontos): histórico completo do funcionário (menos
+  // eliminados), a relação actual primeiro e depois da mais recente para a mais antiga.
+  @Query("""
+      select t
+      from TiposRelacionamentoEntity t
+      left join fetch t.contrVinculoId c
+      left join fetch c.tpContratoId
+      left join fetch c.vinculoId
+      left join fetch t.situacLaboralId sl
+      left join fetch sl.situacaoLaboralId
+      left join fetch t.escalaoId
+      left join fetch t.carreiraId car
+      left join fetch car.escalaoId
+      where t.funId.uuid = :funcionarioUuid
+        and (t.estado is null or t.estado <> cv.inps.rh.shared.application.constants.Estado.E)
+      order by case when t.estActAdm = 1 then 0 else 1 end, t.dataInicio desc, t.id desc
+      """)
+  List<TiposRelacionamentoEntity> findAllComboByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
+
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO(
                null,

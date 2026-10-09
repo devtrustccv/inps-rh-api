@@ -45,7 +45,11 @@ public class ContratoHistoricoWriteService {
    * propostas, nao "criado com ...".
    */
   public java.util.Optional<ContratoHistoricoEntity> historicoActual(ContratoEntity contrato) {
-    return contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId());
+    // Em vigor = est_act_adm=1 (ou, na falta, o A mais recente). NÃO a versão mais alta: depois de uma
+    // renovação rejeitada, a versão mais alta é a proposta em I e o "antes" mostraria as datas dela.
+    return contratoHistoricoEntityRepository.findFirstByContratoId_IdAndEstActAdmOrderByVersaoDesc(contrato.getId(), 1)
+        .or(() -> contratoHistoricoEntityRepository.findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.A))
+        .or(() -> contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId()));
   }
 
   /** Congela o diff da renovacao (historico anterior -> proposta) em RH_T_VALIDACAO_DETALHE. */
@@ -128,6 +132,15 @@ public class ContratoHistoricoWriteService {
    * histórico do vínculo em vigor mantém-se intacto.
    */
   public void transicionarRenovacao(ContratoEntity contrato, Estado estado) {
+    transicionarRenovacao(contrato, estado, null);
+  }
+
+  /**
+   * Como acima; numa aprovação (A) com {@code dadosAprovados}, a proposta passa a ter as datas
+   * finais decididas na validação (o checker pode completar/corrigir Duração e Data Fim que não
+   * vieram no registo) — as mesmas que são gravadas no contrato.
+   */
+  public void transicionarRenovacao(ContratoEntity contrato, Estado estado, RenovarContratoReqDTO dadosAprovados) {
     var pendenteOpt = contratoHistoricoEntityRepository
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P);
     if (pendenteOpt.isEmpty()) {
@@ -151,6 +164,11 @@ public class ContratoHistoricoWriteService {
 
     // A proposta traz as suas próprias datas (as novas datas da renovação); não se propagam as do
     // contrato, que conserva as datas do vínculo em vigor.
+    if (estado == Estado.A && dadosAprovados != null) {
+      pendente.setDataInicio(dadosAprovados.getDataInicio());
+      pendente.setDataFim(dadosAprovados.getDataFim());
+      pendente.setDuracao(dadosAprovados.getDuracaoMeses());
+    }
     pendente.setEstado(estado);
     contratoHistoricoEntityRepository.save(pendente);
   }

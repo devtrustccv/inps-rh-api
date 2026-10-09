@@ -84,8 +84,8 @@ public class NovoContratoService {
     // D2 (DOSSIÊ, Novo Contrato): "o botão Novo Contrato só deve ficar visível caso NÃO exista um
     // contrato ativo". Enforçado no backend via query: um contrato em vigor (estado A e ainda dentro
     // do prazo) bloqueia o novo — a alteração de um contrato em vigor faz-se pela Renovação.
-    var hoje = LocalDate.now();
-    if (contratoEntityRepository.existeContratoEmVigor(funcionario, Estado.A, hoje)) {
+    // Só o ESTADO conta (questão das datas fica em aberto): bloqueia se existir um contrato Ativo.
+    if (contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A)) {
       throw IgrpResponseStatusException.badRequest(
           "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
     }
@@ -302,9 +302,16 @@ public class NovoContratoService {
     return nova;
   }
 
-  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo - 1) e cria uma nova (CONTINUIDADE).
+  // Sem mudança de direção/secção/local de trabalho NÃO se cria nova mobilidade: o novo tiprel reutiliza
+  // a mobilidade em vigor e só a DATA_FIM é actualizada (na aprovação — ValidarContratoService), para
+  // uma rejeição não deixar a mobilidade alterada. Com mudança: encerra a ativa (DATA_FIM = início do
+  // novo - 1) e cria uma nova (CONTINUIDADE).
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
+
+    if (mobilidadeAtual != null && mobilidadeMapper.mesmaColocacao(mobilidadeAtual, dc)) {
+      return mobilidadeAtual;
+    }
 
     if (mobilidadeAtual != null && mobilidadeAtual.getDataFim() == null) {
       mobilidadeAtual.setDataFim(dc.getDataInicio().minusDays(1));

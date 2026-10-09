@@ -70,6 +70,9 @@ public interface ContratoEntityRepository extends
       WHERE c.funId = :fun AND c.estado = :estado
         AND (c.dataFim IS NULL OR c.dataFim >= :hoje)
       """)
+  /** Existe algum contrato do funcionário no estado indicado (sem condição de datas). */
+  boolean existsByFunIdAndEstado(FuncionarioEntity funId, Estado estado);
+
   boolean existeContratoEmVigor(@Param("fun") FuncionarioEntity fun,
                                 @Param("estado") Estado estado,
                                 @Param("hoje") LocalDate hoje);

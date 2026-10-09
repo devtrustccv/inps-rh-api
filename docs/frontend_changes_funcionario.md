@@ -474,3 +474,27 @@ vêm a `null`. Tratar como opcionais.
 - **Rendimento** e **Desconto** passam a ter grelha também no **registo** (antes só depois de uma
   correcção).
 - Deixam de aparecer linhas de alterações antigas que não pertenciam à validação aberta.
+
+---
+
+# Validar renovação de contrato — rejeitar repõe o contrato em vigor
+
+**Data:** 2026-10-08
+**Branch:** develop
+
+`POST /api/v1/funcionarios/{idFuncionario}/validar-renovacao-contrato/{contratoId}`
+
+## O que muda
+
+| Situação | Antes | Agora |
+|---|---|---|
+| `validacao: "NAO"` — Dossiê depois da rejeição | Mostrava as datas da proposta rejeitada, `dataFim: null`, estado `I` e **sem subsídios/encargos** | Mostra o contrato em vigor (datas, estado `A`, subsídios e encargos), como antes da renovação |
+| `validacao: "NAO"` — mensagem | `"Renovação de contrato actualizada."` | `"Renovação de contrato rejeitada."` |
+| `validacao: "SIM"`/`"NAO"` sem renovação pendente | `200` (e inactivava o vínculo em vigor) | **`400`** `"Não há renovação pendente para validar."` |
+| Nova renovação depois de uma rejeitada — *Valor anterior* do Detalhe de alterações | Datas da proposta rejeitada | Datas do contrato em vigor |
+| `validacao: "SIM"` depois de corrigir a data de início | O relacionamento anterior terminava na véspera do início **original** (ficava um buraco entre os dois) | Termina na véspera do início **aprovado** |
+
+A proposta rejeitada continua visível na Gestão Contratual com estado `I`.
+
+**Ação front:** tratar o `400` (por exemplo, duplo clique em Validar/Rejeitar) e, se a mensagem for
+mostrada, usar a nova.

@@ -133,6 +133,9 @@ public class ValidarRegistoColaboradorService {
 
     colaboradorValidationRules.verificarDuplicidadeFamiliares(
         registroColaborador.getFamiliares(), funcionario.getFamiliares());
+    // Um dependente só pode estar a cargo de um colaborador (também na correção/validação do registo).
+    colaboradorValidationRules.verificarResponsavelUnicoAgregado(
+        registroColaborador.getFamiliares(), funcionario.getUuid());
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(),

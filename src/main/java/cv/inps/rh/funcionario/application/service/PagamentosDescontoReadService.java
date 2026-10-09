@@ -79,7 +79,8 @@ public class PagamentosDescontoReadService {
       }
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
+        // sem DATA_FIM = em aberto → continua dentro do período
+        predicates.add(cb.or(cb.isNull(root.get("dataFim")), cb.lessThanOrEqualTo(root.get("dataFim"), df)));
       }
 
       return cb.and(predicates.toArray(new Predicate[0]));

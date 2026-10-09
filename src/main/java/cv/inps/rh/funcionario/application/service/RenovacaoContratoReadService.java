@@ -50,9 +50,12 @@ public class RenovacaoContratoReadService {
     dto.setTemRenovacaoPendente(false);
 
     // A renovação pendente é o histórico em estado P com versão > 1 (a versão 1 é o contrato inicial,
-    // não uma renovação).
+    // não uma renovação). Sem P, a proposta devolvida para correção (C) também conta: o maker corrige-a
+    // a partir dos dados que submeteu, não de um formulário vazio.
     contratoHistoricoEntityRepository
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
+        .or(() -> contratoHistoricoEntityRepository
+            .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.C))
         .filter(h -> h.getVersao() != null && h.getVersao() > 1)
         .ifPresent(h -> {
           var renovacao = new RenovarContratoRespDTO();
