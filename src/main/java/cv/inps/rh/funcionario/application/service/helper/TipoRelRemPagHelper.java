@@ -167,6 +167,15 @@ public class TipoRelRemPagHelper {
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
+    // Idempotente: o que JÁ está associado ao tiprel destino não volta a ser inserido. Sem isto, chamar
+    // o transferir duas vezes para o mesmo tiprel (ex.: renovação pendente gravada de novo sem decisão)
+    // duplicava as linhas de RH_T_TIPREL_REM_PAG.
+    if (novoTipoRel != null && novoTipoRel.getId() != null) {
+      for (var existente : tipoRelRemPagEntityRepository.findByTiprelId_Id(novoTipoRel.getId())) {
+        if (existente.getRemId() != null && existente.getRemId().getId() != null) remIds.add(existente.getRemId().getId());
+        if (existente.getPagId() != null && existente.getPagId().getId() != null) pagIds.add(existente.getPagId().getId());
+      }
+    }
     var hoje = referencia != null ? referencia : java.time.LocalDate.now();
     var excluirRem = excluirRemIds != null ? excluirRemIds : java.util.Collections.<Long>emptySet();
     var excluirPag = excluirPagIds != null ? excluirPagIds : java.util.Collections.<Long>emptySet();
