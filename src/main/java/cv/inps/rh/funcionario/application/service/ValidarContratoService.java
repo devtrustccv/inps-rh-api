@@ -129,7 +129,21 @@ public class ValidarContratoService {
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();
-    mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    if (mobilidadeMapper.partilhadaComAnterior(tiposRelacionamento)) {
+      // Mobilidade reutilizada do contrato em vigor (sem mudança de colocação): não se reescreve. Se a
+      // colocação foi alterada na correção/validação, passa a ser um movimento — encerra-se a em vigor
+      // (como no registo; o revert de um NAO repõe-lhe a DATA_FIM) e cria-se uma nova para o contrato.
+      if (!mobilidadeMapper.mesmaColocacao(mobilidade, dadosContratuais)) {
+        mobilidade.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
+        var nova = mobilidadeMapper.toMobilidade(dadosContratuais, tiposRelacionamento.getEstado());
+        nova.setFunId(funcionario);
+        nova.setTipoSituacao("CONTINUIDADE");
+        funcionario.getMobilidades().add(nova);
+        tiposRelacionamento.setMobId(nova);
+      }
+    } else {
+      mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    }
 
     var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
     if (carreira != null) {
@@ -368,7 +382,13 @@ public class ValidarContratoService {
       }
 
       var mob = tr.getMobId();
-      if (mob != null)
+      // Mobilidade partilhada com o contrato em vigor (Novo Contrato sem mudança de colocação): está
+      // ativa e pertence também ao tiprel anterior — o estado do novo contrato não lhe toca. Na
+      // aprovação só se lhe estende a DATA_FIM até ao fim do novo contrato.
+      if (mobilidadeMapper.partilhadaComAnterior(tr)) {
+        if (estado == Estado.A && tr.getContrVinculoId() != null)
+          mob.setDataFim(tr.getContrVinculoId().getDataFim());
+      } else if (mob != null)
         mob.setEstado(estado);
 
       var carreira = tr.getCarreiraId() != null ? tr.getCarreiraId() : null;

@@ -302,9 +302,16 @@ public class NovoContratoService {
     return nova;
   }
 
-  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo - 1) e cria uma nova (CONTINUIDADE).
+  // Sem mudança de direção/secção/local de trabalho NÃO se cria nova mobilidade: o novo tiprel reutiliza
+  // a mobilidade em vigor e só a DATA_FIM é actualizada (na aprovação — ValidarContratoService), para
+  // uma rejeição não deixar a mobilidade alterada. Com mudança: encerra a ativa (DATA_FIM = início do
+  // novo - 1) e cria uma nova (CONTINUIDADE).
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
+
+    if (mobilidadeAtual != null && mobilidadeMapper.mesmaColocacao(mobilidadeAtual, dc)) {
+      return mobilidadeAtual;
+    }
 
     if (mobilidadeAtual != null && mobilidadeAtual.getDataFim() == null) {
       mobilidadeAtual.setDataFim(dc.getDataInicio().minusDays(1));

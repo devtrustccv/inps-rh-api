@@ -18,4 +18,7 @@ public interface RhVContratoEntityRepository extends
    *  getById: TIPO_SITUACAO (INICIO/RENOVACAO), EST_ACT_ADM (1=atual) e datas por versão. */
   Optional<RhVContratoEntity> findByContratoUuidAndVersao(UUID contratoUuid, Integer versao);
 
+  /** Todas as versões (histórico) de um contrato. */
+  java.util.List<RhVContratoEntity> findAllByContratoId(Long contratoId);
+
 }

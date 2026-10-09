@@ -134,6 +134,23 @@ public class MobilidadeMapper {
     return me;
   }
 
+  /** Mesma colocação: direção, secção (unidade) e local de trabalho iguais aos do formulário. */
+  public boolean mesmaColocacao(MobilidadeEntity mobilidade, DadosContratuaisReqDTO dc) {
+    if (mobilidade == null || dc == null) return false;
+    return java.util.Objects.equals(mobilidade.getInstidId() != null ? mobilidade.getInstidId().getId() : null, dc.getDirecaoId())
+        && java.util.Objects.equals(mobilidade.getSecaoId() != null ? mobilidade.getSecaoId().getId() : null, dc.getSeccaoId())
+        && java.util.Objects.equals(mobilidade.getLocalTrabId() != null ? mobilidade.getLocalTrabId().getId() : null, dc.getLocalTrabalhoId());
+  }
+
+  /**
+   * A mobilidade do tiprel é a MESMA do tiprel anterior — Novo Contrato sem mudança de colocação
+   * reutiliza a mobilidade em vigor em vez de criar outra.
+   */
+  public boolean partilhadaComAnterior(cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tr) {
+    if (tr == null || tr.getMobId() == null || tr.getTiprelId() == null || tr.getTiprelId().getMobId() == null) return false;
+    return java.util.Objects.equals(tr.getMobId().getId(), tr.getTiprelId().getMobId().getId());
+  }
+
   public void toUpdateEntity(MobilidadeEntity mobilidade, DadosContratuaisReqDTO dc) {
     if (dc == null) return;
     mobilidade.setTipoSituacao("NOVO_CONTRATO");
