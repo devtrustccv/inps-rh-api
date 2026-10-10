@@ -317,4 +317,8 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
   List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid,
                                                                @Param("situacaoAtual") Integer situacaoAtual);
 
+  /** Id da direção (RH_T_MOBILIDADE.INSTIT_ID) da mobilidade do tiprel indicado. */
+  @Query("SELECT t.mobId.instidId.id FROM TiposRelacionamentoEntity t WHERE t.id = :tiprelId")
+  Optional<Long> findDirecaoIdDaMobilidade(@Param("tiprelId") Long tiprelId);
+
 }
