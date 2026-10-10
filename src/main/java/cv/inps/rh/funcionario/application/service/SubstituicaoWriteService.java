@@ -113,8 +113,9 @@ public class SubstituicaoWriteService {
     validarSobreposicao(funcionarioSubstituto, funcionarioSubstituido, dto.getDataInicio(), dto.getDataFim(), null);
 
     // Caso de teste / item 50-51: a substituição só segue para VALIDAÇÃO quando existe diferença
-    // salarial a favor do substituto (salário do substituto < salário do substituído). Sem diferença
-    // não há nada a validar nem a compensar → a substituição fica logo ACTIVA (A). Com diferença fica
+    // salarial a favor do substituto (salário do substituto < salário do substituído) E o total de
+    // dias é ≥ 15. Sem diferença, ou com menos de 15 dias, não há nada a validar nem a compensar → a
+    // substituição fica logo ACTIVA (A). Com diferença (e ≥ 15 dias) fica
     // P e segue para validação, onde a diferença é registada em RH_T_DEF_REMUNERACOES (DOSSIÊ 16/07:
     // "ao validar o registo logo deve fazer um registo em RH_T_DEF_REMUNERACAO") — aqui só se cria a
     // validação pendente.
@@ -122,6 +123,13 @@ public class SubstituicaoWriteService {
     var salarioSubstituido = substituidoTiprel.getSalario();
     boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
         && salarioSubstituto.compareTo(salarioSubstituido) < 0;
+
+    // Substituição curta (total < 15 dias; mês completo conta 30): não há diferença a processar em
+    // RH_T_DEF_REMUNERACOES (mesmo limiar de registarDiferencaDef), logo não há nada a validar — fica
+    // logo ACTIVA, sem validação nem DEF; só o detalhe mensal é registado.
+    var meses = repartirPorMes(dto.getDataInicio(), dto.getDataFim(), salarioSubstituto, salarioSubstituido);
+    int totalDias = meses.stream().mapToInt(MesSubstituicao::nrDias).sum();
+    boolean vaiParaValidacao = temDiferencaSalarial && totalDias >= LIMIAR_DIAS_DEF;
 
     var substituicao = new SubstituicaoEntity();
     substituicao.setSubstitutoTiprelId(substitutoTiprel);
@@ -131,7 +139,7 @@ public class SubstituicaoWriteService {
     substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
-    substituicao.setEstado(temDiferencaSalarial ? Estado.P : Estado.A);
+    substituicao.setEstado(vaiParaValidacao ? Estado.P : Estado.A);
     // Persistir já: o detalhe mensal e a validação abaixo precisam do id da substituição.
     entityManager.persist(substituicao);
     entityManager.flush();
@@ -139,9 +147,9 @@ public class SubstituicaoWriteService {
     // DETALHE mensal (RH_T_SUBSTITUICAO_DETALHE) criado NO REGISTO para TODOS os casos (caso de uso:
     // o Caso 1, sem diferença, também tem detalhe). O DEF_REMUNERACOES (diferença processada) só se
     // cria ao validar (SIM), a partir deste detalhe.
-    registarDetalheMensal(substituicao, substitutoTiprel, salarioSubstituto, salarioSubstituido);
+    registarDetalheMensal(substituicao, meses, salarioSubstituto, salarioSubstituido);
 
-    if (temDiferencaSalarial) {
+    if (vaiParaValidacao) {
       // Existe diferença → segue para validação, associada ao SUBSTITUTO (quem regista e recebe a
       // diferença). FUN_ID = substituto; a validação aparece no contexto do substituto.
       var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
@@ -402,16 +410,14 @@ public class SubstituicaoWriteService {
    * quando não há valor a favor do substituto (substituto ganha ≥). O estado segue a substituição
    * (P se vai a validação; A se não).
    */
-  private void registarDetalheMensal(SubstituicaoEntity substituicao, TiposRelacionamentoEntity substitutoTiprel,
+  private void registarDetalheMensal(SubstituicaoEntity substituicao, List<MesSubstituicao> meses,
       BigDecimal salarioSubstituto, BigDecimal salarioSubstituido) {
-    LocalDate dataInicio = substituicao.getDataInicio();
-    LocalDate dataFim = substituicao.getDataFim();
-    if (dataInicio == null || dataFim == null || dataFim.isBefore(dataInicio)) {
+    if (meses.isEmpty()) {
       log.warn("Substituição {}: datas inválidas (inicio={}, fim={}); detalhe não registado.",
-          substituicao.getId(), dataInicio, dataFim);
+          substituicao.getId(), substituicao.getDataInicio(), substituicao.getDataFim());
       return;
     }
-    for (var m : repartirPorMes(dataInicio, dataFim, salarioSubstituto, salarioSubstituido)) {
+    for (var m : meses) {
       BigDecimal diferenca = m.valor() != null && m.valor().signum() > 0 ? m.valor() : BigDecimal.ZERO;
       var detalhe = new SubstituicaoDetalheEntity();
       detalhe.setSubstituicaoId(substituicao);

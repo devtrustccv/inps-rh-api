@@ -124,43 +124,163 @@ public class GlobalExceptionHandler {
   public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
     Throwable rootCause = getRootCause(ex);
-
-    ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-    problem.setTitle("Erro de dados");
+    LOGGER.error("DataIntegrityViolationException: {}", ex.getMostSpecificCause().getMessage());
 
     if (rootCause instanceof SQLException sqlEx) {
-      String msg = sqlEx.getMessage();
-      if (msg != null) {
-        if (msg.contains("ORA-01400")) {
-          // ORA-01400: cannot insert NULL into ("SCHEMA"."TABLE"."COLUMN")
-          String column = extractOraColumn(msg);
-          problem.setDetail(column != null
-              ? "Campo obrigatório em falta: '" + column.toLowerCase() + "'"
-              : "Campo obrigatório em falta.");
-        } else if (msg.contains("ORA-02291")) {
-          // ORA-02291: integrity constraint (SCHEMA.FK_NAME) violated - parent key not found
-          String constraint = extractOraConstraint(msg);
-          problem.setDetail(constraint != null
-              ? "Referência inválida (constraint: " + constraint + "): o valor indicado não existe."
-              : "Referência inválida: o valor indicado não existe na tabela relacionada.");
-        } else if (msg.contains("ORA-00001")) {
-          // ORA-00001: unique constraint (SCHEMA.UK_NAME) violated
-          String constraint = extractOraConstraint(msg);
-          problem.setDetail(constraint != null
-              ? "Valor duplicado (constraint: " + constraint + "): já existe um registo com este valor."
-              : "Já existe um registo com este valor.");
-        } else {
-          problem.setDetail(msg);
-        }
-      } else {
-        problem.setDetail("Erro interno de base de dados.");
-      }
+      return problemaBaseDados(sqlEx);
+    }
+    ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problem.setTitle("Erro de dados");
+    problem.setDetail("Os dados enviados não são válidos.");
+    problem.setProperty("igrpType", "validation");
+    return problem;
+  }
+
+  /**
+   * Erros de base de dados que chegam embrulhados noutras exceções (ex. a violação só rebenta no
+   * commit da transação → TransactionSystemException / JpaSystemException). Só os traduz quando a
+   * causa raiz é uma violação de dados conhecida (ORA de constraint/valor); o resto mantém o
+   * tratamento por omissão (500).
+   */
+  @ExceptionHandler({org.springframework.transaction.TransactionSystemException.class,
+      org.springframework.orm.jpa.JpaSystemException.class})
+  public ProblemDetail handleErroBaseDadosEmbrulhado(RuntimeException ex) {
+    Throwable rootCause = getRootCause(ex);
+    if (rootCause instanceof SQLException sqlEx && codigoOra(sqlEx.getMessage()) != null
+        && ORA_VIOLACAO_DADOS.contains(codigoOra(sqlEx.getMessage()))) {
+      LOGGER.error("Violação de dados ({}): {}", ex.getClass().getSimpleName(), sqlEx.getMessage());
+      return problemaBaseDados(sqlEx);
+    }
+    LOGGER.error(ex.getMessage(), ex);
+    var problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    problem.setTitle("Erro interno");
+    problem.setDetail("Ocorreu um erro inesperado ao gravar os dados.");
+    return problem;
+  }
+
+  /** Códigos ORA que correspondem a dados inválidos enviados pelo utilizador (→ 400). */
+  private static final java.util.Set<String> ORA_VIOLACAO_DADOS = java.util.Set.of(
+      "ORA-00001", "ORA-01400", "ORA-01407", "ORA-01438", "ORA-02290", "ORA-02291", "ORA-02292", "ORA-12899");
+
+  /**
+   * Traduz um erro Oracle numa mensagem para o utilizador. A mensagem ORA crua (com link para a
+   * documentação da Oracle) nunca é devolvida ao cliente — fica só no log.
+   */
+  private ProblemDetail problemaBaseDados(SQLException sqlEx) {
+    ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problem.setTitle("Erro de dados");
+    problem.setProperty("igrpType", "validation");
+
+    String msg = sqlEx.getMessage();
+    String codigo = codigoOra(msg);
+    String constraint = msg != null ? extractOraConstraint(msg) : null;
+
+    String detail;
+    if ("ORA-01400".equals(codigo) || "ORA-01407".equals(codigo)) {
+      // ORA-01400: cannot insert NULL into ("SCHEMA"."TABLE"."COLUMN")
+      String column = extractOraColumn(msg);
+      detail = column != null
+          ? "Campo obrigatório em falta: '" + column.toLowerCase() + "'."
+          : "Campo obrigatório em falta.";
+    } else if ("ORA-02290".equals(codigo)) {
+      // ORA-02290: check constraint (SCHEMA.CK_NAME) violated
+      detail = mensagemCheckConstraint(constraint);
+    } else if ("ORA-02291".equals(codigo)) {
+      // ORA-02291: integrity constraint (SCHEMA.FK_NAME) violated - parent key not found
+      detail = "Referência inválida: o valor indicado não existe.";
+    } else if ("ORA-02292".equals(codigo)) {
+      // ORA-02292: integrity constraint (SCHEMA.FK_NAME) violated - child record found
+      detail = "Não é possível concluir a operação: o registo está a ser utilizado noutros dados.";
+    } else if ("ORA-00001".equals(codigo)) {
+      // ORA-00001: unique constraint (SCHEMA.UK_NAME) violated
+      detail = "Já existe um registo com estes dados.";
+    } else if ("ORA-12899".equals(codigo)) {
+      // ORA-12899: value too large for column "SCHEMA"."TABLE"."COLUMN" (actual: X, maximum: Y)
+      String column = extractOraColumnValueTooLarge(msg);
+      detail = column != null
+          ? "O valor do campo '" + column.toLowerCase() + "' é demasiado longo."
+          : "Um dos valores indicados é demasiado longo.";
+    } else if ("ORA-01438".equals(codigo)) {
+      detail = "Um dos valores numéricos indicados é demasiado grande.";
     } else {
-      problem.setDetail(ex.getMostSpecificCause().getMessage());
+      detail = "Os dados enviados não respeitam as regras da base de dados.";
     }
 
-    LOGGER.error("DataIntegrityViolationException: {}", ex.getMostSpecificCause().getMessage());
+    problem.setDetail(detail);
+    if (constraint != null) problem.setProperty("constraint", constraint);
     return problem;
+  }
+
+  /**
+   * Mensagem para violações de CHECK constraint, a partir da convenção de nomes do schema
+   * (CK_&lt;ENTIDADE&gt;_&lt;REGRA&gt;): _PERIODO/_PD/_PENA = data fim &lt; data início, _ESTADO = estado
+   * inválido, _PERC = percentagem fora de 0..100, _DURACAO = duração negativa.
+   */
+  private String mensagemCheckConstraint(String constraint) {
+    if (constraint == null) {
+      return "Os dados enviados não respeitam as regras definidas.";
+    }
+    String ck = constraint.toUpperCase();
+    String entidade = entidadeDaConstraint(ck);
+    String contexto = entidade != null ? " (" + entidade + ")" : "";
+
+    if (ck.endsWith("_PERIODO") || ck.endsWith("_PD") || ck.endsWith("_PENA")) {
+      return "A data de fim não pode ser anterior à data de início" + contexto + ".";
+    }
+    if (ck.endsWith("_ESTADO")) {
+      return "Estado inválido" + contexto + ".";
+    }
+    if (ck.endsWith("_PERC")) {
+      return "A percentagem tem de estar entre 0 e 100" + contexto + ".";
+    }
+    if (ck.endsWith("_DURACAO")) {
+      return "A duração não pode ser negativa" + contexto + ".";
+    }
+    return "Os dados enviados não respeitam as regras definidas" + contexto + ".";
+  }
+
+  /** Nome legível da entidade a partir do prefixo da constraint (CK_EXP_PROF_PERIODO → Experiência Profissional). */
+  private static String entidadeDaConstraint(String ck) {
+    String nome = ck.replaceFirst("^(CK|CHK)_", "");
+    for (var e : ENTIDADES_CONSTRAINT.entrySet()) {
+      if (nome.startsWith(e.getKey() + "_")) return e.getValue();
+    }
+    return null;
+  }
+
+  private static final java.util.Map<String, String> ENTIDADES_CONSTRAINT = new java.util.LinkedHashMap<>();
+  static {
+    ENTIDADES_CONSTRAINT.put("EXP_PROF", "Experiência Profissional");
+    ENTIDADES_CONSTRAINT.put("HAB_LIT", "Habilitação Literária");
+    ENTIDADES_CONSTRAINT.put("FORM_FEITO", "Formação Profissional");
+    ENTIDADES_CONSTRAINT.put("CONTR", "Contrato");
+    ENTIDADES_CONSTRAINT.put("DD_BANC", "Dados Bancários");
+    ENTIDADES_CONSTRAINT.put("DEFREM", "Remuneração");
+    ENTIDADES_CONSTRAINT.put("DEF_PAG", "Encargo/Desconto");
+    ENTIDADES_CONSTRAINT.put("SIT_LAB", "Situação Laboral");
+    ENTIDADES_CONSTRAINT.put("SUBSTIT", "Substituição");
+    ENTIDADES_CONSTRAINT.put("RH_T_SUBSTITUICAO", "Substituição");
+    ENTIDADES_CONSTRAINT.put("PROC_DISC", "Processo Disciplinar");
+    ENTIDADES_CONSTRAINT.put("ESCALAO", "Escalão");
+    ENTIDADES_CONSTRAINT.put("CARR", "Carreira");
+    ENTIDADES_CONSTRAINT.put("MOB", "Mobilidade");
+    ENTIDADES_CONSTRAINT.put("FAM", "Agregado Familiar");
+    ENTIDADES_CONSTRAINT.put("DOC_PESS", "Documento Pessoal");
+    ENTIDADES_CONSTRAINT.put("CONTACTO", "Contacto");
+    ENTIDADES_CONSTRAINT.put("END", "Endereço");
+  }
+
+  /** Código ORA-NNNNN da mensagem (o primeiro que aparece), ou null. */
+  private static String codigoOra(String message) {
+    if (message == null) return null;
+    var m = java.util.regex.Pattern.compile("ORA-\\d{5}").matcher(message);
+    return m.find() ? m.group() : null;
+  }
+
+  /** Extrai a coluna de ORA-12899: value too large for column "SCHEMA"."TABLE"."COLUMN" (...) */
+  private String extractOraColumnValueTooLarge(String message) {
+    var m = java.util.regex.Pattern.compile("\"[^\"]+\"\\.\"[^\"]+\"\\.\"([^\"]+)\"").matcher(message);
+    return m.find() ? m.group(1) : null;
   }
 
   /** Extrai o nome da coluna de mensagens ORA-01400: ...("SCHEMA"."TABLE"."COLUMN") */
