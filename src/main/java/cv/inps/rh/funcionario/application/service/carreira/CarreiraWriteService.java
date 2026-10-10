@@ -124,6 +124,9 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
+    // Só se regista carreira se o vínculo ATUAL tiver carreira (FLG_CARREIRA=1).
+    funcionarioRules.garantirVinculoAtualComCarreira(funcionario.getUuid());
+
     // Doc (Regra Geral): "O campo processar salário deve ser obrigatório"
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
@@ -720,6 +723,10 @@ public class CarreiraWriteService {
     // isso salta o roteamento de progressão/processada e cai no caminho editar-in-place; no fim
     // reactiva a validação INSERT (C -> P) em vez de criar uma UPDATE nova. Ciclo maker-checker.
     boolean correcaoRegisto = Estado.C.equals(carreira.getEstado());
+
+    // Progressão/Promoção e Editar: o vínculo ATUAL tem de ter carreira (uma carreira de um contrato
+    // anterior não se altera quando o colaborador passou a um vínculo sem carreira).
+    funcionarioRules.garantirVinculoAtualComCarreira(funcionario.getUuid());
 
     // "Sem cargo" (CATEGORIA): o frontend envia cargoPosicaoId=0. Tratar 0 como null para a
     // classificação de tipo (mudouChave) e a gravação do cargo ficarem corretas.
