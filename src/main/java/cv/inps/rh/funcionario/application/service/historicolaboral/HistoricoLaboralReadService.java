@@ -229,6 +229,12 @@ public class HistoricoLaboralReadService {
       dto.setContrato(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getNome()
           : null);
       dto.setVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);
+      // Flags do vínculo ATUAL — o ecrã usa-as para bloquear "Novo" de carreira (sem carreira) e de
+      // remunerações/descontos (sem salário); o backend valida o mesmo (FuncionarioRules).
+      if (contrato.getVinculoId() != null) {
+        dto.setFlgCarreira(contrato.getVinculoId().getFlgCarreira());
+        dto.setFlgSalario(contrato.getVinculoId().getFlgSalario());
+      }
     }
 
     dto.setSalario(atual.getSalario() != null

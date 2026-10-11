@@ -104,4 +104,10 @@ public class RelacaoLaboralDTO  {
 
   private String observacao ;
 
+
+  private Integer flgCarreira ;
+
+
+  private String flgSalario ;
+
 }

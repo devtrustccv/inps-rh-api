@@ -89,6 +89,39 @@ public class FuncionarioRules {
     return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid).orElse(null);
   }
 
+  /**
+   * Vínculo (RH_T_PARAM_VINCULO) do contrato da relação laboral ATUAL (tiprel est_act_adm=1). É este,
+   * e não o de contratos anteriores, que decide se o colaborador pode ter carreira/salário — ex.:
+   * começou com Estágio (sem carreira) e passou a Contratado (com carreira). Null se não houver.
+   */
+  public ParamVinculoEntity getVinculoAtual(UUID funUuid) {
+    var atual = getTipoRelacionamentoAtualOrNull(funUuid);
+    return atual != null && atual.getContrVinculoId() != null ? atual.getContrVinculoId().getVinculoId() : null;
+  }
+
+  /** Bloqueia registo/alteração de carreira quando o vínculo atual não tem carreira (FLG_CARREIRA=0). */
+  public void garantirVinculoAtualComCarreira(UUID funUuid) {
+    var vinculo = getVinculoAtual(funUuid);
+    if (vinculo == null || !Objects.equals(1, vinculo.getFlgCarreira())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O vínculo atual do colaborador" + nomeVinculo(vinculo) + " não tem carreira.");
+    }
+  }
+
+  /** Bloqueia registo de remunerações/descontos quando o vínculo atual não tem salário (FLG_SALARIO=NAO). */
+  public void garantirVinculoAtualComSalario(UUID funUuid) {
+    var vinculo = getVinculoAtual(funUuid);
+    if (vinculo == null || !cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo.temSalario(vinculo.getFlgSalario())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O vínculo atual do colaborador" + nomeVinculo(vinculo)
+              + " não tem salário: não é possível registar remunerações nem descontos.");
+    }
+  }
+
+  private static String nomeVinculo(ParamVinculoEntity vinculo) {
+    return vinculo != null && vinculo.getNome() != null ? " (" + vinculo.getNome() + ")" : "";
+  }
+
 
   public ContratoEntity getContratoComMaiorVersao(UUID funUuid) {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);

@@ -48,6 +48,8 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há remunerações a registar.
+    funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var remuneracao = new DefinicaoRemuneracaoEntity();
@@ -97,6 +99,8 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há descontos a registar.
+    funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var pagamento = new DefPagamentoEntity();
