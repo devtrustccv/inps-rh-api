@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "competitor": "claude_code",
+      "kind": "skill",
+      "source_path": "C:\\Users\\janir\\IdeaProjects\\inps-rh-api\\.claude\\skills\\igrp-spring-generator",
+      "source_hash": "a8e73234e3f282bd817d6a4eb08ccc3cbea380603741134c739131771a45a108",
+      "dest_path": "C:\\Users\\janir\\IdeaProjects\\inps-rh-api\\.refact\\skills\\igrp-spring-generator",
+      "dest_hash": "a8e73234e3f282bd817d6a4eb08ccc3cbea380603741134c739131771a45a108",
+      "importer_version": "competitor_import_v2",
+      "last_imported_at": "2026-06-24T19:18:44.742126400Z",
+      "metadata": {
+        "original_name": "igrp-spring-generator",
+        "generated_name": "igrp-spring-generator",
+        "original_description": "Creates a Spring Boot project (newApi) and generates Java + .igrpstudio from IGRP manifests. Invoke for 'create Spring Boot project', 'create REST API/endpoints/routes', or create controller/actions/DTO/model/enum/module.",
+        "rewrote_skill_md": true
+      }
+    }
+  ],
+  "last_report": {
+    "generated_at": "2026-06-24T19:18:44.449298+00:00",
+    "completed_at": "2026-06-24T19:18:44.751639+00:00",
+    "reported_scopes": [
+      {
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "label": "project workspace"
+      }
+    ],
+    "reported_sources": [
+      {
+        "competitor": "claude_code",
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "source_label": ".claude"
+      },
+      {
+        "competitor": "open_code",
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "source_label": ".opencode"
+      },
+      {
+        "competitor": "kilo_code",
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "source_label": ".kilo"
+      },
+      {
+        "competitor": "kilo_code",
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "source_label": ".kilocode"
+      },
+      {
+        "competitor": "continue_dev",
+        "scope_kind": "project",
+        "scope_id": "dd5efa32e318f9c0",
+        "source_label": ".continue"
+      }
+    ],
+    "discovered_candidates": 1,
+    "status_counts": {
+      "created": 1,
+      "unsupported": 2
+    },
+    "competitor_counts": {
+      "claude_code": {
+        "discovered": 1,
+        "created": 1,
+        "updated": 0,
+        "unchanged": 0,
+        "stale": 0,
+        "conflicts": 0,
+        "user_modified": 0,
+        "unsupported": 0,
+        "errors": 0
+      },
+      "kilo_code": {
+        "discovered": 0,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "stale": 0,
+        "conflicts": 0,
+        "user_modified": 0,
+        "unsupported": 1,
+        "errors": 0
+      },
+      "continue_dev": {
+        "discovered": 0,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "stale": 0,
+        "conflicts": 0,
+        "user_modified": 0,
+        "unsupported": 1,
+        "errors": 0
+      }
+    },
+    "kind_counts": {
+      "skill": {
+        "discovered": 1,
+        "created": 1,
+        "updated": 0,
+        "unchanged": 0,
+        "stale": 0,
+        "conflicts": 0,
+        "user_modified": 0,
+        "unsupported": 0,
+        "errors": 0
+      },
+      "unsupported_rules": {
+        "discovered": 0,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "stale": 0,
+        "conflicts": 0,
+        "user_modified": 0,
+        "unsupported": 2,
+        "errors": 0
+      }
+    },
+    "top_issues": [
+      {
+        "competitor": "kilo_code",
+        "kind": "unsupported_rules",
+        "scope": {
+          "type": "project",
+          "root": "<redacted>"
+        },
+        "path": "<redacted>/.../CLAUDE.md",
+        "status": "unsupported",
+        "message": "Kilo Code rules and instruction files are report-only in v1"
+      },
+      {
+        "competitor": "continue_dev",
+        "kind": "unsupported_rules",
+        "scope": {
+          "type": "project",
+          "root": "<redacted>"
+        },
+        "path": "<redacted>/.../CLAUDE.md",
+        "status": "unsupported",
+        "message": "Continue rules and instruction files are report-only in v1"
+      }
+    ]
+  }
+}
