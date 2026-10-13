@@ -129,7 +129,9 @@ public class NovoContratoService {
     // para os períodos ficarem contíguos com o novo (que abre em inicio) sem sobreposição de 1 dia.
     // Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo) e deixava o
     // tiprel anterior por fechar.
-    tipoRelacionamentoAtual.setEstActAdm(0);
+    // EST_ACT_ADM (último vínculo) NÃO muda no registo: o anterior continua a ser o último até a
+    // validação positiva (ValidarContratoService) — assim um processamento feito enquanto o novo está
+    // pendente processa o contrato em vigor e não o pendente. A rejeição não precisa de o repor.
     tipoRelacionamentoAtual.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
@@ -190,8 +192,11 @@ public class NovoContratoService {
         tiposRelacionamentoNovo, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamentoNovo.setRegimeId(regime);
     tiposRelacionamentoNovo.setMobId(mobilidade);
-    tiposRelacionamentoNovo.setFlgProcessa(0);
-    tiposRelacionamentoNovo.setEstActAdm(1);
+    // FLG_PROCESSA: todo o INSERT em RH_T_TIPOS_RELACIONAMENTO nasce com 1 (regra da analista). Não
+    // confundir com EST_ACT_ADM, que diz se o vínculo é o último.
+    tiposRelacionamentoNovo.setFlgProcessa(1);
+    // Pendente: só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    tiposRelacionamentoNovo.setEstActAdm(0);
     tiposRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tiposRelacionamentoNovo);
 
@@ -412,8 +417,11 @@ public class NovoContratoService {
         tiposRelacionamento, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamento.setRegimeId(regime);
     tiposRelacionamento.setMobId(mobilidade);
-    tiposRelacionamento.setFlgProcessa(0);
-    tiposRelacionamento.setEstActAdm(1);
+    // FLG_PROCESSA: todo o INSERT em RH_T_TIPOS_RELACIONAMENTO nasce com 1 (regra da analista). Não
+    // confundir com EST_ACT_ADM, que diz se o vínculo é o último.
+    tiposRelacionamento.setFlgProcessa(1);
+    // Pendente: só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    tiposRelacionamento.setEstActAdm(0);
     tiposRelacionamento.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tiposRelacionamento);
 

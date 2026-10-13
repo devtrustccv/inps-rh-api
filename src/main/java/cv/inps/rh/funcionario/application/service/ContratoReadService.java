@@ -70,7 +70,12 @@ public class ContratoReadService {
     // RELAÇÃO LABORAL atual (tiprel est_act_adm=1) — e não o est_act_adm do histórico: com um novo
     // contrato/renovação pendente, o histórico do contrato anterior ainda tem est_act_adm=1 e os
     // botões apareciam trocados (anterior "Atual", pendente "Inicial").
-    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(idFuncionario);
+    // O Novo Contrato em validação ainda não é o último vínculo (EST_ACT_ADM só muda na aprovação): é
+    // ele o "atual" para os botões; sem ele, o último vínculo. Pode não haver nenhum (contrato
+    // desativado e novo ainda pendente) — por isso a variante sem exceção.
+    var tiprelEmValidacao = funcionarioRules.getTiprelContratoEmValidacao(idFuncionario);
+    var tiprelAtual = tiprelEmValidacao != null ? tiprelEmValidacao
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(idFuncionario);
     Long contratoAtualId = tiprelAtual != null && tiprelAtual.getContrVinculoId() != null
         ? tiprelAtual.getContrVinculoId().getId() : null;
     Integer versaoAtual = contratoAtualId == null ? null

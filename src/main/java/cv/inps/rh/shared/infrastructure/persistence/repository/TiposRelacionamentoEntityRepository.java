@@ -317,6 +317,9 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
   List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid,
                                                                @Param("situacaoAtual") Integer situacaoAtual);
 
+  /** Tiprel mais recente de um contrato do funcionário (qualquer EST_ACT_ADM). */
+  Optional<TiposRelacionamentoEntity> findFirstByFunId_UuidAndContrVinculoId_UuidOrderByIdDesc(UUID funUuid, UUID contratoUuid);
+
   /** Id da direção (RH_T_MOBILIDADE.INSTIT_ID) da mobilidade do tiprel indicado. */
   @Query("SELECT t.mobId.instidId.id FROM TiposRelacionamentoEntity t WHERE t.id = :tiprelId")
   Optional<Long> findDirecaoIdDaMobilidade(@Param("tiprelId") Long tiprelId);
