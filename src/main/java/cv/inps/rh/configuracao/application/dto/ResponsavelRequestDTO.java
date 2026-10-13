@@ -17,7 +17,7 @@ public record ResponsavelRequestDTO(
 
     UUID idFuncionario,
 
-    UUID idSeccao,
+    Long idSeccao,
 
     @NotBlank
     String nomeSeccao

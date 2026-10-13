@@ -85,12 +85,19 @@ public class ContratoReadService {
             .filter(java.util.Objects::nonNull)
             .max(Integer::compare)
             .orElse(null);
+    // Último contrato (o único reativável): o do vínculo EST_ACT_ADM=1 — a desativação mantém-no —, e só
+    // quando não há Novo Contrato em validação (reativar o anterior nesse momento criaria conflito).
+    var ultimoVinculo = tiprelEmValidacao != null ? null
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(idFuncionario);
+    Long contratoUltimoId = ultimoVinculo != null && ultimoVinculo.getContrVinculoId() != null
+        ? ultimoVinculo.getContrVinculoId().getId() : null;
     var content = page.getContent().stream()
         .map(v -> {
           var dto = contratoMapper.toDTO(v);
           if (contratoAtualId != null && versaoAtual != null)
             dto.setAtual(java.util.Objects.equals(v.getContratoId(), contratoAtualId)
                 && java.util.Objects.equals(v.getVersao(), versaoAtual));
+          dto.setUltimo(contratoUltimoId != null && java.util.Objects.equals(v.getContratoId(), contratoUltimoId));
           dto.setSituacaoDesc(dominioService.traduzir(dominioMovLaboral, v.getTipoSituacao()));
           return dto;
         })

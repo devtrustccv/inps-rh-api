@@ -45,7 +45,7 @@
     {
       "name": "idSeccao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
