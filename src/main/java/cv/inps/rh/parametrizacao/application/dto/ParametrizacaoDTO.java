@@ -24,4 +24,7 @@ public class ParametrizacaoDTO  {
 
   private Long value ;
 
+
+  private Long nif ;
+
 }
