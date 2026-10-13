@@ -12,7 +12,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEn
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoHistoricoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -34,8 +33,8 @@ import java.util.UUID;
  *
  * <p>Guards:
  * <ul>
- *   <li><b>Desativar (A→I):</b> só o contrato ATUAL (tiprel com est_act_adm=1), que esteja ativo e
- *       que NÃO tenha sido processado em folha (RH_T_PROC_FUNCIONARIOS).</li>
+ *   <li><b>Desativar (A→I):</b> só o contrato ATUAL (tiprel com est_act_adm=1), que esteja ativo —
+ *       mesmo que já processado em folha (fica sob responsabilidade do utilizador).</li>
  *   <li><b>Ativar (I→A):</b> só o ÚLTIMO contrato do funcionário e desde que não exista outro
  *       contrato em vigor (mesmo guard do registo / Novo Contrato).</li>
  * </ul>
@@ -49,7 +48,6 @@ public class AlterarEstadoContratoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ContratoEntityRepository contratoEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
-  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
   private final ContratoHistoricoEntityRepository contratoHistoricoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
@@ -97,17 +95,15 @@ public class AlterarEstadoContratoService {
   // -----------------------------------------------------------------------------------------------
 
   /**
-   * Desativar: ativo e não processado em folha. O "só o contrato ATUAL" já foi garantido a montante
+   * Desativar: só exige que esteja ativo (processado em folha é permitido). O "só o contrato ATUAL" já foi garantido a montante
    * pelo finder por est_act_adm=1 — que devolve vazio (e a mesma mensagem) se este não for o corrente.
    */
   private void validarDesativacao(ContratoEntity contrato, TiposRelacionamentoEntity tiprel) {
     if (contrato.getEstado() != Estado.A) {
       throw IgrpResponseStatusException.badRequest("Só é possível desativar um contrato ativo.");
     }
-    if (processamentoFuncionarioRepository.existsByTiprel_Id(tiprel.getId())) {
-      throw IgrpResponseStatusException.badRequest(
-          "Não é possível desativar um contrato já processado em folha.");
-    }
+    // Contrato já processado em folha: a desativação é permitida — fica sob responsabilidade do
+    // utilizador (decisão de negócio).
   }
 
   /** Ativar: só o ÚLTIMO contrato do funcionário e sem outro contrato em vigor. */
@@ -117,6 +113,11 @@ public class AlterarEstadoContratoService {
     if (contrato.getEstado() != Estado.I) {
       throw IgrpResponseStatusException.badRequest(
           "Só é possível ativar um contrato inativo (estado I). Estado atual: " + contrato.getEstado() + ".");
+    }
+    // Com um Novo Contrato em validação o anterior não se reativa (o novo passaria a conflituar com ele).
+    if (funcionarioRules.getTiprelContratoEmValidacao(funcionario.getUuid()) != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Existe um Novo Contrato em validação: valide-o ou rejeite-o antes de ativar o contrato anterior.");
     }
     // "Último/atual contrato" = aquele cujo HISTÓRICO tem est_act_adm=1 (o atual administrativo).
     // Robusto contra um Novo Contrato REJEITADO — cujo histórico nasce e permanece est_act_adm=0 —,

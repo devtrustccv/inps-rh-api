@@ -258,7 +258,9 @@ public class DadosContratuaisMapper {
     clone.setReferente(original.getReferente());
     clone.setUltProc(original.getUltProc());
     clone.setMotivoSitLab(original.getMotivoSitLab());
-    clone.setFlgProcessa(original.getFlgProcessa());
+    // O clone é sempre um INSERT novo: FLG_PROCESSA nasce com 1 (regra da analista), não herda o
+    // valor do anterior (um anterior a 0 passava 0 ao novo). Quem precisa de outro valor sobrepõe depois.
+    clone.setFlgProcessa(1);
 
     return clone;
   }

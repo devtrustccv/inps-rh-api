@@ -111,6 +111,11 @@ public class HistoricoLaboralWriteService {
       alterou = true;
     }
 
+    // Persistir o NOVO tiprel diretamente (é novo → persist, a mesma instância fica gerida). Só via
+    // saveAndFlush(funcionario) o Spring Data faz merge e o cascade grava uma CÓPIA: o
+    // novoRelacionamento ficava transient e a transferência de rem/pag abaixo rebentava com
+    // TransientPropertyValueException (500) para qualquer colaborador com remunerações/descontos.
+    novoRelacionamento = tiposRelacionamentoEntityRepository.save(novoRelacionamento);
     funcionario.getTiposrelacionamentos().add(novoRelacionamento);
     funcionarioEntityRepository.saveAndFlush(funcionario);
 

@@ -73,8 +73,9 @@ public class ValidarContratoService {
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    // Contrato alvo = o do tiprel atual (o novo contrato registado, ainda por validar/corrigir).
-    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // Contrato alvo = o do tiprel EM VALIDAÇÃO (o novo contrato registado, por validar/corrigir), lido da
+    // validação — o novo tiprel só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    var tiprelAtual = funcionarioRules.getTiprelContratoEmValidacao(funcionario.getUuid());
     var contratoAlvo = tiprelAtual != null ? tiprelAtual.getContrVinculoId() : null;
 
     // CORRIGIR (checker devolve ao maker): contrato pendente P -> C e validação P -> C, SEM aplicar
@@ -85,7 +86,7 @@ public class ValidarContratoService {
         throw IgrpResponseStatusException.badRequest("Não há contrato pendente para devolver para correção.");
       }
       funcionarioRules.devolverParaCorrecao(contratoAlvo.getUuid(), contratoAlvo.getEstado(), Referencia.CONTRATO);
-      mudarEstado(funcionario, Estado.C);
+      mudarEstado(funcionario, tiprelAtual, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
       LOGGER.info("[CORRIGIR] CONTRATO devolvido para correção (contrato={}).", contratoAlvo.getUuid());
       return ResponseEntity.ok(new SuccessResponseDTO(true, contratoAlvo.getUuid().toString(),
@@ -121,7 +122,10 @@ public class ValidarContratoService {
               .formatted(funcionario.getNome()));
     }
 
-    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    var tiposRelacionamento = tiprelAtual;
+    if (tiposRelacionamento == null) {
+      throw IgrpResponseStatusException.badRequest("Não há contrato em validação para este colaborador.");
+    }
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
     var contrato = tiposRelacionamento.getContrVinculoId();
@@ -137,7 +141,7 @@ public class ValidarContratoService {
         mobilidade.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
         var nova = mobilidadeMapper.toMobilidade(dadosContratuais, tiposRelacionamento.getEstado());
         nova.setFunId(funcionario);
-        nova.setTipoSituacao("CONTINUIDADE");
+        nova.setTipoSituacao("NOVO_CONTRATO");
         funcionario.getMobilidades().add(nova);
         tiposRelacionamento.setMobId(nova);
       }
@@ -147,7 +151,11 @@ public class ValidarContratoService {
 
     var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
     if (carreira != null) {
+      // O TIPO_SITUACAO da carreira (INICIO na 1ª carreira, senão NOVO_CONTRATO) é decidido no registo do
+      // Novo Contrato; o tipoCarreira que o formulário reenvia na validação/correção não o sobrepõe.
+      var tipoCarreiraRegistado = carreira.getTipoSituacao();
       carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+      carreira.setTipoSituacao(tipoCarreiraRegistado);
     }
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
@@ -206,7 +214,7 @@ public class ValidarContratoService {
     // dentro do bloco flgSalario==1, pelo que estagios (flg_salario=0) nunca transitavam.
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      mudarEstado(funcionario, estado);
+      mudarEstado(funcionario, tiposRelacionamento, estado);
       // Subsidios/encargos MANUAIS nascem pendentes (P) e devem seguir a decisao de validacao
       // (SIM -> A, NAO -> I), tal como as restantes tabelas em mudarEstado. Sem isto ficavam em P
       // apos validar e nao seriam processados. Os movimentos FIXOS do vinculo sao tratados pelo
@@ -219,6 +227,11 @@ public class ValidarContratoService {
       var contratoAntigoConversao = tiprelAntigoConversao != null ? tiprelAntigoConversao.getContrVinculoId() : null;
       marcarAlertaConversao(contratoAntigoConversao, EstadoValidacao.SIM.equals(dto.getValidar()));
       if (estado == Estado.A) {
+        // Só agora o novo contrato passa a ÚLTIMO VÍNCULO (EST_ACT_ADM=1) e o anterior deixa de o ser.
+        var ultimoAnterior = funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
+        if (ultimoAnterior != null && !java.util.Objects.equals(ultimoAnterior.getId(), tiposRelacionamento.getId()))
+          ultimoAnterior.setEstActAdm(0);
+        tiposRelacionamento.setEstActAdm(1);
         // Os def do contrato ANTERIOR já foram encerrados (DATA_FIM, mantendo 'A') e retirados da
         // coleção de trabalho acima (encerrarEExcluirDefsContratoAnterior). Por isso o reconciliar
         // cria fixos FRESCOS para o novo contrato (não vê os antigos) e o associarNovos só associa os
@@ -235,7 +248,9 @@ public class ValidarContratoService {
               ? escalaoAplicado.getValor() : dadosContratuais.getSalario();
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
               salarioReconciliar, dadosContratuais.getMoeda(),
-              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
+              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(),
+              // OBS dos movimentos fixos do vínculo: INICIO no 1º contrato, senão NOVO_CONTRATO.
+              "INICIO".equals(contrato.getTipoSituacao()) ? "INICIO" : "NOVO_CONTRATO");
         }
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
       } else {
@@ -249,7 +264,7 @@ public class ValidarContratoService {
       // Maker reenviou a correção: C -> P (volta à fila de validação). Sem consolidar nem ordem de
       // serviço — isso só na validação positiva (SIM). Os manuais editados mantêm-se P.
       funcionarioRules.reabrirParaValidacao(contratoAlvo.getUuid(), Referencia.CONTRATO);
-      mudarEstado(funcionario, Estado.P);
+      mudarEstado(funcionario, tiposRelacionamento, Estado.P);
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -367,9 +382,8 @@ public class ValidarContratoService {
         });
   }
 
-  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+  private void mudarEstado(FuncionarioEntity funcionarioEntity, TiposRelacionamentoEntity tr, Estado estado) {
 
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
       var contrato = tr.getContrVinculoId();

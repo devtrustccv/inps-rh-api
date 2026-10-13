@@ -64,6 +64,10 @@ public class ContratoListDTO  {
 
   private boolean atual ;
 
+  // true no ÚLTIMO contrato do funcionário (o do vínculo EST_ACT_ADM=1, que a desativação mantém) — o
+  // único que pode ser reativado; false enquanto houver um Novo Contrato em validação.
+  private boolean ultimo ;
+
   private boolean renovavel ;
 
   // true se o contrato já tem processamento salarial (algum tiprel em RH_T_PROC_FUNCIONARIOS)

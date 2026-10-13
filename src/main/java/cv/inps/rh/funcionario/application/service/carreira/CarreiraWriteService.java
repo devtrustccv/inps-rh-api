@@ -211,7 +211,9 @@ public class CarreiraWriteService {
     novoTiprel.setRegimeId(relacionamentoAtual.getRegimeId());
     novoTiprel.setSituacLaboralId(relacionamentoAtual.getSituacLaboralId());
     novoTiprel.setEstActAdm(0);
-    novoTiprel.setFlgProcessa(dto.getFlgProcessa());
+    // FLG_PROCESSA do tiprel: todo o INSERT nasce com 1 (regra da analista). O "Processar salário?" do
+    // formulário indica se é o VÍNCULO ATUAL — vai para o EST_ACT_ADM, aplicado na validação.
+    novoTiprel.setFlgProcessa(1);
     novoTiprel.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoTiprel);
 
@@ -598,9 +600,10 @@ public class CarreiraWriteService {
         tiprelPendente.setSituacLaboralId(tiprelAtual.getSituacLaboralId());
         tiprelPendente.setTiprelId(tiprelAtual);
       }
+      // "Processar salário?" = vínculo atual → EST_ACT_ADM. O FLG_PROCESSA do tiprel fica o do registo
+      // (1): quem decide se é processado é o EST_ACT_ADM (a procedure filtra est_act_adm=1).
       tiprelPendente.setEstActAdm(novoEst);
       tiprelPendente.setEstado(Estado.A);
-      tiprelPendente.setFlgProcessa(novoFlgProcessa);
       tiposRelacionamentoEntityRepository.save(tiprelPendente);
     }
 

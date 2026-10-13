@@ -133,7 +133,21 @@ public class MobilidadeReadService {
         ? mobilidade.getMobId()
         : null;
 
-    return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, pai);
+    var dto = mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, pai);
+
+    // Mesmo estado que a LISTA: nos consolidados (A/I) a lista usa a vista RH_V_MOBILIDADE, que
+    // calcula A/I pelas datas (uma mobilidade terminada aparece Inactiva); a tabela continua A. Sem
+    // isto o detalhe dizia "Ativo" para o que a lista mostra "Inactivo". P/C mantêm o da tabela.
+    if (mobilidade.getEstado() == Estado.A || mobilidade.getEstado() == Estado.I) {
+      rhVMobilidadeEntityRepository.findById(mobilidade.getId())
+          .map(RhVMobilidadeEntity::getEstado)
+          .flatMap(Estado::fromCode)
+          .ifPresent(e -> {
+            dto.setEstado(e.getCode());
+            dto.setEstadoDesc(e.getDescription());
+          });
+    }
+    return dto;
   }
 
   @Transactional(readOnly = true)
