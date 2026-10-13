@@ -137,7 +137,7 @@ public class ValidarContratoService {
         mobilidade.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
         var nova = mobilidadeMapper.toMobilidade(dadosContratuais, tiposRelacionamento.getEstado());
         nova.setFunId(funcionario);
-        nova.setTipoSituacao("CONTINUIDADE");
+        nova.setTipoSituacao("NOVO_CONTRATO");
         funcionario.getMobilidades().add(nova);
         tiposRelacionamento.setMobId(nova);
       }
@@ -147,7 +147,11 @@ public class ValidarContratoService {
 
     var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
     if (carreira != null) {
+      // O TIPO_SITUACAO da carreira (INICIO na 1ª carreira, senão NOVO_CONTRATO) é decidido no registo do
+      // Novo Contrato; o tipoCarreira que o formulário reenvia na validação/correção não o sobrepõe.
+      var tipoCarreiraRegistado = carreira.getTipoSituacao();
       carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+      carreira.setTipoSituacao(tipoCarreiraRegistado);
     }
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
@@ -235,7 +239,9 @@ public class ValidarContratoService {
               ? escalaoAplicado.getValor() : dadosContratuais.getSalario();
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
               salarioReconciliar, dadosContratuais.getMoeda(),
-              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
+              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(),
+              // OBS dos movimentos fixos do vínculo: INICIO no 1º contrato, senão NOVO_CONTRATO.
+              "INICIO".equals(contrato.getTipoSituacao()) ? "INICIO" : "NOVO_CONTRATO");
         }
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
       } else {
