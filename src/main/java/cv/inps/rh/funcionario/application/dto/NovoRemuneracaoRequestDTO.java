@@ -23,11 +23,7 @@ public class NovoRemuneracaoRequestDTO  {
   @NotNull(message = "The field <movimentoId> is required")
 
   private Long movimentoId ;
-  @NotNull(message = "The field <valor> is required")
-
   private BigDecimal valor ;
-  @NotNull(message = "The field <percentagem> is required")
-
   private BigDecimal percentagem ;
   private String moeda ;
   @NotBlank(message = "The field <dataInicio> is required")

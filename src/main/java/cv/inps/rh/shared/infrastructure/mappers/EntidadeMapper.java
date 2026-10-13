@@ -30,6 +30,8 @@ public class EntidadeMapper {
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
     dto.setLabel(entidade.getNome());
     dto.setValue(entidade.getId());
+    // NIF da entidade: o ecrã de pagamento preenche-o por defeito ao escolher a entidade.
+    dto.setNif(entidade.getNif());
     return dto;
   }
 

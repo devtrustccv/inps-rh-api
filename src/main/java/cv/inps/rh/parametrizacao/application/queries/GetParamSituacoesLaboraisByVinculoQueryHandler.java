@@ -42,7 +42,8 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
          .filter(obj -> Objects.isNull(query.getCodigo()) || obj.getParamSit().getCodigo().equals(query.getCodigo()))
          .map(r -> new ParametrizacaoDTO(
              r.getParamSit().getNome(),
-             r.getParamSit().getId()
+             r.getParamSit().getId(),
+             null
          ))
          .toList();
 

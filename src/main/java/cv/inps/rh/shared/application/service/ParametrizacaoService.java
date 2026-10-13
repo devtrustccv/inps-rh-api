@@ -72,7 +72,7 @@ public class ParametrizacaoService {
   public List<ParametrizacaoDTO> getInstituicoes() {
     return instituicaoEntityRepository.findDirecoesList()
         .stream()
-        .map(p -> new ParametrizacaoDTO(p.getNome(), p.getId()))
+        .map(p -> new ParametrizacaoDTO(p.getNome(), p.getId(), null))
         .toList();
   }
 
