@@ -401,9 +401,19 @@ public class MobilidadeWriteService {
 
     // Registos inactivos/eliminados são histórico — não se editam (guard I/E comum a todo o dossiê).
     funcionarioRules.garantirEditavel(mobilidade.getEstado());
-    // Guard de processamento: se já entrou em folha, editar alteraria dados já processados.
+    // Mobilidade já processada (entrou em folha): só Data Início e Data Fim são editáveis — direção,
+    // unidade, local e tipo vêm no payload mas são ignorados. Mudar só datas não é um movimento, por isso
+    // grava-se diretamente, sem validação.
     if (mobilidadeProcessada(mobilidade)) {
-      throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade que já tem processamento salarial.");
+      if (mobilidadeDto.getDataInicio() != null) mobilidade.setDataInicio(mobilidadeDto.getDataInicio());
+      if (mobilidadeDto.getDataFim() != null) mobilidade.setDataFim(mobilidadeDto.getDataFim());
+      if (mobilidade.getDataFim() != null && mobilidade.getDataInicio() != null
+          && mobilidade.getDataFim().isBefore(mobilidade.getDataInicio())) {
+        throw IgrpResponseStatusException.badRequest("A data de fim não pode ser anterior à data de início.");
+      }
+      mobilidadeEntityRepository.save(mobilidade);
+      funcionarioEntityRepository.save(funcionario);
+      return new SuccessResponseDTO(true, mobilidade.getUuid().toString(), "Datas da mobilidade actualizadas.", java.util.List.of());
     }
 
     // Estado dos três campos ANTES de aplicar o payload — a base da comparação mais abaixo.
