@@ -32,4 +32,8 @@ public class EntidadeEntity  {
     private String nome;
 
 
+    @Column(name="nif")
+    private Long nif;
+
+
 }

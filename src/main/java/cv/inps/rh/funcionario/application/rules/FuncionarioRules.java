@@ -89,6 +89,39 @@ public class FuncionarioRules {
     return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid).orElse(null);
   }
 
+  /**
+   * Vínculo (RH_T_PARAM_VINCULO) do contrato da relação laboral ATUAL (tiprel est_act_adm=1). É este,
+   * e não o de contratos anteriores, que decide se o colaborador pode ter carreira/salário — ex.:
+   * começou com Estágio (sem carreira) e passou a Contratado (com carreira). Null se não houver.
+   */
+  public ParamVinculoEntity getVinculoAtual(UUID funUuid) {
+    var atual = getTipoRelacionamentoAtualOrNull(funUuid);
+    return atual != null && atual.getContrVinculoId() != null ? atual.getContrVinculoId().getVinculoId() : null;
+  }
+
+  /** Bloqueia registo/alteração de carreira quando o vínculo atual não tem carreira (FLG_CARREIRA=0). */
+  public void garantirVinculoAtualComCarreira(UUID funUuid) {
+    var vinculo = getVinculoAtual(funUuid);
+    if (vinculo == null || !Objects.equals(1, vinculo.getFlgCarreira())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O vínculo atual do colaborador" + nomeVinculo(vinculo) + " não tem carreira.");
+    }
+  }
+
+  /** Bloqueia registo de remunerações/descontos quando o vínculo atual não tem salário (FLG_SALARIO=NAO). */
+  public void garantirVinculoAtualComSalario(UUID funUuid) {
+    var vinculo = getVinculoAtual(funUuid);
+    if (vinculo == null || !cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo.temSalario(vinculo.getFlgSalario())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O vínculo atual do colaborador" + nomeVinculo(vinculo)
+              + " não tem salário: não é possível registar remunerações nem descontos.");
+    }
+  }
+
+  private static String nomeVinculo(ParamVinculoEntity vinculo) {
+    return vinculo != null && vinculo.getNome() != null ? " (" + vinculo.getNome() + ")" : "";
+  }
+
 
   public ContratoEntity getContratoComMaiorVersao(UUID funUuid) {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);
@@ -114,7 +147,12 @@ public class FuncionarioRules {
 
   public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(UUID funId, UUID contratoId) {
     if (funId == null || contratoId == null) return null;
-    return tiposRelacionamentoEntityRepository.findByFunUuidAndContratoUuid(funId, contratoId);
+    var atual = tiposRelacionamentoEntityRepository.findByFunUuidAndContratoUuid(funId, contratoId);
+    if (atual != null) return atual;
+    // Sem tiprel ÚLTIMO VÍNCULO (EST_ACT_ADM=1) para este contrato — ex.: Novo Contrato pendente, que só
+    // passa a último vínculo na validação positiva: usa-se o tiprel mais recente do contrato.
+    return tiposRelacionamentoEntityRepository
+        .findFirstByFunId_UuidAndContrVinculoId_UuidOrderByIdDesc(funId, contratoId).orElse(null);
   }
 
 
@@ -222,6 +260,18 @@ public class FuncionarioRules {
   }
 
 
+
+  /**
+   * Tiprel do Novo Contrato em validação (pendente P ou em correção C), lido da própria validação
+   * (RH_T_VALIDACAO.TIPREL_ID). O novo tiprel só passa a último vínculo (EST_ACT_ADM=1) na validação
+   * positiva, por isso NÃO se pode localizar pelo "atual". Null se não houver contrato em validação.
+   */
+  public TiposRelacionamentoEntity getTiprelContratoEmValidacao(UUID funUuid) {
+    return getValidacao(funUuid, Estado.P, TipoAcao.INSERT, Referencia.CONTRATO)
+        .or(() -> getValidacao(funUuid, Estado.C, TipoAcao.INSERT, Referencia.CONTRATO))
+        .map(ValidacaoEntity::getTiprelId)
+        .orElse(null);
+  }
 
   public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
 

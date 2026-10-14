@@ -33,6 +33,9 @@ public interface CarreiraEntityRepository extends
 
   boolean existsByContrVinculoIdFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
+  /** O colaborador já tem (ou teve) alguma carreira registada? Decide INICIO vs NOVO_CONTRATO. */
+  boolean existsByContrVinculoIdFunId(FuncionarioEntity fun);
+
   // Carreiras actualmente activas do funcionário (estado A e ainda em vigor: data fim nula).
   List<CarreiraEntity> findAllByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 

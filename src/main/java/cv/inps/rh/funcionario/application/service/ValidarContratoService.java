@@ -73,8 +73,9 @@ public class ValidarContratoService {
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    // Contrato alvo = o do tiprel atual (o novo contrato registado, ainda por validar/corrigir).
-    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // Contrato alvo = o do tiprel EM VALIDAÇÃO (o novo contrato registado, por validar/corrigir), lido da
+    // validação — o novo tiprel só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    var tiprelAtual = funcionarioRules.getTiprelContratoEmValidacao(funcionario.getUuid());
     var contratoAlvo = tiprelAtual != null ? tiprelAtual.getContrVinculoId() : null;
 
     // CORRIGIR (checker devolve ao maker): contrato pendente P -> C e validação P -> C, SEM aplicar
@@ -85,7 +86,7 @@ public class ValidarContratoService {
         throw IgrpResponseStatusException.badRequest("Não há contrato pendente para devolver para correção.");
       }
       funcionarioRules.devolverParaCorrecao(contratoAlvo.getUuid(), contratoAlvo.getEstado(), Referencia.CONTRATO);
-      mudarEstado(funcionario, Estado.C);
+      mudarEstado(funcionario, tiprelAtual, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
       LOGGER.info("[CORRIGIR] CONTRATO devolvido para correção (contrato={}).", contratoAlvo.getUuid());
       return ResponseEntity.ok(new SuccessResponseDTO(true, contratoAlvo.getUuid().toString(),
@@ -121,7 +122,10 @@ public class ValidarContratoService {
               .formatted(funcionario.getNome()));
     }
 
-    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    var tiposRelacionamento = tiprelAtual;
+    if (tiposRelacionamento == null) {
+      throw IgrpResponseStatusException.badRequest("Não há contrato em validação para este colaborador.");
+    }
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
     var contrato = tiposRelacionamento.getContrVinculoId();
@@ -129,11 +133,29 @@ public class ValidarContratoService {
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();
-    mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    if (mobilidadeMapper.partilhadaComAnterior(tiposRelacionamento)) {
+      // Mobilidade reutilizada do contrato em vigor (sem mudança de colocação): não se reescreve. Se a
+      // colocação foi alterada na correção/validação, passa a ser um movimento — encerra-se a em vigor
+      // (como no registo; o revert de um NAO repõe-lhe a DATA_FIM) e cria-se uma nova para o contrato.
+      if (!mobilidadeMapper.mesmaColocacao(mobilidade, dadosContratuais)) {
+        mobilidade.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
+        var nova = mobilidadeMapper.toMobilidade(dadosContratuais, tiposRelacionamento.getEstado());
+        nova.setFunId(funcionario);
+        nova.setTipoSituacao("NOVO_CONTRATO");
+        funcionario.getMobilidades().add(nova);
+        tiposRelacionamento.setMobId(nova);
+      }
+    } else {
+      mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
+    }
 
     var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
     if (carreira != null) {
+      // O TIPO_SITUACAO da carreira (INICIO na 1ª carreira, senão NOVO_CONTRATO) é decidido no registo do
+      // Novo Contrato; o tipoCarreira que o formulário reenvia na validação/correção não o sobrepõe.
+      var tipoCarreiraRegistado = carreira.getTipoSituacao();
       carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+      carreira.setTipoSituacao(tipoCarreiraRegistado);
     }
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
@@ -192,7 +214,7 @@ public class ValidarContratoService {
     // dentro do bloco flgSalario==1, pelo que estagios (flg_salario=0) nunca transitavam.
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      mudarEstado(funcionario, estado);
+      mudarEstado(funcionario, tiposRelacionamento, estado);
       // Subsidios/encargos MANUAIS nascem pendentes (P) e devem seguir a decisao de validacao
       // (SIM -> A, NAO -> I), tal como as restantes tabelas em mudarEstado. Sem isto ficavam em P
       // apos validar e nao seriam processados. Os movimentos FIXOS do vinculo sao tratados pelo
@@ -205,6 +227,11 @@ public class ValidarContratoService {
       var contratoAntigoConversao = tiprelAntigoConversao != null ? tiprelAntigoConversao.getContrVinculoId() : null;
       marcarAlertaConversao(contratoAntigoConversao, EstadoValidacao.SIM.equals(dto.getValidar()));
       if (estado == Estado.A) {
+        // Só agora o novo contrato passa a ÚLTIMO VÍNCULO (EST_ACT_ADM=1) e o anterior deixa de o ser.
+        var ultimoAnterior = funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
+        if (ultimoAnterior != null && !java.util.Objects.equals(ultimoAnterior.getId(), tiposRelacionamento.getId()))
+          ultimoAnterior.setEstActAdm(0);
+        tiposRelacionamento.setEstActAdm(1);
         // Os def do contrato ANTERIOR já foram encerrados (DATA_FIM, mantendo 'A') e retirados da
         // coleção de trabalho acima (encerrarEExcluirDefsContratoAnterior). Por isso o reconciliar
         // cria fixos FRESCOS para o novo contrato (não vê os antigos) e o associarNovos só associa os
@@ -221,7 +248,9 @@ public class ValidarContratoService {
               ? escalaoAplicado.getValor() : dadosContratuais.getSalario();
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
               salarioReconciliar, dadosContratuais.getMoeda(),
-              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
+              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(),
+              // OBS dos movimentos fixos do vínculo: INICIO no 1º contrato, senão NOVO_CONTRATO.
+              "INICIO".equals(contrato.getTipoSituacao()) ? "INICIO" : "NOVO_CONTRATO");
         }
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
       } else {
@@ -235,7 +264,7 @@ public class ValidarContratoService {
       // Maker reenviou a correção: C -> P (volta à fila de validação). Sem consolidar nem ordem de
       // serviço — isso só na validação positiva (SIM). Os manuais editados mantêm-se P.
       funcionarioRules.reabrirParaValidacao(contratoAlvo.getUuid(), Referencia.CONTRATO);
-      mudarEstado(funcionario, Estado.P);
+      mudarEstado(funcionario, tiposRelacionamento, Estado.P);
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -310,9 +339,9 @@ public class ValidarContratoService {
    * e o contrato/tiprel/carreira/mobilidade/regime ANTERIORES (fechados no registo) voltam a ativos.
    * Os registos do NOVO contrato ja foram para 'I' via mudarEstado.
    *
-   * <p>So se REATIVA o contrato anterior se ele ainda estiver EM VIGOR (dentro do prazo) — mesma
-   * logica do guard D2 (existeContratoEmVigor). Se ja tinha terminado, a rejeicao do novo contrato
-   * NAO o ressuscita: o colaborador fica sem relacao ativa (correto, o anterior expirou).
+   * <p>O tiprel anterior volta SEMPRE a ser o último vínculo (est_act_adm=1), sem condição de datas.
+   * O contrato anterior NÃO é reativado: o Novo Contrato só é permitido sem contrato Ativo, logo ele
+   * já estava inativo antes do registo — fica como estava (reativá-lo bloqueava um novo registo).
    */
   private void reverterRegistoNovoContrato(TiposRelacionamentoEntity novoTiprel) {
     novoTiprel.setEstActAdm(0);
@@ -321,19 +350,15 @@ public class ValidarContratoService {
     var contratoAntigo = antigo.getContrVinculoId();
     if (contratoAntigo == null) return;
 
-    var hoje = LocalDate.now();
-    boolean emVigor = contratoAntigo.getDataFim() == null
-        || !contratoAntigo.getDataFim().isBefore(hoje);
-    if (!emVigor) return;
-
     // data_fim reposto = data_fim do contrato anterior (o registo tinha-o sobrescrito com a data de
     // inicio do novo); nunca null, para nao perder o termo do contrato.
     var df = contratoAntigo.getDataFim();
     antigo.setEstActAdm(1);
     antigo.setDataFim(df);
-    contratoAntigo.setEstado(Estado.A);
     if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(df);
-    if (antigo.getMobId() != null) antigo.getMobId().setDataFim(df);
+    // Mobilidade reutilizada (sem mudança de colocação) não foi fechada no registo: fica como está.
+    if (antigo.getMobId() != null && !mobilidadeMapper.partilhadaComAnterior(novoTiprel))
+      antigo.getMobId().setDataFim(df);
     if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(df);
   }
 
@@ -357,9 +382,8 @@ public class ValidarContratoService {
         });
   }
 
-  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+  private void mudarEstado(FuncionarioEntity funcionarioEntity, TiposRelacionamentoEntity tr, Estado estado) {
 
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
       var contrato = tr.getContrVinculoId();
@@ -368,7 +392,13 @@ public class ValidarContratoService {
       }
 
       var mob = tr.getMobId();
-      if (mob != null)
+      // Mobilidade partilhada com o contrato em vigor (Novo Contrato sem mudança de colocação): está
+      // ativa e pertence também ao tiprel anterior — o estado do novo contrato não lhe toca. Na
+      // aprovação só se lhe estende a DATA_FIM até ao fim do novo contrato.
+      if (mobilidadeMapper.partilhadaComAnterior(tr)) {
+        if (estado == Estado.A && tr.getContrVinculoId() != null)
+          mob.setDataFim(tr.getContrVinculoId().getDataFim());
+      } else if (mob != null)
         mob.setEstado(estado);
 
       var carreira = tr.getCarreiraId() != null ? tr.getCarreiraId() : null;

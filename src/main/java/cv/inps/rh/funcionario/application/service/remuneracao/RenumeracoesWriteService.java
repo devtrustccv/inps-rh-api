@@ -48,6 +48,8 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há remunerações a registar.
+    funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var remuneracao = new DefinicaoRemuneracaoEntity();
@@ -56,8 +58,8 @@ public class RenumeracoesWriteService {
     // Moeda opcional: quando nao vem no pedido assume-se CVE por defeito.
     remuneracao.setMoeda(
         request.getMoeda() != null && !request.getMoeda().isBlank() ? request.getMoeda() : "CVE");
-    // Caso de uso 1.8: OBS = "Novo Registo".
-    remuneracao.setObs("Novo Registo");
+    // OBS = exatamente a observação do formulário.
+    remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
@@ -97,14 +99,16 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há descontos a registar.
+    funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var pagamento = new DefPagamentoEntity();
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
     pagamento.setEstado(Estado.P);
-    // Caso de uso 1.8: OBS = "Novo Registo".
-    pagamento.setObs("Novo Registo");
+    // OBS = exatamente a observação do formulário.
+    pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
     pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
@@ -299,6 +303,12 @@ public class RenumeracoesWriteService {
   }
 
   private void validarRemuneracaoOuPagamento(NovoRemuneracaoRequestDTO request) {
+    // Valor e percentagem são alternativos (um ou outro, conforme o tipo de movimento).
+    boolean temValor = request.getValor() != null && request.getValor().signum() > 0;
+    boolean temPercentagem = request.getPercentagem() != null && request.getPercentagem().signum() > 0;
+    if (!temValor && !temPercentagem) {
+      throw IgrpResponseStatusException.badRequest("Indique o valor ou a percentagem.");
+    }
     ValidationUtil.validateValorNaoNegativo(request.getValor());
     ValidationUtil.validatePercentagem(request.getPercentagem());
     ValidationUtil.validateIntervaloData(

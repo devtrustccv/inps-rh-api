@@ -134,6 +134,14 @@ public class NotificacaoDestinatarioResolver {
    * um destinatário".</p>
    */
   private List<Destinatario> resolverResponsavelColaborador(FuncionarioEntity colaborador) {
+    return responsaveisDe(colaborador).stream()
+        .map(this::resolverResponsavel)
+        .flatMap(Optional::stream)
+        .toList();
+  }
+
+  /** Linhas activas de RH_T_RESPONSAVEL da colocação actual do colaborador (secção, senão direção). */
+  private List<ResponsavelEntity> responsaveisDe(FuncionarioEntity colaborador) {
     if (colaborador == null) return List.of();
 
     // A colocação vem da mobilidade referenciada pelo tiprel ATUAL (est_act_adm=1), e não de uma
@@ -170,13 +178,42 @@ public class NotificacaoDestinatarioResolver {
     if (responsaveis.isEmpty()) {
       LOGGER.warn("Sem responsáveis activos em RH_T_RESPONSAVEL para direcao={} secao={}",
           direcaoId, secao != null ? secao.getId() : null);
-      return List.of();
     }
+    return responsaveis;
+  }
 
-    return responsaveis.stream()
-        .map(this::resolverResponsavel)
-        .flatMap(Optional::stream)
-        .toList();
+  /**
+   * Pessoas IDENTIFICÁVEIS (com linha em RH_T_FUNCIONARIO) dos tipos pedidos que NÃO têm email —
+   * o complemento de {@link #resolver}. Servem para gravar a notificação como "Pendente" (fica no
+   * portal do funcionário), em vez de não deixar registo nenhum. RESPONSAVEL_REGISTO não entra:
+   * sem perfil IAM com email não há identidade RH a quem associar a notificação.
+   */
+  @Transactional(readOnly = true)
+  public List<Destinatario> resolverSemEmail(FuncionarioEntity colaborador,
+                                            Collection<TipoDestinatarioNotificacao> tipos) {
+    if (tipos == null || tipos.isEmpty() || colaborador == null) return List.of();
+    var semEmail = new ArrayList<Destinatario>();
+    var vistos = new java.util.HashSet<Long>();
+    for (var tipo : tipos) {
+      switch (tipo) {
+        case COLABORADOR -> {
+          if (emailDe(colaborador).isEmpty() && vistos.add(colaborador.getId())) {
+            semEmail.add(new Destinatario(tipo.name(), colaborador.getNome(), null, colaborador));
+          }
+        }
+        case RESPONSAVEL_COLABORADOR -> {
+          for (var r : responsaveisDe(colaborador)) {
+            var f = r.getFunId();
+            if (f == null || emailDe(f).isPresent() || StringUtils.hasText(r.getEmail())) continue;
+            if (vistos.add(f.getId())) {
+              semEmail.add(new Destinatario(tipo.name(), f.getNome(), null, f));
+            }
+          }
+        }
+        case RESPONSAVEL_REGISTO -> { /* sem identidade RH */ }
+      }
+    }
+    return semEmail;
   }
 
   /**

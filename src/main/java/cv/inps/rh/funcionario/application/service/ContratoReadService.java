@@ -29,6 +29,7 @@ public class ContratoReadService {
   private final ContratoMapper contratoMapper;
   private final RhVContratoEntityRepository rhVContratoEntityRepository;
   private final DominioService dominioService;
+  private final cv.inps.rh.funcionario.application.rules.FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
   public WrapperListContratoDTO listaContratos(GetListContratosQuery query) {
@@ -64,9 +65,39 @@ public class ContratoReadService {
 
     // situacaoDesc: traduz o tipo de situação do contrato (domínio TIPO_MOV_LABORAL, com fallback ao código)
     var dominioMovLaboral = dominioService.getDominioMap("TIPO_MOV_LABORAL");
+
+    // "Atual" (botão Ver Informação Atual) = a versão mais recente, não rejeitada, do contrato da
+    // RELAÇÃO LABORAL atual (tiprel est_act_adm=1) — e não o est_act_adm do histórico: com um novo
+    // contrato/renovação pendente, o histórico do contrato anterior ainda tem est_act_adm=1 e os
+    // botões apareciam trocados (anterior "Atual", pendente "Inicial").
+    // O Novo Contrato em validação ainda não é o último vínculo (EST_ACT_ADM só muda na aprovação): é
+    // ele o "atual" para os botões; sem ele, o último vínculo. Pode não haver nenhum (contrato
+    // desativado e novo ainda pendente) — por isso a variante sem exceção.
+    var tiprelEmValidacao = funcionarioRules.getTiprelContratoEmValidacao(idFuncionario);
+    var tiprelAtual = tiprelEmValidacao != null ? tiprelEmValidacao
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(idFuncionario);
+    Long contratoAtualId = tiprelAtual != null && tiprelAtual.getContrVinculoId() != null
+        ? tiprelAtual.getContrVinculoId().getId() : null;
+    Integer versaoAtual = contratoAtualId == null ? null
+        : rhVContratoEntityRepository.findAllByContratoId(contratoAtualId).stream()
+            .filter(h -> h.getEstado() == null || !("I".equals(h.getEstado()) || "E".equals(h.getEstado())))
+            .map(RhVContratoEntity::getVersao)
+            .filter(java.util.Objects::nonNull)
+            .max(Integer::compare)
+            .orElse(null);
+    // Último contrato (o único reativável): o do vínculo EST_ACT_ADM=1 — a desativação mantém-no —, e só
+    // quando não há Novo Contrato em validação (reativar o anterior nesse momento criaria conflito).
+    var ultimoVinculo = tiprelEmValidacao != null ? null
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(idFuncionario);
+    Long contratoUltimoId = ultimoVinculo != null && ultimoVinculo.getContrVinculoId() != null
+        ? ultimoVinculo.getContrVinculoId().getId() : null;
     var content = page.getContent().stream()
         .map(v -> {
           var dto = contratoMapper.toDTO(v);
+          if (contratoAtualId != null && versaoAtual != null)
+            dto.setAtual(java.util.Objects.equals(v.getContratoId(), contratoAtualId)
+                && java.util.Objects.equals(v.getVersao(), versaoAtual));
+          dto.setUltimo(contratoUltimoId != null && java.util.Objects.equals(v.getContratoId(), contratoUltimoId));
           dto.setSituacaoDesc(dominioService.traduzir(dominioMovLaboral, v.getTipoSituacao()));
           return dto;
         })

@@ -57,6 +57,12 @@ public class NovoContratoService {
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ContratoEntityRepository contratoEntityRepository;
   private final AlertaEntityRepository alertaEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
+
+  // TIPO_SITUACAO/OBS gravados (o descritivo "Continuidade" no ecrã é só tradução do domínio):
+  // INICIO no 1º registo do colaborador, NOVO_CONTRATO nos seguintes.
+  private static final String TIPO_INICIO = "INICIO";
+  private static final String TIPO_NOVO_CONTRATO = "NOVO_CONTRATO";
 
 
   @Transactional
@@ -84,8 +90,8 @@ public class NovoContratoService {
     // D2 (DOSSIÊ, Novo Contrato): "o botão Novo Contrato só deve ficar visível caso NÃO exista um
     // contrato ativo". Enforçado no backend via query: um contrato em vigor (estado A e ainda dentro
     // do prazo) bloqueia o novo — a alteração de um contrato em vigor faz-se pela Renovação.
-    var hoje = LocalDate.now();
-    if (contratoEntityRepository.existeContratoEmVigor(funcionario, Estado.A, hoje)) {
+    // Só o ESTADO conta (questão das datas fica em aberto): bloqueia se existir um contrato Ativo.
+    if (contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A)) {
       throw IgrpResponseStatusException.badRequest(
           "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
     }
@@ -97,16 +103,22 @@ public class NovoContratoService {
 
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
 
+    // 1º contrato do colaborador → INICIO em todas as tabelas; nos seguintes → NOVO_CONTRATO.
+    var tipoSituacao = isPrimeiroContrato ? TIPO_INICIO : TIPO_NOVO_CONTRATO;
+    // Carreira: INICIO se é a PRIMEIRA carreira do colaborador, mesmo que o contrato não seja o 1º
+    // (ex.: começou com um vínculo sem carreira). Calculado antes de qualquer alteração.
+    var tipoCarreira = carreiraEntityRepository.existsByContrVinculoIdFunId(funcionario)
+        ? TIPO_NOVO_CONTRATO : TIPO_INICIO;
+
     // Sem vínculo ativo (est_act_adm=1) — ex.: o contrato atual foi DESATIVADO pelo toggle de estado.
     // Nesse caso NÃO há tiprel anterior para fechar: cria-se um contrato fresco (como no 1º contrato),
-    // mas com TIPO_SITUACAO=CONTINUIDADE (já houve contratos antes). Usa-se a variante nullable para
+    // mas com TIPO_SITUACAO=NOVO_CONTRATO (já houve contratos antes). Usa-se a variante nullable para
     // não rebentar (getTipoRelacionamentoAtual lança quando não há atual).
     var tipoRelacionamentoAtual = isPrimeiroContrato ? null
         : funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
 
     if (isPrimeiroContrato || tipoRelacionamentoAtual == null) {
-      return primeiroContrato(funcionario, dadosContratuais,
-          isPrimeiroContrato ? "INICIO" : "CONTINUIDADE");
+      return primeiroContrato(funcionario, dadosContratuais, tipoSituacao, tipoCarreira);
     }
     // SEM guard I/E aqui (ao contrario dos restantes fluxos do dossie): o alvo nao e um registo que se
     // esteja a editar, e o vinculo ANTERIOR que a linha seguinte vai ARQUIVAR. Desactivar um contrato
@@ -117,7 +129,9 @@ public class NovoContratoService {
     // para os períodos ficarem contíguos com o novo (que abre em inicio) sem sobreposição de 1 dia.
     // Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo) e deixava o
     // tiprel anterior por fechar.
-    tipoRelacionamentoAtual.setEstActAdm(0);
+    // EST_ACT_ADM (último vínculo) NÃO muda no registo: o anterior continua a ser o último até a
+    // validação positiva (ValidarContratoService) — assim um processamento feito enquanto o novo está
+    // pendente processa o contrato em vigor e não o pendente. A rejeição não precisa de o repor.
     tipoRelacionamentoAtual.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
@@ -125,9 +139,8 @@ public class NovoContratoService {
 
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
-    // D3 (DOSSIÊ): num contrato NÃO-primeiro, TIPO_SITUACAO = CONTINUIDADE. O 1º contrato usa
-    // INICIO e é tratado em primeiroContrato().
-    contratoNovo.setTipoSituacao("CONTINUIDADE");
+    // Contrato NÃO-primeiro: TIPO_SITUACAO = NOVO_CONTRATO (o 1º usa INICIO, em primeiroContrato()).
+    contratoNovo.setTipoSituacao(TIPO_NOVO_CONTRATO);
     // Regra (analista): a VERSAO do CONTRATO_VINCULO e SEMPRE 1 num novo contrato.
     // A renovacao NAO incrementa aqui — o incremento de versao vive no HISTORICO
     // (RH_T_CONTRATO_HISTORICO). Como versao=1, a constraint CK_CONTRATO_VERSAO_CONTRATO
@@ -141,12 +154,13 @@ public class NovoContratoService {
     CarreiraEntity carreira = null;
     if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
 
-      CarreiraEntity atual = tipoRelacionamentoAtual.getCarreiraId() != null ? tipoRelacionamentoAtual.getCarreiraId() : null;
-      if (atual != null) {
-        carreira = mudaCarreiraOuManter(atual, dadosContratuais);
-        carreira.setContrVinculoId(contratoNovo);
-        contratoNovo.getCarreiras().add(carreira);
-      }
+      // Cria SEMPRE a carreira escolhida no formulário. Antes só era criada se o tiprel anterior já tivesse
+      // carreira — um contrato anterior sem carreira (ou vínculo diferente) perdia carreira e escalão.
+      // mudaCarreiraOuManter fecha a anterior (DATA_FIM = início - 1) só quando ela existe.
+      CarreiraEntity atual = tipoRelacionamentoAtual.getCarreiraId();
+      carreira = mudaCarreiraOuManter(atual, dadosContratuais, tipoCarreira);
+      carreira.setContrVinculoId(contratoNovo);
+      contratoNovo.getCarreiras().add(carreira);
 
     }
 
@@ -168,8 +182,7 @@ public class NovoContratoService {
 
     var tiposRelacionamentoNovo = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tiposRelacionamentoNovo.setFunId(funcionario);
-    // D3 (DOSSIÊ, Novo Contrato 2.5): TIPO_SITUACAO = CONTINUIDADE (não-primeiro contrato).
-    tiposRelacionamentoNovo.setTipoSituacao("CONTINUIDADE");
+    tiposRelacionamentoNovo.setTipoSituacao(TIPO_NOVO_CONTRATO);
     // Caso de uso 1.2: TIPREL_ID = id do tipo de relacionamento anterior.
     tiposRelacionamentoNovo.setTiprelId(tipoRelacionamentoAtual);
     tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
@@ -179,8 +192,11 @@ public class NovoContratoService {
         tiposRelacionamentoNovo, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamentoNovo.setRegimeId(regime);
     tiposRelacionamentoNovo.setMobId(mobilidade);
-    tiposRelacionamentoNovo.setFlgProcessa(0);
-    tiposRelacionamentoNovo.setEstActAdm(1);
+    // FLG_PROCESSA: todo o INSERT em RH_T_TIPOS_RELACIONAMENTO nasce com 1 (regra da analista). Não
+    // confundir com EST_ACT_ADM, que diz se o vínculo é o último.
+    tiposRelacionamentoNovo.setFlgProcessa(1);
+    // Pendente: só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    tiposRelacionamentoNovo.setEstActAdm(0);
     tiposRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tiposRelacionamentoNovo);
 
@@ -198,11 +214,11 @@ public class NovoContratoService {
       if (!CollectionUtils.isEmpty(dadosContratuais.getSubsidios())) {
         var remList = dadosContratuais.getSubsidios().stream()
             .map(s -> {
-              // Caso de uso 1.2: DATA_INICIO/FIM = do novo contrato; OBS = "Novo Contrato".
+              // Caso de uso 1.2: DATA_INICIO/FIM = do novo contrato; OBS = NOVO_CONTRATO.
               var r = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
               r.setDataInicio(contratoNovo.getDataInicio());
               r.setDataFim(contratoNovo.getDataFim());
-              r.setObs("Novo Contrato");
+              r.setObs(TIPO_NOVO_CONTRATO);
               return r;
             })
             .collect(Collectors.toList());
@@ -220,9 +236,8 @@ public class NovoContratoService {
       if (!CollectionUtils.isEmpty(dadosContratuais.getEncargosDescontos())) {
         var pagList = dadosContratuais.getEncargosDescontos().stream()
             .map(e -> {
-              // Caso de uso 1.2: OBS = "Novo Contrato".
               var p = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-              p.setObs("Novo Contrato");
+              p.setObs(tipoSituacao);
               return p;
             })
             .collect(Collectors.toList());
@@ -287,24 +302,33 @@ public class NovoContratoService {
 
   // D4 (DOSSIÊ, Novo Contrato): num contrato NÃO-primeiro encerram-se SEMPRE os registos ativos
   // (DATA_FIM IS NULL) de carreira/mobilidade/regime — pondo DATA_FIM = data de início do novo
-  // contrato — e cria-se um novo registo (CONTINUIDADE). Não se reutiliza o do contrato anterior:
+  // contrato — e cria-se um novo registo (NOVO_CONTRATO; a carreira INICIO se for a 1ª do colaborador).
+  // Não se reutiliza o do contrato anterior:
   // assim o novo tiprel aponta para entidades PRÓPRIAS, o que mantém a separação e permite a
   // reversão limpa na validação NÃO (reabrir os antigos, inativar os novos).
   private CarreiraEntity mudaCarreiraOuManter(
       CarreiraEntity carreiraAtual,
-      DadosContratuaisReqDTO dc) {
+      DadosContratuaisReqDTO dc,
+      String tipoCarreira) {
 
     if (carreiraAtual != null && carreiraAtual.getDataFim() == null) {
       carreiraAtual.setDataFim(dc.getDataInicio().minusDays(1));
     }
     var nova = carreiraMapper.toCarreira(dc, Estado.P);
-    nova.setTipoSituacao("CONTINUIDADE");
+    nova.setTipoSituacao(tipoCarreira);
     return nova;
   }
 
-  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo - 1) e cria uma nova (CONTINUIDADE).
+  // Sem mudança de direção/secção/local de trabalho NÃO se cria nova mobilidade: o novo tiprel reutiliza
+  // a mobilidade em vigor e só a DATA_FIM é actualizada (na aprovação — ValidarContratoService), para
+  // uma rejeição não deixar a mobilidade alterada. Com mudança: encerra a ativa (DATA_FIM = início do
+  // novo - 1) e cria uma nova (NOVO_CONTRATO).
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
+
+    if (mobilidadeAtual != null && mobilidadeMapper.mesmaColocacao(mobilidadeAtual, dc)) {
+      return mobilidadeAtual;
+    }
 
     if (mobilidadeAtual != null && mobilidadeAtual.getDataFim() == null) {
       mobilidadeAtual.setDataFim(dc.getDataInicio().minusDays(1));
@@ -312,13 +336,13 @@ public class NovoContratoService {
 
     MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
     nova.setFunId(funcionario);
-    nova.setTipoSituacao("CONTINUIDADE");
+    nova.setTipoSituacao(TIPO_NOVO_CONTRATO);
     funcionario.getMobilidades().add(nova);
     return nova;
   }
 
 
-  // D4: encerra SEMPRE o regime ativo (DATA_FIM = início do novo - 1) e cria um novo (CONTINUIDADE).
+  // D4: encerra SEMPRE o regime ativo (DATA_FIM = início do novo - 1) e cria um novo (NOVO_CONTRATO).
   private RegimeTrabalhoEntity mudaRegimeOuManter(RegimeTrabalhoEntity regimeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
     if (regimeAtual != null && regimeAtual.getDataFim() == null) {
@@ -327,14 +351,14 @@ public class NovoContratoService {
     var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
     if (nova != null) {
       nova.setFunId(funcionario);
-      nova.setTipoSituacao("CONTINUIDADE");
+      nova.setTipoSituacao(TIPO_NOVO_CONTRATO);
       funcionario.getRegimesTrabalhos().add(nova);
     }
     return nova;
   }
 
   private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais,
-                                                   String tipoSituacao) {
+                                                   String tipoSituacao, String tipoCarreira) {
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());
@@ -353,12 +377,14 @@ public class NovoContratoService {
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
       regime.setFunId(funcionario);
+      regime.setTipoSituacao(tipoSituacao);
       funcionario.getRegimesTrabalhos().add(regime);
     }
 
     var mobilidade = mobilidadeMapper.toMobilidade(dadosContratuais, Estado.P);
     if (mobilidade != null) {
       mobilidade.setFunId(funcionario);
+      mobilidade.setTipoSituacao(tipoSituacao);
       funcionario.getMobilidades().add(mobilidade);
     }
 
@@ -366,6 +392,7 @@ public class NovoContratoService {
     if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
       carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
       if (carreira != null) {
+        carreira.setTipoSituacao(tipoCarreira);
         carreira.setContrVinculoId(contrato);
         contrato.getCarreiras().add(carreira);
       }
@@ -375,21 +402,26 @@ public class NovoContratoService {
 
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
-        "NOVO_CONTRATO", "NOVO_CONTRATO");
+        tipoSituacao, tipoSituacao);
     situacaoLaboral.setContrVinculoId(contrato);
     contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
     var tiposRelacionamento = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tiposRelacionamento.setFunId(funcionario);
     tiposRelacionamento.setContrVinculoId(contrato);
+    tiposRelacionamento.setTipoSituacao(tipoSituacao);
+    tiposRelacionamento.setObs(tipoSituacao);
     tiposRelacionamento.setCarreiraId(carreira);
     // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
     colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
         tiposRelacionamento, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamento.setRegimeId(regime);
     tiposRelacionamento.setMobId(mobilidade);
-    tiposRelacionamento.setFlgProcessa(0);
-    tiposRelacionamento.setEstActAdm(1);
+    // FLG_PROCESSA: todo o INSERT em RH_T_TIPOS_RELACIONAMENTO nasce com 1 (regra da analista). Não
+    // confundir com EST_ACT_ADM, que diz se o vínculo é o último.
+    tiposRelacionamento.setFlgProcessa(1);
+    // Pendente: só passa a último vínculo (EST_ACT_ADM=1) na validação positiva.
+    tiposRelacionamento.setEstActAdm(0);
     tiposRelacionamento.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tiposRelacionamento);
 
@@ -407,7 +439,11 @@ public class NovoContratoService {
 
       if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
         var remList = dadosContratuais.getSubsidios().stream()
-            .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
+            .map(s -> {
+              var r = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+              r.setObs(tipoSituacao);
+              return r;
+            })
             .collect(Collectors.toList());
         funcionario.setDefinicoesRenumeracoes(remList);
       }
@@ -423,9 +459,8 @@ public class NovoContratoService {
       if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
         var pagList = dadosContratuais.getEncargosDescontos().stream()
             .map(e -> {
-              // Caso de uso 1.2: OBS = "Novo Contrato".
               var p = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-              p.setObs("Novo Contrato");
+              p.setObs(tipoSituacao);
               return p;
             })
             .collect(Collectors.toList());

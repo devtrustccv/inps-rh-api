@@ -260,7 +260,24 @@ public class ProcessamentoSalarialWriteService {
         ? request.getDataFim().format(formatter)
         : null;
 
-    var ccIds = request.getDireccaoId()
+    var direccaoIds = request.getDireccaoId() != null ? request.getDireccaoId() : List.<Long>of();
+
+    // Colaborador indicado SEM direção: a procedure PROCESSAR, com p_tiprel_id preenchido, procura o
+    // centro de custo da direção recebida e, com direção NULL, falha ("o serviço não está associado ao
+    // centro de custo"). Usa-se a direção da mobilidade do próprio tiprel (mesma ligação
+    // tiprel.mob_id -> mobilidade.instit_id que a procedure usa no processamento global).
+    if (request.getRelacionamentoId() != null && direccaoIds.isEmpty()) {
+      direccaoIds = tiposRelacionamentoEntityRepository
+          .findDirecaoIdDaMobilidade(request.getRelacionamentoId())
+          .map(List::of)
+          .orElse(List.of());
+      if (direccaoIds.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest(
+            "O colaborador indicado não tem direção (mobilidade) associada: indique o centro de custo.");
+      }
+    }
+
+    var ccIds = direccaoIds
         .stream()
         .map(String::valueOf)
         .toArray(String[]::new);

@@ -89,7 +89,8 @@ public class RenumeracoesReadService {
       }
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
+        // sem DATA_FIM = em aberto → continua dentro do período
+        predicates.add(cb.or(cb.isNull(root.get("dataFim")), cb.lessThanOrEqualTo(root.get("dataFim"), df)));
       }
 
       // Melhoria 2.3: filtros adicionais por Situação Laboral e por Contrato/Vínculo (IDs da vista

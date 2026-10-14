@@ -42,6 +42,9 @@ public interface ValidacaoEntityRepository extends JpaRepository<ValidacaoEntity
    */
   long countByReferenciaIdAndReferenciaNameAndTipoAccaoAndEstado(Long referenciaId, String referenciaName, String tipoAccao, Estado estado);
 
+  /** Como acima, mas pela referência UUID (ex.: renovações de um contrato = contrato.uuid). */
+  long countByReferenciaUuidAndReferenciaNameAndTipoAccaoAndEstado(java.util.UUID referenciaUuid, String referenciaName, String tipoAccao, Estado estado);
+
   @Modifying
   @Transactional
   @Query("""

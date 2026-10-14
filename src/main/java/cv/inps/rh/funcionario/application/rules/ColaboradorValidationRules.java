@@ -272,26 +272,37 @@ public class ColaboradorValidationRules {
   }
 
   /**
-   * Regra de negócio: um dependente/familiar só pode ter UM colaborador responsável pelo seu agregado.
-   * Uma pessoa pode pertencer a agregados de colaboradores diferentes, mas apenas 1 é responsável.
-   * Verifica, para cada familiar em que o colaborador atual é responsável, se já existe outro
-   * colaborador registado como responsável pelo mesmo documento.
+   * Regra de negócio: um dependente/familiar só pode estar A CARGO de UM colaborador.
+   * Uma pessoa pode pertencer a agregados de colaboradores diferentes, mas só 1 a tem a cargo
+   * (Dependente = SIM ou Responsável = SIM). Verifica, para cada familiar a cargo do colaborador
+   * atual, se outro colaborador (registo A/P/C) já o tem a cargo pelo mesmo documento.
    */
   public void verificarResponsavelUnicoAgregado(List<AgregadoDependenteReqDTO> novos, UUID funcionarioUuid) {
     if (CollectionUtils.isEmpty(novos)) return;
     for (var dto : novos) {
-      if (!isResponsavel(dto.getResponsavel()) || !StringUtils.hasText(dto.getNumDocumento())) continue;
+      // "A cargo" do colaborador = marcado como Dependente (domínio DEPENDENCIA: SIM/NAO) ou como
+      // Responsável. O ecrã de agregados usa Dependente; Responsável é opcional.
+      if (!isACargo(dto.getDependente(), dto.getResponsavel()) || !StringUtils.hasText(dto.getNumDocumento())) continue;
       var doc = dto.getNumDocumento().trim();
-      boolean outroResponsavel = familiarEntityRepository
-          .findByNumDocumentoAndEstadoIn(doc, List.of(Estado.A, Estado.P)).stream()
+      var outro = familiarEntityRepository
+          .findByNumDocumentoAndEstadoIn(doc, List.of(Estado.A, Estado.P, Estado.C)).stream()
           .filter(f -> f.getFunId() == null || funcionarioUuid == null
               || !funcionarioUuid.equals(f.getFunId().getUuid()))
-          .anyMatch(f -> isResponsavel(f.getResponsavel()));
-      if (outroResponsavel) {
+          .filter(f -> isACargo(f.getDependencia(), f.getResponsavel()))
+          .findFirst();
+      if (outro.isPresent()) {
+        var quem = StringUtils.hasText(dto.getNome()) ? dto.getNome().trim() + " (documento " + doc + ")" : "documento " + doc;
+        var colaborador = outro.get().getFunId() != null && StringUtils.hasText(outro.get().getFunId().getNome())
+            ? " (" + outro.get().getFunId().getNome().trim() + ")" : "";
         throw IgrpResponseStatusException.conflict(
-            "O referido familiar já possui outro colaborador associado como seu responsável.");
+            "O familiar " + quem + " já é dependente de outro colaborador" + colaborador
+                + ". Um dependente só pode estar a cargo de um colaborador.");
       }
     }
+  }
+
+  private boolean isACargo(String dependente, String responsavel) {
+    return isResponsavel(dependente) || isResponsavel(responsavel);
   }
 
   private boolean isResponsavel(String valor) {

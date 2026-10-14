@@ -103,9 +103,11 @@ public class ResponsavelService {
     var savedSections = secaoEntityRepository
         .findAllByEstadoAndInstId_Id(Estado.A, direcao.getId());
 
+    // Indexadas pelo ID numérico: é o seccaoId que o GET (direcao/responsavel/{id}) devolve e que o
+    // frontend reenvia no POST (antes indexava por UUID e o POST rebentava com "5" não é UUID).
     var savedSectionsById = savedSections.stream()
         .collect(Collectors.toMap(
-            SecaoEntity::getUuid,
+            SecaoEntity::getId,
             Function.identity()
         ));
 

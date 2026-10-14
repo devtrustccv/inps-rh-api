@@ -329,6 +329,30 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "flgCarreira",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "type": "integer"
+    },
+    {
+      "name": "flgSalario",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "type": "string"
     }
   ],
   "id": "l6xt20qblf"

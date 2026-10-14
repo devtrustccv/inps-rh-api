@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ProcessarRenovacaoLoteCommand;
 import cv.inps.rh.funcionario.application.commands.RenovarContratoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
 import cv.inps.rh.funcionario.application.dto.RenovarLoteItemReqDTO;
@@ -43,6 +44,7 @@ public class RenovacaoContratoService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final AlertaEntityRepository alertaEntityRepository;
+  private final ValidacaoRenovacaoContratoService validacaoRenovacaoContratoService;
 
   /** Contexto resolvido e validado de uma renovação, pronto a aplicar. */
   private record ContextoRenovacao(FuncionarioEntity funcionario, ContratoEntity contratoAtual,
@@ -53,6 +55,23 @@ public class RenovacaoContratoService {
 
     var dto = command.getRenovacaocontrato();
     var dadosRenovacao = dto != null ? dto.getDadosRenovacao() : null;
+
+    // Renovação devolvida para correção (C): "renovar" de novo é o maker a CORRIGIR a proposta — edita
+    // o mesmo histórico/tiprel/validação (C -> P, datas corrigidas) em vez de criar outra renovação.
+    var funcionarioUuid = IdentificadorUnico.from(command.getIdFuncionario()).valor();
+    if (funcionarioRules.temValidacaoPorCorrigir(funcionarioUuid, TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO)) {
+      validarDatas(dadosRenovacao);
+      var correcao = new RenovacaoContratoDTO();
+      correcao.setDadosRenovacao(dadosRenovacao);
+      correcao.setValidacao(null);
+      validacaoRenovacaoContratoService.validar(
+          new ValidarRenovacaoContratoCommand(correcao, command.getIdFuncionario(), command.getContratoId()));
+      var tiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioUuid);
+      var resposta = new RenovacaoContratoDTO();
+      resposta.setDadosRenovacao(tiprel != null && tiprel.getContrVinculoId() != null
+          ? contratoMapper.toRenovacaoContratoReqDTO(tiprel.getContrVinculoId()) : dadosRenovacao);
+      return resposta;
+    }
 
     var ctx = validarRenovacao(command.getIdFuncionario(), dadosRenovacao);
     var detalhe = aplicarRenovacao(ctx, dadosRenovacao);
@@ -118,6 +137,17 @@ public class RenovacaoContratoService {
    * parametrização do tipo de contrato (renovável + nº máximo de renovações) e ausência de validação
    * pendente. Lança IgrpResponseStatusException em qualquer falha.
    */
+  /**
+   * Guard (datas da renovação): a data de início é obrigatória e pode ser no passado (renovações
+   * registadas em atraso); a data de fim, se indicada, não pode ser anterior à de início.
+   */
+  private void validarDatas(RenovarContratoReqDTO dadosRenovacao) {
+    if (dadosRenovacao == null || dadosRenovacao.getDataInicio() == null)
+      throw IgrpResponseStatusException.badRequest("A data de início da renovação é obrigatória.");
+    if (dadosRenovacao.getDataFim() != null && dadosRenovacao.getDataFim().isBefore(dadosRenovacao.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("A data de fim não pode ser anterior à data de início.");
+  }
+
   private ContextoRenovacao validarRenovacao(String idFuncionario, RenovarContratoReqDTO dadosRenovacao) {
 
     var idFunc = IdentificadorUnico.from(idFuncionario);
@@ -133,12 +163,7 @@ public class RenovacaoContratoService {
       throw IgrpResponseStatusException.notFound(
           "O funcionário '%s' não possui contrato ativo".formatted(funcionario.getNome()));
 
-    // Guard (datas da renovação): a data de início é obrigatória e pode ser no passado (renovações
-    // registadas em atraso); a data de fim, se indicada, não pode ser anterior à de início.
-    if (dadosRenovacao == null || dadosRenovacao.getDataInicio() == null)
-      throw IgrpResponseStatusException.badRequest("A data de início da renovação é obrigatória.");
-    if (dadosRenovacao.getDataFim() != null && dadosRenovacao.getDataFim().isBefore(dadosRenovacao.getDataInicio()))
-      throw IgrpResponseStatusException.badRequest("A data de fim não pode ser anterior à data de início.");
+    validarDatas(dadosRenovacao);
 
     // Guard (parametrização do tipo de contrato): tem de ser renovável e respeitar o nº máximo de
     // renovações. Nº de renovações já validadas = validações UPDATE/RENOVACAO_CONTRATO em estado A
@@ -153,8 +178,8 @@ public class RenovacaoContratoService {
       Integer maxRenovacao = tipoContrato.getMaxRenovacao();
       if (maxRenovacao != null && maxRenovacao > 0) {
         long renovacoesValidadas = validacaoEntityRepository
-            .countByReferenciaIdAndReferenciaNameAndTipoAccaoAndEstado(
-                contratoAtual.getId(), Referencia.RENOVACAO_CONTRATO.name(), TipoAcao.UPDATE.name(), Estado.A);
+            .countByReferenciaUuidAndReferenciaNameAndTipoAccaoAndEstado(
+                contratoAtual.getUuid(), Referencia.RENOVACAO_CONTRATO.name(), TipoAcao.UPDATE.name(), Estado.A);
         if (renovacoesValidadas >= maxRenovacao)
           throw IgrpResponseStatusException.badRequest(
               "Foi atingido o número máximo de renovações (%d) para este contrato.".formatted(maxRenovacao));
@@ -162,6 +187,10 @@ public class RenovacaoContratoService {
     }
 
     funcionarioRules.garantirEditavel(contratoAtual.getEstado());
+
+    if (funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO))
+      throw IgrpResponseStatusException.conflict(
+          "O funcionário '%s' tem uma renovação de contrato devolvida para correção: corrija-a na Gestão Contratual.".formatted(funcionario.getNome()));
 
     if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO))
       throw IgrpResponseStatusException.conflict(
@@ -217,7 +246,9 @@ public class RenovacaoContratoService {
         TipoAcao.UPDATE.name(), Referencia.RENOVACAO_CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    valid.setReferenciaId(contratoAtual.getId());
+    // REFERENCIA_ID = histórico da proposta (o registo que deu origem à validação). REFERENCIA_UUID
+    // mantém-se o do contrato: é a âncora de devolver/reabrir e da contagem de renovações.
+    valid.setReferenciaId(novoHistorico.getId());
     valid.setReferenciaUuid(contratoAtual.getUuid());
     funcionario.getValidacoes().add(valid);
     return new DetalheRenovacao(valid, antesRenovacao, novoHistorico);

@@ -41,6 +41,13 @@ public class ReconciliacaoMovimentoVinculoService {
    */
   public void reconciliar(FuncionarioEntity funcionario, ContratoEntity contrato,
                           BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim) {
+    reconciliar(funcionario, contrato, salario, moeda, dataInicio, dataFim, null);
+  }
+
+  /** Igual, mas grava {@code obs} (ex.: NOVO_CONTRATO) nos movimentos fixos criados; null = sem OBS. */
+  public void reconciliar(FuncionarioEntity funcionario, ContratoEntity contrato,
+                          BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim,
+                          String obs) {
     if (contrato == null || contrato.getVinculoId() == null) {
       return;
     }
@@ -48,12 +55,13 @@ public class ReconciliacaoMovimentoVinculoService {
     Long vinculoAntigoId = (contrato.getContratoId() != null && contrato.getContratoId().getVinculoId() != null)
         ? contrato.getContratoId().getVinculoId().getId() : null;
 
-    reconciliarRemuneracao(funcionario, vinculoNovoId, vinculoAntigoId, salario, moeda, dataInicio, dataFim);
-    reconciliarPagamentos(funcionario, vinculoNovoId, vinculoAntigoId, dataInicio, dataFim);
+    reconciliarRemuneracao(funcionario, vinculoNovoId, vinculoAntigoId, salario, moeda, dataInicio, dataFim, obs);
+    reconciliarPagamentos(funcionario, vinculoNovoId, vinculoAntigoId, dataInicio, dataFim, obs);
   }
 
   private void reconciliarRemuneracao(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
-                                      BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim) {
+                                      BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim,
+                                      String obs) {
     var remMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "REM", Estado.A);
     if (CollectionUtils.isEmpty(remMovs) || remMovs.getFirst().getTmId() == null) {
       return;
@@ -85,12 +93,13 @@ public class ReconciliacaoMovimentoVinculoService {
       existentes.forEach(r -> r.setEstado(Estado.I));
       var nova = definicaoRemuneracaoMapper.createRenumeracao(salario, remTm, dataInicio, dataFim, funcionario, moeda);
       nova.setEstado(Estado.A); // reconciliar so corre em validacao positiva → fixo fica logo activo
+      if (obs != null) nova.setObs(obs);
       funcionario.getDefinicoesRenumeracoes().add(nova);
     }
   }
 
   private void reconciliarPagamentos(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
-                                     LocalDate dataInicio, LocalDate dataFim) {
+                                     LocalDate dataInicio, LocalDate dataFim, String obs) {
     var novosPagMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "PAG", Estado.A);
     Set<Long> novosPagTms = novosPagMovs.stream()
         .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
@@ -118,6 +127,7 @@ public class ReconciliacaoMovimentoVinculoService {
             m.getPercentagem() != null ? BigDecimal.valueOf(m.getPercentagem()) : null,
             m.getTmId(), dataInicio, dataFim, funcionario);
         novo.setEstado(Estado.A); // reconciliar so corre em validacao positiva → fixo fica logo activo
+        if (obs != null) novo.setObs(obs);
         funcionario.getDefinicoesPagamentos().add(novo);
       }
     });

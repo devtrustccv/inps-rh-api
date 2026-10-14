@@ -124,6 +124,9 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
+    // Só se regista carreira se o vínculo ATUAL tiver carreira (FLG_CARREIRA=1).
+    funcionarioRules.garantirVinculoAtualComCarreira(funcionario.getUuid());
+
     // Doc (Regra Geral): "O campo processar salário deve ser obrigatório"
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
@@ -208,7 +211,9 @@ public class CarreiraWriteService {
     novoTiprel.setRegimeId(relacionamentoAtual.getRegimeId());
     novoTiprel.setSituacLaboralId(relacionamentoAtual.getSituacLaboralId());
     novoTiprel.setEstActAdm(0);
-    novoTiprel.setFlgProcessa(dto.getFlgProcessa());
+    // FLG_PROCESSA do tiprel: todo o INSERT nasce com 1 (regra da analista). O "Processar salário?" do
+    // formulário indica se é o VÍNCULO ATUAL — vai para o EST_ACT_ADM, aplicado na validação.
+    novoTiprel.setFlgProcessa(1);
     novoTiprel.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoTiprel);
 
@@ -595,9 +600,10 @@ public class CarreiraWriteService {
         tiprelPendente.setSituacLaboralId(tiprelAtual.getSituacLaboralId());
         tiprelPendente.setTiprelId(tiprelAtual);
       }
+      // "Processar salário?" = vínculo atual → EST_ACT_ADM. O FLG_PROCESSA do tiprel fica o do registo
+      // (1): quem decide se é processado é o EST_ACT_ADM (a procedure filtra est_act_adm=1).
       tiprelPendente.setEstActAdm(novoEst);
       tiprelPendente.setEstado(Estado.A);
-      tiprelPendente.setFlgProcessa(novoFlgProcessa);
       tiposRelacionamentoEntityRepository.save(tiprelPendente);
     }
 
@@ -720,6 +726,10 @@ public class CarreiraWriteService {
     // isso salta o roteamento de progressão/processada e cai no caminho editar-in-place; no fim
     // reactiva a validação INSERT (C -> P) em vez de criar uma UPDATE nova. Ciclo maker-checker.
     boolean correcaoRegisto = Estado.C.equals(carreira.getEstado());
+
+    // Progressão/Promoção e Editar: o vínculo ATUAL tem de ter carreira (uma carreira de um contrato
+    // anterior não se altera quando o colaborador passou a um vínculo sem carreira).
+    funcionarioRules.garantirVinculoAtualComCarreira(funcionario.getUuid());
 
     // "Sem cargo" (CATEGORIA): o frontend envia cargoPosicaoId=0. Tratar 0 como null para a
     // classificação de tipo (mudouChave) e a gravação do cargo ficarem corretas.
