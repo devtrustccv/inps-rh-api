@@ -67,6 +67,9 @@ public class AssiduidadeListDTO  {
   private String estadoDesc ;
 
 
+  private String motivoAusencia ;
+
+
   private String mesReferencia ;
 
 

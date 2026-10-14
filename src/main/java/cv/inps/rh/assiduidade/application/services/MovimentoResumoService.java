@@ -59,6 +59,7 @@ public class MovimentoResumoService {
 
       dto.setEstado(entity.getEstado());
       dto.setEstadoDesc(entity.getEstado());
+      dto.setMotivoAusencia(entity.getMotivoAusencia());
       dto.setMesReferencia(String.format("%02d/%d", entity.getMes(), entity.getAno()));
       dto.setMes(entity.getMes());
       dto.setAno(entity.getAno());
@@ -87,12 +88,12 @@ public class MovimentoResumoService {
             root.get("mes").as(Integer.class));
 
         if (StringUtils.hasText(query.getDataInicio())) {
-          var d = LocalDate.parse(query.getDataInicio());
+          var d = lerData(query.getDataInicio());
           predicates = cb.and(predicates,
               cb.greaterThanOrEqualTo(anoMes, d.getYear() * 100 + d.getMonthValue()));
         }
         if (StringUtils.hasText(query.getDataFim())) {
-          var d = LocalDate.parse(query.getDataFim());
+          var d = lerData(query.getDataFim());
           predicates = cb.and(predicates,
               cb.lessThanOrEqualTo(anoMes, d.getYear() * 100 + d.getMonthValue()));
         }
@@ -132,7 +133,12 @@ public class MovimentoResumoService {
       }
 
       if (query.getIlha() != null) {
-        predicates = cb.and(predicates, cb.equal(root.get("idIlha"), query.getIlha()));
+        // ID_ILHA da vista é o id do LOCAL DE TRABALHO (RH_T_PARAM_LOCAL_TRAB), não da ilha: filtra-se
+        // pelos locais de trabalho cuja ilha (ILHA_ID) é a escolhida no filtro (id da geografia).
+        var locaisDaIlha = cq.subquery(Long.class);
+        var lt = locaisDaIlha.from(cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity.class);
+        locaisDaIlha.select(lt.get("id")).where(cb.equal(lt.get("ilhaId").get("id"), query.getIlha()));
+        predicates = cb.and(predicates, root.get("idIlha").in(locaisDaIlha));
       }
 
       if (query.getEstado() != null && !query.getEstado().isBlank()) {
@@ -141,6 +147,15 @@ public class MovimentoResumoService {
 
       return predicates;
     };
+  }
+
+  /** Aceita dd/MM/yyyy (o ecrã envia assim) e yyyy-MM-dd; antes só ISO e o filtro rebentava com 500. */
+  private static LocalDate lerData(String valor) {
+    var d = cv.inps.rh.shared.util.DateFormatter.stringToLocalDate(valor.trim());
+    if (d == null) {
+      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Data inválida: " + valor);
+    }
+    return d;
   }
 
   private String formatarHoras(BigDecimal horas) {

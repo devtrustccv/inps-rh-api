@@ -33,6 +33,9 @@ public class DispensaListDTO  {
 
   private String direcao ;
 
+  // Nome do colaborador (a lista mostrava a coluna vazia).
+  private String nomeColaborador ;
+
 
   private Long direcaoId ;
 

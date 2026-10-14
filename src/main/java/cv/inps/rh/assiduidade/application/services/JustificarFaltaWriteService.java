@@ -110,13 +110,9 @@ public class JustificarFaltaWriteService {
 
     var selecionados = dto.getItensFalta();
 
-    // O tipo de justificação só existe no formulário quando "Com Justificativo" = SIM
-    // (spec: "os campos abaixo só aparecem caso Com Justificativo = SIM"). Marcar a
-    // falta como não justificada é um acto legítimo e não precisa de tipo. O radio é do
-    // cabeçalho — aplica-se a todas as faltas seleccionadas, não é escolha por dia.
-    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
-
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
+    // Tipo Falta SEMPRE obrigatório (AS-005), com ou sem justificativo: é ele que define o desconto
+    // no salário e a necessidade de validação. O ecrã mostra o campo em ambos os casos.
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), true);
 
     // Regra (spec :494): só vai a validação se forem mais de 3 dias NESTE registo E o tipo de
     // justificação descontar no salário. Caso contrário fica logo activo.
@@ -227,6 +223,7 @@ public class JustificarFaltaWriteService {
     // utilizador: o anexo do grupo pertence ao pedido.
     if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty()) {
       for (var anexo : dto.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(anexo)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             anexo,
             estadoInicial,
@@ -306,8 +303,7 @@ public class JustificarFaltaWriteService {
     }
     // Parametrização da justificação — mesma tolerância ao "0" do formulário. O radio
     // "Com Justificativo?" é do cabeçalho, como no registo (não é escolha por dia).
-    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), true);
 
     // O despacho decide o PEDIDO inteiro, por isso itera sobre as faltas dele e não sobre os
     // itens recebidos. O `itensFalta` continua a ser aceite no corpo, por compatibilidade, mas
@@ -442,9 +438,10 @@ public class JustificarFaltaWriteService {
     boolean preenchido = tipoJustificacao != null && tipoJustificacao > 0;
 
     if (!preenchido) {
+      // Tipo Falta é SEMPRE obrigatório (AS-005): define o desconto no salário e a necessidade de
+      // validação (RH_T_PARAM_SITUACAO) — com ou sem justificativo.
       if (obrigatorio)
-        throw IgrpResponseStatusException.badRequest(
-            "Tipo de justificação é obrigatório quando a falta é marcada com justificativo");
+        throw IgrpResponseStatusException.badRequest("Indique o Tipo Falta.");
       return null;
     }
 
@@ -593,8 +590,7 @@ public class JustificarFaltaWriteService {
     saldoLockService.lockColaborador(funcionario.getUuid());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), true);
     var responsavel = resolverResponsavel(dto.getResponsavelId());
 
     // Estado ANTIGO, lido antes de o ciclo o sobrescrever — é com ele que se decide se a edição

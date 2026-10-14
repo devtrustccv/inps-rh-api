@@ -117,6 +117,7 @@ public class DispensaWriteService {
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       java.util.List<DocumentoEntity> documentos = new java.util.ArrayList<>();
       for (var d : req.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             Estado.P,
@@ -204,6 +205,7 @@ public class DispensaWriteService {
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       List<DocumentoEntity> documentos = new ArrayList<>();
       for (var d : req.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             estado,

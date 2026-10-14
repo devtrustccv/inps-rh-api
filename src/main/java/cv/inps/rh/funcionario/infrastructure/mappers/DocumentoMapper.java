@@ -21,6 +21,16 @@ public class DocumentoMapper {
 
   private final EntityManager entityManager;
 
+  /**
+   * Anexo com conteúdo: tipo de documento (> 0) e ficheiro. Os formulários enviam sempre uma linha de
+   * anexo vazia (tipoDocumentoId=0, documento="") mesmo sem anexo — gravá-la rebentava com
+   * "tpDocumentoId is mandatory" (500). Usar antes de gravar qualquer anexo.
+   */
+  public static boolean anexoPreenchido(AnexoReqDTO dto) {
+    return dto != null && dto.getTipoDocumentoId() != null && dto.getTipoDocumentoId() > 0
+        && dto.getDocumento() != null && !dto.getDocumento().isBlank();
+  }
+
   public DocumentoEntity toEntity(cv.inps.rh.shared.application.dto.AnexoReqDTO dto,
                                   Estado estado,
                                   String referenciaName,

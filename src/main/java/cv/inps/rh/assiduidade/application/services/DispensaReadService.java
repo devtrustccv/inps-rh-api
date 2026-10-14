@@ -127,6 +127,8 @@ public class DispensaReadService {
     var mob = e.getTiprelId() != null ? e.getTiprelId().getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
     dto.setDirecao(inst != null ? inst.getNome() : null);
+    var fun = e.getTiprelId() != null ? e.getTiprelId().getFunId() : null;
+    dto.setNomeColaborador(fun != null ? fun.getNome() : null);
     dto.setDirecaoId(inst != null ? inst.getId() : null);
     var contr = e.getTiprelId() != null ? e.getTiprelId().getContrVinculoId() : null;
     var vinculo = contr != null ? contr.getVinculoId() : null;
@@ -142,10 +144,11 @@ public class DispensaReadService {
     dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
     var hi = e.getHoraInicio();
     var hf = e.getHoraFim();
+    // As horas estão gravadas como INTERVAL ("0 4:0:0.0"): mostram-se em HH:mm.
+    var hiFmt = StringUtils.hasText(hi) ? TimeUtils.intervalFormatToHHmm(hi) : "";
+    var hfFmt = StringUtils.hasText(hf) ? TimeUtils.intervalFormatToHHmm(hf) : "";
     dto.setIntervaloHoras(
-        (StringUtils.hasText(hi) ? hi : "") +
-            (StringUtils.hasText(hi) || StringUtils.hasText(hf) ? " / " : "") +
-            (StringUtils.hasText(hf) ? hf : ""));
+        hiFmt + (StringUtils.hasText(hiFmt) || StringUtils.hasText(hfFmt) ? " / " : "") + hfFmt);
     dto.setTotalHorasDireito(null);
     dto.setTotalHorasSolicitadas(TimeUtils.diffMinutes(hi, hf));
     dto.setMotivoDispensa(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : e.getTipoDispensa());
