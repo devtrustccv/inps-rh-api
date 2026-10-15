@@ -71,6 +71,9 @@ public class HoraExtraServiceWrite {
     pedido = pedidoRepository.saveAndFlush(pedido);
 
     Long firstHoraExtraId = null;
+    // Colaborador/vínculo associados à validação (o 1.º registo do pedido), como nos outros pedidos.
+    cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funValidacao = null;
+    cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tiprelValidacao = null;
     String pedidoUuid = pedido.getUuid().toString();
     int totalRegistos = 0;
 
@@ -114,10 +117,13 @@ public class HoraExtraServiceWrite {
       he.setUuid(UuidCreator.getTimeOrderedEpoch());
       he = horaExtraRepository.save(he);
 
-      if (firstHoraExtraId == null)
+      if (firstHoraExtraId == null) {
         firstHoraExtraId = he.getId();
+        funValidacao = funcionario;
+        tiprelValidacao = tipoRelAtual;
+      }
 
-      if (dto.getDocumento() != null) {
+      if (DocumentoMapper.anexoPreenchido(dto.getDocumento())) {
         var doc = documentoMapper.toEntity(
             dto.getDocumento(),
             Estado.P,
@@ -136,6 +142,8 @@ public class HoraExtraServiceWrite {
         TipoAcao.INSERT.name(),
         Referencia.HORA_EXTRA.name(),
         Estado.P);
+    validacao.setFunId(funValidacao);
+    validacao.setTiprelId(tiprelValidacao);
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
     validacaoEntityRepository.save(validacao);
@@ -320,7 +328,7 @@ public class HoraExtraServiceWrite {
           he.setValorDiario(novoValor);
         }
 
-        if (ajuste.getDocumento() != null) {
+        if (DocumentoMapper.anexoPreenchido(ajuste.getDocumento())) {
             var docsHe = documentoEntityRepository
                 .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
 

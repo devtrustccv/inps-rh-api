@@ -122,4 +122,9 @@ public class VResumoAssiduidadeEntity  {
     private String estado;
 
 
+    /** Tipos de falta do mês com n.º de dias, ex.: "Doença (2d), Luto (1d)". */
+    @Column(name="motivo_ausencia")
+    private String motivoAusencia;
+
+
 }

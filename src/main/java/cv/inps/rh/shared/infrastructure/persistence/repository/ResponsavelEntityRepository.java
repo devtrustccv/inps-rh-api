@@ -46,7 +46,18 @@ public interface ResponsavelEntityRepository extends
   // linhas antigas em 'I' na mesma direção, e um Optional rebentaria com NonUniqueResultException.
   List<ResponsavelEntity> findAllByInstitId_idAndSecaoIdIsNullAndEstado(Long institutoId, String estado);
 
-  Optional<ResponsavelEntity> findByFunId_Uuid(UUID funcionarioUuid);
+  List<ResponsavelEntity> findAllByFunId_UuidOrderByIdAsc(UUID funcionarioUuid);
+
+  // O mesmo funcionário pode ser responsável de várias unidades (direção + secção) e o
+  // soft-delete deixa linhas 'I' — um Optional derivado rebentava com NonUniqueResultException (500).
+  // Devolve a primeira linha ACTIVA; sem activas, a primeira que houver (comportamento anterior).
+  default Optional<ResponsavelEntity> findByFunId_Uuid(UUID funcionarioUuid) {
+    var todos = findAllByFunId_UuidOrderByIdAsc(funcionarioUuid);
+    return todos.stream()
+        .filter(r -> "A".equals(r.getEstado()))
+        .findFirst()
+        .or(() -> todos.stream().findFirst());
+  }
 
   @Query("""
           SELECT NEW cv.inps.rh.configuracao.application.services.model.ResponsavelSectionData(

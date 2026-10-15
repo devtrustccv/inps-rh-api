@@ -180,6 +180,7 @@ public class FaltaServiceWrite {
         && pedido != null) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             estadoInicial,

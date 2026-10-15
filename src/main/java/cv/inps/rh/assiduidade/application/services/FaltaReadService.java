@@ -88,7 +88,12 @@ public class FaltaReadService {
         }
       }
       if (query.getIlha() != null) {
-        predicates.add(cb.equal(root.get("idIlha"), query.getIlha()));
+        // ID_ILHA da vista é o id do LOCAL DE TRABALHO (RH_T_PARAM_LOCAL_TRAB), não da ilha: filtra-se
+        // pelos locais de trabalho cuja ilha (ILHA_ID) é a escolhida no filtro (id da geografia).
+        var locaisDaIlha = cq.subquery(Long.class);
+        var lt = locaisDaIlha.from(cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity.class);
+        locaisDaIlha.select(lt.get("id")).where(cb.equal(lt.get("ilhaId").get("id"), query.getIlha()));
+        predicates.add(root.get("idIlha").in(locaisDaIlha));
       }
       if (query.getDirecao() != null) {
         predicates.add(cb.equal(root.get("idDirecao"), query.getDirecao()));
@@ -125,7 +130,9 @@ public class FaltaReadService {
     dto.setDescontoRenumeracao(Objects.equals("S", e.getFlgDescSal()));
     dto.setEstadoProcessamento(e.getEstProc());
     dto.setEstado(e.getEstMensal());
-    dto.setEstadoDesc(e.getEstMensal());
+    // AS-007: descrição legível ("Justificada"/"Injustificada") em vez do código da view.
+    var est = e.getEstMensal();
+    dto.setEstadoDesc(est == null || est.isEmpty() ? null : est.charAt(0) + est.substring(1).toLowerCase());
     return dto;
   }
 

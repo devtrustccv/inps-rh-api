@@ -264,6 +264,8 @@ public class JustificarFaltaReadService {
       var primeira = faltas.getFirst();
       dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
       dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
+      var respFun = primeira.getResponsavelId() != null ? primeira.getResponsavelId().getFunId() : null;
+      dto.setResponsavelNome(respFun != null ? respFun.getNome() : null);
       dto.setObsResponsavel(primeira.getObsResponsavel());
       dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
       dto.setMotivo(primeira.getDescricaoMotivo());
