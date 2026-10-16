@@ -6,6 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 
 import java.sql.SQLException;
+import java.util.Set;
+
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.transaction.TransactionSystemException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,5 +52,15 @@ class GlobalExceptionHandlerTest {
     assertThat(traduzir("ORA-02292: integrity constraint (INPSRH.FK_X) violated - child record found").getDetail())
         .isEqualTo("Não é possível concluir a operação: o registo está a ser utilizado noutros dados.");
     assertThat(traduzir("ORA-99999: algo inesperado").getDetail()).doesNotContain("ORA-");
+  }
+
+  @Test
+  void violacaoDeValidacaoNoCommitDa400EmVezDe500() {
+    // MS-010: a validação da entidade falha no commit e chega embrulhada (TransactionSystemException).
+    var cve = new ConstraintViolationException("tpDocumentoId is mandatory", Set.of());
+    var ex = new TransactionSystemException("Could not commit JPA transaction",
+        new RuntimeException("rollback", cve));
+    assertThat(handler.handleTransactionSystemException(ex).getStatus())
+        .isEqualTo(HttpStatus.BAD_REQUEST.value());
   }
 }
