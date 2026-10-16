@@ -60,7 +60,7 @@ class GlobalExceptionHandlerTest {
     var cve = new ConstraintViolationException("tpDocumentoId is mandatory", Set.of());
     var ex = new TransactionSystemException("Could not commit JPA transaction",
         new RuntimeException("rollback", cve));
-    assertThat(handler.handleTransactionSystemException(ex).getStatus())
+    assertThat(handler.handleErroBaseDadosEmbrulhado(ex).getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
   }
 }

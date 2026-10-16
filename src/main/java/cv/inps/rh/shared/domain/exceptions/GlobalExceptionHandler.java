@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,20 +93,6 @@ public class GlobalExceptionHandler {
     return problemDetail;
   }
 
-  /**
-   * Validação da entidade que só falha no commit (flush no fim da transação): o Spring embrulha a
-   * ConstraintViolationException numa TransactionSystemException, que saía como 500 em vez de 400.
-   */
-  @ExceptionHandler(TransactionSystemException.class)
-  public ProblemDetail handleTransactionSystemException(TransactionSystemException ex) {
-    for (Throwable t = ex; t != null && t.getCause() != t; t = t.getCause()) {
-      if (t instanceof ConstraintViolationException cve) {
-        return handleConstraintViolationException(cve);
-      }
-    }
-    throw ex;
-  }
-
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
 
@@ -160,6 +145,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({org.springframework.transaction.TransactionSystemException.class,
       org.springframework.orm.jpa.JpaSystemException.class})
   public ProblemDetail handleErroBaseDadosEmbrulhado(RuntimeException ex) {
+    // Validação da entidade (@NotNull…) que só falha no flush do commit: 400 com a mensagem do campo.
+    for (Throwable t = ex; t != null && t.getCause() != t; t = t.getCause()) {
+      if (t instanceof ConstraintViolationException cve) {
+        return handleConstraintViolationException(cve);
+      }
+    }
     Throwable rootCause = getRootCause(ex);
     if (rootCause instanceof SQLException sqlEx && codigoOra(sqlEx.getMessage()) != null
         && ORA_VIOLACAO_DADOS.contains(codigoOra(sqlEx.getMessage()))) {

@@ -88,11 +88,15 @@ public class NotificacaoReadService {
 
   @Transactional(readOnly = true)
   public NotificacaoInfoDTO findById(String id) {
-    var uuid = UUID.fromString(id);
-    NotificacaoEntity entity = notificacaoRepository.findByUuid((uuid))
-        .orElseThrow(() -> IgrpResponseStatusException.notFound(
-            "Notificacão not found with id"+uuid
-        ));
+    // A lista devolve o id numérico (o mesmo que o "enviar" usa); aceita também o uuid.
+    NotificacaoEntity entity;
+    if (id != null && id.chars().allMatch(Character::isDigit) && !id.isEmpty()) {
+      entity = notificacaoRepository.findByIdOrThrow(Long.parseLong(id));
+    } else {
+      var uuid = IdentificadorUnico.from(id).valor();
+      entity = notificacaoRepository.findByUuid(uuid)
+          .orElseThrow(() -> IgrpResponseStatusException.notFound("Notificação não encontrada: " + id));
+    }
     return notificacaoMapper.toDto(entity);
   }
 
