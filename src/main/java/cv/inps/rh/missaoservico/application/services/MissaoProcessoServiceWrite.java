@@ -670,7 +670,8 @@ public class MissaoProcessoServiceWrite {
       log.setLugarHospedagem(item.getLugarHospedagem().trim());
       log.setFlgAlimentacao(alimentacao);
       log.setValorDiario(item.getValorDiario());
-      log.setValorTotal(item.getValorTotal() != null
+      // MS-017: total vazio ou 0 (o ecrã enviava 0) = valor diário × nº de dias.
+      log.setValorTotal(item.getValorTotal() != null && item.getValorTotal().signum() > 0
           ? item.getValorTotal()
           : item.getValorDiario().multiply(BigDecimal.valueOf(nrDias)));
       log.setMoeda(StringUtils.hasText(item.getMoeda()) ? item.getMoeda().trim().toUpperCase() : "CVE");

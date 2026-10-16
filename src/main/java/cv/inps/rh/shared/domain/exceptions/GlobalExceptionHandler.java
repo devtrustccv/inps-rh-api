@@ -145,6 +145,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({org.springframework.transaction.TransactionSystemException.class,
       org.springframework.orm.jpa.JpaSystemException.class})
   public ProblemDetail handleErroBaseDadosEmbrulhado(RuntimeException ex) {
+    // Validação da entidade (@NotNull…) que só falha no flush do commit: 400 com a mensagem do campo.
+    for (Throwable t = ex; t != null && t.getCause() != t; t = t.getCause()) {
+      if (t instanceof ConstraintViolationException cve) {
+        return handleConstraintViolationException(cve);
+      }
+    }
     Throwable rootCause = getRootCause(ex);
     if (rootCause instanceof SQLException sqlEx && codigoOra(sqlEx.getMessage()) != null
         && ORA_VIOLACAO_DADOS.contains(codigoOra(sqlEx.getMessage()))) {

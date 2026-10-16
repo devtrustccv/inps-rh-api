@@ -30,6 +30,8 @@ public class MissaoServicoResumoDTO  {
   private String destino;                 // descricaoDestino
   private String nacionalInternacional;   // "Nacional" | "Internacional" via flgDestino
   private LocalDate dataMissao;           // dataInicio
+  private LocalDate dataInicio;           // MS-002: período da missão
+  private LocalDate dataFim;
   // Estado do registo: "A" (activa) | "I" (cancelada) — RH_T_MISSAO_SERVICO.ESTADO
   private String estado;
   private String estadoDesc;              // "Activo" | "Cancelado"

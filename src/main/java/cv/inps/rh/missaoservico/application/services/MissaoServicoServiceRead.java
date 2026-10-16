@@ -149,6 +149,8 @@ public class MissaoServicoServiceRead {
     response.setAutorizadoPor(missao.getAutorizadoPor());
     response.setDataAutorizacao(missao.getDataAutorizacao());
     response.setEtapa(missao.getEtapa());
+    var etapaDetalhe = EtapaProcesso.fromCode(missao.getEtapa());
+    response.setEtapaDesc(etapaDetalhe != null ? etapaDetalhe.getDescricao() : missao.getEtapa());
     response.setEstado(missao.getEstado());
     response.setMotivoCancelamento(missao.getMotivoCancelamento());
 
@@ -272,6 +274,8 @@ public class MissaoServicoServiceRead {
       dto.setDestino(m.getDescricaoDestino());
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
+      dto.setDataInicio(m.getDataInicio());
+      dto.setDataFim(m.getDataFim());
       // Etapa da missão = a do processo activo mais atrasado (a etapa da missão fica em SUBMISSAO)
       dto.setEtapa(etapaAtrasada);
       var etapaEnum = EtapaProcesso.fromCode(etapaAtrasada);
