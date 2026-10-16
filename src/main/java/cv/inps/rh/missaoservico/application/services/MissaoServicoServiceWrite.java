@@ -126,6 +126,11 @@ public class MissaoServicoServiceWrite {
     validarSubmissao(dto);
 
     var missao = missaoServicoRepository.findByUuidOrThrow(uuid);
+    // MS-019: missão finalizada ou cancelada é só de consulta.
+    if ("FINALIZADO".equals(missao.getEstado()) || ESTADO_INATIVO.equals(missao.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("A missão " + support.nrMissaoFormatado(missao)
+          + " está finalizada ou cancelada e não pode ser alterada.");
+    }
     var pais = geografiaRepository.findByIdOrThrow(dto.getPaisDestinoId());
     var antes = DadosAviso.de(missao);
     var colabsAtivosAntes = missaoColaboradorRepository.findAllByMissaoServId_Uuid(uuid).stream()

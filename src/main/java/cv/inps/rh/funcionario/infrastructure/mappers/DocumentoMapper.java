@@ -61,7 +61,10 @@ public class DocumentoMapper {
       FuncionarioEntity fun) {
     if (newList == null)
       return existingList;
-    for (AnexoReqDTO dto : newList) {
+    // Linhas de anexo vazias (o formulário traz sempre uma) não são documentos: ignoradas, e uma
+    // linha existente que ficou vazia conta como removida.
+    var validos = newList.stream().filter(DocumentoMapper::anexoPreenchido).toList();
+    for (AnexoReqDTO dto : validos) {
       DocumentoEntity found = null;
       if (dto.getId() != null) {
         for (DocumentoEntity d : existingList) {
@@ -89,7 +92,7 @@ public class DocumentoMapper {
 
     // Soft delete for removed items
     for (DocumentoEntity existing : existingList) {
-      boolean stillExists = newList.stream()
+      boolean stillExists = validos.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
       if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
