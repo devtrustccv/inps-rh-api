@@ -1,0 +1,59 @@
+{
+ "type": "controller",
+ "name": "ConfiguracaoAjudaCusto",
+ "module": "missaoservico",
+ "description": "parametrizacao da ajuda de custo por carreira/cargo",
+ "basePath": "api/v1/missao-servico/configuracao-ajuda-custo",
+ "actions": [
+  {
+   "actionName": "getConfiguracaoAjudaCusto",
+   "method": "GET",
+   "responses": {
+    "200": {
+     "name": "OK",
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "ParamAjudaCusto",
+        "objectType": "dto",
+        "collectionType": "list",
+        "module": "missaoservico"
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "actionName": "saveConfiguracaoAjudaCusto",
+   "method": "POST",
+   "requestBody": {
+    "content": {
+     "application/json": {
+      "schema": {
+       "type": "ParamAjudaCusto",
+       "objectType": "dto",
+       "collectionType": "list",
+       "module": "missaoservico"
+      }
+     }
+    }
+   },
+   "responses": {
+    "200": {
+     "name": "OK",
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "string",
+        "objectType": "java",
+        "collectionType": "none"
+       }
+      }
+     }
+    }
+   }
+  }
+ ],
+ "id": "msvctrl04configajudacusto"
+}
