@@ -44,6 +44,7 @@ public class ValidarRegistoColaboradorService {
   private final DefPagamentoMapper defPagamentoMapper;
   private final ContratoMapper contratoMapper;
   private final CarreiraMapper carreiraMapper;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository carreiraEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
@@ -191,9 +192,28 @@ public class ValidarRegistoColaboradorService {
     var mobilidade = tiposRelacionamento.getMobId();
     mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
+    // O tipo de contrato/vínculo pode mudar na validação: a carreira acompanha o vínculo novo, com
+    // a mesma regra do registo (só há RH_T_CARREIRA se o vínculo tiver carreira e ela vier indicada).
+    // Antes a carreira antiga ficava ligada com CARR_PCCS_ID a null e o formulário deixava de abrir.
     var carreira = tiposRelacionamento.getCarreiraId();
-    // PCCS sem carreira: não existe entidade de carreira para atualizar (o escalão vive no tiprel).
-    if (carreira != null) carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    var comCarreira = colaboradorValidationRules.vinculoTemCarreira(dadosContratuais.getTipoVinculoLaboralId())
+        && dadosContratuais.getCarreiraId() != null;
+    if (comCarreira && carreira != null) {
+      carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    } else if (comCarreira) {
+      carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
+      carreira.setContrVinculoId(contrato);
+      carreira = carreiraEntityRepository.save(carreira);
+      tiposRelacionamento.setCarreiraId(carreira);
+      tiposRelacionamento.setEscalaoId(null); // com carreira o escalão vem dela
+    } else if (carreira != null) {
+      // Vínculo sem carreira: a carreira do registo deixa de valer; o escalão passa para o tiprel.
+      carreira.setEstado(Estado.E);
+      tiposRelacionamento.setCarreiraId(null);
+      carreira = null;
+      colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(tiposRelacionamento, null,
+          dadosContratuais.getTipoVinculoLaboralId(), dadosContratuais.getEscalaoReferenciaId());
+    }
 
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);

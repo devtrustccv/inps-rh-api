@@ -184,6 +184,8 @@ public class CarreiraWriteService {
       if (escalaoSel != null && escalaoSel.getValor() != null) dto.setSalario(escalaoSel.getValor());
     }
 
+    validarCarreiraComSalario(dto);
+
     var tipoCarreira = dto.getTipoCarreira() != null ? dto.getTipoCarreira() : "CARREIRA_NOVO";
     var obsMovimento = tipoCarreira;
     var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
@@ -741,6 +743,7 @@ public class CarreiraWriteService {
       if (escalaoSel != null && escalaoSel.getValor() != null)
         dto.setSalario(escalaoSel.getValor());
     }
+    validarCarreiraComSalario(dto);
 
     funcionarioRules.garantirEditavel(carreira.getEstado());
 
@@ -944,4 +947,16 @@ public class CarreiraWriteService {
     return new SuccessResponseDTO(true, carreira.getUuid().toString(),
         correcaoRegisto ? "Correção reenviada para validação." : "Carreira actualizada.", List.of());
   }
+
+  /** Regra: uma carreira tem carreira PCCS e escalão, e por isso obrigatoriamente salário. */
+  private static void validarCarreiraComSalario(CarreiraNovoDTO dto) {
+    if (dto.getCarreiraId() == null)
+      throw IgrpResponseStatusException.badRequest("Carreira é obrigatória.");
+    if (dto.getEscalaoReferenciaId() == null)
+      throw IgrpResponseStatusException.badRequest("Escalão é obrigatório.");
+    if (dto.getSalario() == null || dto.getSalario().signum() <= 0)
+      throw IgrpResponseStatusException.badRequest(
+          "O escalão escolhido não tem valor parametrizado: uma carreira tem de ter salário.");
+  }
+
 }

@@ -138,11 +138,10 @@ public class DadosContratuaisMapper {
       }
     }
 
-    dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCarrPccsId().getId() : null);
-
-    dcr.setCarreiraDesc(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
+    // Carreira sem CARR_PCCS_ID (dados antigos) não pode impedir o formulário de abrir.
+    var carrPccs = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId().getCarrPccsId() : null;
+    dcr.setCarreiraId(carrPccs != null ? carrPccs.getId() : null);
+    dcr.setCarreiraDesc(carrPccs != null ? carrPccs.getNome() : null);
 
     dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getCategoriaId() != null ?
