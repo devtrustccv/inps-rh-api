@@ -201,6 +201,7 @@ public class DadosContratuaisMapper {
         sr.setObservacoes(s.getObs());
         sr.setEstado(s.getEstado() != null ? s.getEstado().getCode() : null);
         sr.setEstadoDesc(s.getEstado() != null ? s.getEstado().getDescription() : null);
+        sr.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(s));
         return sr;
       }).toList();
 
@@ -221,6 +222,7 @@ public class DadosContratuaisMapper {
         er.setObservacoes(e.getObs());
         er.setEstado(e.getEstado() != null ? e.getEstado().getCode() : null);
         er.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
+        er.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(e));
         return er;
       }).toList();
 

@@ -43,4 +43,8 @@ public class SubsidioRespDTO  {
 
   private String estadoDesc ;
 
+
+  // Melhoria 25: movimento PCCS (FLG_BLOQUEAR) ou já processado → só Data Fim/OBS editáveis.
+  private Boolean bloqueado ;
+
 }

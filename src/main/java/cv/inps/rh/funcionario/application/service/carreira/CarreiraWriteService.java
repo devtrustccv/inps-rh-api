@@ -58,6 +58,7 @@ public class CarreiraWriteService {
   private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
   private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  private final cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules movimentoBloqueioRules;
 
   /**
    * "Carreira processada" = igual à vista RH_V_CARREIRA.PROCESSAMENTO: existe um tiprel desta
@@ -243,6 +244,7 @@ public class CarreiraWriteService {
       if (movREM != null) {
         var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
         salario.setTmId(movREM.getTmId());
+        movimentoBloqueioRules.marcar(salario, vinculoAtualId);
         definicaoRemuneracaoEntityRepository.save(salario);
         novasRem.add(salario);
       }
@@ -637,6 +639,15 @@ public class CarreiraWriteService {
     if (progressao) {
       entityManager.flush();
       registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
+      // Melhoria 25: o proc não conhece FLG_BLOQUEAR — marcam-se aqui os fixos PCCS do tiprel novo.
+      var vinculoProg = carreira.getContrVinculoId() != null && carreira.getContrVinculoId().getVinculoId() != null
+          ? carreira.getContrVinculoId().getVinculoId().getId() : null;
+      if (tiprelPendente != null && vinculoProg != null) {
+        funcionarioRules.getRemuneracoesAssociados(tiprelPendente.getId())
+            .forEach(r -> movimentoBloqueioRules.marcar(r, vinculoProg));
+        funcionarioRules.getPagamentosDescontosAssociados(tiprelPendente.getId())
+            .forEach(p -> movimentoBloqueioRules.marcar(p, vinculoProg));
+      }
 
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
@@ -852,6 +863,7 @@ public class CarreiraWriteService {
         salarioNovo.setDataInicio(dataEfetiva);
         salarioNovo.setDataFim(null);
         salarioNovo.setTmId(salarioAntigo.getTmId());
+        salarioNovo.setFlgBloquear(salarioAntigo.getFlgBloquear()); // mesmo movimento, mesmo bloqueio
         definicaoRemuneracaoEntityRepository.save(salarioNovo);
         tipoRelRemPagHelper.associarLista(relacionamento, List.of(salarioNovo), List.of());
       }
@@ -866,7 +878,8 @@ public class CarreiraWriteService {
 
     if (!CollectionUtils.isEmpty(dto.getSubsidios())) {
       var remList = dto.getSubsidios().stream()
-          .filter(s -> s.getTipoSubsidioId() == null || !tmsFixosRemEdit.contains(s.getTipoSubsidioId()))
+          // Fixos novos não se recriam; os já existentes (com id) só aceitam OBS (melhoria 25).
+          .filter(s -> s.getId() != null || s.getTipoSubsidioId() == null || !tmsFixosRemEdit.contains(s.getTipoSubsidioId()))
           .map(s -> {
             DefinicaoRemuneracaoEntity obj;
             if (s.getId() == null) {
@@ -874,6 +887,11 @@ public class CarreiraWriteService {
               obj.setObs(obsAtualizar);
             } else {
               obj = definicaoRemuneracaoEntityRepository.findByIdOrThrow(s.getId());
+              var fixoRem = obj.getTmId() != null && tmsFixosRemEdit.contains(obj.getTmId().getId());
+              if (fixoRem || cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(obj)) {
+                if (s.getObservacoes() != null) obj.setObs(ValidationUtil.trimToNull(s.getObservacoes()));
+                return obj;
+              }
               obj.setPercentagem(s.getPercentagem());
               obj.setValor(s.getValor());
               obj.setObs(ValidationUtil.trimToNull(s.getObservacoes()));
@@ -888,7 +906,7 @@ public class CarreiraWriteService {
 
     if (!CollectionUtils.isEmpty(dto.getEncargosDescontos())) {
       var pagList = dto.getEncargosDescontos().stream()
-          .filter(e -> e.getTipoEncargoId() == null || !tmsFixosPagEdit.contains(e.getTipoEncargoId()))
+          .filter(e -> e.getId() != null || e.getTipoEncargoId() == null || !tmsFixosPagEdit.contains(e.getTipoEncargoId()))
           .map(e -> {
             DefPagamentoEntity obj;
             if (e.getId() == null) {
@@ -896,6 +914,12 @@ public class CarreiraWriteService {
               obj.setObs(obsAtualizar);
             } else {
               obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
+              var fixoPag = obj.getTmId() != null && tmsFixosPagEdit.contains(obj.getTmId().getId());
+              if (fixoPag || cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(obj)) {
+                if (e.getDataFim() != null) obj.setDataFim(e.getDataFim());
+                if (e.getObservacoes() != null) obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
+                return obj;
+              }
               obj.setValor(e.getValor());
               obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
               var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());

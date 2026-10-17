@@ -174,18 +174,22 @@ public class RenumeracoesWriteService {
     }
 
     var request = data.getDados();
-    validarRemuneracaoOuPagamento(request);
+    // Melhoria 25: vencimento PCCS (FLG_BLOQUEAR) ou já processado → só Data Fim e OBS.
+    boolean soDataFimObs = cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(remuneracao);
+    if (!soDataFimObs) validarRemuneracaoOuPagamento(request);
 
     funcionarioRules.garantirEditavel(remuneracao.getEstado());
     // Estado ANTES do payload (edicao in place).
     var camposRend = dossierCampos.rendimento();
     var antesRend = detalheAlteracoes.capturar(camposRend, remuneracao);
-    remuneracao.setValor(request.getValor());
-    remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
-    remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
+    if (!soDataFimObs) {
+      remuneracao.setValor(request.getValor());
+      remuneracao.setPercentagem(request.getPercentagem());
+      remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
+      remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
+    }
 
     // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
     if (remuneracao.getEstado() == Estado.C) {
@@ -249,7 +253,9 @@ public class RenumeracoesWriteService {
     }
 
     var request = data.getDados();
-    validarRemuneracaoOuPagamento(request);
+    // Melhoria 25: IUR/INPS/valor líquido PCCS (FLG_BLOQUEAR) ou já processado → só Data Fim e OBS.
+    boolean soDataFimObs = cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(pagamento);
+    if (!soDataFimObs) validarRemuneracaoOuPagamento(request);
 
     funcionarioRules.garantirEditavel(pagamento.getEstado());
 
@@ -257,16 +263,18 @@ public class RenumeracoesWriteService {
     var camposDesc = dossierCampos.desconto();
     var antesDesc = detalheAlteracoes.capturar(camposDesc, pagamento);
 
-    pagamento.setPercentagem(request.getPercentagem());
-    pagamento.setValor(request.getValor());
     pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
-    pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
-    pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
-    pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
-    pagamento.setNif(request.getNif());
-    pagamento.setEntId(request.getEntidade());
+    if (!soDataFimObs) {
+      pagamento.setPercentagem(request.getPercentagem());
+      pagamento.setValor(request.getValor());
+      pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
+      pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
+      pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
+      pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
+      pagamento.setNif(request.getNif());
+      pagamento.setEntId(request.getEntidade());
+    }
 
     // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
     if (pagamento.getEstado() == Estado.C) {
