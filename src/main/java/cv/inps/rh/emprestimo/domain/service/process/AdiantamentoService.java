@@ -1,13 +1,16 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
+import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
@@ -18,7 +21,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +38,7 @@ public class AdiantamentoService {
   private final EmprestimoDocumentService documentService;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final EmprestimoHelper emprestimoHelper;
+  private final ApplicationAuditorAware auditorAware;
 
   // todo caso emprestimo senao forem validados positivamente activar ou desativar os planos
 
@@ -52,6 +59,7 @@ public class AdiantamentoService {
     var newLoan = emEdicao ? base : new EmprestimoEntity();
     if (!emEdicao) {
       newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      emprestimoHelper.iniciarSubprocesso(initialLoan.getPedido());
     }
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
@@ -123,8 +131,20 @@ public class AdiantamentoService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
-      switch (request.getParecer()) {
+    if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      // Retificação do parecer técnico devolve já ao pedido — não depende do responsável.
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+    } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      // Como na Análise RH do pedido: quem valida o avanço é o responsável (nível 2). Usa o
+      // "responsavel" herdado de BaseDecisaoDTO (o GET devolve-o no mesmo formato).
+      var responsavelParecer = Optional.ofNullable(request.getResponsavel())
+          .map(BaseDecisaoDTO.Responsavel::parecer)
+          .flatMap(ParecerProcesso::fromCode)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
+
+      switch (responsavelParecer) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
@@ -133,7 +153,10 @@ public class AdiantamentoService {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
-        case RETIFICACAO -> loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -149,6 +172,7 @@ public class AdiantamentoService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          setResponsavel(obj, request.getResponsavel());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
@@ -156,6 +180,7 @@ public class AdiantamentoService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          setResponsavel(newObj, request.getResponsavel());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
@@ -166,7 +191,20 @@ public class AdiantamentoService {
     emprestimoEntityRepository.save(loan);
   }
 
-  public void anexarComprovativo(String emprestimoId, DocumentoDTO request) {
+  private void setResponsavel(PedidoDecisaoEntity decisao, BaseDecisaoDTO.Responsavel responsavel) {
+    var parecer = Optional.ofNullable(responsavel)
+        .map(BaseDecisaoDTO.Responsavel::parecer)
+        .flatMap(ParecerProcesso::fromCode);
+    if (parecer.isEmpty()) {
+      return;
+    }
+    decisao.setParecerResponsavel(parecer.get().name());
+    decisao.setObservacaoResponsavel(responsavel.observacao());
+    decisao.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+    decisao.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+  }
+
+  public void anexarComprovativo(String emprestimoId, DocumentoDTO request, String action) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
 
@@ -176,6 +214,15 @@ public class AdiantamentoService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
     );
+
+    // O endpoint não tinha acção: o Seguinte gravava o documento mas o pedido ficava em
+    // ANEXAR_CONTRATO_ADIANTAMENTO até à primeira gravação da Verificação (a lista retomava
+    // o subprocesso na etapa errada).
+    if (ProcessStepAction.NEXT.name().equals(action)) {
+      var order = loan.getPedido();
+      order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+      pedidoEntityRepository.save(order);
+    }
   }
 
   public void verificar(String emprestimoId, VerificarAdiantamentoRequestDTO request) {

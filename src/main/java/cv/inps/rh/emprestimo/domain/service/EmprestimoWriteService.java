@@ -197,6 +197,9 @@ public class EmprestimoWriteService {
           .map(PlanoFinanceiroRowDTO::juros)
           .filter(java.util.Objects::nonNull)
           .reduce(BigDecimal.ZERO, BigDecimal::add));
+      // A Viatura não recebe Data Fim no pedido (só Fundo Social/Recuperação): é a data da
+      // última prestação — o Pagamento/Fim de Processo mostrava "-".
+      entity.setDataFim(plan.getLast().dataPagamento());
       emprestimoEntityRepository.save(entity);
     }
 
@@ -258,8 +261,10 @@ public class EmprestimoWriteService {
    * Cancelar (ou desistir de) uma Amortização / Renegociação: o empréstimo anterior volta a ser o
    * que está em vigor. Se o NEXT do pedido do subprocesso já tinha corrido, o plano do anterior
    * foi inativado e o do subprocesso criado — repõe-se. A etapa do pedido (partilhado por todas
-   * as versões) volta a PAGAMENTO, a etapa final de um empréstimo concluído, se estava numa
-   * etapa do subprocesso.
+   * as versões) volta a PAGAMENTO, a etapa final de um empréstimo concluído — o anterior está em
+   * vigor, logo já lá tinha chegado. Antes só se repunha se a etapa tivesse ADIANTAMENTO/REFORCO
+   * no nome, e um subprocesso cancelado no pedido (PEDIDO) ou na Análise RH da Renegociação
+   * (ANALISE_RH_PEDIDO) deixava a etapa errada na linha do empréstimo.
    */
   private void reporAposCancelarSubprocesso(EmprestimoEntity subprocesso) {
 
@@ -270,11 +275,8 @@ public class EmprestimoWriteService {
     }
 
     var pedido = subprocesso.getPedido();
-    var etapa = pedido.getEtapa() != null ? pedido.getEtapa() : "";
-    if (etapa.contains("ADIANTAMENTO") || etapa.contains("REFORCO")) {
-      pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
-      pedidoEntityRepository.save(pedido);
-    }
+    pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
+    pedidoEntityRepository.save(pedido);
   }
 
   // Fundo Social / Recuperação: decide o pedido criado em saveFundoSocial

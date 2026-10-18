@@ -14,6 +14,8 @@ public class AnexarComprovativoPagamentoCommand implements Command {
 
 
   private DocumentoDTO documento;
+  // SAVE (omissão) ou NEXT — o NEXT avança o pedido para a Verificação.
+  private String action;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;
 

@@ -50,6 +50,7 @@ public class ReforcoDividaService {
     var newLoan = emEdicao ? base : new EmprestimoEntity();
     if (!emEdicao) {
       newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      adiantamentoEmprestimoHelper.iniciarSubprocesso(loan.getPedido());
     }
     newLoan.setValorReforco(obj.getValorReforco());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
@@ -179,6 +180,15 @@ public class ReforcoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          // Antes só se gravava o responsável ao actualizar uma decisão existente: no primeiro
+          // NEXT (sem Gravar antes) o parecer do responsável perdia-se.
+          Optional.ofNullable(request.getResponsavel())
+              .ifPresent(resp -> {
+                newObj.setParecerResponsavel(resp.parecer().name());
+                newObj.setObservacaoResponsavel(resp.observacao());
+                newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+                newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+              });
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());

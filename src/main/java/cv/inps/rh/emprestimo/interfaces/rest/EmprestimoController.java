@@ -606,10 +606,11 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> anexarComprovativoPagamento(@Valid @RequestBody DocumentoDTO anexarComprovativoPagamentoRequest
+    , @RequestParam(value = "action", required = false) String action
     , @PathVariable String emprestimoId)
   {
 
-      final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, emprestimoId);
+      final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, action, emprestimoId);
 
       return commandBus.send(command);
 

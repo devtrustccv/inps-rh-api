@@ -651,6 +651,13 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "action",
+          "isRequired": false
+        }
       ]
     },
     {

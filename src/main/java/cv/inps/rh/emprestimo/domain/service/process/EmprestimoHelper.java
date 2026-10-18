@@ -3,11 +3,15 @@ package cv.inps.rh.emprestimo.domain.service.process;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
+import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -31,6 +35,32 @@ public class EmprestimoHelper {
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
+  private final PedidoEntityRepository pedidoEntityRepository;
+
+  private static final List<String> ETAPAS_SUBPROCESSO = List.of(
+      EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
+      EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
+      EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
+      EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
+      EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
+  );
+
+  /**
+   * Novo subprocesso (Amortização/Renegociação) sobre um empréstimo em vigor. Todas as versões
+   * partilham o mesmo pedido e as decisões ficam ligadas ao pedido, por isso um 2.º subprocesso
+   * herdava a etapa e os pareceres do 1.º (abria já na Verificação, com o parecer anterior
+   * preenchido, e gravar reescrevia essa decisão). Arquiva as decisões activas das etapas de
+   * subprocesso e põe o pedido na etapa inicial.
+   */
+  public void iniciarSubprocesso(PedidoEntity pedido) {
+    var ativas = pedidoDecisaoEntityRepository.findByPedidoAndEtapaInAndEstado(
+        pedido, ETAPAS_SUBPROCESSO, Estado.A.name());
+    ativas.forEach(decisao -> decisao.setEstado(Estado.I.name()));
+    pedidoDecisaoEntityRepository.saveAll(ativas);
+    pedido.setEtapa(EtapaEmprestimo.PEDIDO.name());
+    pedidoEntityRepository.save(pedido);
+  }
 
   public void saveByTipoSituacao(TipoSituacao tipoSituacao, EmprestimoEntity newLoan, BigDecimal value, Long newNumeroPrestacao) {
 
