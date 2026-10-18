@@ -11,6 +11,7 @@ import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.*;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -466,6 +467,34 @@ public class EmprestimoController {
 
   }
 
+   @GetMapping(
+   value = "{emprestimoId}/versoes"
+  )
+  @Operation(
+    summary = "Get versoes do emprestimo",
+    description = "Empréstimo inicial e subprocessos (Amortização / Renegociação) do mesmo pedido, por versão",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = EmprestimoVersaoDTO.class))
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<List<EmprestimoVersaoDTO>> getEmprestimoVersoes(
+       @PathVariable String emprestimoId)
+  {
+
+      final var query = new GetEmprestimoVersoesQuery(emprestimoId);
+
+      return queryBus.handle(query);
+
+  }
+
    @PostMapping(
    value = "/pedido-adiantamento"
   )
@@ -577,10 +606,11 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> anexarComprovativoPagamento(@Valid @RequestBody DocumentoDTO anexarComprovativoPagamentoRequest
+    , @RequestParam(value = "action", required = false) String action
     , @PathVariable String emprestimoId)
   {
 
-      final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, emprestimoId);
+      final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, action, emprestimoId);
 
       return commandBus.send(command);
 

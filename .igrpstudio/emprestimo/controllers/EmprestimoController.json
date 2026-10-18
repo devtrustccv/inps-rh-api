@@ -475,6 +475,34 @@
       ]
     },
     {
+      "actionName": "getEmprestimoVersoes",
+      "path": "{emprestimoId}/versoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "EmprestimoVersao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "emprestimo"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "savePedidosAdiantamento",
       "path": "/pedido-adiantamento",
       "method": "POST",
@@ -622,6 +650,13 @@
           "name": "emprestimoId",
           "type": "string",
           "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "action",
+          "isRequired": false
         }
       ]
     },
