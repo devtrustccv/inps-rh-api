@@ -43,6 +43,9 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private BigDecimal valorAdiantamento;
 
 
+  private BigDecimal valorReforco;
+
+
   private String tipoSituacao;
 
   private String nib;

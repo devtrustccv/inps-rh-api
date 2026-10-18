@@ -76,6 +76,8 @@ public class EmprestimoReadService {
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
     dto.setTipoSituacao(entity.getTipoSituacao());
     dto.setValorAdiantamento(entity.getValorAdiantado());
+    // Pedido de Renegociação reaberto: sem isto o "Valor Reforço" gravado não voltava ao ecrã.
+    dto.setValorReforco(entity.getValorReforco());
     dto.setSwift(entity.getSwift());
     dto.setMotivo(entity.getMotivo());
     dto.setNib(entity.getNib());
