@@ -36,12 +36,21 @@ public class ReforcoDividaService {
 
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 
-    var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    // Reabrir o pedido de um subprocesso ainda por submeter / em correção (Gravar e depois
+    // Seguinte, ou Retificação) actualiza essa versão — antes criava-se sempre outra, encadeada na
+    // anterior, e a que ficava por submeter era abandonada.
+    var emEdicao = base.getEmprestimo() != null
+        && (StatusEmprestimo.POR_SUBMETER.name().equals(base.getEstado())
+            || StatusEmprestimo.EM_CORRECAO.name().equals(base.getEstado()));
+    var loan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
 
-    var newLoan = new EmprestimoEntity();
-    newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    var newLoan = emEdicao ? base : new EmprestimoEntity();
+    if (!emEdicao) {
+      newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    }
     newLoan.setValorReforco(obj.getValorReforco());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setVersao(loan.getVersao() + 1);

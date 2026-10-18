@@ -36,6 +36,10 @@ public class EmprestimoHelper {
 
     var initialLoan = newLoan.getEmprestimo();
 
+    // NEXT repetido (pedido reaberto após Retificação): o plano desta versão é regenerado, não
+    // acrescentado ao que já tinha.
+    planoFinanceiroEntityRepository.apagarPlanos(newLoan.getId());
+
     LOGGER.debug("TIPO SITUACAO: {}, LOAN ID: {}, VALUE: {}, NUMERO PRESTACOES: {}", tipoSituacao, newLoan.getId(), value, newNumeroPrestacao);
 
     var allInitialPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(initialLoan);
@@ -142,6 +146,17 @@ public class EmprestimoHelper {
     }
 
     savePlans(newLoan, newPlans);
+
+    // A versão nova herdava a prestação/juros do empréstimo anterior; passam a ser os do plano
+    // agora gerado (lista, resumo e Pagamento mostram estes valores).
+    if (newPlans != null && !newPlans.isEmpty()) {
+      newLoan.setValorPrestacao(newPlans.getFirst().pagamento());
+      newLoan.setValorJuroTotal(newPlans.stream()
+          .map(PlanoFinanceiroRowDTO::juros)
+          .filter(java.util.Objects::nonNull)
+          .reduce(BigDecimal.ZERO, BigDecimal::add));
+      emprestimoEntityRepository.save(newLoan);
+    }
   }
 
   // Fundo Social / Recuperação geram o plano já na submissão do pedido, mas

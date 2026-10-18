@@ -38,18 +38,31 @@ public class AdiantamentoService {
   @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
-    var initialLoan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    // Reabrir o pedido de um subprocesso ainda por submeter / em correção (Gravar e depois
+    // Seguinte, ou Retificação) actualiza essa versão — antes criava-se sempre outra, encadeada na
+    // anterior, e a que ficava por submeter era abandonada.
+    var emEdicao = base.getEmprestimo() != null
+        && (StatusEmprestimo.POR_SUBMETER.name().equals(base.getEstado())
+            || StatusEmprestimo.EM_CORRECAO.name().equals(base.getEstado()));
+    var initialLoan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
-    var newLoan = new EmprestimoEntity();
-    newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    var newLoan = emEdicao ? base : new EmprestimoEntity();
+    if (!emEdicao) {
+      newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    }
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(initialLoan.getVersao() + 1);
-    newLoan.setValorDivida(obj.getValorAdiantamento());
-    newLoan.setValorEmprestimo(obj.getValorAdiantamento());
+    // Como no Reforço, a nova versão herda o capital e a dívida actual do empréstimo anterior;
+    // EmprestimoHelper.saveByTipoSituacao aplica depois o adiantamento sobre essa dívida. Antes
+    // gravava-se o valor adiantado nos dois campos: a dívida ficava a 0 no NEXT do pagamento
+    // antecipado e a "Diminuição da Prestação" (sem valor) falhava com VALOR_EMPRESTIMO a null.
+    newLoan.setValorDivida(initialLoan.getValorDivida());
+    newLoan.setValorEmprestimo(initialLoan.getValorEmprestimo());
     newLoan.setEmprestimo(initialLoan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
@@ -175,7 +188,12 @@ public class AdiantamentoService {
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
 
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+        case FAVORAVEL -> {
+          // Última etapa da Amortização: a nova versão passa a ser a que está em vigor (lista).
+          order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+          loan.setEstado(StatusEmprestimo.ATIVO.name());
+          emprestimoEntityRepository.save(loan);
+        }
         case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
         default ->
             throw IgrpResponseStatusException.badRequest("Invalid action for this step %s", request.getAction());
