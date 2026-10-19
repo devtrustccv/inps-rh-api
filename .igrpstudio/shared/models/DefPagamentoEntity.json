@@ -206,6 +206,16 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "flgBloquear",
+      "type": "integer",
+      "length": 1,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
     }
   ],
   "id": "6a8wylphxe",

@@ -58,6 +58,7 @@ public class AlterarEscalaoCargoService {
   private final EntityManager entityManager;
   private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
   private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
+  private final cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules movimentoBloqueioRules;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
   public SuccessResponseDTO alterar(String funcionarioId, AlterarEscalaoCargoDTO dto) {
@@ -231,6 +232,9 @@ public class AlterarEscalaoCargoService {
         salarioNovo.setUuid(UuidCreator.getTimeOrderedEpoch());
         if (salarioTmId != null)
           salarioNovo.setTmId(entityManager.find(TipoMovimentoEntity.class, salarioTmId));
+        var vinculoEscalao = atual.getContrVinculoId() != null && atual.getContrVinculoId().getVinculoId() != null
+            ? atual.getContrVinculoId().getVinculoId().getId() : null;
+        movimentoBloqueioRules.marcar(salarioNovo, vinculoEscalao);
         definicaoRemuneracaoEntityRepository.save(salarioNovo);
         novasRem.add(salarioNovo);
       }

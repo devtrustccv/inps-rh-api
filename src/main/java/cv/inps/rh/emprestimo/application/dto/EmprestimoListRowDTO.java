@@ -67,4 +67,13 @@ public class EmprestimoListRowDTO  {
   private String etapa ;
   private String etapaDesc;
 
+  // Versão mais recente do pedido (pode ser um subprocesso ainda em curso) — é a que a etapa
+  // do pedido descreve; o ▷ da lista abre esta. Igual a emprestimoId quando não há subprocesso.
+  private String emprestimoIdEmCurso;
+
+  private String tipoSituacaoEmCurso;
+
+  // Nº de versões do pedido (empréstimo inicial + subprocessos); > 1 => linha expansível.
+  private Long numeroVersoes;
+
 }

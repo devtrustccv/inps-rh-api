@@ -8,7 +8,9 @@ import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
@@ -24,6 +26,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -73,6 +76,8 @@ public class EmprestimoReadService {
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
     dto.setTipoSituacao(entity.getTipoSituacao());
     dto.setValorAdiantamento(entity.getValorAdiantado());
+    // Pedido de Renegociação reaberto: sem isto o "Valor Reforço" gravado não voltava ao ecrã.
+    dto.setValorReforco(entity.getValorReforco());
     dto.setSwift(entity.getSwift());
     dto.setMotivo(entity.getMotivo());
     dto.setNib(entity.getNib());
@@ -244,12 +249,16 @@ public class EmprestimoReadService {
     plan.setDataInicio(loan.getDataInicio());
     plan.setNumeroPagamento(loan.getNrPrestacao());
 
+    // Plano gravado sempre que exista (os subprocessos não têm data de início, mas gravam o plano
+    // no NEXT do pedido); só sem plano gravado é que se calcula uma simulação.
+    var guardados = planoFinanceiroEntityRepository.findAllByEmprestimo(loan);
     List<PlanoFinanceiroRowDTO> rows;
-    if (plan.getDataInicio() == null) {
+    if (guardados.isEmpty()) {
       rows = emprestimoWriteService.generateFinancialPlan(loan, LocalDate.now(ZoneId.systemDefault()));
     } else {
-      rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
+      rows = guardados
           .stream()
+          .sorted(java.util.Comparator.comparing(PlanoFinanceiroEntity::getNrOrdemPrestacao))
           .map(obj -> new PlanoFinanceiroRowDTO(
               obj.getNrOrdemPrestacao(),
               obj.getEstado(),
@@ -286,6 +295,62 @@ public class EmprestimoReadService {
     plan.setPagamentoMensal(pagamentoMensal == null ? "" : formatter.format(pagamentoMensal));
 
     return plan;
+  }
+
+  private static final Map<String, String> TIPO_SITUACAO_DESC = Map.ofEntries(
+      Map.entry("EMPRESTIMO", "Empréstimo"),
+      Map.entry("FUNDO_SOCIAL", "Fundo Social"),
+      Map.entry("RECUPERACAO", "Recuperação"),
+      Map.entry("AQUISICAO_VIATURA", "Aquisição Viatura"),
+      Map.entry("ADIANTAMENTO_PAGAMENTO_ANTECIPADO", "Amortização — pagamento antecipado"),
+      Map.entry("ADIANTAMENTO_DIMINUICAO_PRESTACAO", "Amortização — diminuição da prestação"),
+      Map.entry("ADIANTAMENTO_PAGAMENTO_ANTECIPADO_DIMINUICAO_PRESTACAO", "Amortização — pagamento antecipado e diminuição da prestação"),
+      Map.entry("REFORCO_AUMENTO_VALOR", "Renegociação — aumento do valor"),
+      Map.entry("REFORCO_AUMENTO_PRESTACAO", "Renegociação — aumento da prestação"),
+      Map.entry("REFORCO_AUMENTO_VALOR_AUMENTO_PRESTACAO", "Renegociação — aumento do valor e da prestação"),
+      Map.entry("AUMENTO_PRESTACAO", "Renegociação — aumento da prestação"),
+      Map.entry("REDUCAO_PRESTACAO", "Renegociação — redução da prestação"),
+      Map.entry("REFORCO_CAPITAL", "Renegociação — reforço de capital")
+  );
+
+  /**
+   * Versões do empréstimo (inicial + subprocessos) para a lista expansível: todas as entradas do mesmo
+   * pedido, da mais antiga para a mais recente; {@code atual} marca a mais recente não cancelada.
+   */
+  public List<EmprestimoVersaoDTO> getVersoes(String uuid) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    var versoes = emprestimoEntityRepository.findAllByPedido_IdOrderByVersaoAscIdAsc(loan.getPedido().getId());
+    // "Atual" = a versão mais recente não cancelada (a que está em curso, ou a em vigor)
+    var idAtual = versoes.stream()
+        .filter(v -> !StatusEmprestimo.CANCELADO.name().equals(v.getEstado())
+            && !StatusEmprestimo.DESISTENCIA.name().equals(v.getEstado()))
+        .map(EmprestimoEntity::getId)
+        .max(Long::compareTo)
+        .orElse(null);
+    var estadoMap = StatusEmprestimo.codeDescriptionMap();
+
+    return versoes.stream()
+        .map(v -> new EmprestimoVersaoDTO(
+            v.getUuid(),
+            v.getVersao(),
+            v.getTipoSituacao(),
+            TIPO_SITUACAO_DESC.getOrDefault(v.getTipoSituacao(), v.getTipoSituacao()),
+            v.getEstado(),
+            estadoMap.getOrDefault(v.getEstado(), v.getEstado()),
+            v.getValorEmprestimo(),
+            v.getValorReforco(),
+            v.getValorAdiantado(),
+            v.getNrPrestacao(),
+            planoFinanceiroEntityRepository.findAllByEmprestimo(v).stream()
+                .filter(p -> "A".equals(p.getEstado()) && "PAGO".equalsIgnoreCase(p.getFlgPago()))
+                .count(),
+            v.getValorPrestacao(),
+            v.getDataInicio(),
+            v.getCreatedDate() != null ? v.getCreatedDate().toLocalDate() : null,
+            v.getId().equals(idAtual)
+        ))
+        .toList();
   }
 
   public HistoricoPagamentoDTO getPaymentHistory(String uuid) {

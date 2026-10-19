@@ -36,4 +36,7 @@ public class NovoRemuneracaoRequestDTO  {
 
   private String estado ;
 
+  // Só leitura (GET): vencimento/encargo PCCS (FLG_BLOQUEAR) ou já processado → só Data Fim e OBS editáveis.
+  private Boolean bloqueado ;
+
 }

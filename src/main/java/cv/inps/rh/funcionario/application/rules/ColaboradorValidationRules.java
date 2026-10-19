@@ -387,6 +387,13 @@ public class ColaboradorValidationRules {
     return escalao;
   }
 
+  /** O vínculo tem carreira (RH_T_PARAM_VINCULO.FLG_CARREIRA = 1)? */
+  public boolean vinculoTemCarreira(Long tipoVinculoId) {
+    if (tipoVinculoId == null) return false;
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
+    return paramVinculo != null && java.util.Objects.equals(1, paramVinculo.getFlgCarreira());
+  }
+
   /** Overload que resolve o vínculo pelo id (para callers que só têm o id do tipo de vínculo). */
   public ParamEscalaoEntity aplicarEscalaoTiprelSemCarreira(
       TiposRelacionamentoEntity tr, CarreiraEntity carreira,

@@ -28,6 +28,8 @@ public class ProcessoLogisticaResponseDTO {
   private List<SeguroViagemResponseDTO> segurosViagem;
   private List<AlojamentoResponseDTO> alojamentos;
   private List<AjudaCustoResponseDTO> ajudasCusto;
+  // Valor diário base da ajuda de custo parametrizado (cargo superior; nacional/estrangeiro). null = sem parametrização.
+  private java.math.BigDecimal valorDiarioAjudaCusto;
   // Colaboradores que podem entrar numa linha; no bilhete/alojamento só os que têm requisição, com o prestador
   private List<MissaoColaboradorResponseDTO> colaboradoresDisponiveis;
   private MissaoNotificacaoResponseDTO notificacao;

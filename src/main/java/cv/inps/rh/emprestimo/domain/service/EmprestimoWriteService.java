@@ -185,7 +185,23 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
+    // Pode correr mais de uma vez (Gravar e Seguinte do Contrato): substitui o plano anterior em
+    // vez de acrescentar outro — antes ficava duplicado (2 linhas por prestação, ambas ativas).
+    planoFinanceiroEntityRepository.apagarPlanos(entity.getId());
     emprestimoHelper.savePlans(entity, plan);
+
+    // Prestação mensal e juros totais do plano no próprio empréstimo (lista, Pagamento, resumo).
+    if (!plan.isEmpty()) {
+      entity.setValorPrestacao(plan.getFirst().pagamento());
+      entity.setValorJuroTotal(plan.stream()
+          .map(PlanoFinanceiroRowDTO::juros)
+          .filter(java.util.Objects::nonNull)
+          .reduce(BigDecimal.ZERO, BigDecimal::add));
+      // A Viatura não recebe Data Fim no pedido (só Fundo Social/Recuperação): é a data da
+      // última prestação — o Pagamento/Fim de Processo mostrava "-".
+      entity.setDataFim(plan.getLast().dataPagamento());
+      emprestimoEntityRepository.save(entity);
+    }
 
     return plan;
   }
@@ -225,6 +241,11 @@ public class EmprestimoWriteService {
     entity.setObservacao(observacao);
     emprestimoEntityRepository.save(entity);
 
+    if (entity.getEmprestimo() != null
+        && (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado))) {
+      reporAposCancelarSubprocesso(entity);
+    }
+
     if (CollectionUtils.isEmpty(files))
       return;
 
@@ -234,6 +255,28 @@ public class EmprestimoWriteService {
         entity.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"
     );
+  }
+
+  /**
+   * Cancelar (ou desistir de) uma Amortização / Renegociação: o empréstimo anterior volta a ser o
+   * que está em vigor. Se o NEXT do pedido do subprocesso já tinha corrido, o plano do anterior
+   * foi inativado e o do subprocesso criado — repõe-se. A etapa do pedido (partilhado por todas
+   * as versões) volta a PAGAMENTO, a etapa final de um empréstimo concluído — o anterior está em
+   * vigor, logo já lá tinha chegado. Antes só se repunha se a etapa tivesse ADIANTAMENTO/REFORCO
+   * no nome, e um subprocesso cancelado no pedido (PEDIDO) ou na Análise RH da Renegociação
+   * (ANALISE_RH_PEDIDO) deixava a etapa errada na linha do empréstimo.
+   */
+  private void reporAposCancelarSubprocesso(EmprestimoEntity subprocesso) {
+
+    var anterior = subprocesso.getEmprestimo();
+    planoFinanceiroEntityRepository.inativarPlanos(subprocesso.getId());
+    if (planoFinanceiroEntityRepository.countByEmprestimo_IdAndEstado(anterior.getId(), Estado.A.name()) == 0) {
+      planoFinanceiroEntityRepository.reativarPlanos(anterior.getId());
+    }
+
+    var pedido = subprocesso.getPedido();
+    pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
+    pedidoEntityRepository.save(pedido);
   }
 
   // Fundo Social / Recuperação: decide o pedido criado em saveFundoSocial

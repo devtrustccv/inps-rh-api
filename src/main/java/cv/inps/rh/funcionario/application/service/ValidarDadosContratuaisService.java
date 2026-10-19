@@ -66,6 +66,11 @@ public class ValidarDadosContratuaisService {
     if (dc.getTipoVinculoLaboralId() == null)
       throw IgrpResponseStatusException.badRequest("Tipo de vínculo laboral é obrigatório.");
 
+    // Todo o colaborador tem situação laboral (contrato, mobilidade, situação laboral e regime são
+    // sempre criados; carreira e salário dependem do vínculo).
+    if (dc.getSituacaoLaboralId() == null)
+      throw IgrpResponseStatusException.badRequest("Situação laboral é obrigatória.");
+
     // -----------------------------
     // EXISTÊNCIA DAS REFERÊNCIAS (FK)
     // -----------------------------
@@ -145,6 +150,10 @@ public class ValidarDadosContratuaisService {
       if (escalao == null)
         throw IgrpResponseStatusException.badRequest("Escalão inválido.");
       dc.setSalario(escalao.getValor());
+      // Regra: quem tem carreira tem obrigatoriamente salário (vem do escalão).
+      if (dc.getSalario() == null || dc.getSalario().signum() <= 0)
+        throw IgrpResponseStatusException.badRequest(
+            "O escalão escolhido não tem valor parametrizado: uma carreira tem de ter salário.");
     }
     // PCCS SEM carreira (flgCarreira != 1): o escalão não pende de carreira, é gravado
     // directamente no tiprel — mas o salário continua a ser automático (valor do escalão).

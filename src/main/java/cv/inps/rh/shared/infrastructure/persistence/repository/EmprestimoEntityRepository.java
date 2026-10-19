@@ -39,6 +39,15 @@ public interface EmprestimoEntityRepository extends
 
   List<EmprestimoEntity> findByUuidNotAndTiprel_FunId(String uuid, FuncionarioEntity funcionarioEntity);
 
+  // Versões do mesmo pedido: o empréstimo inicial e os subprocessos (Amortização / Renegociação),
+  // que reutilizam o pedido do inicial (AdiantamentoService / ReforcoDividaService).
+  List<EmprestimoEntity> findAllByPedido_IdOrderByVersaoAscIdAsc(Long pedidoId);
+
+  // Uma linha por pedido, na versão em vigor: a mais recente que seja o empréstimo inicial ou um
+  // subprocesso (Amortização / Renegociação) já concluído — ATIVO (Amortização, após a Verificação)
+  // ou CABIMENTADO (Renegociação, após o Contrato; o mesmo estado final do Empréstimo Viatura). Um
+  // subprocesso ainda em curso não substitui o empréstimo na lista — aparece na expansão
+  // (GET /emprestimo/{id}/versoes); emprestimoIdEmCurso aponta para ele (cancelados não contam).
   @Query("""
       SELECT new cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO(
           p.uuid,
@@ -67,7 +76,26 @@ public interface EmprestimoEntityRepository extends
           e.valorDivida,
           e.dataInicio,
           p.etapa,
-          ''
+          '',
+          (
+            SELECT emCurso.uuid
+            FROM EmprestimoEntity emCurso
+            WHERE emCurso.id = (
+              SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+            )
+          ),
+          (
+            SELECT emCurso.tipoSituacao
+            FROM EmprestimoEntity emCurso
+            WHERE emCurso.id = (
+              SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+            )
+          ),
+          (
+            SELECT COUNT(versao) FROM EmprestimoEntity versao WHERE versao.pedido.id = p.id
+          )
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id
@@ -75,6 +103,7 @@ public interface EmprestimoEntityRepository extends
             SELECT MAX(latestLoan.id)
             FROM EmprestimoEntity latestLoan
             WHERE latestLoan.pedido.id = p.id
+            AND (latestLoan.emprestimo IS NULL OR latestLoan.estado IN ('ATIVO', 'CABIMENTADO'))
       )
       AND e.estado <> 'CANCELADO'
       AND e.tiprel.id = tr.id

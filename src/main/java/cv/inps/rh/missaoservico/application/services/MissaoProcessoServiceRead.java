@@ -59,6 +59,7 @@ public class MissaoProcessoServiceRead {
   private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
   private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
   private final MissaoProcessoEntityRepository missaoProcessoRepository;
+  private final ParamAjudaCustoService paramAjudaCustoService;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -322,6 +323,10 @@ public class MissaoProcessoServiceRead {
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);
     response.setAjudasCusto(ajudas);
+    if (tipo == TipoProcesso.AJUDA_CUSTO) {
+      // Valor diário base parametrizado (cargo superior da missão), para o ecrã pré-preencher.
+      response.setValorDiarioAjudaCusto(paramAjudaCustoService.valorDiarioBase(missao, ativos));
+    }
     response.setColaboradoresDisponiveis(disponiveis);
     response.setNotificacao(notificacao);
 

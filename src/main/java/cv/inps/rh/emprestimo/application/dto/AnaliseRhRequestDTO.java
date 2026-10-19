@@ -7,7 +7,6 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -58,7 +57,8 @@ public class AnaliseRhRequestDTO {
       @NotNull(message = "O parecer do responsável é obrigatório")
       ParecerProcesso parecer,
 
-      @NotBlank(message = "A observação do responsável é obrigatória")
+      // Obrigatória só para Não Conforme / Retificação (changelog v2 §2) — validado no
+      // formulário; com @NotBlank um "Conforme" sem observação dava 400.
       String observacao
 
   ) {

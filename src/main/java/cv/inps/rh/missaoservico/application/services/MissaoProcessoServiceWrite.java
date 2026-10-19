@@ -65,6 +65,7 @@ public class MissaoProcessoServiceWrite {
   private static final String TIPO_DOC_REQUISICAO = "EMISSAO_REQUISICAO";
 
   private final MissaoProcessoSupport support;
+  private final ParamAjudaCustoService paramAjudaCustoService;
   private final ProcessoEtapaGuard guard;
   private final RequisicaoPdfService requisicaoPdfService;
   private final MissaoProcessoEntityRepository missaoProcessoRepository;
@@ -686,6 +687,12 @@ public class MissaoProcessoServiceWrite {
   private List<LinhaLogistica> linhasAjudaCusto(MissaoServicoEntity missao, MissaoProcessoEntity processo,
                                                 List<AjudaCustoRequestDTO> itens) {
     var alimentacaoPorColab = alimentacaoPorColaborador(missao.getUuid());
+    // Valor diário base parametrizado (RH_T_PARAM_AJUDA_CUSTO): o do colaborador com o cargo superior
+    // aplica-se a todos; nacional/estrangeiro conforme o destino. Sem parametrização usa-se o do ecrã.
+    var colabsAtivos = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missao.getUuid()).stream()
+        .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
+        .toList();
+    var baseParametrizada = paramAjudaCustoService.valorDiarioBase(missao, colabsAtivos);
     var out = new ArrayList<LinhaLogistica>();
     for (var item : itens) {
       if (item == null)
@@ -699,11 +706,14 @@ public class MissaoProcessoServiceWrite {
       if (item.getNumeroDiasAlojamento() == null || item.getNumeroDiasAlojamento() < 0) {
         throw IgrpResponseStatusException.badRequest("ajudasCusto: numeroDiasAlojamento é obrigatório e não pode ser negativo");
       }
-      if (item.getValorDiario() == null) {
-        throw IgrpResponseStatusException.badRequest("ajudasCusto: valorDiario é obrigatório");
+      var base = baseParametrizada != null ? baseParametrizada : item.getValorDiario();
+      if (base == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Não há valor de ajuda de custo parametrizado para as carreiras dos colaboradores desta missão: "
+                + "indique o valor diário ou configure-o em Outras Configurações → Missão.");
       }
       var colab = colaboradoresDaLinha(missao.getUuid(), List.of(item.getColaboradorId()), "ajudasCusto").getFirst();
-      var diario = calcularValorDiarioAjudaCusto(item.getValorDiario(), item.getFlgAlojamento(), alimentacaoPorColab.get(colab.getId()));
+      var diario = calcularValorDiarioAjudaCusto(base, item.getFlgAlojamento(), alimentacaoPorColab.get(colab.getId()));
 
       var log = novaLinha(missao, processo);
       log.setFlgAlojamento(item.getFlgAlojamento() ? "SIM" : "NAO");
