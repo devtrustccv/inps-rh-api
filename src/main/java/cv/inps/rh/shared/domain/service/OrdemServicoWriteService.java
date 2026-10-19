@@ -24,7 +24,7 @@ public class OrdemServicoWriteService {
         os.setTiprelId(tiprel);
         os.setReferente(tipoOrdemServico);
         os.setDescricao(tipoOrdemServico + " - " + (funcionario.getNome() != null ? funcionario.getNome() : ""));
-        os.setNuOrdem("1"); // TODO: usar sequência real
+        os.setNuOrdem(ordemServicoRepository.proximoNumero()); // sequencial por ano
         os.setEstado(Estado.A);
         os.setUuid(UuidCreator.getTimeOrderedEpoch());
         return ordemServicoRepository.save(os);

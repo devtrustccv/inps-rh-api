@@ -100,6 +100,9 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
       """)
   Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 
+  /** Vínculo mais recente do funcionário no estado indicado (ex.: P = pendente de validação). */
+  Optional<TiposRelacionamentoEntity> findFirstByFunId_UuidAndEstadoOrderByIdDesc(UUID funcionarioUuid, cv.inps.rh.shared.application.constants.Estado estado);
+
   @Query("""
       SELECT t
       FROM TiposRelacionamentoEntity t
