@@ -41,6 +41,9 @@ public class ReforcoDividaService {
     // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
     // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
     var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
+    if (emEdicao) {
+      EmprestimoHelper.validarEtapaAtual(base, EtapaEmprestimo.PEDIDO);
+    }
     var loan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
@@ -126,6 +129,7 @@ public class ReforcoDividaService {
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_REFORCO);
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
@@ -215,6 +219,7 @@ public class ReforcoDividaService {
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO);
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
     emprestimoEntityRepository.save(loan);
@@ -274,6 +279,7 @@ public class ReforcoDividaService {
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
@@ -331,6 +337,7 @@ public class ReforcoDividaService {
     var isNext = request.getAction().equals(ProcessStepAction.NEXT);
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
 
     loan.setEstado(isNext ? StatusEmprestimo.CABIMENTADO.name() : loan.getEstado());
 

@@ -66,6 +66,10 @@ public class AquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
+    if (isLoanUpdate) {
+      EmprestimoHelper.validarEtapaAtual(entity, EtapaEmprestimo.PEDIDO);
+    }
+
     // Nome do fornecedor vem do NIF escolhido no pedido e é obrigatório.
     if (!StringUtils.hasText(request.getNomeFornecedor())) {
       throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
@@ -99,13 +103,14 @@ public class AquisicaoViaturaService {
       order.setEstado(Estado.A.name());
 
     } else {
-
       order = entity.getPedido();
+    }
 
-      if (request.getAction().equals(ProcessStepAction.NEXT)) {
-        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
-      }
+    // Seguinte submete o pedido também quando é criado já com Seguinte (antes só ao actualizar: o
+    // pedido ficava POR_SUBMETER na etapa PEDIDO e a Análise RH é que forçava a etapa).
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+      order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+      entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
     }
 
     order = pedidoEntityRepository.save(order);
@@ -127,6 +132,7 @@ public class AquisicaoViaturaService {
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_PEDIDO);
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
@@ -247,6 +253,7 @@ public class AquisicaoViaturaService {
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO);
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
 
@@ -308,6 +315,7 @@ public class AquisicaoViaturaService {
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
@@ -366,6 +374,7 @@ public class AquisicaoViaturaService {
     var isNext = request.getAction().equals(ProcessStepAction.NEXT);
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
     if (Objects.nonNull(request.getDataInicioEmprestimo())) {
       loan.setDataInicio(request.getDataInicioEmprestimo());
       emprestimoEntityRepository.save(loan);

@@ -50,6 +50,9 @@ public class AdiantamentoService {
     // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
     // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
     var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
+    if (emEdicao) {
+      EmprestimoHelper.validarEtapaAtual(base, EtapaEmprestimo.PEDIDO);
+    }
     var initialLoan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
@@ -129,6 +132,7 @@ public class AdiantamentoService {
   public void saveAnaliseRh(String emprestimoId, AnaliseRhAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO);
     loan.setBanco(request.getBancoId() != null ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     loan.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     loan.setSwift(request.getSwift());
@@ -212,6 +216,7 @@ public class AdiantamentoService {
   public void anexarComprovativo(String emprestimoId, DocumentoDTO request, String action) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO);
 
     documentService.saveDocuments(
         List.of(request),
@@ -233,6 +238,7 @@ public class AdiantamentoService {
   public void verificar(String emprestimoId, VerificarAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());

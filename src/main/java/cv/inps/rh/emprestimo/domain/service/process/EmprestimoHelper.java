@@ -49,6 +49,45 @@ public class EmprestimoHelper {
   );
 
   /**
+   * Gravar/Seguinte só na etapa em que o processo se encontra. Antes cada endpoint repunha a etapa
+   * do pedido na sua — consultar uma etapa anterior e gravar fazia o processo recuar. Processos
+   * encerrados (concluídos, cancelados, desistidos) já não aceitam alterações nas etapas.
+   */
+  public static void validarEtapaAtual(EmprestimoEntity loan, EtapaEmprestimo etapa) {
+    var estado = loan.getEstado();
+    var encerrado = java.util.Map.of(
+        StatusEmprestimo.CANCELADO.name(), "cancelado",
+        StatusEmprestimo.DESISTENCIA.name(), "encerrado por desistência",
+        StatusEmprestimo.ATIVO.name(), "concluído",
+        StatusEmprestimo.CABIMENTADO.name(), "concluído");
+    if (estado != null && encerrado.containsKey(estado)) {
+      throw IgrpResponseStatusException.badRequest(
+          "O processo está " + encerrado.get(estado) + " e já não pode ser alterado.");
+    }
+    var atual = loan.getPedido() != null ? loan.getPedido().getEtapa() : null;
+    if (etapa.name().equals(atual)) {
+      return;
+    }
+    // Subprocessos submetidos antes da correção do Seguinte do pedido ficaram com a etapa PEDIDO:
+    // na prática estão na Análise RH.
+    var analiseRh = etapa == EtapaEmprestimo.ANALISE_RH_PEDIDO
+        || etapa == EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO
+        || etapa == EtapaEmprestimo.ANALISE_RH_REFORCO;
+    if (analiseRh && EtapaEmprestimo.PEDIDO.name().equals(atual)
+        && StatusEmprestimo.SUBMETIDO.name().equals(estado)) {
+      return;
+    }
+    var descricao = atual == null ? "-" : java.util.Arrays.stream(EtapaEmprestimo.values())
+        .filter(e -> e.name().equals(atual))
+        .map(EtapaEmprestimo::getDescription)
+        .findFirst()
+        .orElse(atual);
+    throw IgrpResponseStatusException.badRequest(
+        "A etapa «" + etapa.getDescription() + "» não está em curso: o processo encontra-se em «"
+            + descricao + "». Pode consultá-la, mas não gravar.");
+  }
+
+  /**
    * true se {@code base} é um subprocesso ainda em curso (a editar no próprio registo); false se é
    * o empréstimo em vigor (inicial, ou subprocesso já concluído — ATIVO/CABIMENTADO), a partir do
    * qual se cria uma versão nova. Um subprocesso cancelado/desistido não pode ser reaberto.
