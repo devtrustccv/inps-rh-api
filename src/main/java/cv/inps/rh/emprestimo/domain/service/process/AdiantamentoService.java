@@ -86,7 +86,8 @@ public class AdiantamentoService {
     newLoan.setNif(initialLoan.getNif());
     newLoan.setSwift(initialLoan.getSwift());
     newLoan.setValorPrestacao(initialLoan.getValorPrestacao());
-    newLoan.setDescTaxaEsforco(initialLoan.getDescTaxaEsforco());
+    // A avaliação da taxa de esforço é da Análise Financeira de cada processo: não se herda (a
+    // Renegociação abria com a do empréstimo anterior já preenchida).
     newLoan.setRenogociacao(initialLoan.getRenogociacao());
     newLoan.setTmId(initialLoan.getTmId());
     newLoan.setFinalidade(initialLoan.getFinalidade());
