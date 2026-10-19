@@ -37,12 +37,10 @@ public class ReforcoDividaService {
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 
     var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    // Reabrir o pedido de um subprocesso ainda por submeter / em correção (Gravar e depois
-    // Seguinte, ou Retificação) actualiza essa versão — antes criava-se sempre outra, encadeada na
-    // anterior, e a que ficava por submeter era abandonada.
-    var emEdicao = base.getEmprestimo() != null
-        && (StatusEmprestimo.POR_SUBMETER.name().equals(base.getEstado())
-            || StatusEmprestimo.EM_CORRECAO.name().equals(base.getEstado()));
+    // Reabrir o pedido de um subprocesso ainda não concluído (Gravar e depois Seguinte, voltar ao
+    // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
+    // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
+    var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
     var loan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
@@ -107,6 +105,12 @@ public class ReforcoDividaService {
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
 
+      // Como na Viatura, o Seguinte do pedido passa o processo para a Análise RH — antes a etapa
+      // ficava PEDIDO: a barra não marcava o pedido como feito e a lista retomava no pedido.
+      var order = newLoan.getPedido();
+      order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+      pedidoEntityRepository.save(order);
+
       adiantamentoEmprestimoHelper.saveByTipoSituacao(
           tipoSituacao,
           newLoan,
@@ -126,7 +130,9 @@ public class ReforcoDividaService {
     loan.setJuro(request.getJuros());
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+    // Etapa da Renegociação (era ANALISE_RH_PEDIDO, a da Viatura: a barra de etapas e a retoma
+    // pela lista tratavam o subprocesso como o pedido inicial).
+    order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
 
     if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
       // Retificação do parecer técnico devolve já à etapa anterior — não
