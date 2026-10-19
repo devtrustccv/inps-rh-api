@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.shared.util.ValidationUtil;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -65,7 +66,11 @@ public class AquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
-    entity.setNomeFornecedor(request.getNomeFornecedor());
+    // Nome do fornecedor vem do NIF escolhido no pedido e é obrigatório.
+    if (!StringUtils.hasText(request.getNomeFornecedor())) {
+      throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
+    }
+    entity.setNomeFornecedor(request.getNomeFornecedor().trim());
     entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
@@ -78,7 +83,8 @@ public class AquisicaoViaturaService {
     entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
     entity.setJuro(request.getJuros());
-    entity.setNib(request.getNib());
+    // Só validado se preenchido (21 dígitos), como no resto do sistema — antes era gravado sem validação.
+    entity.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     entity.setNif(request.getNif());
 
     PedidoEntity order;
