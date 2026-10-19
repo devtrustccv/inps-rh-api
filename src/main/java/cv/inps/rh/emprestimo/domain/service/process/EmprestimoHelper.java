@@ -4,8 +4,10 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
@@ -45,6 +47,23 @@ public class EmprestimoHelper {
       EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
       EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
   );
+
+  /**
+   * true se {@code base} é um subprocesso ainda em curso (a editar no próprio registo); false se é
+   * o empréstimo em vigor (inicial, ou subprocesso já concluído — ATIVO/CABIMENTADO), a partir do
+   * qual se cria uma versão nova. Um subprocesso cancelado/desistido não pode ser reaberto.
+   */
+  public static boolean isSubprocessoEmCurso(EmprestimoEntity base) {
+    if (base.getEmprestimo() == null) {
+      return false;
+    }
+    var estado = base.getEstado();
+    if (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado)) {
+      throw IgrpResponseStatusException.badRequest(
+          "Este subprocesso foi cancelado. Inicie um novo a partir do empréstimo em vigor.");
+    }
+    return !StatusEmprestimo.ATIVO.name().equals(estado) && !StatusEmprestimo.CABIMENTADO.name().equals(estado);
+  }
 
   /**
    * Novo subprocesso (Amortização/Renegociação) sobre um empréstimo em vigor. Todas as versões
