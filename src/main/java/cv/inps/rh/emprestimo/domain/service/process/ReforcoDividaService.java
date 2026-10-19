@@ -84,7 +84,8 @@ public class ReforcoDividaService {
     newLoan.setNif(loan.getNif());
     newLoan.setSwift(loan.getSwift());
     newLoan.setValorPrestacao(loan.getValorPrestacao());
-    newLoan.setDescTaxaEsforco(loan.getDescTaxaEsforco());
+    // A avaliação da taxa de esforço é da Análise Financeira de cada processo: não se herda (a
+    // Renegociação abria com a do empréstimo anterior já preenchida).
     newLoan.setRenogociacao(loan.getRenogociacao());
     newLoan.setTmId(loan.getTmId());
     newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
