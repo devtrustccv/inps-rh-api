@@ -273,6 +273,7 @@ public class AdiantamentoService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
@@ -280,6 +281,7 @@ public class AdiantamentoService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());

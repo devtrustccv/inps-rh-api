@@ -261,6 +261,7 @@ public class ReforcoDividaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -269,6 +270,7 @@ public class ReforcoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
@@ -319,6 +321,7 @@ public class ReforcoDividaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -327,6 +330,7 @@ public class ReforcoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
