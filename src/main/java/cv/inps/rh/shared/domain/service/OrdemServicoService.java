@@ -27,11 +27,14 @@ import java.util.stream.Collectors;
 public class OrdemServicoService {
 
   private final ParamDocOutputEntityRepository repository;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository ordemServicoRepository;
   private final Map<OrdemServico, OrdemServicoProvider> providers;
 
-  public OrdemServicoService(ParamDocOutputEntityRepository repository, List<OrdemServicoProvider> providerList) {
+  public OrdemServicoService(ParamDocOutputEntityRepository repository, List<OrdemServicoProvider> providerList,
+                             cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository ordemServicoRepository) {
 
     this.repository = repository;
+    this.ordemServicoRepository = ordemServicoRepository;
 
     this.providers = providerList.stream()
         .collect(Collectors.toMap(
@@ -47,6 +50,8 @@ public class OrdemServicoService {
     var ctx = new Context();
 
     ctx.setVariable("assunto", documentOutputType.getTitulo());
+    // Nº provisório (o próximo do ano): a ordem só é gravada ao validar; o template mostrava "______".
+    ctx.setVariable("numeroOrdem", ordemServicoRepository.proximoNumero());
     ctx.setVariable("conteudo", htmlBody);
     ctx.setVariable("dataEmissao", formatNow());
     ctx.setVariable("nomePresidente", getResponsavel(documentOutputType.getResponsavel()));

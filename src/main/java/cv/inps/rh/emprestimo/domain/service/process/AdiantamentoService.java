@@ -46,12 +46,13 @@ public class AdiantamentoService {
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    // Reabrir o pedido de um subprocesso ainda por submeter / em correção (Gravar e depois
-    // Seguinte, ou Retificação) actualiza essa versão — antes criava-se sempre outra, encadeada na
-    // anterior, e a que ficava por submeter era abandonada.
-    var emEdicao = base.getEmprestimo() != null
-        && (StatusEmprestimo.POR_SUBMETER.name().equals(base.getEstado())
-            || StatusEmprestimo.EM_CORRECAO.name().equals(base.getEstado()));
+    // Reabrir o pedido de um subprocesso ainda não concluído (Gravar e depois Seguinte, voltar ao
+    // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
+    // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
+    var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
+    if (emEdicao) {
+      EmprestimoHelper.validarEtapaAtual(base, EtapaEmprestimo.PEDIDO);
+    }
     var initialLoan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
@@ -88,7 +89,8 @@ public class AdiantamentoService {
     newLoan.setNif(initialLoan.getNif());
     newLoan.setSwift(initialLoan.getSwift());
     newLoan.setValorPrestacao(initialLoan.getValorPrestacao());
-    newLoan.setDescTaxaEsforco(initialLoan.getDescTaxaEsforco());
+    // A avaliação da taxa de esforço é da Análise Financeira de cada processo: não se herda (a
+    // Renegociação abria com a do empréstimo anterior já preenchida).
     newLoan.setRenogociacao(initialLoan.getRenogociacao());
     newLoan.setTmId(initialLoan.getTmId());
     newLoan.setFinalidade(initialLoan.getFinalidade());
@@ -110,6 +112,12 @@ public class AdiantamentoService {
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
 
+      // Como na Viatura, o Seguinte do pedido passa o processo para a Análise RH — antes a etapa
+      // ficava PEDIDO: a barra não marcava o pedido como feito e a lista retomava no pedido.
+      var order = newLoan.getPedido();
+      order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
+      pedidoEntityRepository.save(order);
+
       emprestimoHelper.saveByTipoSituacao(
           tipoSituacao,
           newLoan,
@@ -124,6 +132,7 @@ public class AdiantamentoService {
   public void saveAnaliseRh(String emprestimoId, AnaliseRhAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO);
     loan.setBanco(request.getBancoId() != null ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     loan.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     loan.setSwift(request.getSwift());
@@ -207,6 +216,7 @@ public class AdiantamentoService {
   public void anexarComprovativo(String emprestimoId, DocumentoDTO request, String action) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO);
 
     documentService.saveDocuments(
         List.of(request),
@@ -228,6 +238,7 @@ public class AdiantamentoService {
   public void verificar(String emprestimoId, VerificarAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());

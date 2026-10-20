@@ -37,12 +37,13 @@ public class ReforcoDividaService {
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 
     var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    // Reabrir o pedido de um subprocesso ainda por submeter / em correção (Gravar e depois
-    // Seguinte, ou Retificação) actualiza essa versão — antes criava-se sempre outra, encadeada na
-    // anterior, e a que ficava por submeter era abandonada.
-    var emEdicao = base.getEmprestimo() != null
-        && (StatusEmprestimo.POR_SUBMETER.name().equals(base.getEstado())
-            || StatusEmprestimo.EM_CORRECAO.name().equals(base.getEstado()));
+    // Reabrir o pedido de um subprocesso ainda não concluído (Gravar e depois Seguinte, voltar ao
+    // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
+    // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
+    var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
+    if (emEdicao) {
+      EmprestimoHelper.validarEtapaAtual(base, EtapaEmprestimo.PEDIDO);
+    }
     var loan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
@@ -86,7 +87,8 @@ public class ReforcoDividaService {
     newLoan.setNif(loan.getNif());
     newLoan.setSwift(loan.getSwift());
     newLoan.setValorPrestacao(loan.getValorPrestacao());
-    newLoan.setDescTaxaEsforco(loan.getDescTaxaEsforco());
+    // A avaliação da taxa de esforço é da Análise Financeira de cada processo: não se herda (a
+    // Renegociação abria com a do empréstimo anterior já preenchida).
     newLoan.setRenogociacao(loan.getRenogociacao());
     newLoan.setTmId(loan.getTmId());
     newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
@@ -107,6 +109,12 @@ public class ReforcoDividaService {
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
 
+      // Como na Viatura, o Seguinte do pedido passa o processo para a Análise RH — antes a etapa
+      // ficava PEDIDO: a barra não marcava o pedido como feito e a lista retomava no pedido.
+      var order = newLoan.getPedido();
+      order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+      pedidoEntityRepository.save(order);
+
       adiantamentoEmprestimoHelper.saveByTipoSituacao(
           tipoSituacao,
           newLoan,
@@ -121,12 +129,15 @@ public class ReforcoDividaService {
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_REFORCO);
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+    // Etapa da Renegociação (era ANALISE_RH_PEDIDO, a da Viatura: a barra de etapas e a retoma
+    // pela lista tratavam o subprocesso como o pedido inicial).
+    order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
 
     if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
       // Retificação do parecer técnico devolve já à etapa anterior — não
@@ -208,6 +219,7 @@ public class ReforcoDividaService {
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO);
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
     emprestimoEntityRepository.save(loan);
@@ -267,6 +279,7 @@ public class ReforcoDividaService {
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
@@ -324,6 +337,7 @@ public class ReforcoDividaService {
     var isNext = request.getAction().equals(ProcessStepAction.NEXT);
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
 
     loan.setEstado(isNext ? StatusEmprestimo.CABIMENTADO.name() : loan.getEstado());
 

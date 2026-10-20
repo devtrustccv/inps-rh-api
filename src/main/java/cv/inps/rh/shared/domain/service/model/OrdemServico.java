@@ -3,7 +3,7 @@ package cv.inps.rh.shared.domain.service.model;
 public enum OrdemServico {
   FIM_COMISSAO_SERVICO,
   CONVERSAO_CONTRATO,
-  LICENSA_S_VENCIMENTO,
+  LICENCA_S_VENCIMENTO,
   PROGRESSAO_CARGO,
   PROGRESSAO_CATEGORIA,
   SUBSTITUICAO,
