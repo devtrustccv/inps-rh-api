@@ -177,12 +177,14 @@ public class ReforcoDividaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           Optional.ofNullable(request.getResponsavel())
               .ifPresent(resp -> {
                 obj.setParecerResponsavel(resp.parecer().name());
                 obj.setObservacaoResponsavel(resp.observacao());
                 obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
                 obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+                obj.setDataParecerResponsavel(resp.data());
               });
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -191,6 +193,7 @@ public class ReforcoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           // Antes só se gravava o responsável ao actualizar uma decisão existente: no primeiro
           // NEXT (sem Gravar antes) o parecer do responsável perdia-se.
           Optional.ofNullable(request.getResponsavel())
@@ -199,6 +202,7 @@ public class ReforcoDividaService {
                 newObj.setObservacaoResponsavel(resp.observacao());
                 newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
                 newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+                newObj.setDataParecerResponsavel(resp.data());
               });
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());

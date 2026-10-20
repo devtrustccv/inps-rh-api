@@ -192,14 +192,21 @@ public class EmprestimoReadService {
     var baseDecision = new BaseDecisaoDTO();
     baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
-    baseDecision.setData(obj.getCreatedDate().toLocalDate());
+    // Data escolhida no parecer; registos antigos (sem ela) mostram a data de registo, como antes.
+    baseDecision.setData(obj.getDataParecer() != null
+        ? obj.getDataParecer()
+        : obj.getCreatedDate().toLocalDate());
+    baseDecision.setDataExecucao((obj.getLastModifiedDate() != null
+        ? obj.getLastModifiedDate()
+        : obj.getCreatedDate()).toLocalDate());
     baseDecision.setExecutadoPor(obj.getLastModifiedBy());
 
     var responsavel = new BaseDecisaoDTO.Responsavel(
         obj.getParecerResponsavel(),
         obj.getObservacaoResponsavel(),
         obj.getDataObservacaoResponsavel(),
-        obj.getUtilizadorObservacaoResponsavel()
+        obj.getUtilizadorObservacaoResponsavel(),
+        obj.getDataParecerResponsavel()
     );
 
     baseDecision.setResponsavel(responsavel);

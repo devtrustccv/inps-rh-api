@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -66,4 +67,11 @@ public class PedidoDecisaoEntity extends AuditEntity {
 
   @Column(name = "DATA_OBSERVACAO_RESPONSAVEL")
   private LocalDateTime dataObservacaoResponsavel;
+
+  // Data do parecer escolhida no formulário (a de execução é a de registo/alteração).
+  @Column(name = "DATA_PARECER")
+  private LocalDate dataParecer;
+
+  @Column(name = "DATA_PARECER_RESPONSAVEL")
+  private LocalDate dataParecerResponsavel;
 }

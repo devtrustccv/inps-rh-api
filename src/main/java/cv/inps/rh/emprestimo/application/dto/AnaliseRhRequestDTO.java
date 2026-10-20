@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,8 @@ public class AnaliseRhRequestDTO {
 
   private String observacao;
 
+  private LocalDate data;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
   @NotNull(message = "The field <action> is required")
@@ -59,7 +62,9 @@ public class AnaliseRhRequestDTO {
 
       // Obrigatória só para Não Conforme / Retificação (changelog v2 §2) — validado no
       // formulário; com @NotBlank um "Conforme" sem observação dava 400.
-      String observacao
+      String observacao,
+
+      LocalDate data
 
   ) {
   }
