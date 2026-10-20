@@ -150,7 +150,9 @@ public class EmprestimoReadService {
         EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
         EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
         EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name(),
+        EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name(),
+        EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
     );
 
     var decisions = pedidoDecisaoEntityRepository
@@ -168,6 +170,8 @@ public class EmprestimoReadService {
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_REFORCO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
     ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name())).ifPresent(allDecisions::setElaboracaoContratoPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name())).ifPresent(allDecisions::setElaboracaoContratoRenegociacao);
 
     dto.setDecisao(allDecisions);
 

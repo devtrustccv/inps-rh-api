@@ -44,6 +44,7 @@ public class AquisicaoViaturaService {
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
   private final ApplicationAuditorAware auditorAware;
+  private final EmprestimoHelper emprestimoHelper;
 
   public IdDTO saveUpdatePedidoEmprestimo(String emprestimoId, PedidoEmprestimoRequestDTO request) {
 
@@ -415,5 +416,6 @@ public class AquisicaoViaturaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
+    emprestimoHelper.registarExecucaoEtapa(order, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
   }
 }

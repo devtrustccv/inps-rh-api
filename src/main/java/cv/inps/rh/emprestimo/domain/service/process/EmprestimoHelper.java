@@ -4,11 +4,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
@@ -45,8 +47,34 @@ public class EmprestimoHelper {
       EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
       EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
       EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
-      EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
+      EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name(),
+      EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
   );
+
+  /** Decisão das etapas sem parecer (ex.: Elaboração de Contrato): só regista quem executou e quando. */
+  public static final String DECISAO_EXECUTADO = "EXECUTADO";
+
+  /**
+   * Regista a execução de uma etapa sem parecer em RH_T_PEDIDO_DECISAO, para o ecrã mostrar
+   * "Executado Por" / "Data Execução" como nas restantes etapas (antes não havia registo).
+   */
+  public void registarExecucaoEtapa(PedidoEntity pedido, EtapaEmprestimo etapa) {
+    var hoje = LocalDate.now(ZoneId.systemDefault());
+    var decisao = pedidoDecisaoEntityRepository
+        .findByPedidoAndEtapaAndEstado(pedido, etapa.name(), Estado.A.name())
+        .orElseGet(() -> {
+          var nova = new PedidoDecisaoEntity();
+          nova.setPedido(pedido);
+          nova.setDecisao(DECISAO_EXECUTADO);
+          nova.setEtapa(etapa.name());
+          nova.setReferencia(ProcessType.EMPRESTIMO.name());
+          nova.setEstado(Estado.A.name());
+          nova.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          return nova;
+        });
+    decisao.setDataParecer(hoje);
+    pedidoDecisaoEntityRepository.save(decisao);
+  }
 
   /**
    * Gravar/Seguinte só na etapa em que o processo se encontra. Antes cada endpoint repunha a etapa
