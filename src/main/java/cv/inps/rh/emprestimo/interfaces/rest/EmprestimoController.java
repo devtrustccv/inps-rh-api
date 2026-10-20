@@ -766,6 +766,16 @@ public class EmprestimoController {
 
   }
 
+  // Confirmação manual do pagamento (Cabimentado → Ativo) até existir o job de confirmação.
+  @PostMapping("/{emprestimoId}/confirmar-pagamento")
+  public ResponseEntity<Void> confirmarPagamento(
+      @PathVariable String emprestimoId,
+      @RequestBody @Valid cv.inps.rh.emprestimo.application.dto.ConfirmarPagamentoData data
+  ) {
+    final var command = new cv.inps.rh.emprestimo.application.commands.ConfirmarPagamentoEmprestimoCommand(emprestimoId, data);
+    return commandBus.send(command);
+  }
+
   @PostMapping("/{emprestimoId}/estado")
   public ResponseEntity<Void> changeStatus(
       @PathVariable String emprestimoId,

@@ -347,7 +347,12 @@ public class ReforcoDividaService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
 
-    loan.setEstado(isNext ? StatusEmprestimo.CABIMENTADO.name() : loan.getEstado());
+    // Só o Reforço de Capital paga ao colaborador: fica Cabimentado à espera da confirmação do
+    // pagamento. Aumento/Redução do nº de prestações não têm pagamento — ficam logo Ativo.
+    if (isNext) {
+      var comPagamento = TipoSituacao.REFORCO_CAPITAL.name().equals(loan.getTipoSituacao());
+      loan.setEstado(comPagamento ? StatusEmprestimo.CABIMENTADO.name() : StatusEmprestimo.ATIVO.name());
+    }
 
     var step = isNext ?
         EtapaEmprestimo.PAGAMENTO :

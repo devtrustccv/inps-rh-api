@@ -55,4 +55,8 @@ public class DecisaoEmprestimoDTO {
   @Valid
   private BaseDecisaoDTO elaboracaoContratoRenegociacao;
 
+  // Confirmação do pagamento: data (do pagamento), observação, executadoPor / dataExecucao.
+  @Valid
+  private BaseDecisaoDTO pagamento;
+
 }

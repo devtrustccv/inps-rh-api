@@ -134,6 +134,19 @@
       "isUrl": false,
       "primaryKey": false,
       "module": "emprestimo"
+    },
+    {
+      "name": "pagamento",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
     }
   ],
   "id": "p6jyheijsx"

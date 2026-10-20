@@ -234,6 +234,38 @@ public class EmprestimoWriteService {
     emprestimoHelper.savePlans(entity, plan);
   }
 
+  /**
+   * Pagamento confirmado: Cabimentado (contrato feito, à espera do pagamento) → Ativo (pago, em
+   * reembolso). Hoje é manual; o job de confirmação de pagamento deve chamar este mesmo método.
+   * Regista em RH_T_PEDIDO_DECISAO (etapa PAGAMENTO) quem confirmou, a data do pagamento e a
+   * observação, e guarda o comprovativo.
+   */
+  public void confirmarPagamento(String uuid, cv.inps.rh.emprestimo.application.dto.ConfirmarPagamentoData data) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    if (!StatusEmprestimo.CABIMENTADO.name().equals(entity.getEstado())
+        && !StatusEmprestimo.AGUARDA_PAGAMENTO.name().equals(entity.getEstado())) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível confirmar o pagamento de um empréstimo Cabimentado (à espera de pagamento).");
+    }
+
+    entity.setEstado(StatusEmprestimo.ATIVO.name());
+    emprestimoEntityRepository.save(entity);
+
+    emprestimoHelper.registarExecucaoEtapa(
+        entity.getPedido(), EtapaEmprestimo.PAGAMENTO, "PAGO", data.dataPagamento(), data.observacao());
+
+    if (!CollectionUtils.isEmpty(data.files())) {
+      documentService.saveDocuments(
+          data.files(),
+          entity.getTiprel().getFunId(),
+          entity.getUuid(),
+          ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PAGAMENTO.name()
+      );
+    }
+  }
+
   public void mudarEstadoEmprestimo(String uuid, String estado, String observacao, List<DocumentoDTO> files) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
