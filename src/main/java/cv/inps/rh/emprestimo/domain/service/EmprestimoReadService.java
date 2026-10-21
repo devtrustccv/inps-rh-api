@@ -118,7 +118,16 @@ public class EmprestimoReadService {
         .toList();
     dto.setOutrosEmprestimos(otherLoans);
 
-    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
+    // Empréstimos ativos do colaborador no INPS (RH_T_EMPRESTIMO): outros pedidos, só a versão Ativa
+    // mais recente de cada um (as versões do próprio empréstimo e os não pagos/cancelados ficam de fora).
+    var another = emprestimoEntityRepository.findByTiprel_FunIdAndEstado(funId, StatusEmprestimo.ATIVO.name())
+        .stream()
+        .filter(obj -> obj.getPedido() != null && !obj.getPedido().getId().equals(order.getId()))
+        .collect(Collectors.toMap(
+            obj -> obj.getPedido().getId(),
+            obj -> obj,
+            (a, b) -> (b.getVersao() != null && a.getVersao() != null && b.getVersao() > a.getVersao()) ? b : a))
+        .values()
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
             obj.getUuid(),
@@ -130,6 +139,24 @@ public class EmprestimoReadService {
         ))
         .toList();
     dto.setEmprestimos(another);
+
+    // Outros empréstimos (outras instituições) registados noutros pedidos do colaborador e ainda em
+    // curso: data de fim igual ou posterior a hoje, ou sem data de fim.
+    var hoje = LocalDate.now(ZoneId.systemDefault());
+    var outrosAnteriores = emprestimoOutroEntityRepository.findByFunAndEstado(funId, Estado.A.name())
+        .stream()
+        .filter(obj -> obj.getReferenciaOrigem() == null || !obj.getReferenciaOrigem().getId().equals(order.getId()))
+        .filter(obj -> obj.getDataFim() == null || !obj.getDataFim().isBefore(hoje))
+        .map(obj -> new OutrosEmprestimosDTO(
+            obj.getUuid(),
+            obj.getTiposEmprestimo(),
+            obj.getDataInicio(),
+            obj.getDataFim(),
+            obj.getValorEmprestimo(),
+            obj.getValorPrestacao()
+        ))
+        .toList();
+    dto.setOutrosEmprestimosAnteriores(outrosAnteriores);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 

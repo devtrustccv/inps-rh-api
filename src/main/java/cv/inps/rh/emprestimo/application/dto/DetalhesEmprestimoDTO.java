@@ -82,6 +82,10 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
 
+  // Outros empréstimos do colaborador registados noutros pedidos (RH_T_EMPRESTIMO_OUTROS), ainda
+  // em curso — só de leitura na Análise RH; os deste pedido continuam em outrosEmprestimos.
+  private List<OutrosEmprestimosDTO> outrosEmprestimosAnteriores = new ArrayList<>();
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 

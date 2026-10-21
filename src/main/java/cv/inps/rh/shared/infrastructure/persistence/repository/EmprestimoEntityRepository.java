@@ -39,6 +39,8 @@ public interface EmprestimoEntityRepository extends
 
   List<EmprestimoEntity> findByUuidNotAndTiprel_FunId(String uuid, FuncionarioEntity funcionarioEntity);
 
+  List<EmprestimoEntity> findByTiprel_FunIdAndEstado(FuncionarioEntity funcionarioEntity, String estado);
+
   // Versões do mesmo pedido: o empréstimo inicial e os subprocessos (Amortização / Renegociação),
   // que reutilizam o pedido do inicial (AdiantamentoService / ReforcoDividaService).
   List<EmprestimoEntity> findAllByPedido_IdOrderByVersaoAscIdAsc(Long pedidoId);
