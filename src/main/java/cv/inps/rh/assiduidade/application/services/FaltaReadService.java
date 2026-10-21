@@ -129,11 +129,25 @@ public class FaltaReadService {
     dto.setValorADescontar(e.getTotValDesc());
     dto.setDescontoRenumeracao(Objects.equals("S", e.getFlgDescSal()));
     dto.setEstadoProcessamento(e.getEstProc());
+    dto.setEstadoProcessamentoDesc(estadoProcessamentoDesc(e));
+    // AS-016: tipos de falta do mês (spec: Motivo = tipo da falta).
+    dto.setMotivo(e.getMotivo());
     dto.setEstado(e.getEstMensal());
     // AS-007: descrição legível ("Justificada"/"Injustificada") em vez do código da view.
     var est = e.getEstMensal();
     dto.setEstadoDesc(est == null || est.isEmpty() ? null : est.charAt(0) + est.substring(1).toLowerCase());
     return dto;
+  }
+
+  /**
+   * AS-017: descrição do estado de processamento em vez do código da view (PEND/PROC). Spec 20/10:
+   * "verifica se existe um registo em RH_REMUNERACOES" — sem desconto no salário não há o que
+   * processar, por isso não se aplica.
+   */
+  private static String estadoProcessamentoDesc(VfaltaMensalEntity e) {
+    if (!Objects.equals("S", e.getFlgDescSal()))
+      return "Não aplicável";
+    return "PROC".equals(e.getEstProc()) ? "Processado" : "Pendente";
   }
 
   private String formatarHoras(BigDecimal horas) {

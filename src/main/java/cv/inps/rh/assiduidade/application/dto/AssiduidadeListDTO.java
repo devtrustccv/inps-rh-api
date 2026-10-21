@@ -34,16 +34,23 @@ public class AssiduidadeListDTO  {
   private String direcao ;
 
 
-  /** Dias de falta do mes ainda POR justificar (sem registo em RH_T_FALTA). */
+  /**
+   * Todos os dias de falta do mes (spec: SUM(SINTESE_DIARIA.FALTA)), menos os de ausencia sem falta
+   * registada. = totalFaltasJustificadas + totalFaltasInjustificadas + totalFaltasPendentes.
+   */
   private Integer totalFalta ;
 
 
-  /** Dias de falta ja registados e a aguardar despacho (RH_T_FALTA.ESTADO = 'P'). */
+  /** Dias de falta a aguardar despacho (RH_T_FALTA P) ou devolvidos para correcao (C). */
   private Integer totalFaltasPendentes ;
 
 
-  /** Dias de falta ja registados e despachados (RH_T_FALTA.ESTADO = 'A'). */
+  /** Dias de falta aprovados com justificativo (RH_T_FALTA A + FLG_JUSTIFICATIVO = 'SIM'). */
   private Integer totalFaltasJustificadas ;
+
+
+  /** Dias de falta injustificados: sem falta viva registada (ou rejeitada), ou aprovada com 'NAO'. */
+  private Integer totalFaltasInjustificadas ;
 
 
   private Integer totalDias ;
