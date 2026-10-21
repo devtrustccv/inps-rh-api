@@ -41,7 +41,7 @@
         <igrp.auth.version>0.2.0-beta.8</igrp.auth.version>
         <java.version>26</java.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
-        <springdoc.version>2.9.0</springdoc.version>
+        <springdoc.version>2.9.1</springdoc.version>
     </properties>
     <dependencies>
 
@@ -203,7 +203,7 @@
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf</artifactId>
-            <version>10.0.7</version>
+            <version>10.6.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -231,7 +231,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.16.0</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
