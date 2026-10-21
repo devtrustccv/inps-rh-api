@@ -51,6 +51,7 @@ public class MovimentoResumoService {
       dto.setTotalFalta(entity.getTotalFaltas());
       dto.setTotalFaltasPendentes(entity.getTotalFaltasPendentes());
       dto.setTotalFaltasJustificadas(entity.getTotalFaltasJustificadas());
+      dto.setTotalFaltasInjustificadas(entity.getTotalFaltasInjustificadas());
 
       dto.setTotalHorasTrabalhadas(formatarHoras(entity.getHorasTrabalhadas()));
       dto.setTotalHoraAlmoco(formatarHoras(entity.getHorasAlmoco()));

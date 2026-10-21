@@ -113,3 +113,17 @@ aprovada ≠ justificada (marcar falta com "Com Justificativo? = NÃO" também f
 Os totais (`TOT_JUS`/`TOT_INJ`, `total_faltas_justificadas`, Total Faltas — AS-001/AS-013) passam a
 contar pela mesma regra, e `justificadas + injustificadas + pendentes = total`. O desconto no salário
 continua a ser só a coluna "Desconto na Remuneração?".
+
+### Decisão A — implementada (21/10/2026)
+
+Regra decidida: **Justificada** = falta aprovada com `FLG_JUSTIFICATIVO = 'SIM'`; **Injustificada** =
+aprovada com `'NAO'` ou dia de falta sem registo vivo (nunca justificado, ou **rejeitado** — o registo
+rejeitado não conta e o dia volta a "por registar"); **Pendente** = P ou C. **Total Faltas** = todas as
+faltas do mês = J + I + P. Aplicada nas duas vistas (`assiduidade_decisao_a_*.sql`) e no rótulo por dia
+do painel. Encontrado e corrigido no caminho: o painel escondia para sempre os dias rejeitados (a
+escrita deixava re-justificar) e podia prender o dia re-justificado ao pedido rejeitado; a vista contava
+a dobrar dias com duas faltas/ausências.
+
+Bateria `f_decisao_a_mar.sh` (mês limpo, o dia passa por todas as classes): **49/49**; regressão
+`g_regressao_listas.sh` 15/15; invariante J+I+P = total em **todas** as linhas da BD; `mvn test` 55/55.
+Itens resolvidos: AS-001 (Justificada/Injustificada), AS-002 OBS, AS-008 OBS, AS-013, AS-016 (estado).

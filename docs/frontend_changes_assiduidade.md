@@ -1198,6 +1198,60 @@ dev a 21/10.
 
 ---
 
+## 🔴 31. Justificada / Injustificada — uma só regra nas duas listas (21/10/2026)
+
+Branch `fix/assiduidade-bug-report-qa`. Resolve AS-001, AS-002 OBS, AS-008 OBS, AS-013 e AS-016.
+A spec não define a regra (a fonte que indica, `SINTESE_DIARIA.ESTADO`, é sempre `A`); decidido
+com o utilizador.
+
+**Regra, por dia de falta:**
+
+| Dia | Conta como |
+|---|---|
+| Falta aprovada (A) com "Com Justificativo? = SIM" | **Justificada** |
+| Falta aprovada (A) com "Com Justificativo? = NÃO" | **Injustificada** |
+| Falta à espera de despacho (P) ou em correção (C) | **Pendente** |
+| Dia de falta sem registo (marcado sem justificativo, ou registo **rejeitado**/eliminado) | **Injustificada** |
+| Dia sem registo mas com ausência activa (ex.: dispensa validada) | não conta |
+
+O desconto no salário **deixou de decidir** o estado — continua só em "Desconto na Remuneração?".
+
+### `GET movimento-resumos` (Gestão Falta)
+
+| Campo | Antes | Agora |
+|---|---|---|
+| `totalFalta` | só os dias **por registar** | **todas** as faltas do mês |
+| `totalFaltasJustificadas` | qualquer falta aprovada | aprovadas **com** justificativo |
+| `totalFaltasInjustificadas` | — | **novo** |
+| `totalFaltasPendentes` | P | P e C |
+| `estado` | | INJUSTIFICADA se houver alguma; senão PENDENTE; senão JUSTIFICADA; senão CONFORME |
+
+**Garantido:** `totalFalta = totalFaltasJustificadas + totalFaltasInjustificadas + totalFaltasPendentes`.
+Coluna Total Justificada/Total Injustificada: mostrar `totalFaltasJustificadas / totalFaltasInjustificadas`
+(o ecrã mostrava `totalFalta` na Injustificada — AS-001).
+
+Deixa também de contar a dobrar um dia com duas faltas (rejeitada + nova) ou duas ausências.
+
+### `GET falta` (Falta Justificada / Injustificada)
+
+`estado`/`estadoDesc` do mês: **INJUSTIFICADA** se alguma falta aprovada do mês tiver "Com
+Justificativo? = NÃO"; senão **JUSTIFICADA**. Antes era pelo desconto no salário — uma licença
+justificada que desconta saía "Injustificada". Esta lista continua a mostrar só faltas aprovadas.
+
+### Painel de justificação (`GET falta/justificar/{funcionarioId}`)
+
+- **Dias rejeitados voltam a "Por justificar"** em `itensFalta` (antes ficavam escondidos para
+  sempre, apesar de o registo deixar justificá-los de novo). Continuam a aparecer no grupo do
+  pedido rejeitado, como histórico.
+- Um dia re-justificado aparece no grupo do pedido **novo** (antes podia ficar preso ao rejeitado).
+- Rótulo por dia: falta aprovada com "NÃO" passa de "Justificada" a **"Injustificada"**.
+
+**Migration de BD:** `scripts/assiduidade_decisao_a_resumo.sql` (nova coluna
+`TOTAL_FALTAS_INJUSTIFICADAS`; correr **antes** da API) e `scripts/assiduidade_decisao_a_falta_mensal.sql`.
+Aplicadas em dev a 21/10.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |
