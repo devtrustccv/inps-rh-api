@@ -79,7 +79,7 @@ Legenda: ✅ resolvido · 🔧 por resolver (backend/vista) · 🖥️ frontend 
 | Documentação para o frontend | ✅ `frontend_changes_assiduidade.md` §29 | — |
 | AS-010 Licença | ⏸ em espera (pedido do utilizador) — patch no scratchpad da sessão | — |
 | AS-002 anexo meio preenchido → 400 (só assiduidade: `DocumentoMapper.anexoPreenchidoOuErro`/`validarAnexos`) | ✅ feito | `POST falta`: tipo sem ficheiro → 400, ficheiro sem tipo → 400, BD igual; linha vazia do QA → 200 (falta 988 / pedido 327, Rui, 03/11, 0 docs). Outros módulos: por decidir |
-| Ciclo CORRIGIR como no dossiê | 📋 TODO (substitui o guard 400) | — |
+| Ciclo CORRIGIR como no dossiê (falta, justificar, hora extra, férias; dispensa fica 400) | ✅ feito | Bateria `scratchpad/bugreport_qa/corrigir/` (cliente da API + BD): A 39 · B 30 · C 25 · D 29 · E 17 verificações, todas verdes; `mvn test` 55/55 |
 | AS-009 Hora Direito = SUM(TOTAL_HORA) P+A do mês (decisão F, opção a, 21/10) | ✅ feito | `GET dispensa` → `"04:00"` = 240 min na BD (só há 1 dispensa: exclusão de I/E sem caso para testar) |
 
 ## Decisão A — porque é que as duas listas não concordam no estado (21/10/2026)

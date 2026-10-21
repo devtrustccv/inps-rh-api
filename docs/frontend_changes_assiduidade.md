@@ -1070,8 +1070,8 @@ dá erro. O `scripts/assiduidade_bug_report_AS.sql` (14/10) já tem de estar apl
 |---|---|
 | Justificar falta / marcar falta: 400 *"O valor do campo 'despacho_rh' é demasiado longo"* (QA AS-015). Restantes: tratado **como rejeição**, sem aviso | **400** *"A opção 'Corrigir' ainda não está disponível. Nenhuma alteração foi aplicada ao registo."* — nada é gravado |
 
-Mesma mensagem que o dossiê já devolve. Provisório: o ciclo de correcção da assiduidade está por
-fazer. Até lá, **esconder a opção "Corrigir"** do combo `VALIDAR_REGISTO` nestes ecrãs.
+Mesma mensagem que o dossiê já devolve. **Substituído pela secção 30** nos fluxos com validação
+(falta, justificar, hora extra, férias); fica só na Dispensa.
 `PUT falta/justificar/validar/{pedidoId}` com `validar` omitido passa também a dar 400 *"Campo
 validar é obrigatório"* (antes rejeitava o pedido).
 
@@ -1139,6 +1139,62 @@ preenchida** deixa de ser descartada em silêncio (o anexo perdia-se):
 
 Numa edição, um anexo existente reenviado tem de levar `tipoDocumentoId` **e** `documento`. Só a
 assiduidade — dossiê e missão não mudam.
+
+---
+
+## 🔴 30. Ciclo CORRIGIR nos ecrãs de validação da assiduidade (21/10/2026)
+
+Branch `fix/assiduidade-bug-report-qa`. Substitui o 400 provisório da secção 29 nos fluxos com
+validação. Mesmo padrão do dossiê — **"edita-no-validar"**, no **mesmo endpoint** de validar:
+
+| Fluxo | Endpoint de validar |
+|---|---|
+| Marcar Falta | `POST falta/{pedidoId}` |
+| Justificar Falta | `PUT falta/justificar/validar/{pedidoId}` |
+| Hora Extra | `POST hora-extra/{pedidoId}` |
+| Férias (com substituição) | `POST feria/{pedidoId}` |
+
+| Quem | Pedido | Efeito | Resposta |
+|---|---|---|---|
+| Checker | `validar = "CORRIGIR"` sobre pedido **P** | pedido, linhas e validação **P → C**. O resto do corpo é **ignorado** (nada gravado) | 200, `estado: "C"`, `mensagem: "... devolvido para correção."` |
+| Maker | `validar` **vazio/omitido** sobre pedido **C**, com o formulário corrigido | aplica as correcções e **C → P**; a **mesma** linha de validação volta a P (não nasce outra) | 200, `estado: "P"`, `mensagem: "... corrigido e reenviado para validação."` |
+| Checker | `validar = "SIM"` / `"NAO"` sobre pedido **P** | como antes | como antes |
+
+**Erros (400):**
+
+| Situação | Mensagem |
+|---|---|
+| `SIM`/`NAO` sobre pedido em correção | *"... em correção: não pode ser validado. Corrija e reenvie primeiro."* |
+| `CORRIGIR` sobre pedido que não está P | *"Só é possível devolver para correção um ... pendente de validação."* |
+| `validar` vazio sobre pedido que não está C | *"Campo validar é obrigatório"* (como antes) |
+| **Novo:** `SIM`/`NAO` sobre pedido já decidido (Marcar Falta, Férias) | *"Só é possível validar um ... pendente de validação."* — antes decidia outra vez (descontava a dobrar / duplicava a ausência) |
+| Justificar: Editar ou Eliminar pedido em C | *"... foi devolvido para correção. Corrija e reenvie-o pelo formulário de validação."* |
+| Férias: Alterar pedido (`PUT feria/{pedidoId}`) em C | *"Pedido de férias devolvido para correção: ..."* |
+| Férias: reenvio com outro substituto | *"O substituto não se altera na correção. ..."* |
+
+**O que o maker pode corrigir no reenvio** (os campos que o formulário de validação já aceitava):
+- Marcar Falta: `parecer`, `observacao`, `tipoJustificacao`, `deduzirFaltaEm`, `documentos`.
+- Justificar: `motivo`, `obsResponsavel`, `responsavelId`, `tipoJustificacao` (obrigatório), `parecerResponsavel`, `deduzirFaltaEm`, `documentos`.
+- Hora Extra: `horaExtra[]` por `dataInicio` — `horasDiaria`, `percentagemReferente` (o valor é recalculado), `documento`.
+- Férias: `dataInicio`/`dataFim` (recalcula os dias), `parecer`, `obsParecer`, `responsavel`, `obsConvinienciaServico`, `documentos`.
+
+**Onde o maker encontra o que lhe devolveram:** como no dossiê, o inbox de validações
+(`GET funcionarios/validacoes`) mostra só **P**; o pedido em **C** aparece nos GET/listas do próprio
+fluxo com `estado: "C"` / `estadoDesc: "Em correção"` (Gestão Falta conta-o como pendente). Ao
+reenviar, volta ao inbox.
+
+**Enquanto está em C:** o dia continua ocupado (não se marca outra falta por cima) e a reserva de
+saldo de férias/dispensa mantém-se.
+
+**Sem ciclo (continua 400 *"A opção 'Corrigir' ainda não está disponível..."*):** Dispensa — não grava
+`RH_T_VALIDACAO` (a spec riscou-o), não há onde ancorar a correcção.
+
+**Mostrar a opção "Corrigir"** do combo `VALIDAR_REGISTO` nos 4 ecrãs acima; escondê-la na Dispensa.
+O botão "Reenviar" do maker envia o formulário com `validar` vazio.
+
+**Migration de BD:** `scripts/assiduidade_ciclo_corrigir_hora_extra.sql` e
+`scripts/assiduidade_ciclo_corrigir_resumo.sql` (vistas passam a mostrar/contar o C). Aplicadas em
+dev a 21/10.
 
 ---
 

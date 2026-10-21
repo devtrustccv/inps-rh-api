@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -168,18 +169,32 @@ public class FeriaWriteService {
   @Transactional
   public Map<String, ?> validarFeria(ValidarPedidoFeriaCommand command) {
     var req = command.getPedidoferiareq();
-    if (req == null || !StringUtils.hasText(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
-    // O ciclo de correção ainda não existe na assiduidade: sem este guard o CORRIGIR caía no ramo
-    // da rejeição (ou rebentava na coluna de decisão, VARCHAR2(3)) — bug report QA AS-015.
-    if (ValidationUtil.isCorrigir(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de férias ausentes");
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
     var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
+
+    // Ciclo CORRIGIR, padrão do dossiê ("edita-no-validar", mesmo endpoint):
+    //   CORRIGIR      checker devolve: férias, pedido e validação P -> C, sem aplicar o payload;
+    //   validar vazio maker reenvia: aplica as correcções e reabre C -> P;
+    //   SIM/NAO       só sobre férias pendentes — em C têm de ser reenviadas primeiro.
+    if (ValidationUtil.isCorrigir(req.getValidar()))
+      return devolverParaCorrecao(ferias);
+    if (!StringUtils.hasText(req.getValidar())) {
+      if (ferias.getEstado() != Estado.C)
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      return reenviarCorrecao(ferias, req);
+    }
+    if (ferias.getEstado() == Estado.C)
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido de férias em correção: não pode ser validado. Corrija e reenvie primeiro.");
+    if (ferias.getEstado() != Estado.P)
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível validar um pedido de férias pendente de validação.");
 
     var funcionario = ferias.getFunId();
 
@@ -244,6 +259,88 @@ public class FeriaWriteService {
     return resp;
   }
 
+  /**
+   * CORRIGIR (checker): férias, pedido e validação P -> C, sem aplicar o payload. Só existe para as
+   * férias que foram a validação (as com substituição); as outras ficam logo activas.
+   */
+  private Map<String, ?> devolverParaCorrecao(FeriasGozadasEntity ferias) {
+    var pedido = ferias.getPedidoId();
+    if (ferias.getEstado() != Estado.P || pedido == null || !Estado.P.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um pedido de férias pendente de validação.");
+    // INSERT (registo) ou UPDATE (alteração de férias) — o helper procura os dois.
+    var validacao = funcionarioRules.devolverParaCorrecao(pedido.getUuid(), Estado.P, Referencia.FERIA);
+    validacaoEntityRepository.save(validacao);
+
+    ferias.setEstado(Estado.C);
+    feriasGozadasRepository.save(ferias);
+    pedido.setEstado(Estado.C.name());
+    pedidoRepository.save(pedido);
+
+    return respostaCorrecao(ferias, "Pedido de férias devolvido para correção.");
+  }
+
+  /**
+   * Reenvio (maker): aplica as correcções do formulário (datas, parecer, responsável, observações,
+   * anexos) e volta a pôr férias, pedido e validação em P. O saldo é verificado no SIM, como hoje.
+   *
+   * <p>O substituto não se troca aqui: a substituição é gravada à parte no registo e não há ligação
+   * que permita actualizá-la com segurança. Para trocar de substituto, rejeitar e registar de novo.
+   */
+  private Map<String, ?> reenviarCorrecao(FeriasGozadasEntity ferias, PedidoFeriaReqDTO req) {
+    var pedido = ferias.getPedidoId();
+
+    if (req.getSubstituidoPor() != null) {
+      var substituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
+      var tiprelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(substituto.getUuid());
+      if (tiprelSubstituto == null || !Objects.equals(tiprelSubstituto.getId(), ferias.getTiprelIdSubstituido()))
+        throw IgrpResponseStatusException.badRequest(
+            "O substituto não se altera na correção. Para trocar de substituto, rejeite o pedido e registe um novo.");
+    }
+
+    var dataInicio = req.getDataInicio() != null ? req.getDataInicio() : ferias.getDataInicio();
+    var dataFim = req.getDataFim() != null ? req.getDataFim() : ferias.getDataFim();
+    if (dataFim.isBefore(dataInicio))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
+    ferias.setDataInicio(dataInicio);
+    ferias.setDataFim(dataFim);
+    ferias.setNumDia(diffDays(dataInicio, dataFim));
+    ferias.setAnoId(resolveAno(dataInicio));
+
+    if (req.getObsConvinienciaServico() != null)
+      ferias.setObsInfoConveniencia(req.getObsConvinienciaServico());
+    if (req.getParecer() != null)
+      ferias.setDecisaoResponsavel(req.getParecer());
+    if (req.getObsParecer() != null)
+      ferias.setObsResponsavel(req.getObsParecer());
+    if (req.getResponsavel() != null) {
+      var responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () -> IgrpResponseStatusException.notFound(
+              "Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      ferias.setResponsavelId(responsavel.getId());
+    }
+
+    ferias.setEstado(Estado.P);
+    feriasGozadasRepository.save(ferias);
+
+    saveDocuments(req.getDocumentos(), ferias.getFunId(), pedido);
+
+    pedido.setEstado(Estado.P.name());
+    pedidoRepository.save(pedido);
+    validacaoEntityRepository.save(funcionarioRules.reabrirParaValidacao(pedido.getUuid(), Referencia.FERIA));
+
+    return respostaCorrecao(ferias, "Pedido de férias corrigido e reenviado para validação.");
+  }
+
+  private Map<String, ?> respostaCorrecao(FeriasGozadasEntity ferias, String mensagem) {
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", ferias.getId());
+    resp.put("uuid", ferias.getUuid());
+    resp.put("estado", ferias.getEstado().name());
+    resp.put("mensagem", mensagem);
+    return resp;
+  }
+
   @Transactional
   public Map<String, ?> alterarPedidoFeria(AlterarPedidoFeriaCommand command) {
 
@@ -259,6 +356,10 @@ public class FeriaWriteService {
         .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido de férias não encontrado"));
+
+    if (ferias.getEstado() == Estado.C)
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido de férias devolvido para correção: corrija e reenvie-o pelo formulário de validação.");
 
     var funcionario = ferias.getFunId();
 
