@@ -207,6 +207,12 @@ public class EmprestimoWriteService {
   }
 
   public List<PlanoFinanceiroRowDTO> generateFinancialPlan(EmprestimoEntity entity, LocalDate startDate) {
+    // Antes da Análise RH (ou sem taxa de juro definida) não há plano a simular: antes dava
+    // NullPointerException e o "Ver Plano Financeiro" ficava vazio com erro 500.
+    if (entity.getValorEmprestimo() == null || entity.getJuro() == null
+        || entity.getNrPrestacao() == null || entity.getNrPrestacao() <= 0) {
+      return List.of();
+    }
     return FinancialPlanHelper.generateFinancialPlan(
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
