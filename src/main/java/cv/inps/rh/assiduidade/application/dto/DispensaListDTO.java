@@ -64,10 +64,10 @@ public class DispensaListDTO  {
   private String intervaloHoras ;
 
 
-  private Integer totalHorasDireito ;
+  private String totalHorasDireito ;
 
 
-  private Integer totalHorasSolicitadas ;
+  private String totalHorasSolicitadas ;
 
 
   private String motivoDispensa ;

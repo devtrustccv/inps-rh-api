@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -123,7 +124,7 @@ public class HoraExtraServiceWrite {
         tiprelValidacao = tipoRelAtual;
       }
 
-      if (DocumentoMapper.anexoPreenchido(dto.getDocumento())) {
+      if (DocumentoMapper.anexoPreenchidoOuErro(dto.getDocumento())) {
         var doc = documentoMapper.toEntity(
             dto.getDocumento(),
             Estado.P,
@@ -275,6 +276,10 @@ public class HoraExtraServiceWrite {
     var req = command.getHoraextrareq();
     if (req == null || req.getValidar() == null)
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    // O ciclo de correção ainda não existe na assiduidade: sem este guard o CORRIGIR caía no ramo
+    // da rejeição (ou rebentava na coluna de decisão, VARCHAR2(3)) — bug report QA AS-015.
+    if (req.getValidar() == EstadoValidacao.CORRIGIR)
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
 
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
@@ -328,7 +333,7 @@ public class HoraExtraServiceWrite {
           he.setValorDiario(novoValor);
         }
 
-        if (DocumentoMapper.anexoPreenchido(ajuste.getDocumento())) {
+        if (DocumentoMapper.anexoPreenchidoOuErro(ajuste.getDocumento())) {
             var docsHe = documentoEntityRepository
                 .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
 

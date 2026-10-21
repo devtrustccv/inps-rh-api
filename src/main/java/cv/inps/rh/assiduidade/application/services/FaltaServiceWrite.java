@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -180,7 +181,7 @@ public class FaltaServiceWrite {
         && pedido != null) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             estadoInicial,
@@ -234,6 +235,10 @@ public class FaltaServiceWrite {
     var req = command.getFaltareq();
     if (req == null || req.getValidar() == null)
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    // O ciclo de correção ainda não existe na assiduidade: sem este guard o CORRIGIR caía no ramo
+    // da rejeição (ou rebentava na coluna de decisão, VARCHAR2(3)) — bug report QA AS-015.
+    if (req.getValidar() == EstadoValidacao.CORRIGIR)
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
 
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador do pedido de falta é obrigatório");

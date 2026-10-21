@@ -54,4 +54,10 @@ public class FaltaListDTO  {
 
   private String estadoDesc ;
 
+
+  private String motivo ;
+
+
+  private String estadoProcessamentoDesc ;
+
 }

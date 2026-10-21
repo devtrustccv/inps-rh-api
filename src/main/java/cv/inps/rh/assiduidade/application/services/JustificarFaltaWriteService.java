@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -223,7 +224,7 @@ public class JustificarFaltaWriteService {
     // utilizador: o anexo do grupo pertence ao pedido.
     if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty()) {
       for (var anexo : dto.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(anexo)) continue; // linha vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(anexo)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             anexo,
             estadoInicial,
@@ -301,6 +302,12 @@ public class JustificarFaltaWriteService {
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
+    if (dto.getValidar() == null)
+      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    // Sem ciclo de correção na assiduidade: o CORRIGIR caía na rejeição e, antes disso, rebentava
+    // no DESPACHO_RH (VARCHAR2(3)) com "valor demasiado longo" — bug report QA AS-015.
+    if (dto.getValidar() == EstadoValidacao.CORRIGIR)
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
     // Parametrização da justificação — mesma tolerância ao "0" do formulário. O radio
     // "Com Justificativo?" é do cabeçalho, como no registo (não é escolha por dia).
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), true);
@@ -373,6 +380,7 @@ public class JustificarFaltaWriteService {
     // com documentos omitido (= preservar) ficaria 'P' para sempre.
     var existentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+    DocumentoMapper.validarAnexos(dto.getDocumentos());
     var anexos = dto.getDocumentos() != null
         ? documentoMapper.syncDocumentos(
             new ArrayList<>(existentes),
@@ -695,6 +703,7 @@ public class JustificarFaltaWriteService {
     if (dto.getDocumentos() != null) {
       var existentes = documentoEntityRepository
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      DocumentoMapper.validarAnexos(dto.getDocumentos());
       var sincronizados = documentoMapper.syncDocumentos(
           new ArrayList<>(existentes), dto.getDocumentos(),
           TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, funcionario);

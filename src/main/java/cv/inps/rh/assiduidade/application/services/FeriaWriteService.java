@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -169,6 +170,10 @@ public class FeriaWriteService {
     var req = command.getPedidoferiareq();
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    // O ciclo de correção ainda não existe na assiduidade: sem este guard o CORRIGIR caía no ramo
+    // da rejeição (ou rebentava na coluna de decisão, VARCHAR2(3)) — bug report QA AS-015.
+    if (ValidationUtil.isCorrigir(req.getValidar()))
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
@@ -533,6 +538,7 @@ public class FeriaWriteService {
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FERIAS_GOZADAS.name(), pedido.getUuid());
 
+    DocumentoMapper.validarAnexos(documentos);
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
         documentos,
