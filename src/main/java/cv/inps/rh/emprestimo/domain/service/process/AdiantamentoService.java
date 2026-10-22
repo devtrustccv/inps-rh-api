@@ -42,13 +42,11 @@ public class AdiantamentoService {
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var base = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    // Reabrir o pedido de um subprocesso ainda não concluído (Gravar e depois Seguinte, voltar ao
-    // pedido depois de submetido, Retificação) actualiza essa versão. Só o empréstimo em vigor dá
-    // origem a uma versão nova — antes um subprocesso já SUBMETIDO ganhava outra versão encadeada.
+
     var emEdicao = EmprestimoHelper.isSubprocessoEmCurso(base);
-    if (emEdicao) {
+    if (emEdicao)
       EmprestimoHelper.validarEtapaAtual(base, EtapaEmprestimo.PEDIDO);
-    }
+
     var initialLoan = emEdicao ? base.getEmprestimo() : base;
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
@@ -62,10 +60,6 @@ public class AdiantamentoService {
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(initialLoan.getVersao() + 1);
-    // Como no Reforço, a nova versão herda o capital e a dívida actual do empréstimo anterior;
-    // EmprestimoHelper.saveByTipoSituacao aplica depois o adiantamento sobre essa dívida. Antes
-    // gravava-se o valor adiantado nos dois campos: a dívida ficava a 0 no NEXT do pagamento
-    // antecipado e a "Diminuição da Prestação" (sem valor) falhava com VALOR_EMPRESTIMO a null.
     newLoan.setValorDivida(initialLoan.getValorDivida());
     newLoan.setValorEmprestimo(initialLoan.getValorEmprestimo());
     newLoan.setEmprestimo(initialLoan);
@@ -85,8 +79,6 @@ public class AdiantamentoService {
     newLoan.setNif(initialLoan.getNif());
     newLoan.setSwift(initialLoan.getSwift());
     newLoan.setValorPrestacao(initialLoan.getValorPrestacao());
-    // A avaliação da taxa de esforço é da Análise Financeira de cada processo: não se herda (a
-    // Renegociação abria com a do empréstimo anterior já preenchida).
     newLoan.setRenogociacao(initialLoan.getRenogociacao());
     newLoan.setTmId(initialLoan.getTmId());
     newLoan.setFinalidade(initialLoan.getFinalidade());
@@ -108,8 +100,6 @@ public class AdiantamentoService {
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
 
-      // Como na Viatura, o Seguinte do pedido passa o processo para a Análise RH — antes a etapa
-      // ficava PEDIDO: a barra não marcava o pedido como feito e a lista retomava no pedido.
       var order = newLoan.getPedido();
       order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
       pedidoEntityRepository.save(order);
@@ -137,13 +127,9 @@ public class AdiantamentoService {
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
 
     if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
-      // Retificação do parecer técnico devolve já ao pedido — não depende do responsável.
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
     } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
-
-      // Como na Análise RH do pedido: quem valida o avanço é o responsável (nível 2). Usa o
-      // "responsavel" herdado de BaseDecisaoDTO (o GET devolve-o no mesmo formato).
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
           .map(BaseDecisaoDTO.Responsavel::parecer)
           .flatMap(ParecerProcesso::fromCode)
@@ -172,29 +158,24 @@ public class AdiantamentoService {
         EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setDataParecer(request.getData());
-          setResponsavel(obj, request.getResponsavel());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setReferenciaId(loan.getId());
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setDataParecer(request.getData());
-          setResponsavel(newObj, request.getResponsavel());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    setResponsavel(newObj, request.getResponsavel());
+    newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     emprestimoEntityRepository.save(loan);
   }
@@ -203,9 +184,9 @@ public class AdiantamentoService {
     var parecer = Optional.ofNullable(responsavel)
         .map(BaseDecisaoDTO.Responsavel::parecer)
         .flatMap(ParecerProcesso::fromCode);
-    if (parecer.isEmpty()) {
+    if (parecer.isEmpty())
       return;
-    }
+
     decisao.setParecerResponsavel(parecer.get().name());
     decisao.setObservacaoResponsavel(responsavel.observacao());
     decisao.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
@@ -225,9 +206,6 @@ public class AdiantamentoService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
     );
 
-    // O endpoint não tinha acção: o Seguinte gravava o documento mas o pedido ficava em
-    // ANEXAR_CONTRATO_ADIANTAMENTO até à primeira gravação da Verificação (a lista retomava
-    // o subprocesso na etapa errada).
     if (ProcessStepAction.NEXT.name().equals(action)) {
       var order = loan.getPedido();
       order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
@@ -247,7 +225,6 @@ public class AdiantamentoService {
 
       switch (request.getParecer()) {
         case FAVORAVEL -> {
-          // Última etapa da Amortização: a nova versão passa a ser a que está em vigor (lista).
           order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
           loan.setEstado(StatusEmprestimo.ATIVO.name());
           emprestimoEntityRepository.save(loan);
@@ -265,27 +242,23 @@ public class AdiantamentoService {
         EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setDataParecer(request.getData());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setReferenciaId(loan.getId());
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setDataParecer(request.getData());
-          newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     emprestimoEntityRepository.save(loan);
   }

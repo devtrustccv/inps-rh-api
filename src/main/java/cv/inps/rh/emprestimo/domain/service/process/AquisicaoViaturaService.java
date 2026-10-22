@@ -178,45 +178,31 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setDataParecer(request.getData());
-          Optional.ofNullable(request.getResponsavel())
-              .ifPresent(resp -> {
-                obj.setParecerResponsavel(resp.parecer().name());
-                obj.setObservacaoResponsavel(resp.observacao());
-                obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
-                obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
-                obj.setDataParecerResponsavel(resp.data());
-              });
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setReferenciaId(loan.getId());
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setDataParecer(request.getData());
-          // Antes só se gravava o responsável ao actualizar uma decisão existente: um Seguinte
-          // sem Gravar antes perdia o parecer do responsável (RH_T_PEDIDO_DECISAO sem ele).
-          Optional.ofNullable(request.getResponsavel())
-              .ifPresent(resp -> {
-                newObj.setParecerResponsavel(resp.parecer().name());
-                newObj.setObservacaoResponsavel(resp.observacao());
-                newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
-                newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
-                newObj.setDataParecerResponsavel(resp.data());
-              });
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setPedido(order);
+    newObj.setReferenciaId(loan.getId());
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setDataParecer(request.getData());
+    newObj.setObs(request.getObservacao());
+    Optional.ofNullable(request.getResponsavel())
+        .ifPresent(resp -> {
+          newObj.setParecerResponsavel(resp.parecer().name());
+          newObj.setObservacaoResponsavel(resp.observacao());
+          newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+          newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+          newObj.setDataParecerResponsavel(resp.data());
+        });
+    newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     var fun = order.getFunId();
 
@@ -278,8 +264,6 @@ public class AquisicaoViaturaService {
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
       switch (request.getParecer()) {
-        // Conforme avança de facto para a próxima etapa — estava a
-        // definir-se para si própria (bug pré-existente), nunca avançava.
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
@@ -303,29 +287,24 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setDataParecer(request.getData());
-          obj.setCreatedDate(request.getData().atStartOfDay());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setReferenciaId(loan.getId());
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setDataParecer(request.getData());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newObj.setCreatedDate(request.getData().atStartOfDay());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newObj.setCreatedDate(request.getData().atStartOfDay());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     emprestimoEntityRepository.save(loan);
   }
@@ -349,8 +328,6 @@ public class AquisicaoViaturaService {
           loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         }
         case RETIFICACAO -> {
-          // Retificação devolve à etapa imediatamente anterior a esta
-          // (Análise Financeira), não à Análise RH.
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
@@ -364,29 +341,24 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setDataParecer(request.getData());
-          obj.setCreatedDate(request.getData().atStartOfDay());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setReferenciaId(loan.getId());
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setDataParecer(request.getData());
-          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newObj.setCreatedDate(request.getData().atStartOfDay());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newObj.setCreatedDate(request.getData().atStartOfDay());
+    pedidoDecisaoEntityRepository.save(newObj);
   }
 
   @Transactional
