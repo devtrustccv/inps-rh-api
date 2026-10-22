@@ -150,7 +150,8 @@ public class MissaoServicoServiceRead {
     response.setDataAutorizacao(missao.getDataAutorizacao());
     response.setEtapa(missao.getEtapa());
     var etapaDetalhe = EtapaProcesso.fromCode(missao.getEtapa());
-    response.setEtapaDesc(etapaDetalhe != null ? etapaDetalhe.getDescricao() : missao.getEtapa());
+    // MS-016: SUBMISSAO não é EtapaProcesso — o fallback devolvia o código cru ("SUBMISSAO").
+    response.setEtapaDesc(etapaDetalhe != null ? etapaDetalhe.getDescricao() : resolveEtapaDesc(missao.getEtapa()));
     response.setEstado(missao.getEstado());
     response.setMotivoCancelamento(missao.getMotivoCancelamento());
 

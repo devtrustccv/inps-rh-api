@@ -98,7 +98,9 @@ public class MissaoServicoServiceWrite {
     missao.setAutorizadoPor(dto.getAutorizadoPor());
     missao.setDataAutorizacao(dto.getDataAutorizacao());
     missao.setEtapa(ETAPA_1);
-    missao.setEstado(StringUtils.hasText(dto.getEstado()) ? dto.getEstado() : ESTADO_ATIVO);
+    // MS-019: a missão nasce sempre activa. O estado só muda pelo cancelamento ou pela autorização,
+    // nunca pelo corpo do pedido (dava para pôr uma missão em I sem a cascata do cancelamento).
+    missao.setEstado(ESTADO_ATIVO);
 
     missao = missaoServicoRepository.save(missao);
     sincronizarProcessos(missao, dto.getAlojamento());
@@ -123,14 +125,15 @@ public class MissaoServicoServiceWrite {
       throw IgrpResponseStatusException.badRequest("Payload inválido");
     }
 
-    validarSubmissao(dto);
-
     var missao = missaoServicoRepository.findByUuidOrThrow(uuid);
-    // MS-019: missão finalizada ou cancelada é só de consulta.
+    // MS-019: missão finalizada ou cancelada é só de consulta. Antes da validação do payload, para
+    // quem abre uma missão fechada ver este motivo e não um campo em falta.
     if ("FINALIZADO".equals(missao.getEstado()) || ESTADO_INATIVO.equals(missao.getEstado())) {
       throw IgrpResponseStatusException.badRequest("A missão " + support.nrMissaoFormatado(missao)
           + " está finalizada ou cancelada e não pode ser alterada.");
     }
+
+    validarSubmissao(dto);
     var pais = geografiaRepository.findByIdOrThrow(dto.getPaisDestinoId());
     var antes = DadosAviso.de(missao);
     var colabsAtivosAntes = missaoColaboradorRepository.findAllByMissaoServId_Uuid(uuid).stream()
@@ -148,9 +151,7 @@ public class MissaoServicoServiceWrite {
     missao.setNrDias(calcularNrDias(dto.getDataInicio(), dto.getDataFim()));
     missao.setAutorizadoPor(dto.getAutorizadoPor());
     missao.setDataAutorizacao(dto.getDataAutorizacao());
-    if (StringUtils.hasText(dto.getEstado())) {
-      missao.setEstado(dto.getEstado());
-    }
+    // MS-019: dto.estado é ignorado — ver submeter().
     if (isNext(dto.getProcessoEtapaAction())) {
       avancarEtapa(missao, ETAPA_2);
     }
@@ -315,32 +316,32 @@ public class MissaoServicoServiceWrite {
 
   private void validarSubmissao(MissaoSubmissaoRequestDTO dto) {
     if (dto.getPaisDestinoId() == null) {
-      throw IgrpResponseStatusException.badRequest("paisDestinoId é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique o País de Destino.");
     }
     if (!StringUtils.hasText(dto.getDescricaoDestino())) {
-      throw IgrpResponseStatusException.badRequest("descricaoDestino é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Descrição do Destino.");
     }
     // Obrigatório no ecrã "Registo de Missão" (Âmbito da Missão), e é o que justifica a deslocação.
     if (!StringUtils.hasText(dto.getAmbitoMissao())) {
-      throw IgrpResponseStatusException.badRequest("ambitoMissao é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique o Âmbito da Missão.");
     }
     if (dto.getDataInicio() == null) {
-      throw IgrpResponseStatusException.badRequest("dataInicio é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Data Início da missão.");
     }
     if (dto.getDataFim() == null) {
-      throw IgrpResponseStatusException.badRequest("dataFim é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Data Fim da missão.");
     }
     if (dto.getDataFim().isBefore(dto.getDataInicio())) {
-      throw IgrpResponseStatusException.badRequest("dataFim não pode ser anterior a dataInicio");
+      throw IgrpResponseStatusException.badRequest("A Data Fim da missão não pode ser anterior à Data Início.");
     }
     if (!StringUtils.hasText(dto.getAutorizadoPor())) {
-      throw IgrpResponseStatusException.badRequest("autorizadoPor é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique quem autorizou a missão (Autorizado por).");
     }
     if (dto.getDataAutorizacao() == null) {
-      throw IgrpResponseStatusException.badRequest("dataAutorizacao é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Data de Autorização.");
     }
     if (CollectionUtils.isEmpty(dto.getColaboradores())) {
-      throw IgrpResponseStatusException.badRequest("colaboradores é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Adicione pelo menos um colaborador à missão.");
     }
   }
 

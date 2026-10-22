@@ -32,4 +32,7 @@ public class MissaoColaboradorResponseDTO  {
   // o frontend usa isto para agrupar o multiselect e não oferecer combinações inválidas.
   private Long missaoPrestId;
   private String nomePrestador;
+
+  /** MS-013/D2: só na logística da AJUDA_CUSTO — valor diário base parametrizado da carreira dele. */
+  private java.math.BigDecimal valorDiarioAjudaCusto;
 }
