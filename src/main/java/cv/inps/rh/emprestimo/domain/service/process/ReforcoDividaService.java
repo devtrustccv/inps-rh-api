@@ -190,6 +190,7 @@ public class ReforcoDividaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
@@ -267,6 +268,7 @@ public class ReforcoDividaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
@@ -327,6 +329,7 @@ public class ReforcoDividaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());

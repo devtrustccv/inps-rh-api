@@ -1,6 +1,5 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
-import cv.inps.rh.shared.util.ValidationUtil;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -17,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoOutroEntity
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -196,6 +196,7 @@ public class AquisicaoViaturaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
@@ -313,6 +314,7 @@ public class AquisicaoViaturaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
@@ -373,6 +375,7 @@ public class AquisicaoViaturaService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());

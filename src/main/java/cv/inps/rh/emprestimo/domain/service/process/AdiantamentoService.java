@@ -3,19 +3,18 @@ package cv.inps.rh.emprestimo.domain.service.process;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
-import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
-import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
-import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,11 +35,8 @@ public class AdiantamentoService {
   private final PedidoEntityRepository pedidoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
   private final EmprestimoDocumentService documentService;
-  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final EmprestimoHelper emprestimoHelper;
   private final ApplicationAuditorAware auditorAware;
-
-  // todo caso emprestimo senao forem validados positivamente activar ou desativar os planos
 
   @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
@@ -187,6 +183,7 @@ public class AdiantamentoService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
@@ -278,6 +275,7 @@ public class AdiantamentoService {
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
+          newObj.setReferenciaId(loan.getId());
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
