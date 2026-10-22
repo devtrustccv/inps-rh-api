@@ -44,6 +44,7 @@ public class AquisicaoViaturaService {
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
   private final ApplicationAuditorAware auditorAware;
+  private final EmprestimoHelper emprestimoHelper;
 
   public IdDTO saveUpdatePedidoEmprestimo(String emprestimoId, PedidoEmprestimoRequestDTO request) {
 
@@ -182,12 +183,14 @@ public class AquisicaoViaturaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           Optional.ofNullable(request.getResponsavel())
               .ifPresent(resp -> {
                 obj.setParecerResponsavel(resp.parecer().name());
                 obj.setObservacaoResponsavel(resp.observacao());
                 obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
                 obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+                obj.setDataParecerResponsavel(resp.data());
               });
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -196,6 +199,17 @@ public class AquisicaoViaturaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
+          // Antes só se gravava o responsável ao actualizar uma decisão existente: um Seguinte
+          // sem Gravar antes perdia o parecer do responsável (RH_T_PEDIDO_DECISAO sem ele).
+          Optional.ofNullable(request.getResponsavel())
+              .ifPresent(resp -> {
+                newObj.setParecerResponsavel(resp.parecer().name());
+                newObj.setObservacaoResponsavel(resp.observacao());
+                newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+                newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+                newObj.setDataParecerResponsavel(resp.data());
+              });
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
@@ -293,6 +307,7 @@ public class AquisicaoViaturaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -301,6 +316,7 @@ public class AquisicaoViaturaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
@@ -351,6 +367,7 @@ public class AquisicaoViaturaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -359,6 +376,7 @@ public class AquisicaoViaturaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
@@ -398,5 +416,6 @@ public class AquisicaoViaturaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
+    emprestimoHelper.registarExecucaoEtapa(order, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
   }
 }

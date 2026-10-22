@@ -4,6 +4,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
@@ -29,6 +30,30 @@ public class DocumentoMapper {
   public static boolean anexoPreenchido(AnexoReqDTO dto) {
     return dto != null && dto.getTipoDocumentoId() != null && dto.getTipoDocumentoId() > 0
         && dto.getDocumento() != null && !dto.getDocumento().isBlank();
+  }
+
+  /**
+   * Como {@link #anexoPreenchido}, mas uma linha meio preenchida (ficheiro sem tipo, ou tipo sem
+   * ficheiro) dá 400 em vez de ser descartada em silêncio — o anexo perdia-se sem aviso. A linha
+   * totalmente vazia que o formulário traz continua a ser ignorada (devolve {@code false}).
+   * Só a assiduidade usa este (bug report QA AS-002); dossiê e missão ficam com o descarte.
+   */
+  public static boolean anexoPreenchidoOuErro(AnexoReqDTO dto) {
+    if (dto == null)
+      return false;
+    boolean temTipo = dto.getTipoDocumentoId() != null && dto.getTipoDocumentoId() > 0;
+    boolean temFicheiro = dto.getDocumento() != null && !dto.getDocumento().isBlank();
+    if (temTipo && !temFicheiro)
+      throw IgrpResponseStatusException.badRequest("Anexe o ficheiro do documento indicado.");
+    if (temFicheiro && !temTipo)
+      throw IgrpResponseStatusException.badRequest("Indique o Tipo de Documento do anexo.");
+    return temTipo;
+  }
+
+  /** {@link #anexoPreenchidoOuErro} sobre a lista toda — para chamar antes do {@link #syncDocumentos}. */
+  public static void validarAnexos(List<AnexoReqDTO> anexos) {
+    if (anexos != null)
+      anexos.forEach(DocumentoMapper::anexoPreenchidoOuErro);
   }
 
   public DocumentoEntity toEntity(cv.inps.rh.shared.application.dto.AnexoReqDTO dto,

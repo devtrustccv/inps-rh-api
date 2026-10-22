@@ -4,11 +4,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
@@ -45,8 +47,44 @@ public class EmprestimoHelper {
       EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
       EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
       EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
-      EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
+      EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name(),
+      EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name(),
+      // o pagamento confirmado é por versão: a confirmação do subprocesso não reescreve a do anterior
+      EtapaEmprestimo.PAGAMENTO.name()
   );
+
+  /** Decisão das etapas sem parecer (ex.: Elaboração de Contrato): só regista quem executou e quando. */
+  public static final String DECISAO_EXECUTADO = "EXECUTADO";
+
+  /**
+   * Regista a execução de uma etapa sem parecer em RH_T_PEDIDO_DECISAO, para o ecrã mostrar
+   * "Executado Por" / "Data Execução" como nas restantes etapas (antes não havia registo).
+   */
+  public void registarExecucaoEtapa(PedidoEntity pedido, EtapaEmprestimo etapa) {
+    registarExecucaoEtapa(pedido, etapa, DECISAO_EXECUTADO, LocalDate.now(ZoneId.systemDefault()), null);
+  }
+
+  public void registarExecucaoEtapa(PedidoEntity pedido, EtapaEmprestimo etapa, String decisaoValor,
+                                    LocalDate data, String observacao) {
+    var decisao = pedidoDecisaoEntityRepository
+        .findByPedidoAndEtapaAndEstado(pedido, etapa.name(), Estado.A.name())
+        .orElseGet(() -> {
+          var nova = new PedidoDecisaoEntity();
+          nova.setPedido(pedido);
+          nova.setDecisao(decisaoValor);
+          nova.setEtapa(etapa.name());
+          nova.setReferencia(ProcessType.EMPRESTIMO.name());
+          nova.setEstado(Estado.A.name());
+          nova.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          return nova;
+        });
+    decisao.setDecisao(decisaoValor);
+    decisao.setDataParecer(data);
+    if (observacao != null) {
+      decisao.setObs(observacao);
+    }
+    pedidoDecisaoEntityRepository.save(decisao);
+  }
 
   /**
    * Gravar/Seguinte só na etapa em que o processo se encontra. Antes cada endpoint repunha a etapa
@@ -58,8 +96,7 @@ public class EmprestimoHelper {
     var encerrado = java.util.Map.of(
         StatusEmprestimo.CANCELADO.name(), "cancelado",
         StatusEmprestimo.DESISTENCIA.name(), "encerrado por desistência",
-        StatusEmprestimo.ATIVO.name(), "concluído",
-        StatusEmprestimo.CABIMENTADO.name(), "concluído");
+        StatusEmprestimo.ATIVO.name(), "concluído");
     if (estado != null && encerrado.containsKey(estado)) {
       throw IgrpResponseStatusException.badRequest(
           "O processo está " + encerrado.get(estado) + " e já não pode ser alterado.");
@@ -93,16 +130,23 @@ public class EmprestimoHelper {
    * qual se cria uma versão nova. Um subprocesso cancelado/desistido não pode ser reaberto.
    */
   public static boolean isSubprocessoEmCurso(EmprestimoEntity base) {
-    if (base.getEmprestimo() == null) {
+    var estado = base.getEstado();
+    // Empréstimo em vigor = Ativo (pago e em reembolso): é a partir dele que nasce uma versão nova.
+    if (base.getEmprestimo() == null || StatusEmprestimo.ATIVO.name().equals(estado)) {
+      if (!StatusEmprestimo.ATIVO.name().equals(estado)) {
+        throw IgrpResponseStatusException.badRequest(
+            "Só é possível iniciar uma Amortização ou Renegociação num empréstimo Ativo (já pago).");
+      }
       return false;
     }
-    var estado = base.getEstado();
     if (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado)) {
       throw IgrpResponseStatusException.badRequest(
           "Este subprocesso foi cancelado. Inicie um novo a partir do empréstimo em vigor.");
     }
-    return !StatusEmprestimo.ATIVO.name().equals(estado) && !StatusEmprestimo.CABIMENTADO.name().equals(estado);
+    // subprocesso ainda não concluído (inclui Cabimentado à espera do pagamento): edita-se no próprio registo
+    return true;
   }
+
 
   /**
    * Novo subprocesso (Amortização/Renegociação) sobre um empréstimo em vigor. Todas as versões

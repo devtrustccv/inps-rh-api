@@ -115,7 +115,8 @@ public interface FaltaEntityRepository extends
   );
 
   /**
-   * Dias já comprometidos em férias por faltas ainda <b>pendentes de despacho</b>.
+   * Dias já comprometidos em férias por faltas ainda <b>pendentes de despacho</b> — em {@code P}
+   * ou devolvidas para correção ({@code C}): uma falta devolvida continua viva e volta a despacho.
    *
    * <p>Reserva de saldo sem criar linhas: a falta em {@code P} já diz, no
    * {@code FLG_DESCONTO_FALTA}, que tenciona deduzir em férias, por isso o saldo pode
@@ -134,7 +135,8 @@ public interface FaltaEntityRepository extends
           JOIN f.sinteseDiarioId s
           JOIN s.funcionarioId func
           WHERE func.uuid = :funcionarioUuid
-            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.estado IN (cv.inps.rh.shared.application.constants.Estado.P,
+                             cv.inps.rh.shared.application.constants.Estado.C)
             AND f.flgDescontoFalta = 'FERIAS'
             AND f.pedidoId.id <> :pedidoIdExcluir
       """)
@@ -149,7 +151,8 @@ public interface FaltaEntityRepository extends
           JOIN f.sinteseDiarioId s
           JOIN s.funcionarioId func
           WHERE func.uuid = :funcionarioUuid
-            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.estado IN (cv.inps.rh.shared.application.constants.Estado.P,
+                             cv.inps.rh.shared.application.constants.Estado.C)
             AND f.flgDescontoFalta = 'FERIAS'
             AND YEAR(f.dataInicio) = :ano
             AND f.pedidoId.id <> :pedidoIdExcluir
@@ -172,7 +175,8 @@ public interface FaltaEntityRepository extends
           JOIN f.sinteseDiarioId s
           JOIN s.funcionarioId func
           WHERE func.uuid = :funcionarioUuid
-            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.estado IN (cv.inps.rh.shared.application.constants.Estado.P,
+                             cv.inps.rh.shared.application.constants.Estado.C)
             AND f.flgDescontoFalta = 'DISPENSA'
             AND s.data BETWEEN :dataInicio AND :dataFim
             AND f.pedidoId.id <> :pedidoIdExcluir

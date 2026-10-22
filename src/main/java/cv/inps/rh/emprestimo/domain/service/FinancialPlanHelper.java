@@ -49,9 +49,12 @@ public class FinancialPlanHelper {
 
     var umMaisTaxa = BigDecimal.ONE.add(taxaMensal, MC);
     var potencia = umMaisTaxa.pow(prazoMeses, MC);
-    var prestacaoFixa = valorEmprestimo
-        .multiply(taxaMensal, MC)
-        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
+    // Taxa 0%: a fórmula da anuidade divide por zero — sem juros a prestação é o valor / nº de meses.
+    var prestacaoFixa = taxaMensal.signum() == 0
+        ? valorEmprestimo.divide(BigDecimal.valueOf(prazoMeses), MC)
+        : valorEmprestimo
+            .multiply(taxaMensal, MC)
+            .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
 
     LOGGER.debug("PRESTACAO FIXA : {}", prestacaoFixa);
 
@@ -114,9 +117,12 @@ public class FinancialPlanHelper {
 
     var umMaisTaxa = BigDecimal.ONE.add(taxaMensal, MC);
     var potencia = umMaisTaxa.pow(prazoMeses, MC);
-    var prestacaoFixa = valorEmprestimo
-        .multiply(taxaMensal, MC)
-        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
+    // Taxa 0%: a fórmula da anuidade divide por zero — sem juros a prestação é o valor / nº de meses.
+    var prestacaoFixa = taxaMensal.signum() == 0
+        ? valorEmprestimo.divide(BigDecimal.valueOf(prazoMeses), MC)
+        : valorEmprestimo
+            .multiply(taxaMensal, MC)
+            .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
 
     LOGGER.debug("PRESTACAO FUNDO SOCIAL FIXA : {}", prestacaoFixa);
 

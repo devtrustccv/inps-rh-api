@@ -118,7 +118,16 @@ public class EmprestimoReadService {
         .toList();
     dto.setOutrosEmprestimos(otherLoans);
 
-    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
+    // Empréstimos ativos do colaborador no INPS (RH_T_EMPRESTIMO): outros pedidos, só a versão Ativa
+    // mais recente de cada um (as versões do próprio empréstimo e os não pagos/cancelados ficam de fora).
+    var another = emprestimoEntityRepository.findByTiprel_FunIdAndEstado(funId, StatusEmprestimo.ATIVO.name())
+        .stream()
+        .filter(obj -> obj.getPedido() != null && !obj.getPedido().getId().equals(order.getId()))
+        .collect(Collectors.toMap(
+            obj -> obj.getPedido().getId(),
+            obj -> obj,
+            (a, b) -> (b.getVersao() != null && a.getVersao() != null && b.getVersao() > a.getVersao()) ? b : a))
+        .values()
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
             obj.getUuid(),
@@ -130,6 +139,24 @@ public class EmprestimoReadService {
         ))
         .toList();
     dto.setEmprestimos(another);
+
+    // Outros empréstimos (outras instituições) registados noutros pedidos do colaborador e ainda em
+    // curso: data de fim igual ou posterior a hoje, ou sem data de fim.
+    var hoje = LocalDate.now(ZoneId.systemDefault());
+    var outrosAnteriores = emprestimoOutroEntityRepository.findByFunAndEstado(funId, Estado.A.name())
+        .stream()
+        .filter(obj -> obj.getReferenciaOrigem() == null || !obj.getReferenciaOrigem().getId().equals(order.getId()))
+        .filter(obj -> obj.getDataFim() == null || !obj.getDataFim().isBefore(hoje))
+        .map(obj -> new OutrosEmprestimosDTO(
+            obj.getUuid(),
+            obj.getTiposEmprestimo(),
+            obj.getDataInicio(),
+            obj.getDataFim(),
+            obj.getValorEmprestimo(),
+            obj.getValorPrestacao()
+        ))
+        .toList();
+    dto.setOutrosEmprestimosAnteriores(outrosAnteriores);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 
@@ -150,7 +177,10 @@ public class EmprestimoReadService {
         EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
         EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
         EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name(),
+        EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name(),
+        EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name(),
+        EtapaEmprestimo.PAGAMENTO.name()
     );
 
     var decisions = pedidoDecisaoEntityRepository
@@ -168,6 +198,9 @@ public class EmprestimoReadService {
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_REFORCO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
     ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name())).ifPresent(allDecisions::setElaboracaoContratoPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name())).ifPresent(allDecisions::setElaboracaoContratoRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.PAGAMENTO.name())).ifPresent(allDecisions::setPagamento);
 
     dto.setDecisao(allDecisions);
 
@@ -192,14 +225,21 @@ public class EmprestimoReadService {
     var baseDecision = new BaseDecisaoDTO();
     baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
-    baseDecision.setData(obj.getCreatedDate().toLocalDate());
+    // Data escolhida no parecer; registos antigos (sem ela) mostram a data de registo, como antes.
+    baseDecision.setData(obj.getDataParecer() != null
+        ? obj.getDataParecer()
+        : obj.getCreatedDate().toLocalDate());
+    baseDecision.setDataExecucao((obj.getLastModifiedDate() != null
+        ? obj.getLastModifiedDate()
+        : obj.getCreatedDate()).toLocalDate());
     baseDecision.setExecutadoPor(obj.getLastModifiedBy());
 
     var responsavel = new BaseDecisaoDTO.Responsavel(
         obj.getParecerResponsavel(),
         obj.getObservacaoResponsavel(),
         obj.getDataObservacaoResponsavel(),
-        obj.getUtilizadorObservacaoResponsavel()
+        obj.getUtilizadorObservacaoResponsavel(),
+        obj.getDataParecerResponsavel()
     );
 
     baseDecision.setResponsavel(responsavel);

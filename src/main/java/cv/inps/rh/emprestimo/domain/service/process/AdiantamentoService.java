@@ -181,6 +181,7 @@ public class AdiantamentoService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           setResponsavel(obj, request.getResponsavel());
           pedidoDecisaoEntityRepository.save(obj);
         },
@@ -189,6 +190,7 @@ public class AdiantamentoService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           setResponsavel(newObj, request.getResponsavel());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -211,6 +213,7 @@ public class AdiantamentoService {
     decisao.setObservacaoResponsavel(responsavel.observacao());
     decisao.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
     decisao.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+    decisao.setDataParecerResponsavel(responsavel.dataParecer());
   }
 
   public void anexarComprovativo(String emprestimoId, DocumentoDTO request, String action) {
@@ -270,6 +273,7 @@ public class AdiantamentoService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          obj.setDataParecer(request.getData());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
@@ -277,6 +281,7 @@ public class AdiantamentoService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
+          newObj.setDataParecer(request.getData());
           newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());

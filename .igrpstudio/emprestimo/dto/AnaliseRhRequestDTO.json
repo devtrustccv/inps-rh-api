@@ -67,6 +67,18 @@
       "primaryKey": false
     },
     {
+      "name": "data",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "documentos",
       "objectType": "dto",
       "type": "Documento",
