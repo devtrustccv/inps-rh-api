@@ -1055,7 +1055,7 @@ utilizador o `title` da resposta.
 ## 🔴 29. Bug report QA SIPS-RH 1.0 — contratos que mudaram (21/10/2026)
 
 Branch `fix/assiduidade-bug-report-qa`. Inclui os campos do commit a4c77a30 (14/10), que não
-tinham sido documentados. Validação completa do report em `docs/validacao_bug_report_SIPS-RH1.0.md`.
+tinham sido documentados. Validação completa do report em `docs/validacao_bug_report_SIPS-RH1.0.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/validacao_bug_report_SIPS-RH1.0.md`)*.
 
 **Migration de BD:** `scripts/assiduidade_bug_report_AS_2.sql` (recria `RH_V_FALTA_MENSAL` com a
 coluna `MOTIVO`). Correr **antes** de pôr esta versão da API no ar — sem a coluna, a lista de faltas

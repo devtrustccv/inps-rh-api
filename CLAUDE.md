@@ -33,7 +33,7 @@ Documentação funcional do domínio em [docs/](docs/) — consultar antes de im
 - **IDs de funcionário**: o refactor recente padronizou `funcionarioDeId` / `funcionarioParaId` (antes `tiprelDeId`/`tiprelParaId`) em DTOs de substituição. Seguir esse padrão em novos DTOs que envolvam relação entre funcionários.
 - **Open-in-view desligado** (`spring.jpa.open-in-view=false`) — carregar associações explicitamente no service layer; não confiar em lazy loading no controller.
 - **Batch inserts** configurados (batch_size=50, order_inserts/updates) — em operações bulk, usar `saveAll` e liberar a sessão periodicamente.
-- **Dialecto Oracle** — evitar SQL ANSI-only; atenção a `LIMIT` (usar `FETCH FIRST n ROWS ONLY` ou `Pageable`).
+- **Dialecto Oracle** — evitar SQL ANSI-only; sem `LIMIT`: usar `Pageable` (ou `ROWNUM` em SQL nativo). A BD de dev é **Oracle 11g XE**, onde `FETCH FIRST n ROWS ONLY` dá ORA-00933.
 - **Flyway desligado por padrão** (`spring.flyway.enabled=false`); migrations em `classpath:db/migration` quando habilitado.
 - **Swagger UI** em `/swagger-ui.html` (controlado por `ENABLE_SWAGGER`).
 - **Enum exposer do IGRP** expõe enums automaticamente em `api/v1/enums` (controlado por `igrp.enum.exposer.enabled`).

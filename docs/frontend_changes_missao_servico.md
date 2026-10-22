@@ -38,7 +38,7 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 ### Alterações de 2026-10-22 — bug report QA (14/10) 🔴
 
 Inclui o que os commits de 16/10 (568695b7) e 17/10 (0e25f614) trouxeram e não foi documentado.
-Validação item a item em `docs/validacao_bug_report_MISSAO_SERVICO1.0.md`.
+Validação item a item em `docs/validacao_bug_report_MISSAO_SERVICO1.0.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/validacao_bug_report_MISSAO_SERVICO1.0.md`)*.
 
 | Alteração | Impacto no front-end | Item |
 |---|---|---|

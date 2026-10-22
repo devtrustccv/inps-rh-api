@@ -4,7 +4,7 @@
 
 Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_24_09_2026.md`
 (imagens em `docs/imagens de avaliacao de desempenho 24_09/`: image13 menu, image15 lista,
-image19 formulário). Plano: `docs/plano_objectivos_comuns_24_09.md`.
+image19 formulário). Plano: `docs/plano_objectivos_comuns_24_09.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/plano_objectivos_comuns_24_09.md`)*.
 
 A spec de 24/09 acrescenta o separador **Objectivos / Avaliação Comuns**, com uma lista
 por ano. Os objectivos comuns de um ano são várias avaliações sem colaborador (uma do INPS
@@ -134,8 +134,8 @@ A spec diz que a periodicidade "deve aparecer **somente no momento de avaliaçã
 ## 2026-09-21 — Refactor SEMESTRE → PERIODICIDADE (breaking)
 
 Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_21_09_2026.md`
-(HTML navegável em `docs/spec_avaliacao_desempenho_21_09_2026.html`).
-Plano: `docs/plano_refactor_avaliacao_desempenho_21_09.md`.
+(HTML navegável em `docs/spec_avaliacao_desempenho_21_09_2026.html` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/spec_avaliacao_desempenho_21_09_2026.html`)*).
+Plano: `docs/plano_refactor_avaliacao_desempenho_21_09.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/plano_refactor_avaliacao_desempenho_21_09.md`)*.
 
 > **Breaking.** O eixo temporal deixa de ser `semestre` (`"1"` | `"2"`) e passa a ser
 > `periodicidade`, um código do domínio. O ciclo pode agora ser semestral, trimestral ou anual.
@@ -391,7 +391,7 @@ períodos do ciclo**, com `avaliacaoFinal: null` nos que ainda não foram avalia
 
 ### 12. Campos acrescentados depois da bateria de testes (21/09)
 
-Ver `docs/bateria_testes_avaliacao_desempenho_21_09.md`.
+Ver `docs/bateria_testes_avaliacao_desempenho_21_09.md` *(removido do repo a 22/10; `git show cac2d263^:docs/bateria_testes_avaliacao_desempenho_21_09.md`)*.
 
 **Grelha de componentes** ganha os rótulos legíveis que o ecrã mostra:
 
@@ -472,7 +472,7 @@ continua a ser uma só linha com `cargoId: null`.
 
 ### 14. Correcções da 2.ª bateria (21/09)
 
-Ver `docs/bateria_testes_avaliacao_desempenho_v2_21_09.md`.
+Ver `docs/bateria_testes_avaliacao_desempenho_v2_21_09.md` *(removido do repo a 22/10; `git show cac2d263^:docs/bateria_testes_avaliacao_desempenho_v2_21_09.md`)*.
 
 **Grelha de definição** (`GET .../avaliacoes/objectivos`) — ganha o colaborador, os períodos
 e o filtro Unidade que o ecrã tem:
