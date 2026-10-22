@@ -30,6 +30,7 @@ public class PrestadorAvaliacaoResponseDTO {
   private String preco;
   private BigDecimal total;
   private String designacao;              // classe A–D
+  private String designacaoDesc;          // MS-020: "Fornecedor Preferencial" | "Aceitável" | "Recurso" | "Rejeitado"
   private LocalDate dataRegisto;
 
 }

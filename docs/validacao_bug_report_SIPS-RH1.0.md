@@ -1,6 +1,6 @@
 # Validação do Bug Report SIPS-RH 1.0 (QA, assiduidade, 13/10/2026)
 
-Report: [Bug_Report_SIPS-RH1.0.html](Bug_Report_SIPS-RH1.0.html) · validado contra `develop` @ 389202d0 em 21/10/2026.
+Report: `Bug_Report_SIPS-RH1.0.html` (removido a 22/10 depois de fechado; recuperar com `git show bb054dd9:docs/Bug_Report_SIPS-RH1.0.html`) · validado contra `develop` @ 389202d0 em 21/10/2026.
 
 > **Spec:** as referências a linhas da spec são da versão 09/09 (removida; ver git). A spec 20/10 que a substitui não muda nenhum destes itens — só renomeia DEF_PAGAMENTOS → DEF_REMUNERACOES na validação da falta e acrescenta a gravação da falta na licença.
 

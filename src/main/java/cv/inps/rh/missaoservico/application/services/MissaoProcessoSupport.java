@@ -61,20 +61,73 @@ public class MissaoProcessoSupport {
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
   private final DomainEntityRepository domainEntityRepository;
   private final EntityManager entityManager;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository missaoLogisticaRepository;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
 
   public record Conteudo(String assunto, String corpo) {}
 
+  public static final String ESTADO_FINALIZADO = "FINALIZADO";
+
   /**
-   * Processo {@code tipoProcesso} da missão. Nas escritas recusa missões canceladas — o processo
-   * pode ainda estar activo, mas a missão já não admite alterações.
+   * Processo {@code tipoProcesso} da missão. Nas escritas recusa missões canceladas e finalizadas —
+   * o processo pode ainda estar activo, mas a missão já não admite alterações (MS-019: uma missão
+   * paga aceitava prestadores, requisições, logística, pareceres e cabimento).
    */
   public MissaoProcessoEntity processo(UUID missaoUuid, String tipoProcesso, boolean escrita) {
+    return processo(missaoUuid, tipoProcesso, escrita, false);
+  }
+
+  /**
+   * Como {@link #processo(UUID, String, boolean)}; {@code permiteFinalizada} deixa escrever numa
+   * missão finalizada — só a avaliação dos prestadores, que se faz depois de o serviço ser prestado.
+   */
+  public MissaoProcessoEntity processo(UUID missaoUuid, String tipoProcesso, boolean escrita,
+                                       boolean permiteFinalizada) {
     var tipo = TipoProcesso.fromCodeOrThrow(tipoProcesso != null ? tipoProcesso.trim().toUpperCase() : null);
     var processo = missaoProcessoRepository.findByMissaoAndTipoOrThrow(missaoUuid, tipo.name());
-    if (escrita && ESTADO_INATIVO.equals(processo.getMissaoServId().getEstado())) {
-      throw IgrpResponseStatusException.badRequest("A missão está cancelada e não admite alterações");
-    }
+    if (escrita)
+      garantirAlteravel(processo.getMissaoServId(), permiteFinalizada);
     return processo;
+  }
+
+  private void garantirAlteravel(MissaoServicoEntity missao, boolean permiteFinalizada) {
+    if (ESTADO_INATIVO.equals(missao.getEstado()))
+      throw IgrpResponseStatusException.badRequest("A missão está cancelada e não admite alterações");
+    if (!permiteFinalizada && ESTADO_FINALIZADO.equals(missao.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "A missão " + nrMissaoFormatado(missao) + " está finalizada e não admite alterações");
+  }
+
+  /**
+   * Alimentação incluída no alojamento de cada colaborador (linhas activas do processo ALOJAMENTO),
+   * por id de RH_T_MISSAO_COLABORADOR. É o que decide a fracção da ajuda de custo — partilhado pela
+   * escrita (cálculo) e pela leitura (mostrar a fracção aplicada, MS-013).
+   */
+  public java.util.Map<Long, String> alimentacaoPorColaborador(UUID missaoUuid) {
+    var linhas = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()) && TipoProcesso.ALOJAMENTO.name().equals(l.getReferencia()))
+        .toList();
+    var out = new java.util.HashMap<Long, String>();
+    if (linhas.isEmpty())
+      return out;
+    var porId = new java.util.HashMap<Long, cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity>();
+    linhas.forEach(l -> porId.put(l.getId(), l));
+    for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(new java.util.ArrayList<>(porId.keySet()))) {
+      if (ESTADO_ATIVO.equals(det.getEstado())) {
+        out.putIfAbsent(det.getMissaoColabId().getId(), porId.get(det.getMissaoLogistId().getId()).getFlgAlimentacao());
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Fracção do valor diário base da ajuda de custo (spec): 1 (100%) sem alojamento pago pela
+   * instituição, 2/3 com alojamento sem alimentação, 1/3 com alojamento e alimentação.
+   */
+  public static String fracaoAjudaCusto(boolean incluiAlojamento, String flgAlimentacao) {
+    if (!incluiAlojamento)
+      return "1";
+    return "SIM".equalsIgnoreCase(flgAlimentacao) ? "1/3" : "2/3";
   }
 
   public boolean isNext(ProcessStepAction action) {
@@ -194,9 +247,9 @@ public class MissaoProcessoSupport {
             && missaoUuid.equals(x.getMissaoProcessoId().getMissaoServId().getUuid())
             && ESTADO_ATIVO.equals(x.getEstado()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Prestador não encontrado nesta missão: " + missaoPrestUuid));
-    if (escrita && ESTADO_INATIVO.equals(prestador.getMissaoProcessoId().getMissaoServId().getEstado())) {
-      throw IgrpResponseStatusException.badRequest("A missão está cancelada e não admite alterações");
-    }
+    // Só as avaliações usam isto, e essas continuam permitidas numa missão finalizada.
+    if (escrita)
+      garantirAlteravel(prestador.getMissaoProcessoId().getMissaoServId(), true);
     return prestador;
   }
 

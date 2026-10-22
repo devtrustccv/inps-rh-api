@@ -19,6 +19,7 @@ public class ParecerResponseDTO {
 
   private UUID uuid;
   private String responsavel;             // UGAL | COORDENADOR_RH | DIRECTOR_RH
+  private String responsavelDesc;         // MS-026: "UGAL" | "Coordenador RH" | "Director RH"
   private String parecer;                 // FAVORAVEL | DESFAVORAVEL
   private String parecerDesc;
   private String observacao;
