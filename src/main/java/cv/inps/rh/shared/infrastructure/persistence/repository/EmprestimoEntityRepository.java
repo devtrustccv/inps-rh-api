@@ -107,7 +107,6 @@ public interface EmprestimoEntityRepository extends
             WHERE latestLoan.pedido.id = p.id
             AND (latestLoan.emprestimo IS NULL OR latestLoan.estado IN ('ATIVO', 'CABIMENTADO'))
       )
-      AND e.estado <> 'CANCELADO'
       AND e.tiprel.id = tr.id
       AND tr.estActAdm = 1
       AND tr.funId.id = f.id
