@@ -17,7 +17,7 @@ falhas**. Feito nesta sessão (8 commits, de `9eba4822` a `4117f38f`):
 - **Notificações novas ao colaborador**, por email: `MISSAO_CONFIRMACAO_PEDIDO` (submissão e
   colaborador acrescentado), `MISSAO_AJUDA_CUSTO` (1.º registo do pagamento), `MISSAO_ALTERACAO`
   (destino/datas). Logística e cancelamento passaram a enviar email (antes só gravavam).
-- **Templates parametrizados** em dev por `docs/db/missao_servico_notificacoes_dml.sql` (7 tipos no
+- **Templates parametrizados** em dev por `docs/sql/missao_servico_notificacoes_dml.sql` (7 tipos no
   domínio `TIPO_NOTIFICACAO`, 7 templates, textos **provisórios**). O aviso de logística procura
   `MISSAO_LOGISTICA_COLABORADOR_{TIPO}` antes do genérico.
 - **PDF da requisição** alinhado com o modelo 3.2.4.2.2 (logótipo, caixas, `RMS-2026-0006`, ECV).
@@ -68,7 +68,7 @@ FINALIZADO e paga. **8/2026**: cancelada, para os testes de email.
 
 - `docs/duvidas_analista_missao_servico.md` — **levar ao analista**; tem o estado de cada ponto.
 - `docs/frontend_changes_missao_servico.md` — guia por ecrã (fonte); `docs/evidencias_missao.html` é gerado.
-- `docs/db/missao_servico_notificacoes_dml.sql` e `docs/db/missao_servico_14_09_ddl.sql` — por aplicar noutros ambientes.
+- `docs/sql/missao_servico_notificacoes_dml.sql` e `docs/sql/missao_servico_14_09_ddl.sql` — por aplicar noutros ambientes.
 - `src/main/java/cv/inps/rh/missaoservico/application/services/MissaoProcessoServiceWrite.java:1089` — `gerarCabimentoAutomatico` (TODO SGAL).
 - `src/main/java/cv/inps/rh/missaoservico/application/services/MissaoProcessoServiceWrite.java:722` — `calcularValorDiarioAjudaCusto` (base vem do cliente).
 - `src/main/java/cv/inps/rh/missaoservico/application/services/MissaoNotificacaoColaborador.java` — envio ao colaborador.

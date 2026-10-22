@@ -308,7 +308,7 @@ Handoff (este doc) commitado no repo principal `develop`: `da22e328`.
   e `contrVinculo` (IDs na vista). Default (sem tiprelUuid) = vínculo ativo (`estActAdm=1`). Escalão como
   filtro 🔴 não dá (vista sem coluna) → DBA.
 - **FASE 6 RESOLVIDO na vista (não é DBA):** `RH_V_RELACAO_LABORAL` recriada
-  (`docs/db/melhorias_dossier_view_relacao_laboral.sql`) para expor o escalão do tiprel em PCCS
+  (`docs/sql/melhorias_dossier_view_relacao_laboral.sql`) para expor o escalão do tiprel em PCCS
   sem-carreira: COALESCE(escalão-carreira, escalão-tiprel) + filtro final tolera carreira null.
   ⚠️ ARMADILHA: no DESC, fazer COALESCE **campo-a-campo** (`COALESCE(j.NIVEL,jt.NIVEL)||'/'||
   COALESCE(j.ESC,jt.ESC)`) — concatenar primeiro dá `'/'` (não-null) e a COALESCE nunca cai para jt.
@@ -371,7 +371,7 @@ isso; se não etiquetar, devolve vazio independentemente do (a)/(b)).
 T0.3 domínio `TIPO_SALARIO_VINCULO` (3 valores). T0.4 domínio `TIPO_MOV_LABORAL`+ref `GESTAO_LABORAL`
 (descobrir nome exato da tabela de domínios). T0.5 `flg_salario`,`flg_carreira` counts pré-backfill.
 
-**FASE 1 — backfill (com autorização):** aplicar `docs/db/melhorias_dossier_tipo_salario.sql` via `DbExec`
+**FASE 1 — backfill (com autorização):** aplicar `docs/sql/melhorias_dossier_tipo_salario.sql` via `DbExec`
 (ADD col, UPDATE, DROP, RENAME, bloco PL/SQL ESCALAO_ID, COMMIT). Verificar contagens; listar SIM_FORA_PCCS
 para revisão manual.
 
@@ -431,7 +431,7 @@ Evidências live em `scratchpad/t78_*.json` + BD (val `01a04cb3-8dc5-7b84-9d11-3
 
 **Falta (controlo do utilizador):**
 1. **`git push` de `develop`** (o merge foi só local; passo público por decidir).
-2. **Aplicar migrações** (`docs/db/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
+2. **Aplicar migrações** (`docs/sql/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
    ainda não as tenha (a BD live já as tem).
 3. **T7.8** — ✅ RESOLVIDO via reader manual isolado (§0d) e ✅ **testado live** no 8089.
 5. **Protótipo §0e (`javers.compare`→RH_T_VALIDACAO_DETALHE)** — testado live, **NÃO commitado**: decidir
@@ -440,7 +440,7 @@ Evidências live em `scratchpad/t78_*.json` + BD (val `01a04cb3-8dc5-7b84-9d11-3
    de worktree já foi prunado; apagar a pasta quando o processo largar / ao reiniciar).
 
 ## 9. Ficheiros-chave (relativos ao worktree)
-- `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER + backfill.
+- `docs/sql/melhorias_dossier_tipo_salario.sql` — ALTER + backfill.
 - `src/.../service/historicolaboral/AlterarEscalaoCargoService.java` — fluxo novo.
 - `src/.../rules/ColaboradorValidationRules.java` — helper escalão.
 - `src/.../constants/custom/TipoSalarioVinculo.java` — enum do domínio.

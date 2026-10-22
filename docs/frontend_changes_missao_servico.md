@@ -2,8 +2,6 @@
 
 **Última actualização:** 2026-09-16 · **Base de todos os endpoints:** `/api/v1/missao-servico`
 
-> Versão em HTML para partilhar: [evidencias_missao.html](evidencias_missao.html) — gerada a partir
-> deste ficheiro; em caso de divergência, vale o Markdown.
 
 Este documento substitui o changelog anterior. Está organizado **por ecrã**, pela ordem em que o
 utilizador os percorre. Cada capítulo traz os *lookups* que o ecrã precisa, o `GET` que o preenche,
@@ -872,7 +870,7 @@ das requisições — com o nº da missão e o motivo. Os colaboradores que **es
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
 | **"Ver Alerta"** (Lista Missão) | O analista retirou os alertas da missão do âmbito actual: `GET /api/v1/funcionarios/alertas` não devolve nada da missão. O botão pode ficar escondido |
-| Templates de notificação | Estão parametrizados em `RH_T_PARAM_NOTIFICACAO` com textos **provisórios**, a rever pelo negócio. O script para os outros ambientes é `docs/db/missao_servico_notificacoes_dml.sql` |
+| Templates de notificação | Estão parametrizados em `RH_T_PARAM_NOTIFICACAO` com textos **provisórios**, a rever pelo negócio. O script para os outros ambientes é `docs/sql/missao_servico_notificacoes_dml.sql` |
 
 ---
 

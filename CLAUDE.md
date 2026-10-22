@@ -24,7 +24,7 @@ Estrutura **hexagonal / Clean Architecture** por módulo de negócio. Cada módu
 
 Módulos de negócio: `assiduidade`, `avaliacao`, `configuracao`, `emprestimo`, `funcionario`, `missaoservico`, `parametrizacao`, `processamento`, `progressaopromocao`, `transversal`. Código compartilhado em `shared/` (config, security, util).
 
-Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio (ex.: `assiduidade_regras.md`, `avaliacao_desempenho.md`, `dossier_regras.md`, `EspecificacaoTecnicaFuncional-MISSAOSERVICO.md`).
+Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio: as specs `Especificação Tecnica Funcional - <MÓDULO>_<data>.md` (a mais recente de cada módulo prevalece) e os contratos de API para o frontend `frontend_changes_<modulo>.md`. Scripts SQL (DDL/DML aplicados à mão, sem Flyway) em [docs/sql/](docs/sql/) e [scripts/](scripts/).
 
 ## Convenções
 
