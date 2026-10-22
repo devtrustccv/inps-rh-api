@@ -24,7 +24,7 @@ Estrutura **hexagonal / Clean Architecture** por módulo de negócio. Cada módu
 
 Módulos de negócio: `assiduidade`, `avaliacao`, `configuracao`, `emprestimo`, `funcionario`, `missaoservico`, `parametrizacao`, `processamento`, `progressaopromocao`, `transversal`. Código compartilhado em `shared/` (config, security, util).
 
-Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio (ex.: `assiduidade_regras.md`, `avaliacao_desempenho.md`, `dossier_regras.md`, `EspecificacaoTecnicaFuncional-MISSAOSERVICO.md`).
+Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio: as specs `Especificação Tecnica Funcional - <MÓDULO>_<data>.md` (a mais recente de cada módulo prevalece) e os contratos de API para o frontend `frontend_changes_<modulo>.md`. Scripts SQL (DDL/DML aplicados à mão, sem Flyway) em [docs/sql/](docs/sql/) e [scripts/](scripts/).
 
 ## Convenções
 
@@ -33,7 +33,7 @@ Documentação funcional do domínio em [docs/](docs/) — consultar antes de im
 - **IDs de funcionário**: o refactor recente padronizou `funcionarioDeId` / `funcionarioParaId` (antes `tiprelDeId`/`tiprelParaId`) em DTOs de substituição. Seguir esse padrão em novos DTOs que envolvam relação entre funcionários.
 - **Open-in-view desligado** (`spring.jpa.open-in-view=false`) — carregar associações explicitamente no service layer; não confiar em lazy loading no controller.
 - **Batch inserts** configurados (batch_size=50, order_inserts/updates) — em operações bulk, usar `saveAll` e liberar a sessão periodicamente.
-- **Dialecto Oracle** — evitar SQL ANSI-only; atenção a `LIMIT` (usar `FETCH FIRST n ROWS ONLY` ou `Pageable`).
+- **Dialecto Oracle** — evitar SQL ANSI-only; sem `LIMIT`: usar `Pageable` (ou `ROWNUM` em SQL nativo). A BD de dev é **Oracle 11g XE**, onde `FETCH FIRST n ROWS ONLY` dá ORA-00933.
 - **Flyway desligado por padrão** (`spring.flyway.enabled=false`); migrations em `classpath:db/migration` quando habilitado.
 - **Swagger UI** em `/swagger-ui.html` (controlado por `ENABLE_SWAGGER`).
 - **Enum exposer do IGRP** expõe enums automaticamente em `api/v1/enums` (controlado por `igrp.enum.exposer.enabled`).

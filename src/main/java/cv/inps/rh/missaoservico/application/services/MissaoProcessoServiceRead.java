@@ -221,6 +221,8 @@ public class MissaoProcessoServiceRead {
     var seguros = new ArrayList<SeguroViagemResponseDTO>();
     var alojamentos = new ArrayList<AlojamentoResponseDTO>();
     var ajudas = new ArrayList<AjudaCustoResponseDTO>();
+    var alimentacaoPorColab = tipo == TipoProcesso.AJUDA_CUSTO
+        ? support.alimentacaoPorColaborador(missaoUuid) : java.util.Map.<Long, String>of();
 
     for (var l : linhas) {
       var colaboradores = detsPorLinha.getOrDefault(l.getId(), List.of()).stream().map(this::toDetDto).toList();
@@ -283,6 +285,17 @@ public class MissaoProcessoServiceRead {
           dto.setValorDiario(l.getValorDiario());
           dto.setValorTotal(l.getValorTotal());
           dto.setEstado(l.getEstado());
+          // MS-013: a base e a fracção não se gravam (só o valor efectivo) — derivam-se do efectivo e
+          // da alimentação do alojamento do colaborador, a mesma regra do cálculo na escrita.
+          var incluiAlojamento = "SIM".equalsIgnoreCase(l.getFlgAlojamento());
+          var dets = detsPorLinha.getOrDefault(l.getId(), List.of());
+          var alimentacao = incluiAlojamento && !dets.isEmpty()
+              ? alimentacaoPorColab.get(dets.getFirst().getMissaoColabId().getId()) : null;
+          var fracao = MissaoProcessoSupport.fracaoAjudaCusto(incluiAlojamento, alimentacao);
+          dto.setFracaoAplicada(fracao);
+          dto.setFlgAlimentacao(incluiAlojamento ? ("SIM".equalsIgnoreCase(alimentacao) ? "SIM" : "NAO") : null);
+          if (l.getValorDiario() != null)
+            dto.setValorDiarioBase(baseDaAjudaCusto(l.getValorDiario(), fracao));
           ajudas.add(dto);
         }
       }
@@ -324,8 +337,13 @@ public class MissaoProcessoServiceRead {
     response.setAlojamentos(alojamentos);
     response.setAjudasCusto(ajudas);
     if (tipo == TipoProcesso.AJUDA_CUSTO) {
-      // Valor diário base parametrizado (cargo superior da missão), para o ecrã pré-preencher.
-      response.setValorDiarioAjudaCusto(paramAjudaCustoService.valorDiarioBase(missao, ativos));
+      // D2: base parametrizada POR colaborador, para o ecrã pré-preencher cada linha. O campo do
+      // processo só vem quando é igual para todos (compatibilidade); com carreiras diferentes, null.
+      var porColab = new HashMap<Long, java.math.BigDecimal>();
+      ativos.forEach(c -> porColab.put(c.getId(), paramAjudaCustoService.valorDiarioBaseDoColaborador(missao, c)));
+      disponiveis.forEach(d -> d.setValorDiarioAjudaCusto(porColab.get(d.getId())));
+      var distintos = new java.util.HashSet<>(porColab.values());
+      response.setValorDiarioAjudaCusto(distintos.size() == 1 ? distintos.iterator().next() : null);
     }
     response.setColaboradoresDisponiveis(disponiveis);
     response.setNotificacao(notificacao);
@@ -339,6 +357,26 @@ public class MissaoProcessoServiceRead {
         });
 
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Valor diário base de uma ajuda de custo gravada só com o efectivo (= base × fracção, arredondado
+   * ao cêntimo). A inversão simples arrasta o arredondamento (666,67 × 3 = 2000,01); devolve-se o
+   * valor com menos casas decimais que, com a mesma fracção e o mesmo arredondamento, dá o efectivo.
+   */
+  static java.math.BigDecimal baseDaAjudaCusto(java.math.BigDecimal efectivo, String fracao) {
+    int num = "1/3".equals(fracao) ? 1 : "2/3".equals(fracao) ? 2 : 3;
+    if (num == 3)
+      return efectivo.setScale(2, java.math.RoundingMode.HALF_UP);
+    var tres = java.math.BigDecimal.valueOf(3);
+    var inverso = efectivo.multiply(tres).divide(java.math.BigDecimal.valueOf(num), 4, java.math.RoundingMode.HALF_UP);
+    for (int casas = 0; casas <= 2; casas++) {
+      var candidato = inverso.setScale(casas, java.math.RoundingMode.HALF_UP);
+      var recalculado = candidato.multiply(java.math.BigDecimal.valueOf(num)).divide(tres, 2, java.math.RoundingMode.HALF_UP);
+      if (recalculado.compareTo(efectivo) == 0)
+        return candidato.setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+    return inverso.setScale(2, java.math.RoundingMode.HALF_UP);
   }
 
   private MissaoLogisticaDetResponseDTO toDetDto(MissaoLogisticaDetEntity d) {
@@ -439,6 +477,10 @@ public class MissaoProcessoServiceRead {
     var dto = new ParecerResponseDTO();
     dto.setUuid(d.getUuid());
     dto.setResponsavel(d.getResponsavel());
+    dto.setResponsavelDesc(java.util.Arrays.stream(cv.inps.rh.missaoservico.application.constants.ResponsavelParecer.values())
+        .filter(r -> r.name().equals(d.getResponsavel())).findFirst()
+        .map(cv.inps.rh.missaoservico.application.constants.ResponsavelParecer::getDescricao)
+        .orElse(d.getResponsavel()));
     dto.setParecer(d.getParecer());
     dto.setParecerDesc(Parecer.descricaoDe(d.getParecer()));
     dto.setObservacao(d.getObservacao());
@@ -650,6 +692,9 @@ public class MissaoProcessoServiceRead {
       var item = new ProcessoCabimentoItemResponseDTO();
       item.setLogisticaUuid(l.getUuid());
       item.setReferencia(l.getReferencia());
+      item.setReferenciaDesc(java.util.Arrays.stream(TipoProcesso.values())
+          .filter(t -> t.name().equals(l.getReferencia())).findFirst()
+          .map(TipoProcesso::getDescricao).orElse(l.getReferencia()));
       item.setNome(switch (tipo) {
         case SEGURO_VIAGEM -> l.getNomeSeguradora();
         case AJUDA_CUSTO -> colaboradores.isEmpty() ? null : colaboradores.getFirst().getNomeColaborador();
@@ -657,7 +702,8 @@ public class MissaoProcessoServiceRead {
       });
       item.setValorTotal(l.getValorTotal());
       item.setMoeda(l.getMoeda());
-      item.setCabId(l.getCabId());
+      // MS-014: 0 não é nº de cabimento (o ecrã mandava 0 por defeito) — sai null, como sem número.
+      item.setCabId(l.getCabId() != null && l.getCabId() > 0 ? l.getCabId() : null);
       item.setEstadoCabimento(l.getEstadoCabimento());
       item.setColaboradores(colaboradores);
       item.setDocumento(documentoMaisRecente(TableName.RH_T_MISSAO_LOGISTICA.name(), l.getUuid(), false));
