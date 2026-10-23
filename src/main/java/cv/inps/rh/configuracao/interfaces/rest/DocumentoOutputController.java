@@ -6,6 +6,7 @@ package cv.inps.rh.configuracao.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.commands.DeleteOutputDocumentCommand;
 import cv.inps.rh.configuracao.application.commands.SaveOutputDocumentCommand;
 import cv.inps.rh.configuracao.application.commands.UpdateOutputDocumentCommand;
 import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
@@ -158,6 +159,35 @@ public class DocumentoOutputController {
   {
 
       final var command = new UpdateOutputDocumentCommand(updateOutputDocumentRequest, id);
+
+      return commandBus.send(command);
+
+  }
+
+   @DeleteMapping(
+   value = "documentos-output/{id}"
+  )
+  @Operation(
+    summary = "Delete output document",
+    description = "Elimina (inativa) o documento de saída",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> deleteOutputDocument(@PathVariable String id)
+  {
+
+      final var command = new DeleteOutputDocumentCommand(id);
 
       return commandBus.send(command);
 
