@@ -8,6 +8,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.NotificacaoMapper;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AlertaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AlertaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
@@ -42,8 +43,27 @@ public class AlertaReadService {
     Specification<AlertaEntity> spec = (root, q, cb) -> {
       List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
 
+      // Spec (JOB Alerta → Lista): filtro Referência = RH_T_ALERTA.REFERENCIA (antes LIKE sobre REFERENCIA_NAME).
       if (StringUtils.hasText(query.getReferencia())) {
-        predicates.add(cb.like(root.get("referenciaName"), "%" + query.getReferencia() + "%"));
+        predicates.add(cb.equal(root.get("referencia"), query.getReferencia()));
+      }
+      // Nome, Direção e Secção eram aceites e ignorados: aplicam-se ao colaborador do alerta (vínculo atual).
+      if (StringUtils.hasText(query.getNomeColaborador())) {
+        predicates.add(cb.like(cb.lower(root.get("funId").get("nome")),
+            "%" + query.getNomeColaborador().trim().toLowerCase() + "%"));
+      }
+      if (query.getDirecaoId() != null || query.getSeccaoId() != null) {
+        var sub = q.subquery(Long.class);
+        var t = sub.from(TiposRelacionamentoEntity.class);
+        var conds = new ArrayList<jakarta.persistence.criteria.Predicate>();
+        conds.add(cb.equal(t.get("funId"), root.get("funId")));
+        conds.add(cb.equal(t.get("estActAdm"), 1));
+        if (query.getDirecaoId() != null)
+          conds.add(cb.equal(t.get("mobId").get("instidId").get("id"), query.getDirecaoId()));
+        if (query.getSeccaoId() != null)
+          conds.add(cb.equal(t.get("mobId").get("secaoId").get("id"), query.getSeccaoId()));
+        sub.select(t.get("id")).where(conds.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        predicates.add(cb.exists(sub));
       }
       if (StringUtils.hasText(query.getTipoAlerta())) {
         predicates.add(cb.equal(root.get("tipoAlerta"), query.getTipoAlerta()));

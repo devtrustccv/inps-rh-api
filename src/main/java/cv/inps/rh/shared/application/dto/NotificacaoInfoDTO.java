@@ -29,5 +29,7 @@ public class NotificacaoInfoDTO  {
   private String email;
   private LocalDate dataEnvio;
   private String estado;
+  /** Descrição do estado (domínio ESTADO_NOTIFICACAO). */
+  private String estadoDescricao;
 
 }

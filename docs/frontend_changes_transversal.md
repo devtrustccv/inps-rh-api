@@ -104,3 +104,70 @@ Alerta `CONVERSAO_CONTRATO` (§3.4.2 §2): o "Processar" abre o **Novo Contrato 
 O endpoint individual de renovação (`POST .../{idFuncionario}/renovacao-contrato/{contratoId}`) e o de
 validação **não mudaram**. O `RenovacaoContratoDTO` e o request de `validar` ficam iguais — o conceito de
 alerta vive só no request do lote.
+
+---
+
+# Bug report QA Transversal (OUTUBRO) — alterações de API (23/10/2026)
+
+Correr antes `scripts/transversal_bug_report_TR.sql` (domínios + estado das notificações).
+
+## 4. Documentos de Saída — `configuracao/documentos-output` (sem `api/v1`)
+
+**Responsável passa a ser o id de `RH_T_RESPONSAVEL`** (spec: `RESPONSAVEL_ID`) — ⚠️ muda o contrato (TR-03/TR-04):
+
+| | Antes | Agora |
+|---|---|---|
+| Registo/edição (POST/PUT) | `responsavel`: UUID do funcionário | **`responsavelId`**: número = o `responsavelId` de `GET configuracao/responsaveis/search` |
+| Resposta (lista/GET) | `responsavelId`: UUID do funcionário | `responsavelId`: número (RH_T_RESPONSAVEL.ID) · `funcionarioId`: UUID · `responsavelNome` |
+
+Quem é responsável da direção e de uma secção tem duas linhas na pesquisa; agora a escolhida é a que fica.
+Na **edição sem `responsavelId`** mantém-se o responsável anterior (antes perdia-se).
+
+- Campo novo **`tipoDocumentoDesc`** (descrição do domínio `ORDEM_SERVICO_DECLARACAO`) — mostrar na lista (TR-01).
+- **Um só documento ativo por tipo**: registar ou editar para um tipo que já tem outro ativo → 400
+  *"Já existe um documento ativo para o tipo X. Edite esse documento."* (havia dois de TRANSFERENCIA e a OS rebentava).
+- `responsavelId` inexistente → 404; inativo → 400.
+- **Eliminar não existe** (a spec só prevê Editar): retirar o botão (TR-05).
+
+**Ação front:** combo Responsável com label `funcionario` e valor `responsavelId` da pesquisa; no Editar, pré-preencher
+com `responsavelId`/`responsavelNome` do GET; título "Registar Documento" no registo (TR-02).
+
+## 5. Tipos de Documento — `configuracao?configurationType=PARAM_TIPO_DOCUMENTO`
+
+- **Editar só altera o Estado** (spec Parametrização: "Somente deve deixar editar Estado"): código, descrição e
+  referência enviados no PUT são ignorados. O ecrã deve pô-los só-leitura na edição e refazer o GET ao abrir (TR-08).
+- `referencia` passa a obrigatória no registo (400 *"referencia: The field <referencia> is required"*) (TR-07).
+- Filtro: `descricao=<texto>`; `estado=` vazio conta como não indicado (antes 400) (TR-06).
+
+## 6. Pedido de Declaração — `api/v1/funcionarios/pedidos/declaracoes`
+
+- **Todos os `{id}` são o `uuid`** do pedido — ⚠️ `PUT {id}/analise` e `PUT {id}/validacao` usavam o id numérico.
+  Id numérico → 400 *"Identificador do pedido inválido…"* (TR-17).
+- **Tipo de Declaração** tem de ser um `value` de `GET api/v1/parametrizacao/dominios?dominio=ORDEM_SERVICO_DECLARACAO&referencia=DECLARACAO`
+  (`AQUISICAO_DISTICO`, `CREDITO_HABITACAO`, `PEDIDO_CREDITO_BANCARIO`, `EFEITO_VISTOS`); outro valor → 400. Usar o mesmo
+  domínio no filtro da lista (TR-09/TR-14).
+- Campos novos: lista e GET `tipoDeclaracaoDesc`, `estadoPedidoDesc`; GET também `finalidadeDesc`; anexos com
+  `estado`/`estadoDesc` preenchidos (TR-15/TR-16).
+- O PDF (`GET {uuid}/declaracao`) passa a funcionar para os 4 tipos (procurava um template que não existia).
+
+**Em espera (spec nova):** retirar Analisar/Validar e passar o pedido pela lista de validação (TR-18) e o separador
+Análise sem "Em conformidade" no registo (TR-13) — a spec de 29/08 não os prevê.
+
+## 7. Notificações — `api/v1/funcionarios/notificacoes`
+
+- **Estado = código do domínio `ESTADO_NOTIFICACAO`**: `POR_ENVIAR`, `ENVIADO`, `ERRO` (novo). Filtrar com o código;
+  mostrar o campo novo **`estadoDescricao`** (TR-20/TR-22). Igual em `missao-servico/{uuid}/notificacoes`.
+- Datas `dataEnvioDe`/`dataEnvioAte`: aceitam `yyyy-MM-dd` ou data com hora; o **Até inclui o próprio dia**; data
+  inválida ou Até < De → 400 (antes 500 / dia excluído) (TR-19).
+- Tipo: combo de `dominios?dominio=TIPO_ALERTA_NOTIFICACAO` (ganhou CONVERSAO_CONTRATO, RENOVACAO_CONTRATO,
+  LICENCA_S_VENCIMENTO, MISSAO_CANCELAMENTO).
+- Mês corrente por defeito: o ecrã pré-preenche as datas (a spec não o define no backend) (TR-21).
+
+## 8. Alertas — `api/v1/funcionarios/alertas`
+
+- Campos novos: **`referencia`** (RH_T_ALERTA.REFERENCIA — mostrar na coluna Referência), **`tipoAlertaDescricao`**,
+  **`flgNotificacao`** (S/N — "Ver Notificação" só ativo com S) (TR-23/24/25).
+- Filtro `referencia` passa a comparar com RH_T_ALERTA.REFERENCIA (ex.: `CONTRATO`).
+- Filtros `nomeColaborador`, `direcaoId`, `seccaoId` passam a funcionar (eram ignorados).
+- "Ver Notificação": `GET alertas/{uuid}/notificacoes` com o **uuid**. Hoje vem sempre vazio: o JOB ainda não gera
+  notificações (destinatários por definir).

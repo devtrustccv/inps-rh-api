@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.service.notificacao;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.funcionario.application.commands.EnviarNotificacaoCommand;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
@@ -52,7 +53,7 @@ public class NotificacaoWriteService {
         emailService.sendEmail(notificacao.getEmail(), notificacao.getAssunto(), notificacao.getMessage());
 
         // 5. Atualizar o estado e a data de envio
-        notificacao.setEstado("Enviado"); // Usar um Enum/Constante seria melhor
+        notificacao.setEstado(EstadoNotificacao.ENVIADO.name());
         notificacao.setDataEnvio(LocalDate.now());
 
         notificacaoRepository.save(notificacao);

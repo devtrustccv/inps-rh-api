@@ -55,51 +55,78 @@ public class DocOutputService {
   @Transactional
   public ParamDocOutputEntity create(DocOutputRequestDTO request) {
 
-
     ParamDocOutputEntity entity = mapper.toEntity(request);
-    entity.setTitulo(request.getTitulo());
-    entity.setCorpo(request.getCorpo());
-    entity.setAssinadoPor(request.getAssinadoPor());
-    entity.setTipoDocumento(request.getTipoDocumento());
+    entity.setEstado(estado(request));
+    if ("A".equals(entity.getEstado()))
+      exigirTipoLivre(entity.getTipoDocumento(), null);
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    entity.setEstado("A");
 
-    ResponsavelEntity responsavel;
-
-    if (request.getResponsavel()!=null) {
-      responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
-          () ->
-              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + request.getResponsavel()));
-      entity.setResponsavel(responsavel);
-    }
+    if (request.getResponsavelId() != null)
+      entity.setResponsavel(responsavel(request.getResponsavelId()));
 
     return repository.save(entity);
   }
 
   @Transactional
   public ParamDocOutputEntity update(String id, DocOutputRequestDTO request) {
-    // Passo 1: Inativar o registo atual
+    // Spec: editar = inativar o registo atual e criar um novo.
     ParamDocOutputEntity oldEntity = findById(id);
-    oldEntity.setEstado("I");
-    repository.save(oldEntity);
-
 
     ParamDocOutputEntity newEntity = mapper.toEntity(request);
-    newEntity.setTitulo(request.getTitulo());
-    newEntity.setCorpo(request.getCorpo());
-    newEntity.setAssinadoPor(request.getAssinadoPor());
-    newEntity.setTipoDocumento(request.getTipoDocumento());
+    newEntity.setEstado(estado(request));
+    // Só pode haver um ativo por tipo; um documento inativo não ocupa o tipo.
+    if ("A".equals(newEntity.getEstado()))
+      exigirTipoLivre(newEntity.getTipoDocumento(), oldEntity.getId());
     newEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    newEntity.setEstado("A");
+    // QA TR-04: sem responsável no pedido mantém-se o anterior (antes perdia-se em silêncio).
+    newEntity.setResponsavel(request.getResponsavelId() != null
+        ? responsavel(request.getResponsavelId())
+        : oldEntity.getResponsavel());
 
-    ResponsavelEntity responsavel;
-    if (request.getResponsavel()!=null) {
-      responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
-          () ->
-              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + request.getResponsavel()));
-      newEntity.setResponsavel(responsavel);
-    }
-
+    oldEntity.setEstado("I");
+    repository.save(oldEntity);
     return repository.save(newEntity);
+  }
+
+  /** Estado pedido no formulário: A ou I (vazio = A). */
+  private static String estado(DocOutputRequestDTO request) {
+    var estado = StringUtils.hasText(request.getEstado()) ? request.getEstado().trim().toUpperCase() : "A";
+    if (!"A".equals(estado) && !"I".equals(estado))
+      throw IgrpResponseStatusException.badRequest("Estado inválido: " + request.getEstado() + " (use A ou I).");
+    return estado;
+  }
+
+  /** Eliminar = inativar (o histórico das versões fica; a Ordem de Serviço só lê os ativos). */
+  @Transactional
+  public ParamDocOutputEntity delete(String id) {
+    ParamDocOutputEntity entity = findById(id);
+    entity.setEstado("I");
+    return repository.save(entity);
+  }
+
+  /**
+   * Responsável pelo id de RH_T_RESPONSAVEL (spec: RESPONSAVEL_ID). Antes era o UUID do funcionário, e quem
+   * é responsável da direção e de uma secção ficava sempre com a primeira linha (QA TR-04).
+   */
+  private ResponsavelEntity responsavel(Long responsavelId) {
+    var r = responsavelRepository.findById(responsavelId)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Responsável não encontrado: " + responsavelId));
+    if (!"A".equals(r.getEstado()))
+      throw IgrpResponseStatusException.badRequest("O responsável " + responsavelId + " não está ativo.");
+    return r;
+  }
+
+  /**
+   * Um só documento ativo por tipo: a Ordem de Serviço e a declaração leem-no com findByTipoDocumentoAndEstado,
+   * que rebenta com dois ativos (havia dois de TRANSFERENCIA depois de uma edição trocar o tipo).
+   */
+  private void exigirTipoLivre(String tipoDocumento, Long idEmEdicao) {
+    if (tipoDocumento == null)
+      throw IgrpResponseStatusException.badRequest("Indique o Tipo de Documento.");
+    var outro = repository.findAllByTipoDocumentoAndEstado(tipoDocumento, "A").stream()
+        .anyMatch(d -> !d.getId().equals(idEmEdicao));
+    if (outro)
+      throw IgrpResponseStatusException.badRequest(
+          "Já existe um documento ativo para o tipo " + tipoDocumento + ". Edite esse documento.");
   }
 }

@@ -64,10 +64,9 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
   @Override
   public Object update(String uuid, TipoDocumentoRequestDTO dto) {
 
+    // Spec (Parametrização, Tipo Documento → Lista → Editar): "Somente deve deixar editar Estado".
+    // Código, descrição e referência ficam como foram registados (QA TR-08).
     var entity = tipoDocumentoRepository.findByUuidOrThrow(UUID.fromString(uuid));
-    entity.setReferencia(dto.getReferencia());
-    entity.setCodigo(dto.getCodigo());
-    entity.setNome(dto.getDescricao());
 
     if (StringUtils.hasText(dto.getEstado()))
       entity.setEstado(Estado.valueOf(dto.getEstado()));
@@ -90,7 +89,8 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
     var descricao = filters.get("descricao");
-    var estado = filters.containsKey("estado")
+    // Estado vazio (o ecrã envia "estado=") conta como não indicado; antes dava 400 (QA TR-06).
+    var estado = StringUtils.hasText(filters.get("estado"))
         ? Estado.valueOf(filters.get("estado"))
         : Estado.A;
 
