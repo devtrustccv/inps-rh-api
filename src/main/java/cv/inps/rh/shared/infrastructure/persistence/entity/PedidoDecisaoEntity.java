@@ -74,4 +74,7 @@ public class PedidoDecisaoEntity extends AuditEntity {
 
   @Column(name = "DATA_PARECER_RESPONSAVEL")
   private LocalDate dataParecerResponsavel;
+
+  @Column(name = "REFERENCIA_ID")
+  private Long referenciaId;
 }

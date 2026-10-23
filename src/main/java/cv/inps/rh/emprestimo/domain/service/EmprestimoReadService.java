@@ -76,7 +76,6 @@ public class EmprestimoReadService {
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
     dto.setTipoSituacao(entity.getTipoSituacao());
     dto.setValorAdiantamento(entity.getValorAdiantado());
-    // Pedido de Renegociação reaberto: sem isto o "Valor Reforço" gravado não voltava ao ecrã.
     dto.setValorReforco(entity.getValorReforco());
     dto.setSwift(entity.getSwift());
     dto.setMotivo(entity.getMotivo());
@@ -118,8 +117,6 @@ public class EmprestimoReadService {
         .toList();
     dto.setOutrosEmprestimos(otherLoans);
 
-    // Empréstimos ativos do colaborador no INPS (RH_T_EMPRESTIMO): outros pedidos, só a versão Ativa
-    // mais recente de cada um (as versões do próprio empréstimo e os não pagos/cancelados ficam de fora).
     var another = emprestimoEntityRepository.findByTiprel_FunIdAndEstado(funId, StatusEmprestimo.ATIVO.name())
         .stream()
         .filter(obj -> obj.getPedido() != null && !obj.getPedido().getId().equals(order.getId()))
@@ -140,8 +137,6 @@ public class EmprestimoReadService {
         .toList();
     dto.setEmprestimos(another);
 
-    // Outros empréstimos (outras instituições) registados noutros pedidos do colaborador e ainda em
-    // curso: data de fim igual ou posterior a hoje, ou sem data de fim.
     var hoje = LocalDate.now(ZoneId.systemDefault());
     var outrosAnteriores = emprestimoOutroEntityRepository.findByFunAndEstado(funId, Estado.A.name())
         .stream()
@@ -160,10 +155,6 @@ public class EmprestimoReadService {
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 
-    // Pedido nunca grava PedidoDecisaoEntity (não é etapa de parecer) — a
-    // Execução Etapa aqui vem diretamente do registo de auditoria da
-    // criação do empréstimo (AuditEntity), mas fica dentro de decisao.pedido
-    // para manter o mesmo formato usado pelas restantes etapas.
     var pedidoExecucao = new BaseDecisaoDTO();
     pedidoExecucao.setExecutadoPor(entity.getCreatedBy());
     ofNullable(entity.getCreatedDate()).ifPresent(d -> pedidoExecucao.setData(d.toLocalDate()));
@@ -210,7 +201,6 @@ public class EmprestimoReadService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name(),
-        // Renegociação: os documentos da Análise RH e do Contrato eram gravados mas não voltavam
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
     );
