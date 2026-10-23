@@ -24,6 +24,7 @@ public interface ProcSalCcPagEntityRepository extends
               e.shortDesc,
               e.tipo,
               e.procSalId,
+              COUNT(DISTINCT e.tiprelId),
               sum(e.valor)
           )
           FROM ProcSalCcPagEntity e
@@ -39,6 +40,7 @@ public interface ProcSalCcPagEntityRepository extends
               e.shortDesc,
               e.tipo,
               null,
+              COUNT(DISTINCT e.tiprelId),
               sum(e.valor)
           )
           FROM ProcSalCcPagEntity e

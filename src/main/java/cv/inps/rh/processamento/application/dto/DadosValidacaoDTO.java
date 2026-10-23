@@ -1,5 +1,6 @@
 package cv.inps.rh.processamento.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,15 @@ public class DadosValidacaoDTO {
 
   @JsonProperty("valor_atual")
   private BigDecimal valorAtual;
+
+  // RH_F_VALIDACAO2 (TIPO_MOVIMENTO): "quantidadeFuncionarios" e "diferenca" (spec, Validar Provisório)
+  @JsonProperty("quantidadeFuncionarios")
+  @JsonAlias({"quantidade", "quantidade_funcionarios"})
+  private Integer quantidadeFuncionarios;
+
+  @JsonProperty("diferenca")
+  @JsonAlias("diferenca_salarial")
+  private BigDecimal diferenca;
 
   @JsonProperty("tipo_movimento")
   private String tipoMovimento;

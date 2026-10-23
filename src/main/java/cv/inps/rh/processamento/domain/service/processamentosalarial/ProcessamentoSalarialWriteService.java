@@ -250,6 +250,10 @@ public class ProcessamentoSalarialWriteService {
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
+    if (request.getDataInicio() != null && request.getDataFim() != null
+        && request.getDataFim().isBefore(request.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início");
+
     var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     var startDate = request.getDataInicio() != null

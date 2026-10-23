@@ -60,12 +60,13 @@ public class FosController {
   )
 
   public ResponseEntity<ListaFosDTO> getListaFos(
+      @RequestParam(value = "mesReferencia", required = false) String mesReferencia,
       @RequestParam(value = "dataInicio", required = false) String dataInicio,
       @RequestParam(value = "dataFim", required = false) String dataFim,
       @RequestParam(value = "page", required = false, defaultValue = "0") String page,
       @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
 
-    final var query = new GetListaFosQuery(dataInicio, dataFim, page, size);
+    final var query = new GetListaFosQuery(mesReferencia, dataInicio, dataFim, page, size);
 
     return queryBus.handle(query);
 
@@ -93,9 +94,10 @@ public class FosController {
 
   public ResponseEntity<String> novoSegurado(
       @RequestParam(value = "ano") Integer ano,
-      @RequestParam(value = "mes") Integer mes) {
+      @RequestParam(value = "mes") Integer mes,
+      @RequestParam(value = "substituir", defaultValue = "false") boolean substituir) {
 
-    final var command = new NovoSeguradoCommand(ano, mes);
+    final var command = new NovoSeguradoCommand(ano, mes, substituir);
 
     return commandBus.send(command);
 

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +41,18 @@ public class ProcessamentoSalarialReadService {
   private final ObjectMapper objectMapper;
   private final DataSource dataSource;
 
+  // data que não se consegue ler dá 400: antes passava a null e o filtro era ignorado em silêncio
+  private static LocalDate parseFilterDate(String value, String label) {
+    if (!StringUtils.hasText(value))
+      return null;
+
+    var date = DateFormatter.stringToLocalDate(value.trim());
+    if (date == null)
+      throw IgrpResponseStatusException.badRequest(label + " inválida: " + value);
+
+    return date;
+  }
+
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
     var pageRequest = PageRequest.of(
@@ -47,8 +60,12 @@ public class ProcessamentoSalarialReadService {
         Integer.parseInt(query.getSize())
     );
 
-    var startDate = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
-    var endDate = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
+    var startDate = parseFilterDate(query.getDataInicio(), "Data Início");
+    var endDate = parseFilterDate(query.getDataFim(), "Data Fim");
+
+    if (startDate != null && endDate != null && endDate.isBefore(startDate))
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início");
+
     var directionId = StringUtils.hasText(query.getDirecaoId()) ? Long.valueOf(query.getDirecaoId()) : null;
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;

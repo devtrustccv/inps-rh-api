@@ -33,6 +33,9 @@ public class DetalhesFosXmlRowDTO {
   private Integer direcao;
 
 
+  private String direcaoNome;
+
+
   private String diasTrabalho;
 
 

@@ -13,21 +13,8 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AusenciaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoDetalheEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +73,9 @@ public class AlterarSituacaoLaboralWriteService {
       return devolverParaCorrecao(funcionario);
     }
 
+    if (dto.getSituacaoLaboralId() == null) {
+      throw IgrpResponseStatusException.badRequest("A situação laboral é obrigatória.");
+    }
     var param = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
     var motivo = dto.getMotivoId() != null
         ? paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId()) : null;
@@ -109,14 +99,22 @@ public class AlterarSituacaoLaboralWriteService {
     }
 
     // MAKER: guards do registo/reenvio.
-    if (dto.getMotivoId() == null) {
+    // Spec (LSV): o motivo só é obrigatório se a situação tiver motivos — LIC_SV não tem nenhum.
+    if (dto.getMotivoId() == null
+        && paramSituacaoDetalheEntityRepository.existsBySituacaoId_IdAndEstado(dto.getSituacaoLaboralId(), Estado.A)) {
       throw IgrpResponseStatusException.badRequest("O motivo da alteração da situação laboral é obrigatório.");
     }
     guardComboInativarAtivar(estaPorCorrigir, param, funcionario);
     guardDataFimObrigatoriaEmAusencia(param, dto);
 
-    var dataInicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
-    var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
+    var dataInicio = DateFormatter.stringToLocalDate(ValidationUtil.trimToNull(dto.getDataInicio()));
+    if (dataInicio == null) {
+      throw IgrpResponseStatusException.badRequest("A data início é obrigatória (ou tem um formato inválido).");
+    }
+    var dataFim = DateFormatter.stringToLocalDate(ValidationUtil.trimToNull(dto.getDataFim()));
+    if (dataFim != null && dataFim.isBefore(dataInicio)) {
+      throw IgrpResponseStatusException.badRequest("A data fim não pode ser anterior à data início.");
+    }
     var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     funcionarioRules.garantirEditavel(tiprelAtual.getEstado());
 

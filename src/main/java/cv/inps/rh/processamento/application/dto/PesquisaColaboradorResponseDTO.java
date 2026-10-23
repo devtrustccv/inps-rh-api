@@ -17,6 +17,9 @@ public record PesquisaColaboradorResponseDTO(
 
     String nome,
 
+    // RH_T_FUNCIONARIOS.NIF — coluna NIF da lista "Marcar Funcionário Para Não Processar"
+    Long nif,
+
     String numeroDocumento,
 
     String direcao,
