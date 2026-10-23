@@ -8,7 +8,9 @@ import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoComm
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -45,6 +47,7 @@ public class PedidoDeclaracaoWriteService {
     private final FuncionarioRules funcionarioRules;
     private final OrdemServicoWriteService ordemServicoWriteService;
     private final DomainEntityRepository domainEntityRepository;
+    private final ValidacaoEntityRepository validacaoEntityRepository;
 
     /** QA TR-09: o tipo tem de ser um valor de ORDEM_SERVICO_DECLARACAO com referência DECLARACAO. */
     private String tipoDeclaracaoValido(String valor) {
@@ -105,13 +108,29 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setUuid(UUID.randomUUID());
 
 
-        if (command.getPedidodeclaracao().getDecisaoAnalise() != null) {
-            declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracao().getDecisaoAnalise()));
-            declaracao.setObsAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracao().getObsAnalise()));
-            savedPedido.setEtapa("ANALISE");
+        // A análise faz-se no próprio registo (já não há "Em conformidade" nem botão Analisar):
+        // fica a observação da análise e o pedido segue para validação.
+        var decisaoAnalise = ValidationUtil.trimToNull(command.getPedidodeclaracao().getDecisaoAnalise());
+        var obsAnalise = ValidationUtil.trimToNull(command.getPedidodeclaracao().getObsAnalise());
+        if (decisaoAnalise != null || obsAnalise != null) {
+            declaracao.setDecisaoAnalise(decisaoAnalise);
+            declaracao.setObsAnalise(obsAnalise);
         }
+        savedPedido.setEtapa("VALIDACAO");
 
         DeclaracaoEntity savedDeclaracao = declaracaoRepository.save(declaracao);
+
+        // O pedido entra na lista de Validação (RH_T_VALIDACAO), como os outros pedidos.
+        var validacao = new ValidacaoEntity();
+        validacao.setTipoAccao(TipoAcao.INSERT.name());
+        validacao.setReferenciaName(Referencia.DECLARACAO.name());
+        validacao.setReferenciaId(savedDeclaracao.getId());
+        validacao.setReferenciaUuid(savedDeclaracao.getUuid());
+        validacao.setEstado(Estado.P);
+        validacao.setUuid(UuidCreator.getTimeOrderedEpoch());
+        validacao.setFunId(funcionario);
+        validacao.setTiprelId(tiposRelacionamento);
+        validacaoEntityRepository.save(validacao);
 
       if (command.getPedidodeclaracao().getAnexos() != null && !command.getPedidodeclaracao().getAnexos().isEmpty()) {
         List<DocumentoEntity> documentos = new java.util.ArrayList<>();
@@ -196,6 +215,14 @@ public class PedidoDeclaracaoWriteService {
         }
 
         declaracaoRepository.save(declaracao);
+
+        // Fecha a linha da lista de Validação (pedidos antigos podem não a ter).
+        validacaoEntityRepository.findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(
+                declaracao.getUuid(), Estado.P, TipoAcao.INSERT.name(), Referencia.DECLARACAO.name())
+            .ifPresent(v -> {
+                v.setEstado("SIM".equalsIgnoreCase(declaracao.getDecisaoRh()) ? Estado.A : Estado.I);
+                validacaoEntityRepository.save(v);
+            });
 
         var mensagem = "SIM".equalsIgnoreCase(declaracao.getDecisaoRh())
             ? "Pedido validado com sucesso."
