@@ -420,6 +420,35 @@ public class AvaliacaoController {
   }
 
    @GetMapping(
+   value = "direcoes-com-colaboradores"
+  )
+  @Operation(
+    summary = "Get direcoes com colaboradores",
+    description = "Direções com colaboradores activos (destino dos objectivos comuns de Direção)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DirecaoResumoDTO.class,
+                  type = "array")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<java.util.List<DirecaoResumoDTO>> getDirecoesComColaboradores()
+  {
+
+      final var query = new GetDirecoesComColaboradoresQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "objectivos-comuns/{ano}"
   )
   @Operation(

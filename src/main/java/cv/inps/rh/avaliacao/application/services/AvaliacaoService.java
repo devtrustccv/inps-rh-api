@@ -242,6 +242,7 @@ public class AvaliacaoService {
       return java.util.Collections.singletonList(null);
     }
 
+    var comColaboradores = instituicaoRepository.findComColaboradoresActivos();
     var ids = new LinkedHashSet<Long>();
     if (dto.getInstitIds() != null) {
       dto.getInstitIds().stream().filter(java.util.Objects::nonNull).forEach(ids::add);
@@ -249,12 +250,28 @@ public class AvaliacaoService {
     if (dto.getInstitId() != null) {
       ids.add(dto.getInstitId());
     }
+    // Só se definem objectivos para direções com colaboradores; sem direções indicadas
+    // abrangem-se todas as que têm colaboradores.
     if (ids.isEmpty()) {
-      throw IgrpResponseStatusException.badRequest(
-          "A abrangência DIRECAO exige pelo menos uma direção (institId ou institIds).");
+      if (comColaboradores.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Não há direções com colaboradores activos.");
+      }
+      return comColaboradores;
     }
+    var filtradas = comColaboradores.stream().filter(d -> ids.contains(d.getId())).toList();
+    if (filtradas.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "Nenhuma das direções indicadas tem colaboradores activos.");
+    }
+    return filtradas;
+  }
 
-    return ids.stream().map(instituicaoRepository::findByIdOrThrow).toList();
+  /** Direções com colaboradores activos — as que recebem os objectivos comuns de Direção. */
+  @Transactional(readOnly = true)
+  public List<cv.inps.rh.avaliacao.application.dto.DirecaoResumoDTO> getDirecoesComColaboradores() {
+    return instituicaoRepository.findComColaboradoresActivos().stream()
+        .map(d -> new cv.inps.rh.avaliacao.application.dto.DirecaoResumoDTO(d.getId(), d.getNome()))
+        .toList();
   }
 
   private AvaliacaoEntity novaAvaliacao(

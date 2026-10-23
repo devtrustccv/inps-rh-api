@@ -541,6 +541,28 @@
       ]
     },
     {
+      "actionName": "getDirecoesComColaboradores",
+      "path": "direcoes-com-colaboradores",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DirecaoResumo",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": []
+    },
+    {
       "actionName": "getObjectivosComuns",
       "path": "objectivos-comuns/{ano}",
       "method": "GET",
