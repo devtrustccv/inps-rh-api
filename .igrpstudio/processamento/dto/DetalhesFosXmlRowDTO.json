@@ -66,6 +66,18 @@
       "primaryKey": false
     },
     {
+      "name": "direcaoNome",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "diasTrabalho",
       "objectType": "java",
       "type": "string",

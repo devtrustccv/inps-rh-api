@@ -1,5 +1,6 @@
 package cv.inps.rh.processamento.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import lombok.AllArgsConstructor;
@@ -54,8 +55,10 @@ public class DadosValidacaoDTO {
   // Chaves emitidas por RH_F_VALIDACAO2 (camelCase, ao contrário das restantes); sem estes campos
   // a Quantidade e a Diferença eram descartadas na leitura (QA PS-018).
   @JsonProperty("quantidadeFuncionarios")
+  @JsonAlias({"quantidade", "quantidade_funcionarios"})
   private Integer quantidadeFuncionarios;
 
   @JsonProperty("diferenca")
+  @JsonAlias("diferenca_salarial")
   private BigDecimal diferenca;
 }

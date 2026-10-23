@@ -94,9 +94,10 @@ public class FosController {
 
   public ResponseEntity<String> novoSegurado(
       @RequestParam(value = "ano") Integer ano,
-      @RequestParam(value = "mes") Integer mes) {
+      @RequestParam(value = "mes") Integer mes,
+      @RequestParam(value = "substituir", defaultValue = "false") boolean substituir) {
 
-    final var command = new NovoSeguradoCommand(ano, mes);
+    final var command = new NovoSeguradoCommand(ano, mes, substituir);
 
     return commandBus.send(command);
 

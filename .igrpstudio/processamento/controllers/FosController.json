@@ -27,6 +27,12 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "mesReferencia",
+          "isRequired": false,
+          "description": "Mês de referência AAAA-MM (ou AAAAMM)"
+        },
+        {
+          "type": "string",
           "name": "dataInicio",
           "isRequired": false
         },
@@ -79,6 +85,13 @@
           "name": "mes",
           "isRequired": true,
           "description": "Mês de referencia, entre 1 a 12"
+        },
+        {
+          "type": "boolean",
+          "name": "substituir",
+          "value": "false",
+          "isRequired": false,
+          "description": "Confirma a substituição quando o mês já tem uma FOS entregue"
         }
       ]
     },
