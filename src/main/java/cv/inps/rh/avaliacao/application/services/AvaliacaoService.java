@@ -57,6 +57,7 @@ public class AvaliacaoService {
   private final AvaliacaoListagemMapper avaliacaoListagemMapper;
   private final AvaliacaoPeriodoService periodoService;
   private final RhVRelacaoLaboralEntityRepository relacaoLaboralRepository;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
 
   public AvaliacaoService(
       AvaliacaoEntityRepository avaliacaoRepository,
@@ -74,7 +75,8 @@ public class AvaliacaoService {
       AvaliacaoMapper avaliacaoMapper,
       AvaliacaoListagemMapper avaliacaoListagemMapper,
       AvaliacaoPeriodoService periodoService,
-      RhVRelacaoLaboralEntityRepository relacaoLaboralRepository) {
+      RhVRelacaoLaboralEntityRepository relacaoLaboralRepository,
+      cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
     this.avaliacaoRepository = avaliacaoRepository;
     this.objectivoRepository = objectivoRepository;
     this.competenciaRepository = competenciaRepository;
@@ -91,6 +93,7 @@ public class AvaliacaoService {
     this.avaliacaoListagemMapper = avaliacaoListagemMapper;
     this.periodoService = periodoService;
     this.relacaoLaboralRepository = relacaoLaboralRepository;
+    this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
   }
 
   @Transactional
@@ -191,7 +194,8 @@ public class AvaliacaoService {
       avaliacaoRepository.save(avaliacao);
       criarLinhasAvaliacao(avaliacao, det.getObjetivos(), mapParamObjectives, dto, det,
           resolverDescricaoManual(instit != null ? instit.getId() : null,
-              dto.getSeccaoId(), cargoDoColaborador(funUuid, dto.getCargoId()), dto.getCarrPccsId()));
+              dto.getSeccaoId(), cargoDoColaborador(funUuid, dto.getCargoId()),
+              carreiraDoColaborador(funUuid, dto.getCarrPccsId())));
       periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(avaliacao, pp));
 
       created.add(avaliacao.getUuid().toString());
@@ -674,8 +678,31 @@ public class AvaliacaoService {
     return null;
   }
 
+  /**
+   * Carreira/Cargo (RH_T_PARAM_CARREIRA) do vínculo actual do colaborador: a carreira PCCS ou, nos
+   * vínculos sem carreira, a do escalão gravado no tiprel. Sem vínculo, a do formulário.
+   */
+  private Long carreiraDoColaborador(UUID funUuid, Long carreiraDoFormulario) {
+    var tr = tiposRelacionamentoRepository.findAtualByFuncionarioUuid(funUuid).orElse(null);
+    if (tr != null) {
+      if (tr.getCarreiraId() != null && tr.getCarreiraId().getCarrPccsId() != null) {
+        return tr.getCarreiraId().getCarrPccsId().getId();
+      }
+      var escalao = tr.getCarreiraId() != null ? tr.getCarreiraId().getEscalaoId() : tr.getEscalaoId();
+      if (escalao != null && escalao.getParamCarrId() != null) {
+        return escalao.getParamCarrId().getId();
+      }
+    }
+    return carreiraDoFormulario;
+  }
+
+  /**
+   * Manual de funções do colaborador: o da direção + Carreira/Cargo (+ secção, se indicada). O
+   * manual deixou de ter o campo Cargo ("Carreira / Cargo" é a carreira); os manuais antigos só com
+   * cargo continuam a ser encontrados quando não há carreira.
+   */
   private String resolverDescricaoManual(Long institId, Long seccaoId, Long cargoId, Long carrPccsId) {
-    if (institId == null || cargoId == null) {
+    if (institId == null || (carrPccsId == null && cargoId == null)) {
       return null;
     }
 
@@ -683,12 +710,13 @@ public class AvaliacaoService {
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get("estado"), ESTADO_ATIVO));
       predicates.add(cb.equal(root.get("institId").get("id"), institId));
-      predicates.add(cb.equal(root.get("cargo").get("id"), cargoId));
-      if (seccaoId != null) {
-        predicates.add(cb.equal(root.get("seccaoId").get("id"), seccaoId));
-      }
       if (carrPccsId != null) {
         predicates.add(cb.equal(root.get("carreira").get("id"), carrPccsId));
+      } else {
+        predicates.add(cb.equal(root.get("cargo").get("id"), cargoId));
+      }
+      if (seccaoId != null) {
+        predicates.add(cb.equal(root.get("seccaoId").get("id"), seccaoId));
       }
       return cb.and(predicates.toArray(new Predicate[0]));
     };
