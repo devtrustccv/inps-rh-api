@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
 
 
 @Data
@@ -23,6 +22,7 @@ public class DocOutputRequestDTO  {
   private String titulo;
   private String corpo;
   private String assinadoPor;
-  private UUID responsavel;
+  /** RH_T_RESPONSAVEL.ID — o `responsavelId` devolvido por GET configuracao/responsaveis/search (spec: RESPONSAVEL_ID). */
+  private Long responsavelId;
 
 }

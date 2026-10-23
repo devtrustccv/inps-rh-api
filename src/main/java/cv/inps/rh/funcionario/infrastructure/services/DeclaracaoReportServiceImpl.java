@@ -24,6 +24,15 @@ public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
     private final ResourceLoader resourceLoader;
     private final PdfGenerator pdfGenerator;
 
+    // Valor do domínio ORDEM_SERVICO_DECLARACAO (referência DECLARACAO) → ficheiro em templates/declaracao/.
+    // Antes procurava "declaracao/<valor>" e nenhum dos 4 tipos tinha ficheiro com esse nome. Os templates
+    // partilham o layout (o texto vem do Documento de Saída), por isso um tipo sem ficheiro próprio usa o padrão.
+    private static final String TEMPLATE_PADRAO = "declaracao_credito_bancario";
+    private static final Map<String, String> TEMPLATES = Map.of(
+        "PEDIDO_CREDITO_BANCARIO", "declaracao_credito_bancario",
+        "CREDITO_HABITACAO", "declaracao_credito_habitacao",
+        "EFEITO_VISTOS", "declaracao_vistos");
+
     @Transactional(readOnly = true)
     @Override
     public byte[] gerarDeclaracao(String declaracaoId) {
@@ -38,7 +47,7 @@ public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
                 () -> IgrpResponseStatusException.notFound("Documento Output not found para tipo declaracao: " + declaracao.getTipoDeclaracao())
             );
 
-      var templateName = "declaracao/" + declaracao.getTipoDeclaracao().toLowerCase();
+      var templateName = "declaracao/" + TEMPLATES.getOrDefault(declaracao.getTipoDeclaracao(), TEMPLATE_PADRAO);
 
       var resource = resourceLoader.getResource(
           "classpath:/templates/" + templateName + ".html");

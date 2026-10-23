@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.service.declaracao;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
@@ -10,6 +11,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.application.services.EmailService;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -42,9 +44,35 @@ public class PedidoDeclaracaoWriteService {
 
     private final FuncionarioRules funcionarioRules;
     private final OrdemServicoWriteService ordemServicoWriteService;
+    private final DomainEntityRepository domainEntityRepository;
+
+    /** QA TR-09: o tipo tem de ser um valor de ORDEM_SERVICO_DECLARACAO com referência DECLARACAO. */
+    private String tipoDeclaracaoValido(String valor) {
+        var tipo = ValidationUtil.trimToNull(valor);
+        if (tipo == null)
+            throw IgrpResponseStatusException.badRequest("Indique o Tipo de Declaração.");
+        if (!domainEntityRepository.getActiveDomainAndReferenciaByCode(
+                PedidoDeclaracaoReadService.DOMINIO_TIPO, PedidoDeclaracaoReadService.REFERENCIA_TIPO).containsKey(tipo))
+            throw IgrpResponseStatusException.badRequest("Tipo de Declaração inválido: " + tipo + ".");
+        return tipo;
+    }
+
+    /** QA TR-17: todos os endpoints do pedido identificam-no pelo uuid (o GET e o PDF já o faziam). */
+    private DeclaracaoEntity declaracaoPorUuid(String id) {
+        final UUID uuid;
+        try {
+            uuid = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw IgrpResponseStatusException.badRequest("Identificador do pedido inválido: " + id + " (esperado o uuid).");
+        }
+        return declaracaoRepository.findByUuid(uuid)
+            .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de declaração não encontrado: " + id));
+    }
 
     @Transactional
     public SuccessResponseDTO saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
+
+        var tipoDeclaracao = tipoDeclaracaoValido(command.getPedidodeclaracao().getTipoDeclaracao());
 
         FuncionarioEntity funcionario = funcionarioRepository
                 .findByUuidOrThrow(command.getPedidodeclaracao().getFunId());
@@ -68,7 +96,7 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setFunId(funcionario);
         declaracao.setTiprelId(tiposRelacionamento);
 
-        declaracao.setTipoDeclaracao(ValidationUtil.trimToNull(command.getPedidodeclaracao().getTipoDeclaracao()));
+        declaracao.setTipoDeclaracao(tipoDeclaracao);
         declaracao.setFinalidade(ValidationUtil.trimToNull(command.getPedidodeclaracao().getFinalidade()));
         declaracao.setEntidadeDestinado(ValidationUtil.trimToNull(command.getPedidodeclaracao().getEntidadeDestinado()));
         declaracao.setDataPedido(command.getPedidodeclaracao().getDataPedido());
@@ -108,7 +136,7 @@ public class PedidoDeclaracaoWriteService {
 
     @Transactional
     public SuccessResponseDTO submeterAnalise(SubmeterAnalisePedidoDeclaracaoCommand command) {
-        DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
+        DeclaracaoEntity declaracao = declaracaoPorUuid(command.getId());
         funcionarioRules.garantirEditavel(declaracao.getEstado());
 
         declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getDecisaoAnalise()));
@@ -137,7 +165,7 @@ public class PedidoDeclaracaoWriteService {
             return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
         }
 
-        DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
+        DeclaracaoEntity declaracao = declaracaoPorUuid(command.getId());
         funcionarioRules.garantirEditavel(declaracao.getEstado());
         PedidoEntity pedido = declaracao.getPedidoId();
 
@@ -194,7 +222,7 @@ public class PedidoDeclaracaoWriteService {
         notificacao.setMessage(corpo);
       notificacao.setEmail(funcionario.getContactos().getFirst().getContacto());
         notificacao.setNomeReceptor(funcionario.getNome());
-        notificacao.setEstado("Enviado");
+        notificacao.setEstado(EstadoNotificacao.ENVIADO.name());
         notificacao.setDataEnvio(LocalDate.now());
         notificacao.setFunId(funcionario);
         notificacao.setReferenciaName("RH_T_DECLARACAO");

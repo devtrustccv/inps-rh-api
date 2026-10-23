@@ -25,7 +25,7 @@ public class TipoDocumentoRequestDTO  {
 
   private String descricao ;
 
-
+  @NotBlank(message = "The field <referencia> is required")
   private String referencia ;
 
 

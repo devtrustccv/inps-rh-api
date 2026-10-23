@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
@@ -591,6 +592,7 @@ public class MissaoServicoServiceRead {
     dto.setNomeReceptor(n.getNomeReceptor());
     dto.setDataEnvio(n.getDataEnvio());
     dto.setEstado(n.getEstado());
+    dto.setEstadoDescricao(EstadoNotificacao.descricaoDe(n.getEstado()));
     dto.setOrigem(origem);
     return dto;
   }

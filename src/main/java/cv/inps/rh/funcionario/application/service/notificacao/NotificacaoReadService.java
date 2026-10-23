@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.DateFormatter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,11 @@ public class NotificacaoReadService {
         Integer.parseInt(query.getPageSize()),
         Sort.by(Sort.Direction.DESC, "createdDate"));
 
+    var dataDe = dataDoFiltro(query.getDataEnvioDe(), "dataEnvioDe");
+    var dataAte = dataDoFiltro(query.getDataEnvioAte(), "dataEnvioAte");
+    if (dataDe != null && dataAte != null && dataAte.isBefore(dataDe))
+      throw IgrpResponseStatusException.badRequest("Data Envio Até não pode ser anterior à Data Envio De.");
+
     Specification<NotificacaoEntity> spec = (root, criteriaQuery, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
 
@@ -49,14 +55,13 @@ public class NotificacaoReadService {
         predicates.add(cb.equal(root.get("tipoNotificacao"), query.getTipoNotificacao()));
       }
 
-      if (StringUtils.hasText(query.getDataEnvioDe())) {
-        LocalDate dataDe = LocalDate.parse(query.getDataEnvioDe(), DateTimeFormatter.ISO_LOCAL_DATE);
-        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), dataDe));
+      if (dataDe != null) {
+        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), dataDe.atStartOfDay()));
       }
 
-      if (StringUtils.hasText(query.getDataEnvioAte())) {
-        LocalDate dataAte = LocalDate.parse(query.getDataEnvioAte(), DateTimeFormatter.ISO_LOCAL_DATE);
-        predicates.add(cb.lessThanOrEqualTo(root.get("createdDate"), dataAte));
+      // "Até" inclui o próprio dia: createdDate tem hora (antes "22/10 a 22/10" não trazia nada — QA TR-19).
+      if (dataAte != null) {
+        predicates.add(cb.lessThan(root.get("createdDate"), dataAte.plusDays(1).atStartOfDay()));
       }
 
       if (StringUtils.hasText(query.getEstado())) {
@@ -84,6 +89,17 @@ public class NotificacaoReadService {
     response.setPageSize(page.getSize());
 
     return response;
+  }
+
+  /** Data de um filtro: aceita só data ou data com hora (fica a parte da data); inválida → 400 (antes 500). */
+  private static LocalDate dataDoFiltro(String valor, String campo) {
+    if (!StringUtils.hasText(valor)) return null;
+    var data = DateFormatter.stringToLocalDate(valor.trim());
+    if (data == null && valor.trim().length() > 10)
+      data = DateFormatter.stringToLocalDate(valor.trim().substring(0, 10));
+    if (data == null)
+      throw IgrpResponseStatusException.badRequest("Data inválida em '" + campo + "': " + valor);
+    return data;
   }
 
   @Transactional(readOnly = true)

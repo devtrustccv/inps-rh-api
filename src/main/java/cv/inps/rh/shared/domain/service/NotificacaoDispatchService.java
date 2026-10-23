@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.domain.service;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -109,14 +110,14 @@ public class NotificacaoDispatchService {
                              UUID referenciaUuid, FuncionarioEntity funId,
                              String assunto, String corpo) {
 
-    String estado = "Pendente";
+    String estado = EstadoNotificacao.POR_ENVIAR.name();
     if (StringUtils.hasText(emailDestino)) {
       try {
         emailService.sendEmail(emailDestino, assunto != null ? assunto : "", corpo != null ? corpo : "");
-        estado = "Enviado";
+        estado = EstadoNotificacao.ENVIADO.name();
       } catch (Exception e) {
         LOGGER.error("Erro ao enviar email notificação {} para {}: {}", tipoNotificacao, emailDestino, e.getMessage());
-        estado = "Erro";
+        estado = EstadoNotificacao.ERRO.name();
       }
     }
 
