@@ -50,4 +50,12 @@ public class DadosValidacaoDTO {
 
   @JsonProperty("fun_id")
   private Integer funId;
+
+  // Chaves emitidas por RH_F_VALIDACAO2 (camelCase, ao contrário das restantes); sem estes campos
+  // a Quantidade e a Diferença eram descartadas na leitura (QA PS-018).
+  @JsonProperty("quantidadeFuncionarios")
+  private Integer quantidadeFuncionarios;
+
+  @JsonProperty("diferenca")
+  private BigDecimal diferenca;
 }

@@ -41,6 +41,7 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
           FROM XmlFosEntity f
           WHERE (:startDate IS NULL OR f.createdDate >= :startDate)
             AND (:endDate IS NULL OR f.createdDate <= :endDate)
+            AND (:mesReferencia IS NULL OR CONCAT(f.ano, f.mes) = :mesReferencia)
             AND (
                   f.tpEntrega <> 'PRIME'
                   OR NOT EXISTS (
@@ -51,11 +52,12 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
                         AND f2.tpEntrega = 'SUBST'
                   )
             )
-          ORDER BY f.ano ASC, f.mes ASC
+          ORDER BY f.ano DESC, f.mes DESC
       """)
   Page<FosRowDTO> getFos(
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate,
+      @Param("mesReferencia") String mesReferencia,
       Pageable pageable
   );
 }

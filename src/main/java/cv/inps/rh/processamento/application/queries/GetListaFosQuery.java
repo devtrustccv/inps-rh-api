@@ -20,5 +20,7 @@ public class GetListaFosQuery implements Query {
   private String page;
   @NotBlank(message = "The field <size> is required")
   private String size;
+  /** Filtro opcional Mês Referência (AAAAMM). */
+  private String mesReferencia;
 
 }

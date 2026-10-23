@@ -179,6 +179,7 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
              f.uuid,
              f.nome,
              f.numDocumento,
+             f.nif,
              i.nome,
              s.nome,
              i.id,

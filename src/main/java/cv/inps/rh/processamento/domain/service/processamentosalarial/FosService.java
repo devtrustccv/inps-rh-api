@@ -7,6 +7,7 @@ import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.util.FosUtil;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import org.springframework.util.StringUtils;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DetalheXmlFosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FosEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -49,13 +50,32 @@ public class FosService {
 
     var startDate = DateFormatter.stringToLocalDateTime(query.getDataInicio());
     var endDate = DateFormatter.stringToLocalDateTime(query.getDataFim());
-    var page = fosEntityRepository.getFos(startDate, endDate, pageable);
+    var page = fosEntityRepository.getFos(startDate, endDate, mesReferencia(query.getMesReferencia()), pageable);
 
     var wrapper = new ListaFosDTO();
     PageMapper.fillPagination(page, wrapper);
     wrapper.setContent(page.getContent());
 
     return wrapper;
+  }
+
+  // Totais da FOS no mesmo formato do procedimento (configXML): inteiros, contribuição (24,5%) arredondada.
+  // Antes ficava "657680.0" / "161131.60" e o TT_CONTRIB_CALC truncado (QA PS-024).
+  static BigDecimal totalRemuneracao(Double soma) {
+    return BigDecimal.valueOf(soma != null ? soma : 0d).setScale(0, RoundingMode.HALF_UP);
+  }
+
+  static BigDecimal totalContribuicao(BigDecimal totalRemuneracao) {
+    return totalRemuneracao.multiply(BigDecimal.valueOf(0.245)).setScale(0, RoundingMode.HALF_UP);
+  }
+
+  /** Filtro Mês Referência da lista (spec: ANO || MES): aceita "202604", "2026-04" ou "2026/04". */
+  private static String mesReferencia(String valor) {
+    if (!StringUtils.hasText(valor)) return null;
+    var digitos = valor.replaceAll("[^0-9]", "");
+    if (!digitos.matches("\\d{6}") || Integer.parseInt(digitos.substring(4)) < 1 || Integer.parseInt(digitos.substring(4)) > 12)
+      throw IgrpResponseStatusException.badRequest("Mês Referência inválido: " + valor + " (formato AAAAMM).");
+    return digitos;
   }
 
   @Transactional(readOnly = true)
@@ -142,14 +162,11 @@ public class FosService {
 
     detalheXmlFosEntityRepository.delete(detail);
 
-    var sum = BigDecimal.valueOf(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+    var sum = totalRemuneracao(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+    var totalContribution = totalContribuicao(sum);
 
-    var totalContribution = sum
-        .multiply(BigDecimal.valueOf(0.245))
-        .setScale(2, RoundingMode.HALF_UP);
-
-    xmlFos.setTtRemuneracao(sum.toString());
-    xmlFos.setTtContribuicao(totalContribution.toString());
+    xmlFos.setTtRemuneracao(sum.toPlainString());
+    xmlFos.setTtContribuicao(totalContribution.toPlainString());
     xmlFos.setTtContribCalc(totalContribution.longValue());
     fosEntityRepository.save(xmlFos);
   }

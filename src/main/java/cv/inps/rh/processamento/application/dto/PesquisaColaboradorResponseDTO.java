@@ -19,6 +19,9 @@ public record PesquisaColaboradorResponseDTO(
 
     String numeroDocumento,
 
+    // RH_T_FUNCIONARIOS.NIF (coluna NIF de Marcar N/Processar — QA PS-017).
+    Long nif,
+
     String direcao,
 
     String seccao,
