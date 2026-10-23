@@ -30,6 +30,14 @@ public interface DirecaoEntityRepository extends
     """, nativeQuery = true)
   List<DirecaoProjection> findDirecoesList();
 
+  /** Direções com pelo menos um colaborador com relação laboral activa (EST_ACT_ADM = 1). */
+  @Query("""
+    SELECT d FROM DirecaoEntity d
+    WHERE d.id IN (SELECT v.direcaoId FROM RhVRelacaoLaboralEntity v WHERE v.estActAdm = 1)
+    ORDER BY d.nome
+    """)
+  List<DirecaoEntity> findComColaboradoresActivos();
+
   @Query(value = "SELECT GET_NOME_CENTRO_CUSTO(:institId) FROM dual", nativeQuery = true)
   String getNomeCentroCusto(@Param("institId") Long institId);
 }

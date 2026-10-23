@@ -18,21 +18,22 @@ financeiro e emissão de relatórios relacionados à folha de pagamento.
 <img src="media/image4.png" style="width:9.25in;height:4.12569in"
 alt="Uma imagem com texto, diagrama, captura de ecrã, file Os conteúdos gerados por IA podem estar incorretos." />
 
-<table style="width:100%;">
+<table style="width:99%;">
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 79%" />
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Funcionalidade</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
+<th
+style="text-align: center;"><p><strong>Funcionalidade</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Lista Processamento</td>
-<td>Lista dados os processamentos efetuados</td>
+<td style="text-align: center;"><p>Lista Processamento</p></td>
+<td><p>Lista dados os processamentos efetuados</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
@@ -58,23 +59,23 @@ falta</p></li>
 <td style="text-align: center;"><ul>
 <li><p>Eliminar Proc</p></li>
 </ul></td>
-<td>Permite remover um processamento salarial que ainda não tenha sido
-previamente validado, garantindo que apenas processamentos confirmados
-permaneçam registados no sistema.</td>
+<td><p>Permite remover um processamento salarial que ainda não tenha
+sido previamente validado, garantindo que apenas processamentos
+confirmados permaneçam registados no sistema.</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
 <li><p>Validar</p></li>
 </ul></td>
-<td>Confirma e consolida o processamento salarial realizado, bloqueando
-alterações posteriores e atualizando os respetivos registos para efeitos
-de pagamento, contabilização e histórico.</td>
+<td><p>Confirma e consolida o processamento salarial realizado,
+bloqueando alterações posteriores e atualizando os respetivos registos
+para efeitos de pagamento, contabilização e histórico.</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
 <li><p>Validar Provisorio</p></li>
 </ul></td>
-<td>Permitir o processamento salaria de forma Provisorio</td>
+<td><p>Permitir o processamento salaria de forma Provisorio</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
@@ -86,24 +87,24 @@ de pagamento, contabilização e histórico.</td>
 <td style="text-align: center;"><ul>
 <li><p>Cabimentar</p></li>
 </ul></td>
-<td>Permite realizar automaticamente o cabimento orçamental através da
-invocação de um serviço do sistema financeiro, assegurando a reserva dos
-recursos necessários para o pagamento da folha salarial.</td>
+<td><p>Permite realizar automaticamente o cabimento orçamental através
+da invocação de um serviço do sistema financeiro, assegurando a reserva
+dos recursos necessários para o pagamento da folha salarial.</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
 <li><p>Eliminar Cab.</p></li>
 </ul></td>
-<td>Permite remover um cabimento que ainda não tenha sido autorizado,
+<td><p>Permite remover um cabimento que ainda não tenha sido autorizado,
 mediante a invocação do serviço correspondente no sistema
-financeiro.</td>
+financeiro.</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
 <li><p>Autorizar</p></li>
 </ul></td>
-<td>Permite autorizar o cabimento previamente efetuado, através da
-invocação do serviço correspondente no sistema financeiro</td>
+<td><p>Permite autorizar o cabimento previamente efetuado, através da
+invocação do serviço correspondente no sistema financeiro</p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ul>
@@ -123,29 +124,30 @@ remunerações, descontos, benefícios e demais componentes da folha.</p>
 <tr>
 <td style="text-align: center;"><p>Marcar N/ Processar</p>
 <p>Desmarcar Para Processar</p></td>
-<td>Esta funcionalidade é útil quando há necessidade de excluir
+<td><p>Esta funcionalidade é útil quando há necessidade de excluir
 determinados funcionários ou períodos da folha de pagamento, seja por
 licenças não remuneradas, afastamentos temporários ou outros
-motivos.</td>
+motivos.</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">LICENÇA SEM VENCIMENTO</td>
-<td>Permite listar todos os colaboradores que se encontram em licença
+<td style="text-align: center;"><p>LICENÇA SEM VENCIMENTO</p></td>
+<td><p>Permite listar todos os colaboradores que se encontram em licença
 sem vencimento, bem como registar novas licenças, atualizar o respetivo
 período e ajustar automaticamente a situação laboral do colaborador no
-sistema.</td>
+sistema.</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">IMPORTAR DESCONTO</td>
-<td>Permite importar dados de cantina e outros para</td>
+<td style="text-align: center;"><p>IMPORTAR DESCONTO</p></td>
+<td><p>Permite importar dados de cantina e outros para</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">FOS</td>
-<td>Envio de folha salarial para sistema core de INPS</td>
+<td style="text-align: center;"><p>FOS</p></td>
+<td><p>Envio de folha salarial para sistema core de INPS</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">SOAT</td>
-<td>Permite listar e exportar dados em formato Excel a segurador</td>
+<td style="text-align: center;"><p>SOAT</p></td>
+<td><p>Permite listar e exportar dados em formato Excel a
+segurador</p></td>
 </tr>
 </tbody>
 </table>
@@ -165,59 +167,59 @@ sistema.</td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte Dados</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte Dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">Nome colaorador</td>
-<td>loockup</td>
+<td style="text-align: left;"><p>Nome colaorador</p></td>
+<td><p>loockup</p></td>
 <td></td>
-<td>RH_T_RUNCIONARIOS.NOME</td>
+<td><p>RH_T_RUNCIONARIOS.NOME</p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Direção</td>
-<td>select</td>
+<td style="text-align: left;"><p>Direção</p></td>
+<td><p>select</p></td>
 <td></td>
-<td style="text-align: left;">RH_T_DIRECAO.NOME;
-RH_T_MOBILIDADE.INSTIT_ID, RH_T_TIPOS_RELACIONAMENTO.MOB_ID</td>
+<td style="text-align: left;"><p>RH_T_DIRECAO.NOME;
+RH_T_MOBILIDADE.INSTIT_ID, RH_T_TIPOS_RELACIONAMENTO.MOB_ID</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Lista</strong></td>
+<td style="text-align: left;"><p><strong>Lista</strong></p></td>
 <td></td>
 <td></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: left;">Nome Colaborador</td>
-<td>TEXT</td>
+<td style="text-align: left;"><p>Nome Colaborador</p></td>
+<td><p>TEXT</p></td>
 <td></td>
-<td>RH_T_RUNCIONARIOS.NOME</td>
+<td><p>RH_T_RUNCIONARIOS.NOME</p></td>
 </tr>
 <tr>
-<td style="text-align: left;">NIF</td>
-<td>TEXT</td>
+<td style="text-align: left;"><p>NIF</p></td>
+<td><p>TEXT</p></td>
 <td></td>
-<td>RH_T_RUNCIONARIOS.NIF</td>
+<td><p>RH_T_RUNCIONARIOS.NIF</p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Direção</td>
-<td>TEXT</td>
+<td style="text-align: left;"><p>Direção</p></td>
+<td><p>TEXT</p></td>
 <td></td>
-<td>RH_T_DIRECAO.NOME; RH_T_MOBILIDADE.INSTIT_ID,
-RH_T_TIPOS_RELACIONAMENTO.MOB_ID</td>
+<td><p>RH_T_DIRECAO.NOME; RH_T_MOBILIDADE.INSTIT_ID,
+RH_T_TIPOS_RELACIONAMENTO.MOB_ID</p></td>
 </tr>
 <tr>
-<td style="text-align: left;">selecionar</td>
-<td>check</td>
-<td>Deve razer por defeito os colaboradores selecionados.</td>
-<td>RH_T_TIPOS_RELACIONAMENTO.ID</td>
+<td style="text-align: left;"><p>selecionar</p></td>
+<td><p>check</p></td>
+<td><p>Deve razer por defeito os colaboradores selecionados.</p></td>
+<td><p>RH_T_TIPOS_RELACIONAMENTO.ID</p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;">REGRAS</td>
+<td colspan="4" style="text-align: center;"><p>REGRAS</p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"><ul>
@@ -241,12 +243,12 @@ Retribuição)</mark></strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;">Ações</td>
+<td colspan="4" style="text-align: center;"><p>Ações</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image6.png"
+<td style="text-align: center;"><p><img src="media/image6.png"
 style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
 <td colspan="3"><p>Ao clicar no botão gravar o sistema deve fazer a
 seguinte ação:</p>
 <ul>
@@ -272,105 +274,106 @@ Desmarcados</mark></p></td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Data Inicio</td>
-<td><em>DATE</em></td>
+<td style="text-align: center;"><p>Data Inicio</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>INPSRH.RH_T_PROC_SALARIOS.DATA_DE</em></td>
+<td><p><em>INPSRH.RH_T_PROC_SALARIOS.DATA_DE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Fim</td>
-<td><em>DATE</em></td>
+<td style="text-align: center;"><p>Data Fim</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>INPSRH. RH_T_PROC_SALARIOS.DATA_DE</em></td>
+<td><p><em>INPSRH. RH_T_PROC_SALARIOS.DATA_DE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direção</td>
-<td><em>SELECT</em></td>
+<td style="text-align: center;"><p>Direção</p></td>
+<td><p><em>SELECT</em></p></td>
 <td></td>
-<td><em>INPSRH. RH_T_PROC_SALARIOS.CC_ID</em></td>
+<td><p><em>INPSRH. RH_T_PROC_SALARIOS.CC_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo</td>
-<td><em>SELECT</em></td>
-<td><strong>DOMAIN</strong> = TIPO_PROCESSAMENTO</td>
-<td><em>RH_T_PROC_SALARIOS.TIPO_PROCESSAMENTO</em></td>
+<td style="text-align: center;"><p>Tipo</p></td>
+<td><p><em>SELECT</em></p></td>
+<td><p><strong>DOMAIN</strong> = TIPO_PROCESSAMENTO</p></td>
+<td><p><em>RH_T_PROC_SALARIOS.TIPO_PROCESSAMENTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Estado</td>
-<td><em>SELECT</em></td>
-<td><em><strong>DOMAIN</strong> = ESTADO_PROCESSAMENTO</em></td>
-<td><em>INPSRH. RH_T_PROC_SALARIOS.ESTADO</em></td>
+<td style="text-align: center;"><p>Estado</p></td>
+<td><p><em>SELECT</em></p></td>
+<td><p><em><strong>DOMAIN</strong> = ESTADO_PROCESSAMENTO</em></p></td>
+<td><p><em>INPSRH. RH_T_PROC_SALARIOS.ESTADO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Estado</td>
-<td><em>TEXT</em></td>
-<td>Situação atual do processamento salarial.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.ESTADO</em></td>
+<td style="text-align: center;"><p>Estado</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Situação atual do processamento salarial.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.ESTADO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mês Referencia</td>
-<td><em>TEXT</em></td>
-<td>Mês e ano a que se refere o processamento salarial</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.MES_REFERENCIA</em></td>
+<td style="text-align: center;"><p>Mês Referencia</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Mês e ano a que se refere o processamento salarial</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.MES_REFERENCIA</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Código CC</td>
-<td><em>TEXT</em></td>
-<td>Código do <strong>Centro de Custo</strong> a que está associado o
-processamento.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.</em>CODIGO_CC</td>
+<td style="text-align: center;"><p>Código CC</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Código do <strong>Centro de Custo</strong> a que está associado o
+processamento.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.</em>CODIGO_CC</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direção</td>
-<td><em>TEXT</em></td>
-<td>Unidade orgânica ou direção responsável pelos colaboradores
-incluídos no processamento.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.</em> <em>DIRECAO</em></td>
+<td style="text-align: center;"><p>Direção</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Unidade orgânica ou direção responsável pelos colaboradores
+incluídos no processamento.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.</em> <em>DIRECAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">OBS</td>
-<td><em>TEXT</em></td>
-<td>Campo de <strong>Observações</strong> para registar informações
-complementares ou exceções relevantes.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.OBS</em></td>
+<td style="text-align: center;"><p>OBS</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Campo de <strong>Observações</strong> para registar informações
+complementares ou exceções relevantes.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.OBS</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Quantidade Processada</td>
-<td><em>TEXT</em></td>
-<td>Número total de colaboradores ou registos incluídos no processamento
-salarial.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.QUANTIDADE</em></td>
+<td style="text-align: center;"><p>Quantidade Processada</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Número total de colaboradores ou registos incluídos no
+processamento salarial.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.QUANTIDADE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Cabimento</td>
-<td><em>TEXT</em></td>
-<td>Indicação do montante ou autorização orçamental afeta ao
-processamento salarial.</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.CABIMENTO</em></td>
+<td style="text-align: center;"><p>Cabimento</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Indicação do montante ou autorização orçamental afeta ao
+processamento salarial.</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.CABIMENTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total</td>
-<td><em>TEXT</em></td>
-<td>Valor monetário total resultante do processamento salarial
-(somatório das remunerações e descontos).</td>
-<td><em>RH_V_LISTA_PROCESSAMENTO.TOTAL</em></td>
+<td style="text-align: center;"><p>Total</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Valor monetário total resultante do processamento salarial
+(somatório das remunerações e descontos).</p></td>
+<td><p><em>RH_V_LISTA_PROCESSAMENTO.TOTAL</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"><ul>
@@ -378,10 +381,11 @@ processamento salarial.</td>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>ACÇÕES</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>ACÇÕES</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Processar</td>
+<td style="text-align: center;"><p>Processar</p></td>
 <td colspan="3"><p>Executa o cálculo do processamento salarial para o
 período e colaboradores selecionados, gerando os valores de
 remunerações, subsídios e descontos. Só se pode processar uma direção
@@ -401,7 +405,7 @@ utilizador.</p>
 Selecionar varias Direções e Processar</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Eliminar Proc</td>
+<td style="text-align: center;"><p>Eliminar Proc</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘PROCESSADO’</strong><em>)</em></p>
@@ -410,7 +414,7 @@ Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 eliminação não deve ser permitida.</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Validar Provisorio</td>
+<td style="text-align: center;"><p>Validar Provisorio</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘PROCESSADO’</strong><em>)</em></p>
@@ -424,7 +428,7 @@ validado, o sistema deve permitir reverter o seu estado para
 associado.</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Validar Definitivo</td>
+<td style="text-align: center;"><p>Validar Definitivo</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘VALIDADO_PROVISORIO</strong><em>)</em></p>
@@ -438,7 +442,7 @@ validado, o sistema deve permitir reverter o seu estado para
 associado.</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Cabimentar</td>
+<td style="text-align: center;"><p>Cabimentar</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘VALIDADO_PROVISORIO’</strong><em>)</em></p>
@@ -453,7 +457,7 @@ existir um Cabimento ativo.<br />
 o respetivo Cabimento.</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Eliminar Cab.</td>
+<td style="text-align: center;"><p>Eliminar Cab.</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘CABIMENTADO’</strong><em>)</em></p>
@@ -465,7 +469,7 @@ botão <strong>Eliminar Cabimento</strong> deve permanecer desativado
 (<em>disabled</em>).</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Autorizar</td>
+<td style="text-align: center;"><p>Autorizar</p></td>
 <td colspan="3"><p><em>Esse botão só deve ficar visível caso o
 Processamento estiver no estado: (</em><strong>RH_T_PROC_SALARIOS.estado
 = ‘CABIMENTADO’</strong><em>)</em></p>
@@ -481,13 +485,13 @@ salvo se existir um mecanismo de anulação especificamente previsto para
 esse efeito.</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Relatorio</td>
-<td colspan="3">Este botão fica visível em qualquer estado</td>
+<td style="text-align: center;"><p>Relatorio</p></td>
+<td colspan="3"><p>Este botão fica visível em qualquer estado</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Desmarcar para / Processar</td>
-<td colspan="3">Só se pode desmarcar para processar somente direções que
-ainda não foram processados</td>
+<td style="text-align: center;"><p>Desmarcar para / Processar</p></td>
+<td colspan="3"><p>Só se pode desmarcar para processar somente direções
+que ainda não foram processados</p></td>
 </tr>
 </tbody>
 </table>
@@ -506,45 +510,46 @@ alt="Uma imagem com texto, file, número, captura de ecrã Os conteúdos gerados
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Formulario</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th style="text-align: center;"><p><strong>Formulario</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">Data Inicio</td>
-<td><em>DATE</em></td>
+<td style="text-align: left;"><p>Data Inicio</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>RH_T_PROC_SALARIOS.DATA_DE</em></td>
+<td><p><em>RH_T_PROC_SALARIOS.DATA_DE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Data Fim</td>
-<td><em>DATE</em></td>
+<td style="text-align: left;"><p>Data Fim</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>RH_T_PROC_SALARIOS.DATA_ATE</em></td>
+<td><p><em>RH_T_PROC_SALARIOS.DATA_ATE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Tipo</td>
-<td><em>SELECT</em></td>
-<td><strong>DOMAIN</strong> = TIPO_PROCESSAMENTO</td>
-<td><em>RH_T_PROC_SALARIOS.TIPO_PROCESSAMENTO</em></td>
+<td style="text-align: left;"><p>Tipo</p></td>
+<td><p><em>SELECT</em></p></td>
+<td><p><strong>DOMAIN</strong> = TIPO_PROCESSAMENTO</p></td>
+<td><p><em>RH_T_PROC_SALARIOS.TIPO_PROCESSAMENTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Direção</td>
-<td><em>lOOKUP</em></td>
-<td>iNPSSIGOF.INSTITUICOES, INPSSIGOF.CENTROS_CUSTO</td>
-<td><em>RH_T_PROC_SALARIOS.</em> <em>CC_ID</em></td>
+<td style="text-align: left;"><p>Direção</p></td>
+<td><p><em>lOOKUP</em></p></td>
+<td><p>iNPSSIGOF.INSTITUICOES, INPSSIGOF.CENTROS_CUSTO</p></td>
+<td><p><em>RH_T_PROC_SALARIOS.</em> <em>CC_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Observação</td>
-<td><em>TEXTAREA</em></td>
+<td style="text-align: left;"><p>Observação</p></td>
+<td><p><em>TEXTAREA</em></p></td>
 <td></td>
-<td><em>RH_T_PROC_SALARIOS.OBS</em></td>
+<td><p><em>RH_T_PROC_SALARIOS.OBS</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
+<td colspan="4"
+style="text-align: center;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"><ul>
@@ -578,17 +583,17 @@ referência.</em></p></li>
 <li><p><em>Caso o utilizador não selecionar centro direção, logo o
 sistema processa todos os vínculos
 (<strong>'Efetivo</strong>,<strong>'Contratado'</strong>)</em></p></li>
-<li><p>O pode processar 1 ou vários direções ao mesmo tempo, e também
+<li><p>O pode processar 1 ou várias direções ao mesmo tempo, e também
 pode processar por colaborador.</p></li>
 </ol></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;">AÇÕES</td>
+<td colspan="4" style="text-align: center;"><p>AÇÕES</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image6.png"
+<td style="text-align: center;"><p><img src="media/image6.png"
 style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
 <td colspan="3"><p>Ao clicar no botão Gravar, deve invocar a seguinte
 funcionalidade:</p>
 <p><em><strong>RH_PROCESSAMENTO_SALARIAL_DB.</strong> PROCESSAR</em>
@@ -616,39 +621,41 @@ Colaborador,</em></p>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Formulario</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte Dados</strong></th>
+<th style="text-align: center;"><p><strong>Formulario</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte Dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Nome</td>
-<td>TEXT</td>
-<td>Nome de colaborador (RH_T_FUNCIONARIO.NOME)</td>
-<td>RH_T_FUNCIONARIO.NOME</td>
+<td style="text-align: center;"><p>Nome</p></td>
+<td><p>TEXT</p></td>
+<td><p>Nome de colaborador (RH_T_FUNCIONARIO.NOME)</p></td>
+<td><p>RH_T_FUNCIONARIO.NOME</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direcao</td>
-<td>LOOCKUP</td>
-<td>Nome de instituições (INPSSIGOF.INSTIDUICOES.NOME)</td>
-<td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID= INPSSIGOF.INSTIDUICOES.ID</td>
+<td style="text-align: center;"><p>Direcao</p></td>
+<td><p>LOOCKUP</p></td>
+<td><p>Nome de instituições (INPSSIGOF.INSTIDUICOES.NOME)</p></td>
+<td><p>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID=
+INPSSIGOF.INSTIDUICOES.ID</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Centro Custo</td>
-<td>LOOCKUP</td>
-<td>Nome de Centro de custo</td>
-<td>INPSSIGOF.CENTROS_CUSTO.ID</td>
+<td style="text-align: center;"><p>Centro Custo</p></td>
+<td><p>LOOCKUP</p></td>
+<td><p>Nome de Centro de custo</p></td>
+<td><p>INPSSIGOF.CENTROS_CUSTO.ID</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">TPREL_ID</td>
-<td>HIDDEN</td>
-<td>Deve devolver o id de tipo relacionamento</td>
-<td>RH_T_TIPOS_RELACIONAMENTO.ID</td>
+<td style="text-align: center;"><p>TPREL_ID</p></td>
+<td><p>HIDDEN</p></td>
+<td><p>Deve devolver o id de tipo relacionamento</p></td>
+<td><p>RH_T_TIPOS_RELACIONAMENTO.ID</p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
+<td colspan="4"
+style="text-align: center;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"><ul>
@@ -657,14 +664,15 @@ Colaborador,</em></p>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>AÇÕES</strong></td>
+<td colspan="4"
+style="text-align: center;"><p><strong>AÇÕES</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image6.png"
+<td style="text-align: center;"><p><img src="media/image6.png"
 style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td colspan="3"><em><strong>RH_PROCESSAMENTO_SALARIAL_DB.</strong>
-ELIMINAR_PROCESSAMENTO</em></td>
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
+<td colspan="3"><p><em><strong>RH_PROCESSAMENTO_SALARIAL_DB.</strong>
+ELIMINAR_PROCESSAMENTO</em></p></td>
 </tr>
 </tbody>
 </table>
@@ -720,7 +728,7 @@ somente as direções que existe em
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>REGRAS</strong></th>
+<th colspan="2"><p><strong>REGRAS</strong></p></th>
 </tr>
 </thead>
 <tbody>
@@ -732,12 +740,13 @@ sido validados</p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>AÇÕES</strong></td>
+<td colspan="2"><p><strong>AÇÕES</strong></p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td><em><strong>RH_PROCESSAMENTO_SALARIAL_DB.</strong>ELIMINAR_PROCESSAMENTO</em></td>
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
+<td><p><em><strong>RH_PROCESSAMENTO_SALARIAL_DB.</strong>ELIMINAR_PROCESSAMENTO</em></p></td>
 </tr>
 </tbody>
 </table>
@@ -758,16 +767,16 @@ processamento.
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Tipo Validação</td>
-<td><em>SELECT</em></td>
+<td style="text-align: center;"><p>Tipo Validação</p></td>
+<td><p><em>SELECT</em></p></td>
 <td><ul>
 <li><p>Diferencia Salarial entre Meses</p></li>
 <li><p>Somatória por Tipo Movimento</p></li>
@@ -775,34 +784,52 @@ processamento.
 <li><p>Ativos não processados</p></li>
 <li><p>Subsídio Atendedor</p></li>
 </ul></td>
-<td><em><strong>DOMAIN</strong> = TIPO_VALIDACAO</em></td>
+<td><p><em><strong>DOMAIN</strong> = TIPO_VALIDACAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mês Atual</td>
-<td><em>SELECT</em></td>
-<td>Deve trazer preenchido o mês do Processamento</td>
-<td><em>TO_CHAR(rh_t_proc_salarios.DATA_DE, ‘MM’)</em></td>
+<td style="text-align: center;"><p><del>Mês Atual</del></p></td>
+<td><p><em><del>SELECT</del></em></p></td>
+<td><p><del>Deve trazer preenchido o mês do Processamento</del></p></td>
+<td><p><em><del>TO_CHAR(rh_t_proc_salarios.DATA_DE,
+‘MM’)</del></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mês Anterior</td>
-<td><em>SELECT</em></td>
-<td>Deve devolver o ames anterior do processamento</td>
-<td><em>TO_CHAR(rh_t_proc_salarios.DATA_DE, ‘MM’)</em></td>
+<td style="text-align: center;"><p><del>Mês Anterior</del></p></td>
+<td><p><em><del>SELECT</del></em></p></td>
+<td><p><del>Deve devolver o ames anterior do
+processamento</del></p></td>
+<td><p><em><del>TO_CHAR(rh_t_proc_salarios.DATA_DE,
+‘MM’)</del></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p>Validar</p></td>
+<td></td>
+<td><p>O mesmo dominio usado em Validação dominio=
+<strong>VALIDAR_REGISTO</strong></p></td>
+<td><p><em><strong>RH_T_NOTIFICACAO.</strong>REFERENCIA_NAME =
+RH_T_DOMINIO. .VALUE || PROCESSAMENTO_SALARIAL</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Diferencia Salarial
-entre Meses -» (<em>RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>.
-RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
-‘<strong>TIPO_MOVIMENTO</strong>’</em>))</td>
+<td style="text-align: center;"><p>Observacao</p></td>
+<td></td>
+<td></td>
+<td><p><em><strong>RH_T_NOTIFICACAO.</strong> MESSAGE</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><table style="width:49%;">
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: center;"><p><strong>Diferencia
+Salarial entre Meses -»
+(<em>RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>. RH_F_VALIDACAO2
+(p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
+‘<strong>TIPO_MOVIMENTO</strong>’</em>))</p></td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: center;"><table style="width:48%;">
 <colgroup>
 <col style="width: 24%" />
 <col style="width: 24%" />
@@ -842,13 +869,13 @@ RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
 </table></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Somatória por Tipo
-Movimento -» <em>(RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>.
+<td colspan="4" style="text-align: center;"><p><strong>Somatória por
+Tipo Movimento -» <em>(RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>.
 RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
-‘<strong>TIPO_MOVIMENTO</strong>’))</em></td>
+‘<strong>TIPO_MOVIMENTO</strong>’))</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><table style="width:49%;">
+<td colspan="4" style="text-align: center;"><table style="width:48%;">
 <colgroup>
 <col style="width: 24%" />
 <col style="width: 24%" />
@@ -876,13 +903,13 @@ RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
 </table></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Outros Motivos -»
+<td colspan="4" style="text-align: center;"><p><strong>Outros Motivos -»
 <em>(RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>. RH_F_VALIDACAO2
 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
-‘<strong>OUTROS’)</strong>)</em></td>
+‘<strong>OUTROS’)</strong>)</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><table style="width:49%;">
+<td colspan="4" style="text-align: center;"><table style="width:48%;">
 <colgroup>
 <col style="width: 24%" />
 <col style="width: 24%" />
@@ -906,13 +933,13 @@ RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
 </table></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Ativos não
+<td colspan="4" style="text-align: center;"><p><strong>Ativos não
 processados -» (<em>RH_PK_VALIDACAO_SALARIAL_DB</em></strong><em>.
 RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
-‘<strong>ATIVOS_N_PROCESSADOS</strong>’</em>))</td>
+‘<strong>ATIVOS_N_PROCESSADOS</strong>’</em>))</p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><table style="width:49%;">
+<td colspan="4" style="text-align: center;"><table style="width:48%;">
 <colgroup>
 <col style="width: 24%" />
 <col style="width: 24%" />
@@ -936,13 +963,13 @@ RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
 </table></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Subsídio Atendedor
--» <em>(RH_PK_VALIDACAO_SALARIAL_DB. </em></strong><em>RH_F_VALIDACAO2
-(p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO<strong>=
-‘SUBSIDIO_ATENDENDOR’)</strong>)</em></td>
+<td colspan="4" style="text-align: center;"><p><strong>Subsídio
+Atendedor -» <em>(RH_PK_VALIDACAO_SALARIAL_DB.
+</em></strong><em>RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR,
+P_TIPO<strong>= ‘SUBSIDIO_ATENDENDOR’)</strong>)</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><table style="width:49%;">
+<td colspan="4" style="text-align: center;"><table style="width:48%;">
 <colgroup>
 <col style="width: 24%" />
 <col style="width: 24%" />
@@ -975,7 +1002,7 @@ RH_F_VALIDACAO2 (p_proc_sal_id OWA_UTIL.VC_ARR, P_TIPO=
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>REGRAS</strong></th>
+<th colspan="2"><p><strong>REGRAS</strong></p></th>
 </tr>
 </thead>
 <tbody>
@@ -995,18 +1022,43 @@ aprovação.</mark></p></li>
 <li><p><mark><em>Só é possível Validar processamentos que se encontrem
 apenas no estado “</em><strong>PROCESSADO</strong><em>”, ou seja, que
 ainda não tenham sido validados</em></mark></p></li>
+</ul>
+<p><em>Regista na <strong>RH_T_NOTIFICACAO</strong></em></p>
+<ul>
+<li><p><em>USER_REGISTO_NAME = USER LOGADO QUE FEZ A ACAO</em></p></li>
+<li><p><em>USER_REGISTO_ID = USER LOGADO QUE FEZ A ACAO</em></p></li>
+<li><p><em>DATA_REGISTO = SYSDATE</em></p></li>
+<li><p><em>REFERENCIA_NAME = RH_T_DOMINIO. VALUE ||’_’||
+VALIDACAO_PROVISORIO</em></p></li>
+<li><p><em>MESSAGE = Campo Observação do formulario’</em></p></li>
+<li><p><em>ASSUNTO = Validação provisoria</em></p></li>
+<li><p><em>EMAIL = email do utilizador que tinha feito o processamento
+<strong>RH_T_PROC_SALARIOS</strong>.USER_REGISTO_NAME</em></p></li>
+<li><p><em>NOME_RECEPTOR =
+<strong>RH_T_PROC_SALARIOS</strong>.USER_REGISTO_NAME</em></p></li>
+<li><p><em>DATA_ENVIO = SYSDATE</em></p></li>
+<li><p><em>URL = NULL</em></p></li>
+<li><p><em>ESTADO = ‘A’</em></p></li>
+<li><p><em>UUID</em></p></li>
+<li><p><em>ALERTA_ID = NULL</em></p></li>
+<li><p><em>REFERENCIA_ID = RH_T_PROC_SALARIOS.ID</em></p></li>
+<li><p><em>REFERENCIA_UUID = NULL</em></p></li>
+<li><p><em>FUN_ID = NULL</em></p></li>
+<li><p><em>TIPO_NOTIFICACAO = ‘VALIDACAO_PROCESSAMENTO’</em></p></li>
+<li><p><em>DESTINATARIO = RESPONSAVEL_REGISTO’</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Ações</strong></td>
+<td colspan="2"><p><strong>Ações</strong></p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td>Faz update, na tabela <strong>RH_T_PROC_SALARIO.ESTADO =
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
+<td><p>Faz update, na tabela <strong>RH_T_PROC_SALARIO.ESTADO =
 ‘</strong>VALIDADO_PROVISORIO’,
 <strong>RH_T_PROC_SALARIO.</strong>USER_VALID_PROV = nome de utilizador
-que validou</td>
+que validou</p></td>
 </tr>
 </tbody>
 </table>
@@ -1022,7 +1074,7 @@ Invoca o mesmo formulario de Validaçao provisoria
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>REGRAS</strong></th>
+<th colspan="2"><p><strong>REGRAS</strong></p></th>
 </tr>
 </thead>
 <tbody>
@@ -1042,18 +1094,43 @@ aprovação.</mark></p></li>
 <li><p><em>Só é possível Validar processamentos que se encontrem apenas
 no estado “</em><strong>VALIDADO_PROVISORIO</strong><em>”, ou seja, que
 ainda não tenham sido validados</em></p></li>
-</ul></td>
+</ul>
+<p><em>Regista na <strong>RH_T_NOTIFICACAO</strong></em></p>
+<ul>
+<li><p><em>USER_REGISTO_NAME = USER LOGADO QUE FEZ A ACAO</em></p></li>
+<li><p><em>USER_REGISTO_ID = USER LOGADO QUE FEZ A ACAO</em></p></li>
+<li><p><em>DATA_REGISTO = SYSDATE</em></p></li>
+<li><p><em>REFERENCIA_NAME = RH_T_DOMINIO. VALUE ||’_’||
+VALIDACAO_DEFINITIVO</em></p></li>
+<li><p><em>MESSAGE = Campo Observação do formulario’</em></p></li>
+<li><p><em>ASSUNTO = Validação Definitivo</em></p></li>
+<li><p><em>EMAIL = email do utilizador que tinha feito o processamento
+<strong>RH_T_PROC_SALARIOS</strong>.USER_REGISTO_NAME</em></p></li>
+<li><p><em>NOME_RECEPTOR =
+<strong>RH_T_PROC_SALARIOS</strong>.USER_REGISTO_NAME</em></p></li>
+<li><p><em>DATA_ENVIO = SYSDATE</em></p></li>
+<li><p><em>URL = NULL</em></p></li>
+<li><p><em>ESTADO = ‘A’</em></p></li>
+<li><p><em>UUID</em></p></li>
+<li><p><em>ALERTA_ID = NULL</em></p></li>
+<li><p><em>REFERENCIA_ID = RH_T_PROC_SALARIOS.ID</em></p></li>
+<li><p><em>REFERENCIA_UUID = NULL</em></p></li>
+<li><p><em>FUN_ID = NULL</em></p></li>
+<li><p><em>TIPO_NOTIFICACAO = ‘VALIDACAO_PROCESSAMENTO’</em></p></li>
+</ul>
+<p><em>DESTINATARIO = RESPONSAVEL_REGISTO’</em></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Ações</strong></td>
+<td colspan="2"><p><strong>Ações</strong></p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td>Faz update, na tabela <strong>RH_T_PROC_SALARIO.</strong>ESTADO
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
+<td><p>Faz update, na tabela <strong>RH_T_PROC_SALARIO.</strong>ESTADO
 <strong>= ‘VALIDADO_DEFINITIVO</strong>’,
 <strong>RH_T_PROC_SALARIO.</strong> USER_VALID_DEF = EMAIL DE USER QUE
-VALIDOU</td>
+VALIDOU</p></td>
 </tr>
 </tbody>
 </table>
@@ -1067,7 +1144,7 @@ VALIDOU</td>
 </colgroup>
 <thead>
 <tr>
-<th colspan="2">REGRAS</th>
+<th colspan="2"><p>REGRAS</p></th>
 </tr>
 </thead>
 <tbody>
@@ -1078,16 +1155,17 @@ validado “<strong>VALIDADO_DEFINITIVO</strong>”</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2">Ações</td>
+<td colspan="2"><p>Ações</p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para cabimentar</p></li>
-<li><p>Muda o estado: <strong>RH_T_PROC_SALARIOS</strong>.ESTADO =”
-<strong>CABIMENTADO</strong>”; <strong>RH_T_PROC_SALARIOS</strong>.
-USER_CABIMENTO = utilizador que fez o cabimento</p></li>
+<li><p><mark>Muda o estado: <strong>RH_T_PROC_SALARIOS</strong>.ESTADO
+=” <strong>CABIMENTADO</strong>”; <strong>RH_T_PROC_SALARIOS</strong>.
+USER_CABIMENTO = utilizador que fez o cabimento</mark></p></li>
 <li><p>UPDATE <strong>RH_T_PROC_SALARIOS</strong>. <strong>CAB_1_ID =
 número de cabimento devolvido no serviço</strong></p></li>
 </ul></td>
@@ -1104,7 +1182,7 @@ número de cabimento devolvido no serviço</strong></p></li>
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>REGRAS</strong></th>
+<th colspan="2"><p><strong>REGRAS</strong></p></th>
 </tr>
 </thead>
 <tbody>
@@ -1116,11 +1194,12 @@ autorizados, ou seja, cujo estado se encontre apenas como
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>ACÇÃO</strong></td>
+<td colspan="2"><p><strong>ACÇÃO</strong></p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para eliminar cabimento</p></li>
 <li><p>Muda o estado: <strong>RH_T_PROC_SALARIOS.ESTADO</strong> =”
@@ -1139,7 +1218,7 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 </colgroup>
 <thead>
 <tr>
-<th colspan="2">REGRAS</th>
+<th colspan="2"><p>REGRAS</p></th>
 </tr>
 </thead>
 <tbody>
@@ -1150,19 +1229,20 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 </ul></td>
 </tr>
 <tr>
-<td colspan="2">Ações</td>
+<td colspan="2"><p>Ações</p></td>
 </tr>
 <tr>
-<td><img src="media/image6.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
+<td><p><img src="media/image6.png"
+style="width:0.6375in;height:0.26944in"
+alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></p></td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para autorizar</p></li>
 </ul>
 <ul>
-<li><p>Muda o estado: <strong>RH_T_PROC_SALARIOS</strong>.ESTADO =”
-<strong>AUTORIZADO</strong>”,
+<li><p><mark>Muda o estado: <strong>RH_T_PROC_SALARIOS</strong>.ESTADO
+=” <strong>AUTORIZADO</strong>”,
 <strong>RH_T_PROC_SALARIOS</strong>.USER_AUTORIZA= utilizador que fez a
-autorização</p></li>
+autorização</mark></p></li>
 </ul></td>
 </tr>
 </tbody>
@@ -1180,185 +1260,198 @@ autorização</p></li>
 </colgroup>
 <thead>
 <tr>
-<th>Nome Relatório</th>
-<th colspan="2">imagem</th>
+<th><p>Nome Relatório</p></th>
+<th colspan="2"><p>imagem</p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Detalhe de Processamento Para o Funcionário</td>
-<td colspan="2"><img src="media/image10.jpeg"
-style="width:6.55694in;height:6.26806in" /></td>
+<td><p>Detalhe de Processamento Para o Funcionário</p></td>
+<td colspan="2"><p><img src="media/image10.jpeg"
+style="width:6.55694in;height:6.26806in" /></p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: center;"><strong>Campo</strong></td>
-<td style="text-align: center;"><strong>Fonte de
-Informação</strong></td>
+<td colspan="2"
+style="text-align: center;"><p><strong>Campo</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte de
+Informação</strong></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Processamento de Salários</strong></td>
-<td>hardcode</td>
+<td colspan="2"><p><strong>Processamento de Salários</strong></p></td>
+<td><p>hardcode</p></td>
 </tr>
 <tr>
-<td colspan="2">Elaborado em:</td>
-<td><strong>SYSDATE</strong></td>
+<td colspan="2"><p>Elaborado em:</p></td>
+<td><p><strong>SYSDATE</strong></p></td>
 </tr>
 <tr>
-<td colspan="2">Data Proc:</td>
-<td>proc_sal_cc.<strong>DATA_PROCESSAMENTO</strong></td>
+<td colspan="2"><p>Data Proc:</p></td>
+<td><p>proc_sal_cc.<strong>DATA_PROCESSAMENTO</strong></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Processar Remunerações Gabinete Sistemas de
-Informação</strong></td>
-<td>proc_sal_cc<strong>.CENTRO_DE_CUSTO</strong></td>
+<td colspan="2"><p><strong>Processar Remunerações Gabinete Sistemas de
+Informação</strong></p></td>
+<td><p>proc_sal_cc<strong>.CENTRO_DE_CUSTO</strong></p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Vencimento Pessoal contratado</strong></td>
-<td>Agrupar, proc_sal_cc<strong>.DESCRICAO,</strong> onde
-proc_sal_cc<strong>..SHORT_DESC</strong> = ‘SAL’</td>
+<td colspan="2"><p><strong>Vencimento Pessoal
+contratado</strong></p></td>
+<td><p>Agrupar, proc_sal_cc<strong>.DESCRICAO,</strong> onde
+proc_sal_cc<strong>..SHORT_DESC</strong> = ‘SAL’</p></td>
 </tr>
 <tr>
-<td colspan="2">10116231</td>
-<td>proc_sal_cc.<strong>NIF</strong></td>
+<td colspan="2"><p>10116231</p></td>
+<td><p>proc_sal_cc.<strong>NIF</strong></p></td>
 </tr>
 <tr>
-<td colspan="2">Anilton Pina Brandão</td>
-<td>proc_sal_cc.<strong>NOME</strong></td>
+<td colspan="2"><p>Anilton Pina Brandão</p></td>
+<td><p>proc_sal_cc.<strong>NOME</strong></p></td>
 </tr>
 <tr>
-<td colspan="2">Contratado</td>
-<td>proc_sal_cc<strong>.RELACAO</strong></td>
+<td colspan="2"><p>Contratado</p></td>
+<td><p>proc_sal_cc<strong>.RELACAO</strong></p></td>
 </tr>
 <tr>
-<td colspan="2">Director Gabinete / 15F</td>
-<td>proc_sal_cc.<strong>ESCALAO</strong></td>
+<td colspan="2"><p>Director Gabinete / 15F</p></td>
+<td><p>proc_sal_cc.<strong>ESCALAO</strong></p></td>
 </tr>
 <tr>
 <td colspan="2"><p>Subsidio Desgaste Viatura</p>
 <p>Vencimento Pessoal contratado</p></td>
-<td>proc_sal_id.<strong>DESCRICAO e</strong> proc_sal_id.<strong>VALOR
-onde o</strong> proc_sal_id.<strong>TIPO =AREM</strong></td>
+<td><p>proc_sal_id.<strong>DESCRICAO e</strong>
+proc_sal_id.<strong>VALOR onde o</strong> proc_sal_id.<strong>TIPO
+=AREM</strong></p></td>
 </tr>
 <tr>
 <td colspan="2"><p>Retenção Previdência social</p>
 <p>Retenção Iur</p></td>
-<td>proc_sal_id.<strong>DESCRICAO e</strong> proc_sal_id.<strong>VALOR
-onde o</strong> proc_sal_id.<strong>TIPO =PAG</strong></td>
-</tr>
-<tr>
-<td colspan="2"><strong>Total Remuneração</strong></td>
-<td>proc_sal_id<strong>.TOTAL_REMUNERACOES</strong></td>
-</tr>
-<tr>
-<td colspan="2"><strong>Total Desconto</strong></td>
-<td style="text-align: left;">proc_sal_id.<strong>DESCONTO</strong></td>
-</tr>
-<tr>
-<td colspan="2"><strong>Total Liquido</strong></td>
-<td
-style="text-align: left;">proc_sal_id.<strong>TOTAL_LIQUIDO</strong></td>
-</tr>
-<tr>
-<td colspan="2">Recibo de Pagamento de Salário para o Funcionario</td>
-<td><img src="media/image11.jpeg"
-style="width:4.88542in;height:6.26806in" /></td>
-</tr>
-<tr>
-<td colspan="2" rowspan="3">Recibo individual do funcionario</td>
-<td><img src="media/image12.jpeg"
-style="width:8.49722in;height:1.79028in" /></td>
-</tr>
-<tr>
-<td><strong><em>N</em>ota</strong>: Este relatório é idêntico ao
-Relatório 2; a única diferença é que apresenta a informação do recibo de
-salário de apenas um colaborador.</td>
-</tr>
-<tr>
-<td><img src="media/image13.jpeg"
-style="width:5.92361in;height:6.26806in" /></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: center;"><strong>Campo</strong></td>
-<td style="text-align: center;"><strong>Fonte De Dados</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>Recibo de Pagamento de
-Salário</strong></td>
-<td>hardcode</td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>Processar Remunerações
-Gabinete Sistemas De Informação</strong></td>
-<td>proc_sal_cc<strong>.CENTRO_DE_CUSTO</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">10458041</td>
-<td>proc_sal_cc.<strong>NIF</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Contratado</td>
-<td>proc_sal_cc<strong>.RELACAO</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Contratado - Contratado</td>
-<td>proc_sal_cc.<strong>ESCALAO</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Nivaldo Cardoso Tavares</td>
-<td>proc_sal_cc.<strong>NOME</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Total Remunerações</td>
-<td>proc_sal_id<strong>.TOTAL_REMUNERACOES</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Total Descontos</td>
-<td style="text-align: left;">proc_sal_id.<strong>DESCONTO</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Total Liquido</td>
-<td
-style="text-align: left;">proc_sal_id.<strong>TOTAL_LIQUIDO</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><em>REMUNERAÇÕES</em></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Vencimento Pessoal
-contratado</td>
-<td>proc_sal_id.<strong>DESCRICAO e</strong> proc_sal_id.<strong>VALOR
-onde o</strong> proc_sal_id.<strong>TIPO =AREM</strong></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><em>DESCONTOS</em></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;">Retenção Previdência
-Social</td>
-<td rowspan="2">proc_sal_id.<strong>DESCRICAO e</strong>
+<td><p>proc_sal_id.<strong>DESCRICAO e</strong>
 proc_sal_id.<strong>VALOR onde o</strong> proc_sal_id.<strong>TIPO
-=PAG</strong></td>
+=PAG</strong></p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;">Retenção IUR</td>
+<td colspan="2"><p><strong>Total Remuneração</strong></p></td>
+<td><p>proc_sal_id<strong>.TOTAL_REMUNERACOES</strong></p></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>Total Desconto</strong></p></td>
+<td
+style="text-align: left;"><p>proc_sal_id.<strong>DESCONTO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2"><p><strong>Total Liquido</strong></p></td>
+<td
+style="text-align: left;"><p>proc_sal_id.<strong>TOTAL_LIQUIDO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2"><p>Recibo de Pagamento de Salário para o
+Funcionario</p></td>
+<td><p><img src="media/image11.jpeg"
+style="width:4.88542in;height:6.26806in" /></p></td>
+</tr>
+<tr>
+<td colspan="2" rowspan="3"><p>Recibo individual do funcionario</p></td>
+<td><p><img src="media/image12.jpeg"
+style="width:8.49722in;height:1.79028in" /></p></td>
+</tr>
+<tr>
+<td><p><strong><em>N</em>ota</strong>: Este relatório é idêntico ao
+Relatório 2; a única diferença é que apresenta a informação do recibo de
+salário de apenas um colaborador.</p></td>
+</tr>
+<tr>
+<td><p><img src="media/image13.jpeg"
+style="width:5.92361in;height:6.26806in" /></p></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: center;"><p><strong>Campo</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte De
+Dados</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><strong>Recibo de Pagamento
+de Salário</strong></p></td>
+<td><p>hardcode</p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><strong>Processar
+Remunerações Gabinete Sistemas De Informação</strong></p></td>
+<td><p>proc_sal_cc<strong>.CENTRO_DE_CUSTO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>10458041</p></td>
+<td><p>proc_sal_cc.<strong>NIF</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Contratado</p></td>
+<td><p>proc_sal_cc<strong>.RELACAO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Contratado -
+Contratado</p></td>
+<td><p>proc_sal_cc.<strong>ESCALAO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Nivaldo Cardoso
+Tavares</p></td>
+<td><p>proc_sal_cc.<strong>NOME</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Total Remunerações</p></td>
+<td><p>proc_sal_id<strong>.TOTAL_REMUNERACOES</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Total Descontos</p></td>
+<td
+style="text-align: left;"><p>proc_sal_id.<strong>DESCONTO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Total Liquido</p></td>
+<td
+style="text-align: left;"><p>proc_sal_id.<strong>TOTAL_LIQUIDO</strong></p></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><em>REMUNERAÇÕES</em></p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Vencimento Pessoal
+contratado</p></td>
+<td><p>proc_sal_id.<strong>DESCRICAO e</strong>
+proc_sal_id.<strong>VALOR onde o</strong> proc_sal_id.<strong>TIPO
+=AREM</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><em>DESCONTOS</em></p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Retenção Previdência
+Social</p></td>
+<td rowspan="2"><p>proc_sal_id.<strong>DESCRICAO e</strong>
+proc_sal_id.<strong>VALOR onde o</strong> proc_sal_id.<strong>TIPO
+=PAG</strong></p></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p>Retenção IUR</p></td>
 </tr>
 <tr>
 <td colspan="2" style="text-align: left;"></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><em>Desconto emitido
-Em:</em></td>
-<td>sysdate</td>
+<td colspan="2" style="text-align: left;"><p><em>Desconto emitido
+Em:</em></p></td>
+<td><p>sysdate</p></td>
 </tr>
 </tbody>
 </table>
 
 ### Resumo Processamento
 
-<img src="media/image14.png" style="width:3.98529in;height:3.36873in" />
+<img src="media/image14.png" style="width:4.06025in;height:3.43209in" />
 
 <table>
 <colgroup>
@@ -1370,88 +1463,90 @@ Em:</em></td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Lista</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><p><strong>Lista</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
 <th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td colspan="5" style="text-align: center;"><strong>Total
-Remunerações</strong></td>
+<td colspan="5" style="text-align: center;"><p><strong>Total
+Remunerações</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Movimento</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Tipo Movimento</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="2"></td>
-<td><em><strong>PROC_SAL_CC_REMUN.</strong>descricao || ‘(‘
-||PROC_SAL_CC_REMUN.short_desc||’)’</em></td>
+<td><p><em><strong>PROC_SAL_CC_REMUN.</strong>descricao || ‘(‘
+||PROC_SAL_CC_REMUN.short_desc||’)’</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><mark>Quantidade</mark></td>
-<td><em><mark>Number</mark></em></td>
-<td colspan="2"><mark>Número total de colcaboradores processados em cada
-tipo de movimento</mark></td>
-<td><em><mark><strong>PROC_SAL_CC_REMUN.</strong>TIPREL</mark></em></td>
+<td style="text-align: center;"><p><mark>Quantidade</mark></p></td>
+<td><p><em><mark>Number</mark></em></p></td>
+<td colspan="2"><p><mark>Número total de colcaboradores processados em
+cada tipo de movimento</mark></p></td>
+<td><p><em><mark><strong>PROC_SAL_CC_REMUN.</strong>TIPREL</mark></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total a Pagar</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Total a Pagar</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="2"></td>
-<td><em><strong>PROC_SAL_CC_REMUN</strong>.total</em></td>
+<td><p><em><strong>PROC_SAL_CC_REMUN</strong>.total</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Detalhe Remuneração</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Abre o Detalhe de Processamento e passa como parâmetro
-<em><strong>PROC_SAL_CC_REMUN.</strong></em>PROC_SAL_ID <strong>e
-<em>PROC_SAL_CC_REMUN.</em></strong>descricao</td>
-<td><em>-----------------------------------------------------------------</em></td>
+<td style="text-align: center;"><p>Detalhe Remuneração</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Abre o Detalhe de Processamento e passa como
+parâmetro <em><strong>PROC_SAL_CC_REMUN.</strong></em>PROC_SAL_ID
+<strong>e <em>PROC_SAL_CC_REMUN.</em></strong>descricao</p></td>
+<td><p><em>-----------------------------------------------------------------</em></p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: center;"><strong>Total
-Pagamento</strong></td>
+<td colspan="5" style="text-align: center;"><p><strong>Total
+Pagamento</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Movimento</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Tipo Movimento</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="2"></td>
-<td><em><strong>PROC_SAL_CC_PAG.</strong>descricao</em></td>
+<td><p><em><strong>PROC_SAL_CC_PAG.</strong>descricao</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><mark>Quantidade</mark></td>
-<td><em><mark>Number</mark></em></td>
-<td colspan="2"><mark>Número total de colcaboradores processados em cada
-tipo de movimento</mark></td>
-<td><em><mark><strong>PROC_SAL_CC_REMUN.</strong>TIPREL</mark></em></td>
+<td style="text-align: center;"><p><mark>Quantidade</mark></p></td>
+<td><p><em><mark>Number</mark></em></p></td>
+<td colspan="2"><p><mark>Número total de colcaboradores processados em
+cada tipo de movimento</mark></p></td>
+<td><p><em><mark><strong>PROC_SAL_CC_REMUN.</strong>TIPREL</mark></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Total</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="2"></td>
-<td><em><strong>TO_CHAR (PROC_SAL_CC_PAG.</strong>total,
-'999,999,999,999' <strong>)</strong></em></td>
+<td><p><em><strong>TO_CHAR (PROC_SAL_CC_PAG.</strong>total,
+'999,999,999,999' <strong>)</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Detalhe Pagamento</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Abre o Detalhe de Processamento e passa como parâmetro
-<em><strong>PROC_SAL_CC_PAG.</strong></em>PROC_SAL_ID <strong>e
-<em>PROC_SAL_CC_PAG.</em></strong>descricao</td>
-<td><em>-----------------------------------------------------------------</em></td>
+<td style="text-align: center;"><p>Detalhe Pagamento</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Abre o Detalhe de Processamento e passa como
+parâmetro <em><strong>PROC_SAL_CC_PAG.</strong></em>PROC_SAL_ID
+<strong>e <em>PROC_SAL_CC_PAG.</em></strong>descricao</p></td>
+<td><p><em>-----------------------------------------------------------------</em></p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: center;"><strong>Ações</strong></td>
+<td colspan="5"
+style="text-align: center;"><p><strong>Ações</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Detalhes Processamento</td>
-<td colspan="4"><em>Permite visualizar todos os colaboradores do tipo
-movimento selecionado</em></td>
+<td style="text-align: center;"><p>Detalhes Processamento</p></td>
+<td colspan="4"><p><em>Permite visualizar todos os colaboradores do tipo
+movimento selecionado</em></p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>SCRIPT</strong></td>
+<td colspan="5"
+style="text-align: left;"><p><strong>SCRIPT</strong></p></td>
 </tr>
 <tr>
 <td colspan="3" style="text-align: center;"><p><strong>Script de
@@ -1479,7 +1574,7 @@ style="width:4.47847in;height:1.525in" /></p></td>
 | Vinculo | *TEXT* |  | ***PROC_SAL_CC_REMUN.**RELACAO OU **PROC_SAL_CC_PAG**.RELACAO* |
 | Valor | *TEXT* |  | ***PROC_SAL_CC_REMUN.**VALOR OU **PROC_SAL_CC_PAG**.VALOR* |
 
-### Lista Susbsisdio Férias 
+###  Lista Susbsisdio Férias 
 
 Permitir de uma forma mais rápida e eficaz o processamento do subsidio
 de natal e de ferias levado em consideração o seguinte:
@@ -1491,109 +1586,93 @@ de natal e de ferias levado em consideração o seguinte:
 
 - Processos disciplinares;
 
-<img src="media/image18.png" style="width:9.68958in;height:3.68611in" />
+<img src="media/image18.png" style="width:9.4186in;height:5.58854in" />
 
-<table style="width:99%;">
+<table style="width:98%;">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 7%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
+<col style="width: 16%" />
+<col style="width: 4%" />
+<col style="width: 37%" />
+<col style="width: 15%" />
 <col style="width: 24%" />
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>FILTRO</strong></th>
+<th style="text-align: center;"><p><strong>FILTRO</strong></p></th>
 <th style="text-align: center;"></th>
 <th style="text-align: center;"></th>
-<th style="text-align: center;"><strong>Fonte de dados</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th colspan="2" style="text-align: center;"><p><strong>Fonte de
+dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;"><del>Tipo de Subsisio</del></td>
-<td><del>SELECT</del></td>
+<td style="text-align: center;"><p><del>Tipo de Subsisio</del></p></td>
+<td><p><del>SELECT</del></p></td>
 <td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direção</td>
-<td><em>SELECT</em></td>
+<td style="text-align: center;"><p>Direção</p></td>
+<td><p><em>SELECT</em></p></td>
 <td style="text-align: center;"></td>
-<td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS</strong>.FUN_ID</em></td>
-<td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS</strong>.FUN_ID</em></td>
+<td colspan="2"
+style="text-align: left;"><p><em>RH_V_SUBSIDIO_FERIAS<strong>.</strong>INSTIT_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Colaborador</td>
-<td><em>DATE</em></td>
-<td><em>RH_T_FUNCIONARIO.NOME</em></td>
-<td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS.</strong>FUN_ID</em></td>
-<td
-style="text-align: left;"><em><strong>-----------------------------------</strong></em></td>
+<td style="text-align: center;"><p>Colaborador</p></td>
+<td><p><em>DATE</em></p></td>
+<td><p><em>RH_T_FUNCIONARIO.NOME</em></p></td>
+<td colspan="2"
+style="text-align: left;"><p><em>RH_V_SUBSIDIO_FERIAS<strong>.</strong>FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data a Processar</td>
-<td><em>DATE</em></td>
-<td><em>Deve trazer por defeito o ano Atual</em></td>
-<td style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS.</strong>
-ANO_REFERENTE</em></td>
-<td style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS.</strong>
-ANO_REFERENTE</em></td>
+<td style="text-align: center;"><p>Ano referente</p></td>
+<td><p><em>DATE</em></p></td>
+<td><p><em>Deve trazer por defeito o ano Atual</em></p></td>
+<td colspan="2"
+style="text-align: left;"><p><em>RH_V_SUBSIDIO_FERIAS<strong>.</strong>
+ANO_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Estado Subsídio</td>
-<td><em>SELECT</em></td>
-<td style="text-align: center;"></td>
-<td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS.</strong>ESTADO</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 <td style="text-align: center;"></td>
 </tr>
 <tr>
 <td colspan="4"
-style="text-align: left;"><p><em><strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>.
-SAL_BASE_DET, passando como parâmetro</em></p>
+style="text-align: left;"><p><em><del><strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>.
+SAL_BASE_DET, passando como parâmetro</del></em></p>
 <ul>
-<li><p><em><strong>P_DATA_PROC</strong> = ano (data a
-Processar)</em></p></li>
-<li><p><em><strong>P_FUN_ID</strong> = id de colaborador</em></p></li>
-<li><p><em><strong>P_DIRECAO =</strong> Direção</em></p></li>
+<li><p><em><del><strong>P_DATA_PROC</strong> = ano (data a
+Processar)</del></em></p></li>
+<li><p><em><del><strong>P_FUN_ID</strong> = id de
+colaborador</del></em></p></li>
+<li><p><em><del><strong>P_DIRECAO =</strong> Direção</del></em></p></li>
 </ul></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome</td>
-<td><em>TEXT</em></td>
-<td>Nome do funcionário afeta a direção escolhida</td>
-<td><em>P_FUN_NOME</em></td>
-<td><em><strong>RH_T_SUBSIDIO_FERIAS.</strong>FUN_ID</em></td>
+<td style="text-align: center;"><p>Nome</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Nome do funcionário afeta a direção escolhida</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Salario Base</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Salario Base</p></td>
+<td><p><em>TEXT</em></p></td>
 <td><p>Media de Salário do ano referente as ferias.</p>
 <p>Caso o salário mudar no meio do mês, o salário do mês deve ser feito
 através da regra 3 simples contando que 1 mês tem 30 dias.</p></td>
-<td><em><strong>sipsv0.sips_prest_api.format_dinheiro(p_num
-=&gt;</strong></em> <em>P_VALOR_SAL_BASE<strong>, p_separator =&gt;
-',');</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_FERIAS.</strong></em>
-<em>V_VALOR_SALARIO_BASE</em></td>
+<td colspan="2"><p><em><strong>sipsv0.sips_prest_api.format_dinheiro
+(p_num =&gt;</strong></em> <em>VALOR_MES_TOTAL<strong>, p_separator
+=&gt; ',');</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mes. Trab.</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Mes. Trab.</p></td>
+<td><p><em>TEXT</em></p></td>
 <td><p>O intervalo dos meses cujo vínculo com o INPS esteve ativo.</p>
 <p>Exemplo:</p>
 <ul>
@@ -1604,15 +1683,14 @@ através da regra 3 simples contando que 1 mês tem 30 dias.</p></td>
 <p>Só deve presentar os dias caso o número de dias for maior que 0
 (zero), caso contrário deve apresentar somente o número de
 meses.</p></td>
-<td style="text-align: left;"><em>P_MES_TOTAL <strong>|| ‘-’ ||</strong>
-P_DIAS_TOTAL</em></td>
-<td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_FERIAS</strong>.</em>
-<em>MES_TRAB</em></td>
+<td colspan="2"
+style="text-align: left;"><p><em>RH_V_SUBSIDIO_FERIAS.MESES_TOTAL
+<strong>|| ‘-’ ||</strong> RH_V_SUBSIDIO_FERIAS.</em>
+<em>DIAS_TOTAL</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Dias de Ferias</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Dias de Ferias</p></td>
+<td><p><em>TEXT</em></p></td>
 <td><p>Visto que o 12 mês de trabalho dão direito a 22 dias de ferias,
 deve ser calculado através de</p>
 <p>DiasFeriasMes = (mêsTrab *22) / 12</p>
@@ -1620,30 +1698,34 @@ deve ser calculado através de</p>
 <p>DiasFeriasDias = (dias *(22/12)) /30</p>
 <p>Dias de ferias será o somatório de:</p>
 <p>DiasFerias = DiasFeriasMes + DiasFeriasDias</p></td>
-<td><em>P_DIAS_TOTAL</em></td>
-<td><em><strong>RH_T_SUBSIDIO_FERIAS</strong>.</em>
-<em>DIAS_TRAB</em></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.</em>
+<em>DIAS_SUBSIDIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor Subsidio</td>
-<td><em>TEXT</em></td>
-<td>ValorSub = diasFerias * SalarioBase / 22</td>
-<td><em><strong>sipsv0.sips_prest_api.format_dinheiro(p_num
-=&gt;</strong></em> <em>P_VALOR_SUBSIDIO<strong>, p_separator =&gt;
-',');</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_FERIAS.</strong></em>
-<em><strong>V_VALOR_SUBSIDIO</strong></em></td>
+<td style="text-align: center;"><p>Valor Subsidio</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>ValorSub = diasFerias * SalarioBase / 22</p></td>
+<td
+colspan="2"><p><em><strong>sipsv0.sips_prest_api.format_dinheiro(p_num
+=&gt;</strong></em> <em>VALOR_SUBSIDIO<strong>, p_separator =&gt;
+',');</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Subsidio Ativo</td>
-<td><em>TEXT</em></td>
-<td>Estado em que se encontra o subsídio</td>
-<td><em>P_ESTADO</em></td>
-<td><em><strong>RH_T_SUBSIDIO_FERIAS.ESTADO</strong></em></td>
+<td style="text-align: center;"><p>Ativar / inativar</p></td>
+<td></td>
+<td></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.
+FLG_ATIVO_INACTIVO</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p>Estado Validação</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Estado em que se encontra o subsídio</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.ESTADO</em></p></td>
 </tr>
 <tr>
 <td colspan="4"
-style="text-align: center;"><em><strong>Regras</strong></em></td>
+style="text-align: center;"><p><em><strong>Regras</strong></em></p></td>
 <td></td>
 </tr>
 <tr>
@@ -1687,26 +1769,48 @@ ferias, exemplo:</p>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>Acoes</strong></td>
+<td colspan="4"
+style="text-align: center;"><p><strong>Acoes</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;">Ver detalhe</td>
-<td colspan="3"><em>Permite visualizar detalhe de Processamento do
-Calculo de Ferias</em></td>
+<td style="text-align: center;"><p>Ver detalhe</p></td>
+<td colspan="3"><p><em>Permite visualizar detalhe de Processamento do
+Calculo de Ferias</em></p></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image20.png"
-style="width:1.15625in;height:0.28333in" /></td>
-<td colspan="3"><em>Permite inactivar um colaborador de forma qe el não
-possa receber o seu subsidio</em></td>
+<td style="text-align: center;"><p><img src="media/image20.png"
+style="width:0.95349in;height:0.34116in" /></p></td>
+<td colspan="3"><p><em>Invoca o procedimento
+<strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>.CALCULO_DIAS_FERIA
+(P_ANO_REFERENTE VARCHAR2,P_USER_REGISTO_ID NUMBER,P_USER_REGISTO_NAME
+VARCHAR2 )</em></p></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p><img src="media/image21.png"
+style="width:1.70339in;height:0.30233in" /></p></td>
+<td colspan="3"><p><em>Permite inactivar um colaborador de forma qe el
+não possa receber o seu subsidio</em></p>
+<p><em><strong>RH_T_SUBSIDIO_FERIA</strong>. FLG_ATIVO_INACTIVO = I ou
+A</em></p>
+<p><em><strong>Nota</strong>: por defeito devem trazer tuvo
+ativo</em></p></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p><img src="media/image22.png"
+style="width:1.0939in;height:0.32296in" /></p></td>
+<td colspan="3"><p><em>Faz update na tabela
+<strong>RH_T_SUBSIDIO_FERIA</strong>.ESTADO = ‘A’no ano referente
+selecionado</em></p></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 
-#### Ativar / inativar 
+#### ~~Ativar / inativar~~ 
 
 <table>
 <colgroup>
@@ -1715,64 +1819,65 @@ possa receber o seu subsidio</em></td>
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>Ativar</strong></th>
+<th colspan="2"><p><strong><del>Ativar</del></strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><p><em>Ao ativar, deve efectuar gravação
-nas seguintes tabelas</em></p>
-<p><em><strong>1.RH_T_SUBSIDIO_FERIAS</strong></em></p>
+<td style="text-align: left;"><p><em><del>Ao ativar, deve efectuar
+gravação nas seguintes tabelas</del></em></p>
+<p><em><del><strong>1.RH_T_SUBSIDIO_FERIAS</strong></del></em></p>
 <ul>
-<li><p><em>FUN_ID</em></p></li>
-<li><p><em>ANO_REFERENTE</em></p></li>
-<li><p><em>VALOR_SALARIO_BASE</em></p></li>
-<li><p><em>MES_TRAB</em></p></li>
-<li><p><em>DIAS_TRAB</em></p></li>
-<li><p><em>DIAS_ANUAL</em></p></li>
-<li><p><em>DIAS_FERIAS</em></p></li>
-<li><p><em>VALOR_SUBSIDIO</em></p></li>
-<li><p><em>ESTADO = <strong>P,</strong> ANTES VALIDACAO,
-<strong>A,</strong> APÔS VALIDACAO</em></p></li>
-<li><p><em>REFERENCIA_ID = UM CODIGO ÚNICO 1 + MAX (VERIFICA O MAXIMA
-REFEERENCIA ), TODOS OS REGISTOS DO MESMO BLOCO TEM A MESMA
-REFERENCIA</em></p></li>
+<li><p><em><del>FUN_ID</del></em></p></li>
+<li><p><em><del>ANO_REFERENTE</del></em></p></li>
+<li><p><em><del>VALOR_SALARIO_BASE</del></em></p></li>
+<li><p><em><del>MES_TRAB</del></em></p></li>
+<li><p><em><del>DIAS_TRAB</del></em></p></li>
+<li><p><em><del>DIAS_ANUAL</del></em></p></li>
+<li><p><em><del>DIAS_FERIAS</del></em></p></li>
+<li><p><em><del>VALOR_SUBSIDIO</del></em></p></li>
+<li><p><em><del>ESTADO = <strong>P,</strong> ANTES VALIDACAO,
+<strong>A,</strong> APÔS VALIDACAO</del></em></p></li>
+<li><p><em><del>REFERENCIA_ID = UM CODIGO ÚNICO 1 + MAX (VERIFICA O
+MAXIMA REFEERENCIA ), TODOS OS REGISTOS DO MESMO BLOCO TEM A MESMA
+REFERENCIA</del></em></p></li>
 </ul></td>
 <td
-style="text-align: left;"><p><em><strong>1.RH_T_SUBSIDIO_FERIAS_DET</strong></em></p>
+style="text-align: left;"><p><em><del><strong>1.RH_T_SUBSIDIO_FERIAS_DET</strong></del></em></p>
 <ul>
-<li><p><em>NUMERO</em></p></li>
-<li><p><em>DATA_INICIO</em></p></li>
-<li><p><em>DATA_FIM</em></p></li>
-<li><p><em>ESCALAO_ID</em></p></li>
-<li><p><em>MES_TRAB</em></p></li>
-<li><p><em>VALOR_MES</em></p></li>
-<li><p><em>DIA_TRAB</em></p></li>
-<li><p><em>VALOR_DIA</em></p></li>
+<li><p><em><del>NUMERO</del></em></p></li>
+<li><p><em><del>DATA_INICIO</del></em></p></li>
+<li><p><em><del>DATA_FIM</del></em></p></li>
+<li><p><em><del>ESCALAO_ID</del></em></p></li>
+<li><p><em><del>MES_TRAB</del></em></p></li>
+<li><p><em><del>VALOR_MES</del></em></p></li>
+<li><p><em><del>DIA_TRAB</del></em></p></li>
+<li><p><em><del>VALOR_DIA</del></em></p></li>
 </ul>
-<p><em>2. Registo na tabela RH_T_VALIDACAO</em></p>
+<p><em><del>2. Registo na tabela RH_T_VALIDACAO</del></em></p>
 <ul>
-<li><p><em>REFERENCIA_NAME = ‘RH_T_SUBSIDIO_FERIAS’</em></p></li>
-<li><p><em>REFERENCIA_ID = REFERENCIA_ID DE
-RH_T_SUBSIDIO_FERIAS’</em></p></li>
-<li><p><em>TIPO_ACCAO = ‘SUBSIDIO_FERIAS’</em></p></li>
+<li><p><em><del>REFERENCIA_NAME =
+‘RH_T_SUBSIDIO_FERIAS’</del></em></p></li>
+<li><p><em><del>REFERENCIA_ID = REFERENCIA_ID DE
+RH_T_SUBSIDIO_FERIAS’</del></em></p></li>
+<li><p><em><del>TIPO_ACCAO = ‘SUBSIDIO_FERIAS’</del></em></p></li>
 </ul></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><em><strong>Inativar</strong></em></td>
+style="text-align: left;"><p><em><strong><del>Inativar</del></strong></em></p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><em>UPDATE
+<td colspan="2" style="text-align: left;"><p><em><del>UPDATE
 <strong>RH_T_SUBSIDIO_FERIAS.</strong>ESTADO <strong>=
-I</strong></em></td>
+I</strong></del></em></p></td>
 </tr>
 </tbody>
 </table>
 
 #### Ver Detalhe
 
-<img src="media/image21.png" style="width:9.67361in;height:3.38333in" />
+<img src="media/image23.png" style="width:8.39535in;height:5.26469in" />
 
 <table>
 <colgroup>
@@ -1784,127 +1889,136 @@ I</strong></em></td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Lista</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
-<th><strong>GRAVAÇÃO</strong></th>
+<th style="text-align: center;"><p><strong>Lista</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th colspan="2" style="text-align: center;"><p><strong>Fonte
+dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td colspan="4" style="text-align: left;"><p>Para preencher o formulário
 se deve invocar o seguinte procedimento:</p>
-<p><em><strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>. SAL_BASE_DET,
-passando como parâmetro</em></p>
+<p><em><del><strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>. SAL_BASE_DET,
+passando como parâmetro</del></em></p>
 <ul>
-<li><p><em><strong>P_DATA_PROC</strong> = ano (data a
-Processar)</em></p></li>
-<li><p><em><strong>P_FUN_ID</strong> = id de colaborador</em></p></li>
+<li><p><em><del><strong>P_DATA_PROC</strong> = ano (data a
+Processar)</del></em></p></li>
+<li><p><em><del><strong>P_FUN_ID</strong> = id de
+colaborador</del></em></p></li>
 </ul></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome</td>
-<td><em>TEXT</em></td>
-<td>Nome do colaborador</td>
-<td><em>P_FUN_NOME</em></td>
-<td><em>RH_T_SUBSIDIO_FERIAS.FUN_ID</em></td>
+<td style="text-align: center;"><p>Nome</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Nome do colaborador</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS..NOME</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nº</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Nº</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>P_NUM</em></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.FUN_ID</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
 <td></td>
+<td></td>
+<td colspan="2"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Inicio</td>
-<td><em>TEXT</em></td>
-<td>Data inicio no escalao</td>
-<td><em>P_DATA_INICIO</em></td>
-<td><em>RH_T_SUBSIDIO_FERIAS_DET.DATA_INICIO</em></td>
+<td style="text-align: center;"><p>Data Inicio</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Data inicio no escalao</p></td>
+<td
+colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET.DATA_INICIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Fim</td>
-<td><em>TEXT</em></td>
-<td>Data fim no escalao ou data final de contagem de escalao</td>
-<td><em>P_DATA_FIM</em></td>
-<td><em>RH_T_SUBSIDIO_FERIAS_DET<strong>.</strong>DATA_FIM</em></td>
+<td style="text-align: center;"><p>Data Fim</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Data fim no escalao ou data final de contagem de escalao</p></td>
+<td
+colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET<strong>.</strong>DATA_FIM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Escalão</td>
-<td><em>TEXT</em></td>
-<td>Referencia / Escalao</td>
-<td><em>P_ESCALAO, P_ESCALACAO_DESC</em></td>
-<td rowspan="2"><em>RH_T_SUBSIDIO_FERIAS_DET.ESCALAO_ID</em></td>
+<td style="text-align: center;"><p>Escalão</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Referencia / Escalao</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET
+.ESCALAO_DESC</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor Escalão</td>
-<td><em>TEXT</em></td>
-<td>Valor Salarial do Escalão</td>
-<td><em>P_VALOR_ESCALAO</em></td>
+<td style="text-align: center;"><p>Valor Escalão</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Valor Salarial do Escalão</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET.</em>
+<em>VALOR_ESCALAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Meses / Dias</td>
-<td><em>TEXT</em></td>
-<td>Valor recebido nos Meses trabalhado no Escalão / Valor recebido nos
-dias trabalhado no Escalão</td>
-<td><p><em>P_MESES || P_MESES_VALOR /</em></p>
-<p><em>P_DIAS || P_DIAS_VALOR</em></p></td>
-<td><p><em>RH_T_SUBSIDIO_FERIAS_DET.</em> <em>MES_TRAB</em></p>
-<p><em>RH_T_SUBSIDIO_FERIAS_DET.VALOR_MES</em></p>
-<p><em>RH_T_SUBSIDIO_FERIAS_DET.</em> <em>DIA_TRAB</em></p>
-<p><em>RH_T_SUBSIDIO_FERIAS_DET.</em> <em>VALOR_DIA</em></p></td>
+<td style="text-align: center;"><p>Meses / Dias</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Valor recebido nos Meses trabalhado no Escalão / Valor recebido
+nos dias trabalhado no Escalão</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET .</em> <em>MES_TRAB ,
+RH_V_SUBSIDIO_FERIAS_DET.</em> <em>VALOR_MES</em></p>
+<p><em>RH_V_SUBSIDIO_FERIAS_DET .</em> DIAS_TRAB,
+<em>RH_V_SUBSIDIO_FERIAS_DET.</em> <em>VALOR_DIA</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor Escalão / Tempo</td>
-<td><em>TEXT</em></td>
-<td>Total de Remunerações Recebido po Escalão</td>
-<td><em>P_SUM_DIAS_MESES</em></td>
-<td><em>------------------------------------------</em></td>
+<td style="text-align: center;"><p>Valor Escalão / Tempo</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Total de Remunerações Recebido po Escalão</p></td>
+<td colspan="2"><p><em>SUM (, RH_V_SUBSIDIO_FERIAS_DET.</em>
+<em>VALOR_MES +</em>, <em>RH_V_SUBSIDIO_FERIAS_DET.</em>
+<em>VALOR_DIA)</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total Remuneração</td>
-<td><em>TEXT</em></td>
-<td>Total Recebido no ano</td>
-<td><em>P_TOTAL_REMUN</em></td>
-<td><em>RH_T_SUBSIDIO_FERIAS.TOTAL_REMUN_ANO</em></td>
+<td style="text-align: center;"><p>Situação</p></td>
+<td><p><em>TEXT</em></p></td>
+<td></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET.SITUACAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Salário Base do Calculo
-(<strong>XXXXX</strong>)</td>
-<td><em>TEXT</em></td>
-<td><p><strong>XXXX</strong> = dias trabalhado</p>
-<p><strong>XXXX</strong> = <em>P_DESC_SAL_BASE</em></p>
+<td style="text-align: center;"><p>Total Remuneração</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Total Recebido no ano</p></td>
+<td colspan="2"><p><em>SUM (SUM (RH_V_SUBSIDIO_FERIAS_DET.</em>
+<em>VALOR_MES +</em>, <em>RH_V_SUBSIDIO_FERIAS_DET.</em>
+<em>VALOR_DIA))</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p>Salário Base do Calculo
+(<strong>XXXXX</strong>)</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p><strong>XXXX</strong> = <em>RH_V_SUBSIDIO_FERIAS</em>
+.SUMATORIA_DIAS_TOTAL</p>
 <p>Média Recebido no periodo trabalhado no ano que serve como base para
 o cálculo do subsidio</p></td>
-<td><em>P_VALOR_SAL_BASE</em></td>
-<td><em>RH_T_SUBSIDIO_FERIAS.</em> <em>VALOR_SALARIO_BASE</em></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS_DET
+.VALOR_MES_TOTAL</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor do Subsidio Referente aos
-<strong>XXXX</strong> dias de Ferias</td>
-<td><em>TEXT</em></td>
-<td><p><strong>XXXX</strong> = Dias de Ferias</p>
-<p><strong>XXXX</strong> = P_DIAS_FERIA</p>
-<p>Valor do Subsidio com base nos dias de Ferias</p></td>
-<td><p><em>P_DESC_SUBSIDIO</em></p>
-<p><em>P_VALOR_SUBSIDIO</em></p></td>
-<td><p><em>RH_T_SUBSIDIO_FERIAS.DIAS_FERIA</em></p>
-<p><em>RH_T_SUBSIDIO_FERIAS.</em> <em>VALOR_SUBSIDIO</em></p></td>
+<td style="text-align: center;"><p>Valor do Subsidio Referente aos
+<strong>XXXX</strong> dias de Ferias</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Valor do Subsidio com base nos dias de Ferias</p>
+<p><strong>XXXX</strong> = <em>RH_V_SUBSIDIO_FERIAS.</em>
+DIAS_SUBSIDIO</p></td>
+<td colspan="2"><p><em>RH_V_SUBSIDIO_FERIAS.</em>
+<em>VALOR_SUBSIDIO</em></p></td>
 </tr>
 </tbody>
 </table>
 
 - Exemplo de Calculo
 
-<img src="media/image22.png" style="width:9.68681in;height:5.05347in" />
+<img src="media/image24.png" style="width:9.68681in;height:5.05347in" />
 
-### Lista Subsidio Natal 
+###  Lista Subsidio Natal 
 
-<img src="media/image23.jpeg"
-style="width:8.38542in;height:4.71944in" />
+<img src="media/image25.png" style="width:9.69306in;height:4.71736in" />
 
 <table>
 <colgroup>
@@ -1916,7 +2030,7 @@ style="width:8.38542in;height:4.71944in" />
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>FILTRO</strong></th>
+<th style="text-align: center;"><p><strong>FILTRO</strong></p></th>
 <th style="text-align: center;"></th>
 <th style="text-align: center;"></th>
 <th style="text-align: center;"></th>
@@ -1925,128 +2039,137 @@ style="width:8.38542in;height:4.71944in" />
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;"><del>Tipo Subsidio</del></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: center;">Direção</td>
+<td style="text-align: center;"><p>Direção</p></td>
 <td></td>
 <td style="text-align: center;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_NATAL.</strong>FUN_ID</em></td>
+style="text-align: left;"><p><em><strong>RH_V_SUBSIDIO_NATAL.INSTIT_ID</strong></em></p></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Funcionário</td>
+<td style="text-align: center;"><p>Funcionário</p></td>
 <td></td>
 <td style="text-align: center;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_NATAL.</strong>FUN_ID</em></td>
+style="text-align: left;"><p><em><strong>RH_V_SUBSIDIO_NATAL.</strong>FUN_ID</em></p></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data a Processar</td>
-<td></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em><strong>RH_T_SUBSIDIO_NATAL.</strong>
-ANO_REFERENTE</em></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: center;">Estado</td>
+<td style="text-align: center;"><p>Ano Referente</p></td>
 <td></td>
 <td style="text-align: center;"></td>
 <td
-style="text-align: left;"><em><strong>RH_T_SUBSIDIO_NATAL.</strong>ESTADO</em></td>
+style="text-align: left;"><p><em><strong>RH_V_SUBSIDIO_NATAL.</strong>ANO_REFERENTE</em></p></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
-<td style="text-align: center;"><strong>Gravação</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
+<td style="text-align: center;"><p><strong>Gravação</strong></p></td>
 </tr>
 <tr>
-<td colspan="4"
-style="text-align: left;"><p><strong>RH_PK_SUBSISIO_NATAL_F_DB.</strong>
-<strong>load_list (P_DIRECAO_ID NUMBER DEFAULT NULL ,</strong></p>
-<p><strong>P_FUN_ID NUMBER DEFAULT NULL,</strong></p>
-<p><strong>p_VALOR_C_BRINDE NUMBER,</strong></p>
-<p><strong><mark>p_ano_processamento number</mark>,</strong></p></td>
-<td style="text-align: left;"></td>
+<td colspan="5"
+style="text-align: left;"><p><del><strong>RH_PK_SUBSISIO_NATAL_F_DB.</strong>
+<strong>load_list (P_DIRECAO_ID NUMBER DEFAULT NULL ,
+</strong></del></p>
+<p><strong><del>P_FUN_ID NUMBER DEFAULT NULL,</del></strong></p>
+<p><strong><del>p_VALOR_C_BRINDE NUMBER,</del></strong></p>
+<p><strong><del><mark>p_ano_processamento
+number</mark>,</del></strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome</td>
-<td><em>TEXT</em></td>
-<td>Nome do funcionário afeta a direção escolhida</td>
-<td><em><strong>P_LS_NOME</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.</strong>FUN_ID</em></td>
+<td style="text-align: center;"><p>Nome</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Nome do funcionário afeta a direção escolhida</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL..</strong>NOME</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong>FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Salario</td>
-<td><em>TEXT</em></td>
-<td>Salario do funcionário de acordo com o montante estabelecido no
-contrato (<em>Salario base do trabalhador até 15 de dezembro</em>)</td>
-<td><em><strong>P_LS_SALARIO</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.VALOR_SALARIO_BASE</strong></em></td>
+<td style="text-align: center;"><p>Salario</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Salario do funcionário de acordo com o montante estabelecido no
+contrato (<em>Salario base do trabalhador até 15 de
+dezembro</em>)</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL..</strong>SALARIO</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.VALOR_SALARIO_BASE</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Meses %</td>
-<td><em>TEXT</em></td>
-<td>O intervalo dos meses cujo o vinculo com o INPS esteve
+<td style="text-align: center;"><p>Meses %</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>O intervalo dos meses cujo o vinculo com o INPS esteve
 ativo.Exemplo:<strong>01/01/2021 à 31/05/202101/07/2021 à nullEste
-exemplo deve contabilizar 11 meses</strong>.</td>
-<td><strong>P_LS_MESES_TRABALHO||'</strong> /
-<strong>'||P_LS_PERC_SALARIO</strong></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.MES_TRAB</strong></em></td>
+exemplo deve contabilizar 11 meses</strong>.</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL..</strong></em>MES_TRAB<strong>||'</strong>
+/ <strong>'|| PERC_SALARIO</strong></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.MES_TRAB</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Faltas %</td>
-<td><em>TEXT</em></td>
-<td>RH_MESES_TRAB.PERCENTAGEM - de acordo com o numero de meses
-trabalhados no ano / Numero de Faltas injustificadas no ano</td>
-<td><em><strong>P_LS_FALTAS||' / '||P_LS_PERC_FALTA</strong></em></td>
+<td style="text-align: center;"><p>Faltas %</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>RH_MESES_TRAB.PERCENTAGEM - de acordo com o numero de meses
+trabalhados no ano / Numero de Faltas injustificadas no ano</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL.FALTAS||' / '||
+PERC_FALTA</strong></em></p></td>
 <td><p><em><strong>RH_T_SUBSIDIO_NATAL.FALTAS,</strong></em></p>
 <p><em><strong>RH_T_SUBSIDIO_NATAL.PERC_FALTA</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor Subsidio</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Valor Subsidio</p></td>
+<td><p><em>TEXT</em></p></td>
 <td><p>Montante bruto a receber do subsidio de natal;</p>
 <p><strong>Valor Subsídio = (Salário * (% Salario/100)) * (%
 Falta/100)</strong></p></td>
-<td><em><strong>P_LS_VALOR_SUBSIDIO</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.VALOR_SUBSIDIO</strong></em></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL</strong>
+.VALOR_SUBSIDIO</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.VALOR_SUBSIDIO</strong></em></p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><ol start="3" type="A">
 <li><p>Brinde</p></li>
 </ol></td>
-<td><em>TEXT</em></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em><strong><mark>p_ls_valor_cheque_brid</mark></strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.CHEQUE_BRINDE</strong></em></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL.</strong>VALOR_CHEQUE_BRID</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong>VALOR_CHEQUE_BRINDE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Prenda Nat.</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Prenda Nat.</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em><strong>p_ls_valor_prenda_natal</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.PRENDA_NATAL</strong></em></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL.</strong>VALOR_PRENDA_NATAL</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong>
+VALOR_PRENDA_NATAL</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Subsidio Ativo</td>
-<td><em>TEXT</em></td>
-<td>Estado em que se encontra o subsídio</td>
-<td><em><strong>P_ESTADO</strong></em></td>
-<td><em><strong>RH_T_SUBSIDIO_NATAL.ESTADO</strong></em></td>
+<td style="text-align: center;"><p>Observação</p></td>
+<td></td>
+<td><p>Obrigatório caso for alterado valor Subsidio ou Prenda
+Na.</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL.</strong>OBSERVACAO</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong>
+OBSERVACAO</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
+<td style="text-align: center;"><p>Ativar / inativar</p></td>
+<td></td>
+<td></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL</strong>.
+FLG_ATIVO_INACTIVO</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong>
+FLG_ATIVO_INACTIVO</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p>Estado Validação</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>Estado em que se encontra o subsídio</p></td>
+<td><p><em><strong>RH_V_SUBSIDIO_NATAL</strong>.ESTADO</em></p></td>
+<td><p><em><strong>RH_T_SUBSIDIO_NATAL.</strong> ESTADO</em></p></td>
+</tr>
+<tr>
+<td colspan="4"
+style="text-align: center;"><p><strong>REGRAS</strong></p></td>
 <td></td>
 </tr>
 <tr>
@@ -2165,17 +2288,51 @@ fevereiro.</em></p></li>
 </ol></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Acoes</strong></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td colspan="5"
+style="text-align: center;"><p><strong>Acoes</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image20.png"
-style="width:1.15625in;height:0.28333in" /></td>
-<td colspan="3"></td>
-<td></td>
+<td style="text-align: center;"><p><img src="media/image20.png"
+style="width:0.95349in;height:0.34116in" /></p></td>
+<td colspan="4"><p><em>Invoca o procedimento
+<strong>RH_PK_SUBSISIO_NATAL_F_DB</strong>.CALCULO_DIAS_NATAL
+(P_ANO_REFERENTE VARCHAR2,P_USER_REGISTO_ID NUMBER,P_USER_REGISTO_NAME
+VARCHAR2 )</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p><img src="media/image21.png"
+style="width:1.70339in;height:0.30233in" /></p></td>
+<td colspan="4"><p><em>Permite inactivar um colaborador de forma qe el
+não possa receber o seu subsidio</em></p>
+<p><em><strong>RH_T_SUBSIDIO_NATAL</strong>..FLG_ATIVO_INACTIVO = I ou
+A</em></p>
+<p><em><strong>Nota</strong>: por defeito devem trazer tuvo
+ativo</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p><img src="media/image22.png"
+style="width:1.0939in;height:0.32296in" /></p></td>
+<td colspan="4"><p><em>Faz update na tabela
+<strong>RH_T_SUBSIDIO_NATAL.</strong>ESTADO = ‘A’no ano referente
+selecionado</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><p><img src="media/image26.png"
+style="width:0.40631in;height:0.31254in" /></p></td>
+<td colspan="4"><p><em><strong>Regra</strong>: A observacao deve ser
+obrigatorio, quando se pretende mudar <strong>Valores subsídio</strong>
+de Natal ou <strong>Prenda de Natal</strong></em></p>
+<p><em>Faz update nos seguintes na tabela
+<strong>RH_T_SUBSIDIO_NATAL</strong></em></p>
+<ul>
+<li><p><em>VALOR_SUBSIDIO <strong>: caso for
+alterado</strong></em></p></li>
+<li><p><em>VALOR_PRENDA_NATAL : caso for alterado</em></p></li>
+<li><p><em>OBSERVACAO: é obrigatorio caso for alterado um dos
+campo</em></p></li>
+<li><p><em>ESTADO: <strong>‘P</strong>’ (caso for alterado um dos
+campo)</em></p></li>
+</ul></td>
 </tr>
 </tbody>
 </table>
@@ -2189,47 +2346,49 @@ style="width:1.15625in;height:0.28333in" /></td>
 </colgroup>
 <thead>
 <tr>
-<th colspan="2"><strong>Ativar</strong></th>
+<th colspan="2"><p><strong>Ativar</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><p><em>Ao ativar, deve efectuar gravação
-nas seguintes tabelas</em></p>
-<p><em><strong>1.RH_T_SUBSIDIO_NATAL</strong></em></p>
+<td style="text-align: left;"><p><em><del>Ao ativar, deve efectuar
+gravação nas seguintes tabelas</del></em></p>
+<p><em><strong><del>1.RH_T_SUBSIDIO_NATAL</del></strong></em></p>
 <ul>
-<li><p><em>FUN_ID</em></p></li>
-<li><p><em>ANO_REFERENTE</em></p></li>
-<li><p><em>VALOR_SALARIO_BASE</em></p></li>
-<li><p><em>MES_TRAB</em></p></li>
-<li><p><em>PERC_SALARIO</em></p></li>
-<li><p><em>FALTAS</em></p></li>
-<li><p><em>PERC_FALTA</em></p></li>
-<li><p><em>VALOR_SUBSIDIO</em></p></li>
-<li><p><em>CHEQUE_BRINDE</em></p></li>
-<li><p><em>PRENDA_NATAL</em></p></li>
-<li><p><em>ESTADO = P (ANTES DE VALIDACAO), A APÔS</em></p></li>
-<li><p><em>REFERENCIA_ID = UM CODIGO ÚNICO 1 + MAX (VERIFICA O MAXIMA
-REFEERENCIA ), TODOS OS REGISTOS DO MESMO BLOCO TEM A MESMA
-REFERENCIA</em></p></li>
+<li><p><em><del>FUN_ID</del></em></p></li>
+<li><p><em><del>ANO_REFERENTE</del></em></p></li>
+<li><p><em><del>VALOR_SALARIO_BASE</del></em></p></li>
+<li><p><em><del>MES_TRAB</del></em></p></li>
+<li><p><em><del>PERC_SALARIO</del></em></p></li>
+<li><p><em><del>FALTAS</del></em></p></li>
+<li><p><em><del>PERC_FALTA</del></em></p></li>
+<li><p><em><del>VALOR_SUBSIDIO</del></em></p></li>
+<li><p><em><del>CHEQUE_BRINDE</del></em></p></li>
+<li><p><em><del>PRENDA_NATAL</del></em></p></li>
+<li><p><em><del>ESTADO = P (ANTES DE VALIDACAO), A
+APÔS</del></em></p></li>
+<li><p><em><del>REFERENCIA_ID = UM CODIGO ÚNICO 1 + MAX (VERIFICA O
+MAXIMA REFEERENCIA ), TODOS OS REGISTOS DO MESMO BLOCO TEM A MESMA
+REFERENCIA</del></em></p></li>
 </ul></td>
-<td style="text-align: left;"><p><em>2. Registo na tabela
-RH_T_VALIDACAO</em></p>
+<td style="text-align: left;"><p><em><del>2. Registo na tabela
+RH_T_VALIDACAO</del></em></p>
 <ul>
-<li><p><em>REFERENCIA_NAME = ‘RH_T_SUBSIDIO_NATAL’</em></p></li>
-<li><p><em>REFERENCIA_ID = REFERENCIA_ID DE
-RH_T_SUBSIDIO_NATAL’</em></p></li>
-<li><p><em>TIPO_ACCAO = ‘SUBSIDIO_NATAL’</em></p></li>
+<li><p><em><del>REFERENCIA_NAME =
+‘RH_T_SUBSIDIO_NATAL’</del></em></p></li>
+<li><p><em><del>REFERENCIA_ID = REFERENCIA_ID DE
+RH_T_SUBSIDIO_NATAL’</del></em></p></li>
+<li><p><em><del>TIPO_ACCAO = ‘SUBSIDIO_NATAL’</del></em></p></li>
 </ul></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><em><strong>Inativar</strong></em></td>
+style="text-align: left;"><p><em><strong>Inativar</strong></em></p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><em>UPDATE
+<td colspan="2" style="text-align: left;"><p><em>UPDATE
 <strong>RH_T_SUBSIDIO_NATAL.</strong>ESTADO <strong>=
-I</strong></em></td>
+I</strong></em></p></td>
 </tr>
 </tbody>
 </table>
@@ -2248,29 +2407,30 @@ durante o período da licença.
 </colgroup>
 <thead>
 <tr>
-<th><strong>elemento</strong></th>
-<th><strong>Descrição</strong></th>
+<th><p><strong>elemento</strong></p></th>
+<th><p><strong>Descrição</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Natureza</strong></td>
-<td>Suspensão temporária do exercício de funções.</td>
+<td><p><strong>Natureza</strong></p></td>
+<td><p>Suspensão temporária do exercício de funções.</p></td>
 </tr>
 <tr>
-<td><strong>Direitos</strong></td>
-<td>Mantém o vínculo e o posto, mas <strong>sem vencimento nem contagem
-de tempo de serviço</strong> (exceto se a lei permitir).</td>
+<td><p><strong>Direitos</strong></p></td>
+<td><p>Mantém o vínculo e o posto, mas <strong>sem vencimento nem
+contagem de tempo de serviço</strong> (exceto se a lei
+permitir).</p></td>
 </tr>
 <tr>
-<td><strong>Duração</strong></td>
-<td>Pode variar (ex.: 6 meses a 2 anos), renovável mediante
-autorização.</td>
+<td><p><strong>Duração</strong></p></td>
+<td><p>Pode variar (ex.: 6 meses a 2 anos), renovável mediante
+autorização.</p></td>
 </tr>
 <tr>
-<td><strong>Motivos comuns</strong></td>
-<td>Motivos pessoais, formação, acompanhamento familiar, missão externa,
-estudos, etc.</td>
+<td><p><strong>Motivos comuns</strong></p></td>
+<td><p>Motivos pessoais, formação, acompanhamento familiar, missão
+externa, estudos, etc.</p></td>
 </tr>
 <tr>
 <td colspan="2"><p>Campo <strong>TIPO_SITUACAO_LABORAL</strong> =
@@ -2286,7 +2446,7 @@ tabela RH_T_SITUACAO_LABORAL ou RH_T_MOVIMENTO</p></td>
 
 RH_T_SITUACAO_LABORAL
 
-<img src="media/image24.png" style="width:9.69306in;height:2.67153in"
+<img src="media/image27.png" style="width:9.69306in;height:2.67153in"
 alt="Uma imagem com texto, captura de ecrã, Tipo de letra, file Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2299,68 +2459,69 @@ alt="Uma imagem com texto, captura de ecrã, Tipo de letra, file Os conteúdos g
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Formulário</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><p><strong>Formulário</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
 <th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Validar</td>
-<td><em>Select</em></td>
-<td colspan="2">Só parecer ao validar</td>
-<td><em>---------------------------------------------------</em></td>
+<td style="text-align: center;"><p>Validar</p></td>
+<td><p><em>Select</em></p></td>
+<td colspan="2"><p>Só parecer ao validar</p></td>
+<td><p><em>---------------------------------------------------</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Situação Laboral</td>
-<td><em>SELECT</em></td>
-<td colspan="2">Pegar id de <strong>RH_T_PARAM_SITUACAO
+<td style="text-align: center;"><p>Situação Laboral</p></td>
+<td><p><em>SELECT</em></p></td>
+<td colspan="2"><p>Pegar id de <strong>RH_T_PARAM_SITUACAO
 (</strong><em>Pega id onde código = LIC_SV referente a licença sem
-Vencimento</em><strong>) ,</strong></td>
-<td><em>RH_T_SITUACAO_LABORAL.</em> <em>SITUACAO_LABORAL_ID</em></td>
+Vencimento</em><strong>) ,</strong></p></td>
+<td><p><em>RH_T_SITUACAO_LABORAL.</em>
+<em>SITUACAO_LABORAL_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Motivo</td>
-<td><em>SELECT</em></td>
-<td colspan="2">O motivo não é obrigatário (somente traz informação caso
-o tipo de situação tem motivo)
-<strong>RH_T_PARAM_SITUACAO_DET</strong></td>
+<td style="text-align: center;"><p>Motivo</p></td>
+<td><p><em>SELECT</em></p></td>
+<td colspan="2"><p>O motivo não é obrigatário (somente traz informação
+caso o tipo de situação tem motivo)
+<strong>RH_T_PARAM_SITUACAO_DET</strong></p></td>
 <td><p><em>RH_T_SITUACAO_LABORAL. MOTIVO_SIT_LAB_ID</em></p>
 <p><em>RH_T_TIPOS_RELACIONAMENTO.MOTIVO_SIT_LAB_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">*Data Inicio</td>
+<td style="text-align: center;"><p>*Data Inicio</p></td>
 <td></td>
 <td colspan="2"></td>
 <td><p><em>RH_T_SITUACAO_LABORAL.DATA_INICIO</em></p>
 <p><em>RH_T_TIPOS_RELACIONAMENTO.DATA_INICIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Fim</td>
-<td><em>DATE</em></td>
+<td style="text-align: center;"><p>Data Fim</p></td>
+<td><p><em>DATE</em></p></td>
 <td colspan="2"></td>
 <td><p><em>RH_T_SITUACAO_LABORAL.DATA_FIM</em></p>
 <p><em>RH_T_TIPOS_RELACIONAMENTO.DATA_FIM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Observação</td>
+<td style="text-align: center;"><p>Observação</p></td>
 <td></td>
 <td colspan="2"></td>
 <td><p><em>RH_T_SITUACAO_LABORAL. OBS</em></p>
 <p><em>RH_T_TIPOS_RELACIONAMENTO. OBS</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">-----------------------</td>
-<td><em>HIDDEN</em></td>
+<td style="text-align: center;"><p>-----------------------</p></td>
+<td><p><em>HIDDEN</em></p></td>
 <td
-colspan="2">-----------------------------------------------------</td>
-<td><em>RH_T_SITUACAO_LABORAL.CONTRATO_VINCULO_ID</em></td>
+colspan="2"><p>-----------------------------------------------------</p></td>
+<td><p><em>RH_T_SITUACAO_LABORAL.CONTRATO_VINCULO_ID</em></p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: center;"><em><strong>OUTRAS
-GRAVAÇOES</strong></em></td>
+<td colspan="5" style="text-align: center;"><p><em><strong>OUTRAS
+GRAVAÇOES</strong></em></p></td>
 </tr>
 <tr>
 <td colspan="3" style="text-align: center;"><p><em>1.Faz update nos
@@ -2429,7 +2590,7 @@ RH_T_AUSENCIA</strong></em></p>
 
 ####  Validação 
 
-<table style="width:100%;">
+<table style="width:99%;">
 <colgroup>
 <col style="width: 99%" />
 </colgroup>
@@ -2470,7 +2631,7 @@ RH_T_FUNCIONARIOS.NOME</p></li>
 
 Lista todos colaboradores que estão de licença
 
-<img src="media/image25.png" style="width:9.69306in;height:4.6375in"
+<img src="media/image28.png" style="width:9.69306in;height:4.6375in"
 alt="Uma imagem com texto, software, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2591,7 +2752,7 @@ alt="Uma imagem com texto, software, número, Tipo de letra Os conteúdos gerado
 
 ####  Modelo Ordem Serviço
 
-| <img src="media/image26.png" style="width:4.01667in;height:4.01181in"
+| <img src="media/image29.png" style="width:4.01667in;height:4.01181in"
 alt="Uma imagem com texto, captura de ecrã, Tipo de letra, documento Os conteúdos gerados por IA podem estar incorretos." /> |
 |----|
 
@@ -2599,10 +2760,10 @@ alt="Uma imagem com texto, captura de ecrã, Tipo de letra, documento Os conteú
 
 ### UPLOAD FICHEIRO
 
-<img src="media/image27.png" style="width:9.69306in;height:1.62292in"
+<img src="media/image30.png" style="width:9.69306in;height:1.62292in"
 alt="Uma imagem com texto, file, Tipo de letra, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
-<img src="media/image28.png" style="width:9.69306in;height:2.2875in"
+<img src="media/image31.png" style="width:9.69306in;height:2.2875in"
 alt="Uma imagem com texto, file, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2612,50 +2773,51 @@ alt="Uma imagem com texto, file, número, Tipo de letra Os conteúdos gerados po
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Campo Ficheiro</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th style="text-align: center;"><p><strong>Campo
+Ficheiro</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Num_fun</td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.FUN_ID</em></td>
+<td style="text-align: center;"><p>Num_fun</p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>NOME_FUNCIONARIO</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.NOME_FUNCIONARIO</em></td>
+<td style="text-align: center;"><p><em>NOME_FUNCIONARIO</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.NOME_FUNCIONARIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>TP_MOV_RETENCAO</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO</em></td>
+<td style="text-align: center;"><p><em>TP_MOV_RETENCAO</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>TP_MOV_REM</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_REM</em></td>
+<td style="text-align: center;"><p><em>TP_MOV_REM</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_REM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>PERCENTAGEM</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.PERCENTAGEM</em></td>
+<td style="text-align: center;"><p><em>PERCENTAGEM</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.PERCENTAGEM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>VALOR</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.VALOR</em></td>
+<td style="text-align: center;"><p><em>VALOR</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.VALOR</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>DATA_INICIO</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_INICIO</em></td>
+<td style="text-align: center;"><p><em>DATA_INICIO</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_INICIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>DATA_FIM</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_FIM</em></td>
+<td style="text-align: center;"><p><em>DATA_FIM</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_FIM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><em>SITUACAO</em></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.SITUACAO</em></td>
+<td style="text-align: center;"><p><em>SITUACAO</em></p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.SITUACAO</em></p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: center;"><em>OUTRAS
-GRAVAÇÕES</em></td>
+<td colspan="2" style="text-align: center;"><p><em>OUTRAS
+GRAVAÇÕES</em></p></td>
 </tr>
 <tr>
 <td style="text-align: center;"><p><em>1.outras gravações na tabela
@@ -2690,7 +2852,7 @@ RH_T_IMPORTACAO_MOVIMENTO</strong></em></p></li>
 
 ### Lista Importados
 
-<img src="media/image29.png" style="width:9.69306in;height:4.36597in"
+<img src="media/image32.png" style="width:9.69306in;height:4.36597in"
 alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2702,107 +2864,110 @@ alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerado
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Data Impotação</td>
-<td><em>DATE</em></td>
+<td style="text-align: center;"><p>Data Impotação</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_REGISTO</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_REGISTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome Ficheiro</td>
+<td style="text-align: center;"><p>Nome Ficheiro</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.NOME_FICHEIRO</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.NOME_FICHEIRO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">FUN_ID</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>FUN_ID</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.FUN_ID</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome Colaborador</td>
-<td><em>TEXT</em></td>
-<td>-----------------------------------------------------------</td>
-<td><em>----------------------------------------------------</em></td>
+<td style="text-align: center;"><p>Nome Colaborador</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>-----------------------------------------------------------</p></td>
+<td><p><em>----------------------------------------------------</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Movimento retenção
-(TP_MOV_RETENCAO)</td>
-<td><em>TEXT</em></td>
-<td>INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME</td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO</em></td>
+<td style="text-align: center;"><p>Movimento retenção
+(TP_MOV_RETENCAO)</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME</p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Movimento Remuneração (TP_MOV_REM)</td>
-<td><em>TEXT</em></td>
-<td>INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME</td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.</em> TP_MOV_REM</td>
+<td style="text-align: center;"><p>Movimento Remuneração
+(TP_MOV_REM)</p></td>
+<td><p><em>TEXT</em></p></td>
+<td><p>INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME</p></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.</em> TP_MOV_REM</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Percentagem</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Percentagem</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.PERCENTAGEM</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.PERCENTAGEM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Valor</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Valor</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.VALOR</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.VALOR</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Inicio</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Data Inicio</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_INICIO</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_INICIO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Fim</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Data Fim</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_FIM</em></td>
+<td><p><em>RH_T_IMPORTACAO_MOVIMENTO.DATA_FIM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Vinculo (Situação)</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Vinculo (Situação)</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
 <td><p><em>RH_T_IMPORTACAO_MOVIMENTO.SITUACAO</em></p>
 <p><em>RH_T_IMPORTACAO_MOVIMENTO.TIPREL_ID</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>ACÇÕES</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>ACÇÕES</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Importar</td>
-<td colspan="3">Permite fazer upload do ficheiro de Ganasio e
-Cantina</td>
+<td style="text-align: center;"><p>Importar</p></td>
+<td colspan="3"><p>Permite fazer upload do ficheiro de Ganasio e
+Cantina</p></td>
 </tr>
 </tbody>
 </table>
 
 ### Validação
 
-<table style="width:95%;">
+<table style="width:94%;">
 <colgroup>
 <col style="width: 47%" />
 <col style="width: 47%" />
@@ -2955,7 +3120,7 @@ NECESSIDADE DE INGRODUCAO DE OUTROS TRABALHADORE QUE NAO FORAM
 PROCESSADO (COLABORADORES QUE TRABALHAM NO EXTERIOR). OU SEJA PERMITIR A
 INTRODUCAO DE OUTROS COLABORADORES , MEDIANTE JUSTIFICAÇÃO
 
-<img src="media/image30.jpeg" style="width:7.7125in;height:3.95903in"
+<img src="media/image33.jpeg" style="width:7.7125in;height:3.95903in"
 alt="Uma imagem com texto, captura de ecrã, número, diagrama Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2968,93 +3133,94 @@ alt="Uma imagem com texto, captura de ecrã, número, diagrama Os conteúdos ger
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
 <th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Mês Referencia</td>
+<td style="text-align: center;"><p>Mês Referencia</p></td>
 <td></td>
 <td colspan="2"></td>
-<td><em>RH_XML_FOS ano||</em> <em>RH_XML_FOS.mes</em></td>
+<td><p><em>RH_XML_FOS ano||</em> <em>RH_XML_FOS.mes</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Inicio</td>
+<td style="text-align: center;"><p>Data Inicio</p></td>
 <td></td>
 <td colspan="2"></td>
-<td><em>RH_XML_FOS.</em> <em>DT_REGISTO</em></td>
+<td><p><em>RH_XML_FOS.</em> <em>DT_REGISTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Fim</td>
+<td style="text-align: center;"><p>Data Fim</p></td>
 <td></td>
 <td colspan="2"></td>
-<td><em>RH_XML_FOS.</em> <em>DT_REGISTO</em></td>
+<td><p><em>RH_XML_FOS.</em> <em>DT_REGISTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
 <td colspan="2"
-style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mês Referencia</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Período do processamento</td>
-<td><strong>RH_XML_FOS.</strong> ANO||MES</td>
+<td style="text-align: center;"><p>Mês Referencia</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Período do processamento</p></td>
+<td><p><strong>RH_XML_FOS.</strong> ANO||MES</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Entega</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Data de submissão</td>
-<td><strong>RH_XML_FOS.</strong> DT_ENTREGA</td>
+<td style="text-align: center;"><p>Data Entega</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Data de submissão</p></td>
+<td><p><strong>RH_XML_FOS.</strong> DT_ENTREGA</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Entrega</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Tipo Entrega</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="2"><p>PRIME / SUBST / CORRE</p>
 <p>case rec.tp_entrega when <strong>'PRIME'</strong> then 'Primeira'
 when <strong>'SUBST'</strong> then 'Substitui o' when 'CORRE' then
 'Corre o' end;</p></td>
-<td><strong>RH_XML_FOS</strong>.tp_entrega</td>
+<td><p><strong>RH_XML_FOS</strong>.tp_entrega</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total Remuneração</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Soma salários</td>
-<td><strong>RH_XML_FOS.</strong> TT_REMUNERACAO</td>
+<td style="text-align: center;"><p>Total Remuneração</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Soma salários</p></td>
+<td><p><strong>RH_XML_FOS.</strong> TT_REMUNERACAO</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Total Contribuição</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Valor INPS</td>
-<td><strong>RH_XML_FOS.</strong> TT_CONTRIBUICAO</td>
+<td style="text-align: center;"><p>Total Contribuição</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Valor INPS</p></td>
+<td><p><strong>RH_XML_FOS.</strong> TT_CONTRIBUICAO</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Obs</td>
-<td><em>TEXT</em></td>
-<td colspan="2">Texto Livre</td>
-<td><strong>RH_XML_FOS.</strong> OBS</td>
+<td style="text-align: center;"><p>Obs</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="2"><p>Texto Livre</p></td>
+<td><p><strong>RH_XML_FOS.</strong> OBS</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">id</td>
-<td><em>HIDDEN</em></td>
+<td style="text-align: center;"><p>id</p></td>
+<td><p><em>HIDDEN</em></p></td>
 <td colspan="2"></td>
-<td><strong>RH_XML_FOS.</strong>ID</td>
+<td><p><strong>RH_XML_FOS.</strong>ID</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">id_dec_e</td>
-<td><em>HIDDEN</em></td>
-<td colspan="2"><strong>FUNCTION</strong>: getIDDC (RH_XML_FOS.
-num_dc)</td>
-<td><strong>RH_XML_FOS.</strong> NUM_DC</td>
+<td style="text-align: center;"><p>id_dec_e</p></td>
+<td><p><em>HIDDEN</em></p></td>
+<td colspan="2"><p><strong>FUNCTION</strong>: getIDDC (RH_XML_FOS.
+num_dc)</p></td>
+<td><p><strong>RH_XML_FOS.</strong> NUM_DC</p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="5"
+style="text-align: left;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="5" style="text-align: center;"><ul>
@@ -3133,7 +3299,8 @@ na lista;</p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>ACÇÕES</strong></td>
+<td colspan="5"
+style="text-align: left;"><p><strong>ACÇÕES</strong></p></td>
 </tr>
 <tr>
 <td colspan="5" style="text-align: center;"><ul>
@@ -3141,10 +3308,10 @@ na lista;</p></li>
 </ul></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image31.png"
-style="width:1.14583in;height:0.23958in" /></td>
-<td colspan="4">É a ação que inicia a geração de um novo FOS. Gera XML
-inicial.</td>
+<td style="text-align: center;"><p><img src="media/image34.png"
+style="width:1.14583in;height:0.23958in" /></p></td>
+<td colspan="4"><p>É a ação que inicia a geração de um novo FOS. Gera
+XML inicial.</p></td>
 </tr>
 <tr>
 <td colspan="5" style="text-align: center;"><ul>
@@ -3152,35 +3319,35 @@ inicial.</td>
 </ul></td>
 </tr>
 <tr>
-<td style="text-align: center;">Atualizar XML</td>
+<td style="text-align: center;"><p>Atualizar XML</p></td>
 <td colspan="4"><p>regra: atualiza contribuição, c<strong>aso for
 alterado alguma informação</strong></p>
 <p><strong>execução:
 rh_pk_gera_xml_db.updatetotalcontribuicoes</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image32.png"
-style="width:0.36458in;height:0.26042in" />: Baixar XML</td>
+<td style="text-align: center;"><p><img src="media/image35.png"
+style="width:0.36458in;height:0.26042in" />: Baixar XML</p></td>
 <td colspan="4"><p>Exporta XML :</p>
 <p><strong>Execução: RH_PK_GERA_XML_DB.</strong>get_xml_by_ajax</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image33.png"
-style="width:0.35417in;height:0.28125in" />: Ver Detalhe</td>
-<td colspan="4">Abre detalhe (abaixo descrito)</td>
+<td style="text-align: center;"><p><img src="media/image36.png"
+style="width:0.35417in;height:0.28125in" />: Ver Detalhe</p></td>
+<td colspan="4"><p>Abre detalhe (abaixo descrito)</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image34.png"
-style="width:0.34375in;height:0.21875in" />: Eliminar</td>
-<td colspan="2"><img src="media/image35.png"
-style="width:2.17014in;height:1.38819in" /></td>
+<td style="text-align: center;"><p><img src="media/image37.png"
+style="width:0.34375in;height:0.21875in" />: Eliminar</p></td>
+<td colspan="2"><p><img src="media/image38.png"
+style="width:2.17014in;height:1.38819in" /></p></td>
 <td colspan="2"><p><strong>Regra: Deixar eliminar somente caso a
 declaração ainda não for entregue</strong></p>
 <p><strong>Execucao: RH_PK_GERA_XML_DB.removerXML()</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image36.png"
-style="width:0.38542in;height:0.3125in" />: Recibo Fos</td>
+<td style="text-align: center;"><p><img src="media/image39.png"
+style="width:0.38542in;height:0.3125in" />: Recibo Fos</p></td>
 <td colspan="4"><p>Visualiza recibo</p>
 <p><strong>Nota</strong>: inps deve disponibilizar um endpoint</p>
 <p><em>Execucao:</em><strong>RH_PK_GERA_XML_DB</strong><em>.recibo_fos</em></p></td>
@@ -3190,7 +3357,7 @@ style="width:0.38542in;height:0.3125in" />: Recibo Fos</td>
 
 #### NOVO SEGURADO
 
-<img src="media/image37.jpeg" style="width:6.53542in;height:3.66667in"
+<img src="media/image40.jpeg" style="width:6.17117in;height:3.46227in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -3200,7 +3367,8 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 </colgroup>
 <thead>
 <tr>
-<th colspan="2" style="text-align: left;"><strong>REGRAS</strong></th>
+<th colspan="2"
+style="text-align: left;"><p><strong>REGRAS</strong></p></th>
 </tr>
 </thead>
 <tbody>
@@ -3278,9 +3446,9 @@ Faltas)</p></li>
 
 #### Ver Detalhe
 
-<img src="media/image38.png" style="width:7.41258in;height:4.23593in" />
+<img src="media/image41.png" style="width:7.41258in;height:4.23593in" />
 
-<table style="width:100%;">
+<table style="width:99%;">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 15%" />
@@ -3292,97 +3460,99 @@ Faltas)</p></li>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Lista</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><p><strong>Lista</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
 <th colspan="4"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Mês Referência</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;"><p>Mês Referência</p></td>
+<td style="text-align: center;"><p><em>TEXT</em></p></td>
 <td colspan="4" style="text-align: center;"></td>
-<td><strong>RH_XML_FOS.</strong>ANO<strong>||'-'||
-RH_XML_FOS.</strong>MES</td>
+<td><p><strong>RH_XML_FOS.</strong>ANO<strong>||'-'||
+RH_XML_FOS.</strong>MES</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Entrega</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;"><p>Tipo Entrega</p></td>
+<td style="text-align: center;"><p><em>TEXT</em></p></td>
 <td colspan="4" style="text-align: center;"></td>
-<td><strong>RH_XML_FOS.</strong> TP_ENTREGA</td>
+<td><p><strong>RH_XML_FOS.</strong> TP_ENTREGA</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
 <td colspan="4"
-style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nº</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Nº</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="4"></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nº Segurado</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Nº Segurado</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_DET_XML_FOS.</strong> NU_SEGURADO</td>
+<td><p><strong>RH_DET_XML_FOS.</strong> NU_SEGURADO</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nome</td>
-<td><em>TEXT</em></td>
-<td colspan="4"><strong>RH_FUNCIONARIOS.NOME</strong></td>
-<td><strong>RH_DET_XML_FOS.</strong> ID_FUNC</td>
+<td style="text-align: center;"><p>Nome</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="4"><p><strong>RH_FUNCIONARIOS.NOME</strong></p></td>
+<td><p><strong>RH_DET_XML_FOS.</strong> ID_FUNC</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direção</td>
-<td><em>TEXT</em></td>
-<td colspan="4">FUNCTION:
-GET_NOME_DIRECAO(RH_DET_XML_FOS.dir_serv_id)</td>
-<td><strong>RH_DET_XML_FOS</strong>.DIR_SERV_ID</td>
+<td style="text-align: center;"><p>Direção</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="4"><p>FUNCTION:
+GET_NOME_DIRECAO(RH_DET_XML_FOS.dir_serv_id)</p></td>
+<td><p><strong>RH_DET_XML_FOS</strong>.DIR_SERV_ID</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Dias de Trabalho</td>
-<td><em>TEXT</em></td>
-<td colspan="4">(30 – faltas no mês anterior ao processamento)</td>
-<td><strong>RH_DET_XML_FOS.</strong> NU_TRAB_MAN</td>
+<td style="text-align: center;"><p>Dias de Trabalho</p></td>
+<td><p><em>TEXT</em></p></td>
+<td colspan="4"><p>(30 – faltas no mês anterior ao
+processamento)</p></td>
+<td><p><strong>RH_DET_XML_FOS.</strong> NU_TRAB_MAN</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Remuneração</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Remuneração</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_DET_XML_FOS.</strong> VL_REMUN_MAN</td>
+<td><p><strong>RH_DET_XML_FOS.</strong> VL_REMUN_MAN</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Remuneração</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Tipo Remuneração</p></td>
+<td><p><em>TEXT</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_DET_XML_FOS.</strong>TIPO</td>
+<td><p><strong>RH_DET_XML_FOS.</strong>TIPO</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">ID</td>
-<td><em>HIDDEN</em></td>
+<td style="text-align: center;"><p>ID</p></td>
+<td><p><em>HIDDEN</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_DET_XML_FOS.</strong>ID</td>
+<td><p><strong>RH_DET_XML_FOS.</strong>ID</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">id_func</td>
-<td><em>HIDDEN</em></td>
+<td style="text-align: center;"><p>id_func</p></td>
+<td><p><em>HIDDEN</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_DET_XML_FOS.</strong> ID_FUNC</td>
+<td><p><strong>RH_DET_XML_FOS.</strong> ID_FUNC</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">id_xml</td>
-<td><em>HIDDEN</em></td>
+<td style="text-align: center;"><p>id_xml</p></td>
+<td><p><em>HIDDEN</em></p></td>
 <td colspan="4"></td>
-<td><strong>RH_XML_FOS.</strong>ID</td>
+<td><p><strong>RH_XML_FOS.</strong>ID</p></td>
 </tr>
 <tr>
-<td colspan="7" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="7"
+style="text-align: left;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="5" style="text-align: center;"><ul>
@@ -3423,7 +3593,8 @@ for inferior a 30 e o tipo de remuneração for Salário;</p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="7" style="text-align: left;"><strong>ACÇÕES</strong></td>
+<td colspan="7"
+style="text-align: left;"><p><strong>ACÇÕES</strong></p></td>
 </tr>
 <tr>
 <td colspan="7" style="text-align: center;"><ul>
@@ -3431,10 +3602,10 @@ for inferior a 30 e o tipo de remuneração for Salário;</p></li>
 </ul></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image39.png"
-style="width:0.32292in;height:0.26042in" /></td>
-<td colspan="2"><img src="media/image40.png"
-style="width:1.8555in;height:1.1685in" /></td>
+<td style="text-align: center;"><p><img src="media/image42.png"
+style="width:0.32292in;height:0.26042in" /></p></td>
+<td colspan="2"><p><img src="media/image43.png"
+style="width:1.8555in;height:1.1685in" /></p></td>
 <td colspan="4"><p>Elimina o registo data tabela RH_DET_XML_FOS e update
 na tabela RH_XML_FOS (TT_REMUNERACAO e TT_CONTRIBUICAO)</p>
 <p><strong>Ojectivo</strong>:</p>
@@ -3448,17 +3619,17 @@ total e contribuição.</p>
 number)</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image41.png"
-style="width:0.34375in;height:0.3125in" /></td>
+<td style="text-align: center;"><p><img src="media/image44.png"
+style="width:0.34375in;height:0.3125in" /></p></td>
 <td colspan="6"><p>Adicionar: adiciona mais um elemento a lista</p>
-<p><img src="media/image42.png"
+<p><img src="media/image45.png"
 style="width:8.29792in;height:1.13681in" /></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image43.png"
-style="width:0.33333in;height:0.28125in" /></td>
-<td colspan="2"><img src="media/image44.png"
-style="width:2.10278in;height:1.35347in" /></td>
+<td style="text-align: center;"><p><img src="media/image46.png"
+style="width:0.33333in;height:0.28125in" /></p></td>
+<td colspan="2"><p><img src="media/image47.png"
+style="width:2.10278in;height:1.35347in" /></p></td>
 <td colspan="4"><p>Atualizar linha</p>
 <p><strong>Execução:</strong>inpsrh.<strong>RH_PK_GERA_XML_DB</strong>.gravarNovaLinhaXML</p>
 <p><mark>NOTA: Caso for alguma informação FOR ALTERADO logo deve ir para
@@ -3492,10 +3663,10 @@ Logado</mark></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image45.png"
-style="width:1.17708in;height:0.17639in" /></td>
-<td colspan="3"><img src="media/image46.png"
-style="width:2.06944in;height:1.36111in" /></td>
+<td style="text-align: center;"><p><img src="media/image48.png"
+style="width:1.17708in;height:0.17639in" /></p></td>
+<td colspan="3"><p><img src="media/image49.png"
+style="width:2.06944in;height:1.36111in" /></p></td>
 <td colspan="3"><p>(<em>Reset das informações na tabela
 <strong>RH_XML_FOS</strong> e <strong>RH_DET_XML_FOS</strong></em>)</p>
 <p><em><strong>Ojectivo:</strong></em> Esta ação serve para
@@ -3517,10 +3688,10 @@ seguinte procedimento -</em>
 varchar2, p_id number)</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image47.png"
-style="width:1.32708in;height:0.22708in" /></td>
-<td colspan="3"><img src="media/image48.png"
-style="width:2.16319in;height:1.68125in" /></td>
+<td style="text-align: center;"><p><img src="media/image50.png"
+style="width:1.32708in;height:0.22708in" /></p></td>
+<td colspan="3"><p><img src="media/image51.png"
+style="width:2.09992in;height:1.63208in" /></p></td>
 <td colspan="3"><p>A ação “Gravar Nova Linha XML” permite ao utilizador
 inserir manualmente uma nova linha no ficheiro FOS, especificando os
 dados do segurado, remuneração e tipo. Esta funcionalidade é utilizada
@@ -3547,10 +3718,10 @@ seguinte procedimento :</em>
 p_id_xml_fos, p_nr_segurado)</em></strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image49.png"
-style="width:1.25417in;height:0.20486in" /></td>
-<td colspan="3"><img src="media/image50.png"
-style="width:2.03088in;height:1.323in" /></td>
+<td style="text-align: center;"><p><img src="media/image52.png"
+style="width:1.25417in;height:0.20486in" /></p></td>
+<td colspan="3"><p><img src="media/image53.png"
+style="width:2.03088in;height:1.323in" /></p></td>
 <td colspan="3"><p><em><strong>Objectivo:</strong> envia os direitos de
 segurança social ao INPS</em></p>
 <p><em><strong>Regra</strong>. Esse botão só aparece quando ainda não
@@ -3572,10 +3743,10 @@ funcionalidade</strong></em></p>
 validação/entrega e devolve mensagens de erro ou sucesso.</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image51.png"
-style="width:1.30417in;height:0.21736in" /></td>
-<td colspan="3"><img src="media/image52.png"
-style="width:2.06127in;height:1.31589in" /></td>
+<td style="text-align: center;"><p><img src="media/image54.png"
+style="width:1.30417in;height:0.21736in" /></p></td>
+<td colspan="3"><p><img src="media/image55.png"
+style="width:2.06127in;height:1.31589in" /></p></td>
 <td colspan="3"><p>A ação <strong>Substituir Folha</strong> permite
 gerar um novo XML do tipo <strong>SUBSTITUIÇÃO</strong>, com base num
 XML já existente, para o mesmo mês de referência.</p>
@@ -3600,9 +3771,9 @@ seguinte procedimento -</em> <strong>RH_PK_GERA_XML_DB<em>.substituirXML
 mesma lógica de geração:</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image53.png"
-style="width:1.70486in;height:0.29375in" /></td>
-<td colspan="6"><em>Volta para pagina inicial</em></td>
+<td style="text-align: center;"><p><img src="media/image56.png"
+style="width:1.70486in;height:0.29375in" /></p></td>
+<td colspan="6"><p><em>Volta para pagina inicial</em></p></td>
 </tr>
 </tbody>
 </table>
@@ -3611,7 +3782,7 @@ style="width:1.70486in;height:0.29375in" /></td>
 
 ### Lista SOAT 
 
-<img src="media/image54.png" style="width:7.17647in;height:3.42217in" />
+<img src="media/image57.png" style="width:7.17647in;height:3.42217in" />
 
 <table>
 <colgroup>
@@ -3716,8 +3887,8 @@ No soat o rh alguns momentos necessidade de fazer algum ajusto nos
 valores, principalmente em caso de baixa. que o valor que recebeu no mês
 não ºe igual ao valor processado
 
-<img src="media/image55.png" style="width:3.91983in;height:1.79282in" />
-<img src="media/image56.png" style="width:5.43518in;height:2.67515in" />
+<img src="media/image58.png" style="width:3.91983in;height:1.79282in" />
+<img src="media/image59.png" style="width:5.43518in;height:2.67515in" />
 
 <table>
 <colgroup>
@@ -3728,101 +3899,103 @@ não ºe igual ao valor processado
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Formulario1</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição / Fonte
-dados</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th style="text-align: center;"><p><strong>Formulario1</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição / Fonte
+dados</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Ano Refencia</td>
+<td style="text-align: center;"><p>Ano Refencia</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_SOAT.ANO_REFERENTE</em></td>
+<td><p><em>RH_T_SOAT.ANO_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Mês Referencia</td>
+<td style="text-align: center;"><p>Mês Referencia</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_SOAT.MES_REFERENTE</em></td>
+<td><p><em>RH_T_SOAT.MES_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>ACÇÕES</strong></td>
+<td style="text-align: center;"><p><strong>ACÇÕES</strong></p></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;">Criar</td>
-<td colspan="3"><em>Invoca o procedimento</em></td>
+<td style="text-align: center;"><p>Criar</p></td>
+<td colspan="3"><p><em>Invoca o procedimento</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Formulario2</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p><strong>Formulario2</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direcao</td>
+<td style="text-align: center;"><p>Direcao</p></td>
 <td></td>
-<td><strong>RH_T_DIRECAO</strong>.ID,
+<td><p><strong>RH_T_DIRECAO</strong>.ID,
 <strong>RH_T_TIPOS_RELACIONAMENTO</strong>.MOB_ID,
-RH_T_MOBILIDADE.<strong>INSTIT_ID</strong></td>
-<td><em>RH_T_SOAT_DETALHE. FUN_ID</em></td>
+RH_T_MOBILIDADE.<strong>INSTIT_ID</strong></p></td>
+<td><p><em>RH_T_SOAT_DETALHE. FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Tipo Identificação</td>
+<td style="text-align: center;"><p>Tipo Identificação</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_SOAT_DETALHE.FUN_ID</em></td>
+<td><p><em>RH_T_SOAT_DETALHE.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Número Identificação</td>
+<td style="text-align: center;"><p>Número Identificação</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_SOAT_DETALHE.FUN_ID</em></td>
+<td><p><em>RH_T_SOAT_DETALHE.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Dias Trabalho</td>
+<td style="text-align: center;"><p>Dias Trabalho</p></td>
 <td></td>
-<td><em>Por defeito traz os dados de
-<strong>RH_T_SOAT_DETALHE</strong>.</em> <em>NU_TRAB_AUTO</em></td>
-<td><em>RH_T_SOAT_DETALHE.</em> <em>NU_TRAB_MAN</em></td>
+<td><p><em>Por defeito traz os dados de
+<strong>RH_T_SOAT_DETALHE</strong>.</em> <em>NU_TRAB_AUTO</em></p></td>
+<td><p><em>RH_T_SOAT_DETALHE.</em> <em>NU_TRAB_MAN</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Remuneracao</td>
+<td style="text-align: center;"><p>Remuneracao</p></td>
 <td></td>
-<td><em>Por defeito traz os dados de
-<strong>RH_T_SOAT_DETALHE</strong>.</em> <em>VL_REMUN_AUTO</em></td>
-<td><em>RH_T_SOAT_DETALHE.</em> <em>VL_REMUN_ MAN</em></td>
+<td><p><em>Por defeito traz os dados de
+<strong>RH_T_SOAT_DETALHE</strong>.</em> <em>VL_REMUN_AUTO</em></p></td>
+<td><p><em>RH_T_SOAT_DETALHE.</em> <em>VL_REMUN_ MAN</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Observação</td>
+<td style="text-align: center;"><p>Observação</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_SOAT_DETALHE.OBS</em></td>
+<td><p><em>RH_T_SOAT_DETALHE.OBS</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>REGRAS</strong></p></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>ACÇÕES</strong></td>
+<td colspan="4"
+style="text-align: left;"><p><strong>ACÇÕES</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image57.png"
-style="width:0.53346in;height:0.29282in" /></td>
-<td colspan="3">Invoca o seguinte Procedimento
+<td style="text-align: center;"><p><img src="media/image60.png"
+style="width:0.53346in;height:0.29282in" /></p></td>
+<td colspan="3"><p>Invoca o seguinte Procedimento
 <strong>RH_PK_GERA_SOAT_DB</strong>. CRIAR (P_ANO NUMBER, P_MES
-NUMBER)</td>
+NUMBER)</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image58.png"
-style="width:0.86111in;height:0.2725in" /></td>
+<td style="text-align: center;"><p><img src="media/image61.png"
+style="width:0.86111in;height:0.2725in" /></p></td>
 <td colspan="3"><p><strong>Restaurar</strong>: Invova o Procedimento
 para restarar SOAT.</p>
 <p><strong>Nota</strong>: so deve sonseguir baixar SOAT que não esteja
@@ -3831,8 +4004,8 @@ fechado (caso o SOAT estiver fechado, este botão não deve aparecer)</p>
 (P_ANO NUMBER, P_MES NUMBER)</p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><img src="media/image59.png"
-style="width:0.26196in;height:0.22454in" /></td>
+<td style="text-align: center;"><p><img src="media/image62.png"
+style="width:0.26196in;height:0.22454in" /></p></td>
 <td colspan="3"><p>1.Permite alterar dados registados de <strong>Dias de
 trabalho</strong> e <strong>Remuneração</strong>.</p>
 <ul>
@@ -3872,7 +4045,7 @@ ACCAO_REFERENTE<strong>)</strong></em></p></li>
 
 ### Dados Seguro
 
-<img src="media/image60.png" style="width:4.45341in;height:5.20208in" />
+<img src="media/image63.png" style="width:4.45341in;height:5.20208in" />
 
 <table>
 <colgroup>
@@ -3883,126 +4056,129 @@ ACCAO_REFERENTE<strong>)</strong></em></p></li>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Campo</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th style="text-align: center;"><p><strong>Campo</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>DADOS DO TOMADOR DE
-SEGURO</strong></td>
+<td colspan="4" style="text-align: left;"><p><strong>DADOS DO TOMADOR DE
+SEGURO</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>NOME:</strong></td>
-<td style="text-align: left;">texto</td>
-<td style="text-align: left;">Nome do INPS CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>NOME:</strong></p></td>
+<td style="text-align: left;"><p>texto</p></td>
+<td style="text-align: left;"><p>Nome do INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>NOME</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>NOME</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>NIF:</strong></td>
-<td style="text-align: left;">number</td>
-<td style="text-align: left;">NIF do INPS CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>NIF:</strong></p></td>
+<td style="text-align: left;"><p>number</p></td>
+<td style="text-align: left;"><p>NIF do INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO</strong>.NIF</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO</strong>.NIF</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>COD CAE:</strong></td>
-<td style="text-align: left;">texto</td>
-<td style="text-align: left;">CAE do INPS CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>COD CAE:</strong></p></td>
+<td style="text-align: left;"><p>texto</p></td>
+<td style="text-align: left;"><p>CAE do INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>COD_CAE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>COD_CAE</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>ATIVIDADE ECONÓMICA:</strong></td>
-<td style="text-align: left;">texto</td>
-<td style="text-align: left;"><strong>ATIVIDADE ECONÓMICA</strong> do
-INPS CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>ATIVIDADE
+ECONÓMICA:</strong></p></td>
+<td style="text-align: left;"><p>texto</p></td>
+<td style="text-align: left;"><p><strong>ATIVIDADE ECONÓMICA</strong> do
+INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>ATIVIDADE_ECONOMICA</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>ATIVIDADE_ECONOMICA</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Nº CERTIDÃO COMERCIAL
-(NC):</strong></td>
-<td style="text-align: left;">texto</td>
-<td style="text-align: left;"><strong>Nº CERTIDÃO COMERCIAL
-(NC):</strong> do INPS CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>Nº CERTIDÃO COMERCIAL
+(NC):</strong></p></td>
+<td style="text-align: left;"><p>texto</p></td>
+<td style="text-align: left;"><p><strong>Nº CERTIDÃO COMERCIAL
+(NC):</strong> do INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>NUM_CERTIDAO_COMERCIAL</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>NUM_CERTIDAO_COMERCIAL</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>DATA VALIDADE NC:</strong></td>
-<td style="text-align: left;"><strong>date</strong></td>
-<td style="text-align: left;"><strong>DATA VALIDADE NC:</strong> do INPS
-CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>DATA VALIDADE
+NC:</strong></p></td>
+<td style="text-align: left;"><p><strong>date</strong></p></td>
+<td style="text-align: left;"><p><strong>DATA VALIDADE NC:</strong> do
+INPS CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>DATA_VALIDADE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>DATA_VALIDADE</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>TELEFONE:</strong></td>
-<td style="text-align: left;"><strong>number</strong></td>
-<td style="text-align: left;"><strong>TELEFONE:</strong> do INPS CENTRAL
-(PRAIA)</td>
+<td style="text-align: left;"><p><strong>TELEFONE:</strong></p></td>
+<td style="text-align: left;"><p><strong>number</strong></p></td>
+<td style="text-align: left;"><p><strong>TELEFONE:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>TELEFONE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>TELEFONE</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>TELEMÓVEL:</strong></td>
-<td style="text-align: left;"><strong>number</strong></td>
-<td style="text-align: left;"><strong>TELEMÓVEL:</strong> do INPS
-CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>TELEMÓVEL:</strong></p></td>
+<td style="text-align: left;"><p><strong>number</strong></p></td>
+<td style="text-align: left;"><p><strong>TELEMÓVEL:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>TELEMOVEL</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>TELEMOVEL</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>LOCALIDADE:</strong></td>
-<td style="text-align: left;"><strong>text</strong></td>
-<td style="text-align: left;"><strong>LOCALIDADE:</strong> do INPS
-CENTRAL (PRAIA)</td>
-<td style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>
-LOCALIDADE:</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>EMAIL:</strong></td>
-<td style="text-align: left;"><strong>text</strong></td>
-<td style="text-align: left;"><strong>EMAIL:</strong> do INPS CENTRAL
-(PRAIA)</td>
+<td style="text-align: left;"><p><strong>LOCALIDADE:</strong></p></td>
+<td style="text-align: left;"><p><strong>text</strong></p></td>
+<td style="text-align: left;"><p><strong>LOCALIDADE:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO</strong>.EMAIL</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>
+LOCALIDADE:</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>MORADA:</strong></td>
-<td style="text-align: left;"><strong>text</strong></td>
-<td style="text-align: left;"><strong>MORADA:</strong> do INPS CENTRAL
-(PRAIA)</td>
+<td style="text-align: left;"><p><strong>EMAIL:</strong></p></td>
+<td style="text-align: left;"><p><strong>text</strong></p></td>
+<td style="text-align: left;"><p><strong>EMAIL:</strong> do INPS CENTRAL
+(PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO</strong>.MORADA</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO</strong>.EMAIL</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>LOCALIDADE:</strong></td>
-<td style="text-align: left;"><strong>text</strong></td>
-<td style="text-align: left;"><strong>LOCALIDADE:</strong> do INPS
-CENTRAL (PRAIA)</td>
+<td style="text-align: left;"><p><strong>MORADA:</strong></p></td>
+<td style="text-align: left;"><p><strong>text</strong></p></td>
+<td style="text-align: left;"><p><strong>MORADA:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>LOCALIDADE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO</strong>.MORADA</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>CONCELHO:</strong></td>
-<td style="text-align: left;"><strong>select</strong></td>
-<td style="text-align: left;"><strong>CONCELHO:</strong> do INPS CENTRAL
-(PRAIA), Por defeito traz Praia</td>
+<td style="text-align: left;"><p><strong>LOCALIDADE:</strong></p></td>
+<td style="text-align: left;"><p><strong>text</strong></p></td>
+<td style="text-align: left;"><p><strong>LOCALIDADE:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO</strong>.CONCELHO</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>LOCALIDADE</p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>Lista
-Apolice</strong></td>
+<td style="text-align: left;"><p><strong>CONCELHO:</strong></p></td>
+<td style="text-align: left;"><p><strong>select</strong></p></td>
+<td style="text-align: left;"><p><strong>CONCELHO:</strong> do INPS
+CENTRAL (PRAIA), Por defeito traz Praia</p></td>
+<td
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO</strong>.CONCELHO</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>APÓLICE Nº:</strong></td>
-<td><strong>Select</strong></td>
+<td colspan="4" style="text-align: left;"><p><strong>Lista
+Apolice</strong></p></td>
+</tr>
+<tr>
+<td style="text-align: left;"><p><strong>APÓLICE Nº:</strong></p></td>
+<td><p><strong>Select</strong></p></td>
 <td><p><strong>NUMERO REFERENTE ZONA:</strong></p>
 <ul>
 <li><p><strong>SAL</strong></p></li>
@@ -4015,19 +4191,19 @@ style="text-align: left;"><p><strong>RH_T_DADOS_APOLICE.</strong>NUM_APOLICE</p>
 <p><strong>RH_T_DADOS_APOLICE.</strong>ILHA_ID</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>DATA INÍCIO DA
-APÓLICE:</strong></td>
-<td><strong>Date</strong></td>
-<td><strong>ESSA INFORMAÇÃO TEM TEM SIDO PREENCHIDO</strong></td>
+<td style="text-align: left;"><p><strong>DATA INÍCIO DA
+APÓLICE:</strong></p></td>
+<td><p><strong>Date</strong></p></td>
+<td><p><strong>ESSA INFORMAÇÃO TEM TEM SIDO PREENCHIDO</strong></p></td>
 <td
-style="text-align: left;"><strong>RH_T_DADOS_APOLICE.</strong>DATA_APOLICE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_APOLICE.</strong>DATA_APOLICE</p></td>
 </tr>
 </tbody>
 </table>
 
 ### Baixar ficheiro SOAT
 
-<img src="media/image61.png" style="width:7.55147in;height:3.8531in" />
+<img src="media/image64.png" style="width:7.55147in;height:3.8531in" />
 
 <table>
 <colgroup>
@@ -4041,159 +4217,170 @@ style="text-align: left;"><strong>RH_T_DADOS_APOLICE.</strong>DATA_APOLICE</td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Campo</strong></th>
-<th colspan="2" style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><p><strong>Campo</strong></p></th>
 <th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th colspan="2" style="text-align: center;"><strong>Fonte
-Dados</strong></th>
+style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th colspan="2"
+style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th colspan="2" style="text-align: center;"><p><strong>Fonte
+Dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>Nº apolice</strong></td>
-<td colspan="2" style="text-align: left;">texto</td>
+<td style="text-align: left;"><p><strong>Nº apolice</strong></p></td>
+<td colspan="2" style="text-align: left;"><p>texto</p></td>
 <td colspan="2" style="text-align: left;"></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_T_DADOS_APOLICE.</strong>NUM_APOLICE</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_APOLICE.</strong>NUM_APOLICE</p></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Baixar ficheiro SOAT</strong></td>
-<td colspan="2" style="text-align: left;">Hiperlink</td>
-<td colspan="2" style="text-align: left;">Abre o ficheiro abaixo
-Indicado</td>
+<td style="text-align: left;"><p><strong>Baixar ficheiro
+SOAT</strong></p></td>
+<td colspan="2" style="text-align: left;"><p>Hiperlink</p></td>
+<td colspan="2" style="text-align: left;"><p>Abre o ficheiro abaixo
+Indicado</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>-----------------------------------------------</strong></td>
+style="text-align: left;"><p><strong>-----------------------------------------------</strong></p></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: center;"><img src="media/image62.png"
-style="width:7.82917in;height:4.56389in" /></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: center;"><strong>Campo</strong></td>
-<td colspan="2"
-style="text-align: center;"><strong>Descrição</strong></td>
-<td colspan="2" style="text-align: center;"><strong>Fonte
-Dados</strong></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="6" style="text-align: left;"><strong>DADOS DO TOMADOR DE
-SEGURO</strong></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>NOME:</strong></td>
-<td colspan="2" style="text-align: left;">Nome do INPS CENTRAL
-(PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_T_DADOS_INSTITUICAO.</strong>NOME</td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>NIF:</strong></td>
-<td colspan="2" style="text-align: left;">NIF do INPS CENTRAL
-(PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO</strong>.NIF</td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>COD CAE:</strong></td>
-<td colspan="2" style="text-align: left;">CAE do INPS CENTRAL
-(PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>COD_CAE</td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>ATIVIDADE
-ECONÓMICA:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>ATIVIDADE
-ECONÓMICA</strong> do INPS CENTRAL (PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>ATIVIDADE_ECONOMICA</td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>Nº CERTIDÃO COMERCIAL
-(NC):</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Nº CERTIDÃO COMERCIAL
-(NC):</strong> do INPS CENTRAL (PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>NUM_CERTIDAO_COMERCIAL</td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>DATA VALIDADE
-NC:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>DATA VALIDADE
-NC:</strong> do INPS CENTRAL (PRAIA)</td>
-<td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>DATA_VALIDADE</td>
+<td colspan="6" style="text-align: center;"><p><img
+src="media/image65.png"
+style="width:7.82917in;height:4.56389in" /></p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>TELEFONE:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>TELEFONE:</strong> do
-INPS CENTRAL (PRAIA)</td>
+style="text-align: center;"><p><strong>Campo</strong></p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>TELEFONE</td>
+style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td colspan="2" style="text-align: center;"><p><strong>Fonte
+Dados</strong></p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="6" style="text-align: left;"><p><strong>DADOS DO TOMADOR DE
+SEGURO</strong></p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>TELEMÓVEL:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>TELEMÓVEL:</strong> do
-INPS CENTRAL (PRAIA)</td>
+style="text-align: left;"><p><strong>NOME:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p>Nome do INPS CENTRAL
+(PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>TELEMOVEL</td>
+style="text-align: left;"><p><strong>RH_T_DADOS_INSTITUICAO.</strong>NOME</p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>LOCALIDADE:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>LOCALIDADE:</strong>
-do INPS CENTRAL (PRAIA)</td>
+style="text-align: left;"><p><strong>NIF:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p>NIF do INPS CENTRAL
+(PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>
-LOCALIDADE:</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO</strong>.NIF</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>EMAIL:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>EMAIL:</strong> do
-INPS CENTRAL (PRAIA)</td>
+<td colspan="2" style="text-align: left;"><p><strong>COD
+CAE:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p>CAE do INPS CENTRAL
+(PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO</strong>.EMAIL</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>COD_CAE</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>MORADA:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>MORADA:</strong> do
-INPS CENTRAL (PRAIA)</td>
+<td colspan="2" style="text-align: left;"><p><strong>ATIVIDADE
+ECONÓMICA:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>ATIVIDADE
+ECONÓMICA</strong> do INPS CENTRAL (PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO</strong>.MORADA</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>ATIVIDADE_ECONOMICA</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><strong>Nº CERTIDÃO
+COMERCIAL (NC):</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Nº CERTIDÃO
+COMERCIAL (NC):</strong> do INPS CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>NUM_CERTIDAO_COMERCIAL</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><strong>DATA VALIDADE
+NC:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>DATA VALIDADE
+NC:</strong> do INPS CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>DATA_VALIDADE</p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>LOCALIDADE:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>LOCALIDADE:</strong>
-do INPS CENTRAL (PRAIA)</td>
+style="text-align: left;"><p><strong>TELEFONE:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>TELEFONE:</strong>
+do INPS CENTRAL (PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>LOCALIDADE</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>TELEFONE</p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>CONCELHO:</strong></td>
-<td colspan="2" style="text-align: left;"><strong>CONCELHO:</strong> do
-INPS CENTRAL (PRAIA)</td>
+style="text-align: left;"><p><strong>TELEMÓVEL:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>TELEMÓVEL:</strong>
+do INPS CENTRAL (PRAIA)</p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO</strong>.CONCELHO</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>TELEMOVEL</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><strong>LOCALIDADE:</strong></p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>LOCALIDADE:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>
+LOCALIDADE:</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><strong>EMAIL:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>EMAIL:</strong> do
+INPS CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO</strong>.EMAIL</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><strong>MORADA:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>MORADA:</strong> do
+INPS CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO</strong>.MORADA</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><strong>LOCALIDADE:</strong></p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>LOCALIDADE:</strong> do INPS
+CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>LOCALIDADE</p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2"
+style="text-align: left;"><p><strong>CONCELHO:</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>CONCELHO:</strong>
+do INPS CENTRAL (PRAIA)</p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO</strong>.CONCELHO</p></td>
 <td></td>
 </tr>
 <tr>
@@ -4203,8 +4390,8 @@ style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO</strong>.CONCELHO</td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>APÓLICE
-Nº:</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>APÓLICE
+Nº:</strong></p></td>
 <td colspan="2"><p><strong>NUMERO REFERENTE ZONA:</strong></p>
 <ul>
 <li><p><strong>SAL</strong></p></li>
@@ -4213,16 +4400,16 @@ NORTE</strong></p></li>
 <li><p><strong>SANTIAGO (SA, FG, MA, BR)</strong></p></li>
 </ul></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>NUM_APOLICE</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>NUM_APOLICE</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>DATA INÍCIO DA
-APÓLICE:</strong></td>
-<td colspan="2"><strong>ESSA INFORMAÇÃO TEM TEM SIDO
-PREENCHIDO</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>DATA INÍCIO DA
+APÓLICE:</strong></p></td>
+<td colspan="2"><p><strong>ESSA INFORMAÇÃO TEM TEM SIDO
+PREENCHIDO</strong></p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>DATA_APOLICE</td>
+style="text-align: left;"><p><strong>RH_V_DADOS_INSTITUICAO.</strong>DATA_APOLICE</p></td>
 <td></td>
 </tr>
 <tr>
@@ -4232,26 +4419,29 @@ style="text-align: left;"><strong>RH_V_DADOS_INSTITUICAO.</strong>DATA_APOLICE</
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>DATA DE REFERÊNCIA
-(*)</strong></td>
-<td colspan="2"><strong>Mês e ano referente ,</strong> que coincide com
-mês de processamento</td>
-<td colspan="2">RH_T_PROC_SALARIOS. <em>DATA_PROC_PROVISORIO</em></td>
+<td colspan="2" style="text-align: left;"><p><strong>DATA DE REFERÊNCIA
+(*)</strong></p></td>
+<td colspan="2"><p><strong>Mês e ano referente ,</strong> que coincide
+com mês de processamento</p></td>
+<td colspan="2"><p>RH_T_PROC_SALARIOS.
+<em>DATA_PROC_PROVISORIO</em></p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>Nº TOTAL DE PESSOAS
-SEGURAS</strong></td>
-<td colspan="2"><strong>NUMERO TOTAL DE COLABORADORES</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>Nº TOTAL DE PESSOAS
+SEGURAS</strong></p></td>
+<td colspan="2"><p><strong>NUMERO TOTAL DE
+COLABORADORES</strong></p></td>
 <td
-colspan="2"><strong>COUNT</strong>(<strong>RH_T_PROC_FUNCIONARIOS</strong>.TIPREL_ID)</td>
+colspan="2"><p><strong>COUNT</strong>(<strong>RH_T_PROC_FUNCIONARIOS</strong>.TIPREL_ID)</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>MASSA SALARIAL ANUAL
-SEGURA</strong></td>
-<td colspan="2"><strong>VALOR TOTAL ANNUAL (X 12)</strong></td>
-<td colspan="2"><strong>RH_T_REMUNERACOES.</strong> VALOR_REAL</td>
+<td colspan="2" style="text-align: left;"><p><strong>MASSA SALARIAL
+ANUAL SEGURA</strong></p></td>
+<td colspan="2"><p><strong>VALOR TOTAL ANNUAL (X 12)</strong></p></td>
+<td colspan="2"><p><strong>RH_T_REMUNERACOES.</strong>
+VALOR_REAL</p></td>
 <td></td>
 </tr>
 <tr>
@@ -4261,37 +4451,38 @@ SEGURA</strong></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>SEGURO NOVO /
-EXISTENTE:</strong></td>
-<td colspan="2"><strong>NULL</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>SEGURO NOVO /
+EXISTENTE:</strong></p></td>
+<td colspan="2"><p><strong>NULL</strong></p></td>
 <td colspan="2" style="text-align: center;"></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>MODALIDADE:</strong></td>
-<td colspan="2"><strong>NULL</strong></td>
+style="text-align: left;"><p><strong>MODALIDADE:</strong></p></td>
+<td colspan="2"><p><strong>NULL</strong></p></td>
 <td colspan="2" style="text-align: center;"></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: center;"><strong>Lista</strong></td>
 <td colspan="2"
-style="text-align: center;"><strong>Descrição</strong></td>
+style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td colspan="2"
+style="text-align: center;"><p><strong>Descrição</strong></p></td>
 <td colspan="2" style="text-align: center;"></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>NOME COMPLETO
-(*)</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar o nome
-completo de cada colaborador</strong></td>
-<td colspan="2"><strong>RH_V_SOAT.</strong>NOME</td>
+<td colspan="2" style="text-align: left;"><p><strong>NOME COMPLETO
+(*)</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar o nome
+completo de cada colaborador</strong></p></td>
+<td colspan="2"><p><strong>RH_V_SOAT.</strong>NOME</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>TIPO DOC. IDENT.
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>TIPO DOC. IDENT.
+(*)</strong></p></td>
 <td colspan="2" style="text-align: left;"><p><strong>Deve-se indicar um
 dos três (3) tipos documentos de identificação:</strong></p>
 <ul>
@@ -4301,57 +4492,60 @@ identidade para os colaboradores nacionais;</strong></p></li>
 estrangeiros.</strong></p></li>
 </ul></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_SOAT.</strong>TP_DOCUMENTO</td>
+style="text-align: left;"><p><strong>RH_V_SOAT.</strong>TP_DOCUMENTO</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>Nº DOC. IDENT.
-(*)</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Inserir o número de
+<td colspan="2" style="text-align: left;"><p><strong>Nº DOC. IDENT.
+(*)</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Inserir o número de
 identificação (se TIPO DOC. IDENT. = NIC, deve-se introduzir 13
-carateres).</strong></td>
-<td colspan="2" style="text-align: left;"><strong>RH_V_SOAT.</strong>
-NUM_DOCUMENTO</td>
+carateres).</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>RH_V_SOAT.</strong>
+NUM_DOCUMENTO</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>DATA
-VALIDADE</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar a data de
+<td colspan="2" style="text-align: left;"><p><strong>DATA
+VALIDADE</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar a data de
 validade do documento de identificação com o seguinte formato
-dd/mm/aaaa.</strong></td>
-<td colspan="2"><strong>RH_V_SOAT.</strong>DATA_VALIDADE</td>
+dd/mm/aaaa.</strong></p></td>
+<td colspan="2"><p><strong>RH_V_SOAT.</strong>DATA_VALIDADE</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>NIF (*)</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar o NIF (número
-de identificação fiscal) de cada colaborador (9 dígitos)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>NIF
+(*)</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar o NIF
+(número de identificação fiscal) de cada colaborador (9
+dígitos)</strong></p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_SOAT.</strong>NIF</td>
+style="text-align: left;"><p><strong>RH_V_SOAT.</strong>NIF</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>DATA
-NASCIMENTO</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar a data de
+<td colspan="2" style="text-align: left;"><p><strong>DATA
+NASCIMENTO</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar a data de
 nascimento de cada colaborador com o seguinte formato
-dd/mm/aaaa.</strong></td>
-<td colspan="2" style="text-align: left;"><strong>RH_V_SOAT.</strong>
-DATA_NASCIMENTO</td>
+dd/mm/aaaa.</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>RH_V_SOAT.</strong>
+DATA_NASCIMENTO</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>SEXO (*)</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar o sexo de cada
-colaborador (Masculino ou Feminino)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>SEXO
+(*)</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar o sexo de
+cada colaborador (Masculino ou Feminino)</strong></p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_SOAT.</strong>SEXO</td>
+style="text-align: left;"><p><strong>RH_V_SOAT.</strong>SEXO</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>SITUAÇÃO
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>SITUAÇÃO
+(*)</strong></p></td>
 <td colspan="2"
 style="text-align: left;"><p><strong>Indicar:</strong></p>
 <p><strong>I - Incluir: para incluir colaboradores novos</strong></p>
@@ -4361,21 +4555,22 @@ apólice</strong></p>
 colaboradores existentes na apólice</strong></p>
 <p><strong>M - Manter: para os colaboradores existentes na apólice, sem
 qualquer alteração</strong></p></td>
-<td colspan="2" style="text-align: left;"></td>
-<td></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: left;"><strong>PROFISSÃO
-(*)</strong></td>
-<td colspan="2"><strong>Indicar a profissão/função que cada colaborador
-exerce na empresa/instituição</strong></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_SOAT.CARGO_CARREIRA</strong></td>
+style="text-align: left;"><p><strong>RH_V_SOAT.SITUACAO</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>APRENDIZ OU ESTAGIÁRIO
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>PROFISSÃO
+(*)</strong></p></td>
+<td colspan="2"><p><strong>Indicar a profissão/função que cada
+colaborador exerce na empresa/instituição</strong></p></td>
+<td colspan="2"
+style="text-align: left;"><p><strong>RH_V_SOAT.CARGO_CARREIRA</strong></p></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" style="text-align: left;"><p><strong>APRENDIZ OU
+ESTAGIÁRIO (*)</strong></p></td>
 <td colspan="2"
 style="text-align: left;"><p><strong>Indicar:</strong></p>
 <p><strong>Sim: se o colaborador é aprendiz, eventual, temporário,
@@ -4386,8 +4581,8 @@ contrato</strong></p>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>Nº HORAS SEMANA
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>Nº HORAS SEMANA
+(*)</strong></p></td>
 <td colspan="2" style="text-align: left;"><p><strong>Indicar o número de
 horas semanais de cada colaborador (o período normal de trabalho
 previsto no artigo 149º do Código Laboral não pode ultrapassar 44 horas
@@ -4402,15 +4597,15 @@ faltou</strong></p>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>RETRIBUIÇÃO BASE
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>RETRIBUIÇÃO BASE
+(*)</strong></p></td>
 <td colspan="2" style="text-align: center;"></td>
 <td colspan="2" style="text-align: center;"></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>HORA /DIA/ MÊS
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>HORA /DIA/ MÊS
+(*)</strong></p></td>
 <td colspan="2"
 style="text-align: left;"><p><strong>Indicar:</strong></p>
 <p><strong>H - HORA: se a retribuição é paga ao colaborador à
@@ -4419,12 +4614,12 @@ hora;</strong></p>
 dia;</strong></p>
 <p><strong>M - MÊS: se a retribuição é paga ao colaborador ao
 mês.</strong></p></td>
-<td colspan="2"><strong>M</strong></td>
+<td colspan="2"><p><strong>M</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>RETRIBUIÇÃO HORA
-/DIÁRIO/MENSAL (*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>RETRIBUIÇÃO HORA
+/DIÁRIO/MENSAL (*)</strong></p></td>
 <td colspan="2" style="text-align: left;"><p><strong>Inserir a
 retribuição de acordo com a periodicidade do pagamento
 (Hora/Diário/Mensal).</strong></p>
@@ -4436,17 +4631,18 @@ retribuição paga por dia;</strong></p></li>
 <li><p><strong>Se HORA/DIA/MÊS = M - MÊS, deve-se introduzir a
 retribuição paga por mês.</strong></p></li>
 </ul></td>
-<td colspan="2"><strong>RH_V_SOAT.</strong> SALARIO_BASE</td>
+<td colspan="2"><p><strong>RH_V_SOAT.</strong> SALARIO_BASE</p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>RETRIBUIÇÃO ANUAL
-(*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>RETRIBUIÇÃO ANUAL
+(*)</strong></p></td>
 <td colspan="2" style="text-align: left;"><p><strong>Inserir o salário
 anual auferido pelo colaborador.</strong></p>
 <p><strong>O valor a indicar não pode ser inferior a 12 vezes do salário
 mínimo nacional em vigor.</strong></p></td>
-<td colspan="2"><strong>RH_V_SOAT.</strong>SALARIO_BASE_ANUAL</td>
+<td
+colspan="2"><p><strong>RH_V_SOAT.</strong>SALARIO_BASE_ANUAL</p></td>
 <td></td>
 </tr>
 <tr>
@@ -4456,23 +4652,24 @@ mínimo nacional em vigor.</strong></p></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>TRABALHADOR
-TEMPORARIAMENTE NO ESTRANGEIRO (*)</strong></td>
+<td colspan="2" style="text-align: left;"><p><strong>TRABALHADOR
+TEMPORARIAMENTE NO ESTRANGEIRO (*)</strong></p></td>
 <td colspan="2"
 style="text-align: left;"><p><strong>Indicar:</strong></p>
 <p><strong>Sim: se o colaborador está temporariamente no estrangeiro ao
 serviço</strong></p>
 <p><strong>Não: caso contrário</strong></p></td>
-<td colspan="2"><strong>RH_V_SOAT.</strong>COLAB_NO_ESTRANGEIRO</td>
+<td
+colspan="2"><p><strong>RH_V_SOAT.</strong>COLAB_NO_ESTRANGEIRO</p></td>
 <td></td>
 </tr>
 <tr>
 <td colspan="2"
-style="text-align: left;"><strong>OBSERVAÇÕES</strong></td>
-<td colspan="2" style="text-align: left;"><strong>Indicar as observações
-relevantes sobre cada colaborador</strong></td>
+style="text-align: left;"><p><strong>OBSERVAÇÕES</strong></p></td>
+<td colspan="2" style="text-align: left;"><p><strong>Indicar as
+observações relevantes sobre cada colaborador</strong></p></td>
 <td colspan="2"
-style="text-align: left;"><strong>RH_V_SOAT.</strong>OBS</td>
+style="text-align: left;"><p><strong>RH_V_SOAT.</strong>OBS</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -4482,9 +4679,9 @@ style="text-align: left;"><strong>RH_V_SOAT.</strong>OBS</td>
 
 ### Registo Criterios aumento
 
-<img src="media/image63.png" style="width:9.68194in;height:2.40764in" />
+<img src="media/image66.png" style="width:9.68194in;height:2.40764in" />
 
-<img src="media/image64.png" style="width:9.68264in;height:4.05694in" />
+<img src="media/image67.png" style="width:9.68264in;height:4.05694in" />
 
 <table>
 <colgroup>
@@ -4495,94 +4692,94 @@ style="text-align: left;"><strong>RH_V_SOAT.</strong>OBS</td>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Formulário</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
+<th style="text-align: center;"><p><strong>Formulário</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Gravação</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Designação Aumento</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Designação Aumento</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.DESCRICAO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DESCRICAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Motivo</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Motivo</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.MOTIVO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.MOTIVO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Referencia do aumento</td>
-<td><em>DATE</em></td>
+<td style="text-align: center;"><p>Data Referencia do aumento</p></td>
+<td><p><em>DATE</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Percentagem</td>
+<td style="text-align: center;"><p>Percentagem</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.PERCENTAGEM</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.PERCENTAGEM</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;"><em><strong>Lista
-colaborador</strong></em></td>
+<td colspan="4" style="text-align: center;"><p><em><strong>Lista
+colaborador</strong></em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Direção</td>
-<td><em>SELECT</em></td>
-<td>INPSSIGOF.INSTITUICOES</td>
-<td><em>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</em></td>
+<td style="text-align: center;"><p>Direção</p></td>
+<td><p><em>SELECT</em></p></td>
+<td><p>INPSSIGOF.INSTITUICOES</p></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Unidade</td>
-<td><em>SELECT</em></td>
-<td>RH_T_SECAO</td>
-<td><em>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</em></td>
+<td style="text-align: center;"><p>Unidade</p></td>
+<td><p><em>SELECT</em></p></td>
+<td><p>RH_T_SECAO</p></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Lista</td>
+<td style="text-align: center;"><p>Lista</p></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;">Colaborador</td>
+<td style="text-align: center;"><p>Colaborador</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL_DET.FUN_ID</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL_DET.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Carreira</td>
+<td style="text-align: center;"><p>Carreira</p></td>
 <td></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL_DET.CARREIRA_ID</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL_DET.CARREIRA_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Nivel / Escalão</td>
-<td><em>SELETCT</em></td>
+<td style="text-align: center;"><p>Nivel / Escalão</p></td>
+<td><p><em>SELETCT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL_DET.NIVEL_ESCALAO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL_DET.NIVEL_ESCALAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Salário Antes:</td>
-<td><em>NUMBER</em></td>
+<td style="text-align: center;"><p>Salário Antes:</p></td>
+<td><p><em>NUMBER</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL_DET.SALARIO_ANTES</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL_DET.SALARIO_ANTES</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Salário Depois:</td>
-<td><em>NUMBER</em></td>
+<td style="text-align: center;"><p>Salário Depois:</p></td>
+<td><p><em>NUMBER</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL_DET.SALARIO_DEPOIS</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL_DET.SALARIO_DEPOIS</em></p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: center;">Acoes</td>
+<td colspan="4" style="text-align: center;"><p>Acoes</p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Gravar</td>
+<td style="text-align: center;"><p>Gravar</p></td>
 <td colspan="3"><p><em>Ao confirma deve gravar nas seguintes
 Tabelas</em></p>
 <ul>
@@ -4613,7 +4810,7 @@ RH_T_AUMENTO_SALARIAL</em></p></li>
 
 ### Validação
 
-<table style="width:100%;">
+<table style="width:99%;">
 <colgroup>
 <col style="width: 99%" />
 </colgroup>
@@ -4633,7 +4830,7 @@ Salarial</em></p>
 
 ### Lista Aumento
 
-<table style="width:92%;">
+<table style="width:91%;">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 5%" />
@@ -4642,63 +4839,63 @@ Salarial</em></p>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
+<th style="text-align: center;"><p><strong>Filtro</strong></p></th>
+<th style="text-align: center;"><p><strong>Tipo</strong></p></th>
+<th style="text-align: center;"><p><strong>Descrição</strong></p></th>
+<th style="text-align: center;"><p><strong>Fonte dados</strong></p></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Ano Referente</td>
-<td><em>Select</em></td>
-<td>Deve somente extrair o ano</td>
-<td><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></td>
+<td style="text-align: center;"><p>Ano Referente</p></td>
+<td><p><em>Select</em></p></td>
+<td><p>Deve somente extrair o ano</p></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
+<td style="text-align: center;"><p><strong>Lista</strong></p></td>
+<td style="text-align: center;"><p><strong>Tipo</strong></p></td>
+<td style="text-align: center;"><p><strong>Descrição</strong></p></td>
+<td style="text-align: center;"><p><strong>Fonte dados</strong></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Designação</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Designação</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.DESCRICAO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DESCRICAO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Motivo</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Motivo</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.MOTIVO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.MOTIVO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Referente</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Data Referente</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DATA_REFERENTE</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Percentagem</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Percentagem</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.PERCENTAGEM</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.PERCENTAGEM</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;">Data Registo</td>
-<td><em>TEXT</em></td>
+<td style="text-align: center;"><p>Data Registo</p></td>
+<td><p><em>TEXT</em></p></td>
 <td></td>
-<td><em>RH_T_AUMENTO_SALARIAL.DATA_REGISTO</em></td>
+<td><p><em>RH_T_AUMENTO_SALARIAL.DATA_REGISTO</em></p></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Acoes</strong></td>
+<td style="text-align: center;"><p><strong>Acoes</strong></p></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: center;">Editar</td>
+<td style="text-align: center;"><p>Editar</p></td>
 <td colspan="3"><p><em>Abre o mesmo formulário de Registo</em></p>
 <p><em><strong>Nota:</strong> Não deve ser permitido editar um registo
 que ainda não tenha sido validado; nesses casos, o registo deve estar

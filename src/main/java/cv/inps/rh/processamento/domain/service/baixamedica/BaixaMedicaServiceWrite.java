@@ -16,6 +16,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import oracle.jdbc.internal.OracleCallableStatement;
@@ -69,6 +70,8 @@ public class BaixaMedicaServiceWrite {
   @Transactional
   public Map<String, Object> criar(BaixaMedicaReqDTO req) {
 
+    validarRegisto(req);
+
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     if (tiprel == null)
@@ -88,11 +91,12 @@ public class BaixaMedicaServiceWrite {
       paramSituacaoDetalheRepository.findById(req.getMotivo()).ifPresent(abono::setParamSitDetId);
     abono = abonosRepository.save(abono);
 
-    saveUpdatePeriodos(req.getPeriodos(), abono, Estado.P);
+    var periodos = saveUpdatePeriodos(req.getPeriodos(), abono, Estado.P);
 
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d, Estado.P,
             TableName.RH_T_ABONOS_BENEFICIOS.name(),
@@ -134,8 +138,12 @@ public class BaixaMedicaServiceWrite {
       falta.setParamSitId(paramSit);
       falta.setHorasAusencia("+0 00:00:00");
       // O procedure retorna datas em formato dd/MM/yyyy
-      if (item.getDataInicioFalta() != null && !item.getDataInicioFalta().isBlank())
-        falta.setDataInicio(java.time.LocalDate.parse(item.getDataInicioFalta(), fmt).atStartOfDay());
+      java.time.LocalDate inicioFalta = null;
+      if (item.getDataInicioFalta() != null && !item.getDataInicioFalta().isBlank()) {
+        inicioFalta = java.time.LocalDate.parse(item.getDataInicioFalta(), fmt);
+        falta.setDataInicio(inicioFalta.atStartOfDay());
+      }
+      falta.setAbonoBenefId(periodoDaFalta(periodos, inicioFalta));
       if (item.getDataFimFalta() != null && !item.getDataFimFalta().isBlank())
         falta.setDataFim(java.time.LocalDate.parse(item.getDataFimFalta(), fmt).atTime(LocalTime.MAX));
       if (item.getValorDesc() != null && !item.getValorDesc().isBlank())
@@ -152,6 +160,9 @@ public class BaixaMedicaServiceWrite {
 
     validacao.setReferenciaId(abono.getId());
     validacao.setReferenciaUuid(abono.getUuid());
+    // Sem isto a licença aparecia sem nome na lista de validações (mesmo defeito do AS-011).
+    validacao.setFunId(funcionario);
+    validacao.setTiprelId(tiprel);
     validacaoRepository.save(validacao);
 
     return Map.of(
@@ -160,7 +171,41 @@ public class BaixaMedicaServiceWrite {
     );
   }
 
-  private void saveUpdatePeriodos(@Valid List<PeriodoLicensaRowDTO> periodos, AbonosBeneficiosEntity abono, Estado estado) {
+  /**
+   * Obrigatórios do formulário (spec 09/09, Licença): Tipo Licença e pelo menos um período com
+   * Data Início. Sem este guard as datas vazias chegavam ao procedimento e ao NOT NULL de
+   * RH_T_ABONOS_BENEFICIOS e a API devolvia 500 (QA AS-010).
+   */
+  private void validarRegisto(BaixaMedicaReqDTO req) {
+    if (req == null || req.getColaborador() == null)
+      throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
+    if (req.getTipoLicenca() == null || req.getTipoLicenca() <= 0)
+      throw IgrpResponseStatusException.badRequest("Indique o Tipo Licença.");
+    if (req.getDataInicio() == null || req.getDataFim() == null)
+      throw IgrpResponseStatusException.badRequest("Data Início e Data Fim da licença são obrigatórias.");
+    if (req.getDataFim().isBefore(req.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
+    if (req.getPeriodos() == null || req.getPeriodos().isEmpty())
+      throw IgrpResponseStatusException.badRequest("Indique pelo menos um período de licença.");
+  }
+
+  /**
+   * Spec 20/10: RH_T_FALTA.ABONO_BENEF_ID = id de RH_T_ABONOS_BENEFICIOS_DET. O procedimento calcula as
+   * faltas mensais sobre o intervalo todo da licença, por isso cada falta fica no período que contém o
+   * seu início (ou no primeiro, se nenhum o contiver).
+   */
+  private static AbonosBeneficiosDetalheEntity periodoDaFalta(List<AbonosBeneficiosDetalheEntity> periodos,
+                                                              java.time.LocalDate inicioFalta) {
+    if (periodos.isEmpty()) return null;
+    if (inicioFalta != null)
+      for (var p : periodos)
+        if (p.getDataInicio() != null && p.getDataFim() != null
+            && !inicioFalta.isBefore(p.getDataInicio()) && !inicioFalta.isAfter(p.getDataFim()))
+          return p;
+    return periodos.getFirst();
+  }
+
+  private List<AbonosBeneficiosDetalheEntity> saveUpdatePeriodos(@Valid List<PeriodoLicensaRowDTO> periodos, AbonosBeneficiosEntity abono, Estado estado) {
 
     var rows = new ArrayList<AbonosBeneficiosDetalheEntity>();
 
@@ -183,7 +228,7 @@ public class BaixaMedicaServiceWrite {
       rows.add(periodoRow);
     }
 
-    abonosBeneficiosDetalheEntityRepository.saveAll(rows);
+    return abonosBeneficiosDetalheEntityRepository.saveAll(rows);
   }
 
   // ----------------------------------------------------------------
@@ -196,7 +241,31 @@ public class BaixaMedicaServiceWrite {
 
     var abono = abonosRepository.findByUuidOrThrow(abonoUuid);
 
+    if (validar == EstadoValidacao.CORRIGIR)
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
+    if (abono.getEstado() != Estado.P)
+      throw IgrpResponseStatusException.badRequest("Só é possível validar uma licença pendente de validação.");
+
     final Estado estado = validar == EstadoValidacao.SIM ? Estado.A : Estado.I;
+
+    // Spec 09/09 (Licença → Validação): validar/desvalidar põe A/I em todas as tabelas associadas.
+    // Antes só mudavam os documentos, a validação e os períodos reenviados — o abono, os períodos
+    // não reenviados, a ausência e as faltas ficavam em P para sempre.
+    abono.setEstado(estado);
+    abonosRepository.save(abono);
+
+    var periodos = abonosBeneficiosDetalheEntityRepository.findByAbonoBenef_Uuid(abonoUuid);
+    periodos.forEach(p -> p.setEstado(estado.name()));
+    abonosBeneficiosDetalheEntityRepository.saveAll(periodos);
+
+    var ausencias = ausenciaRepository.findAllByReferenciaNameAndReferenciaId(
+        TableName.RH_T_ABONOS_BENEFICIOS.name(), abono.getId());
+    ausencias.forEach(a -> a.setEstado(estado));
+    ausenciaRepository.saveAll(ausencias);
+
+    var faltas = periodos.isEmpty() ? List.<FaltaEntity>of() : faltaRepository.findAllByAbonoBenefIdIn(periodos);
+    faltas.forEach(f -> f.setEstado(estado));
+    faltaRepository.saveAll(faltas);
 
     // Actualizar estado dos documentos existentes
     var docsExistentes = documentoEntityRepository
@@ -212,6 +281,7 @@ public class BaixaMedicaServiceWrite {
       FuncionarioEntity funId = abono.getFunId();
       List<DocumentoEntity> novos = new ArrayList<>();
       for (var d : ajuste.getDocumentos()) {
+        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d, estado,
             TableName.RH_T_ABONOS_BENEFICIOS.name(),
@@ -228,7 +298,8 @@ public class BaixaMedicaServiceWrite {
           validacaoRepository.save(v);
         });
 
-    saveUpdatePeriodos(ajuste.getPeriodos(), abono, estado);
+    if (ajuste.getPeriodos() != null)
+      saveUpdatePeriodos(ajuste.getPeriodos(), abono, estado);
 
     return Map.of(
         "abonoId", abono.getId(),

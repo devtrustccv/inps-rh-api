@@ -227,12 +227,13 @@
         </tr>
     </table>
 
-    <div th:each="emp, stat : ${funcionarios}" class="employee">
+    <th:block th:each="grupo : ${grupos}">
 
-        <div class="entity-center"
-             th:if="${stat.first and emp.shortDesc != 'NULL'}">
-            <span th:text="${emp.shortDesc}"></span>
+        <div class="entity-center" th:if="${grupo.vencimento != null}">
+            <span th:text="${grupo.vencimento}">Vencimento Pessoal contratado</span>
         </div>
+
+        <div class="employee" th:each="emp : ${grupo.funcionarios}">
 
         <div class="employee-header">
             <span th:text="${emp.dados}">10116231</span>
@@ -266,6 +267,7 @@
 
 
     </div>
+    </th:block>
 </div>
 </body>
 </html>
