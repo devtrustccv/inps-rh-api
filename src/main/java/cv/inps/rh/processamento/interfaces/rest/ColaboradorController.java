@@ -238,7 +238,7 @@ public class ColaboradorController {
         return commandBus.send(command);
     }
 
-    @PostMapping(value = "baixa-medica/{pedidoId}")
+    @PostMapping(value = "baixa-medica/{abonoId}")
     @Operation(
         summary = "Validar baixa medica",
         description = "Validar baixa medica",

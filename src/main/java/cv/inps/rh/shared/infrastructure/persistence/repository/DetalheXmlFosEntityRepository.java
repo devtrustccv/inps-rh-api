@@ -41,13 +41,16 @@ public interface DetalheXmlFosEntityRepository extends
               d.nuSegurado,
               f.nome,
               d.dirServId,
-              d.nuTrabAuto,
-              d.vlRemunAuto,
+              dir.nome,
+              d.nuTrabMan,
+              d.vlRemunMan,
               d.tipo
           )
           FROM DetalheXmlFosEntity d
           JOIN d.idFunc f
+          LEFT JOIN DirecaoEntity dir ON dir.id = d.dirServId
           WHERE d.idXmlFos.id = :fosId AND (:direcaoId IS NULL OR d.dirServId = :direcaoId)
+          ORDER BY f.nome ASC, d.tipo DESC
       """)
   List<DetalhesFosXmlRowDTO> findDetalhesByFos(@Param("fosId") Long fosId, @Param("direcaoId") Integer direcaoId);
 

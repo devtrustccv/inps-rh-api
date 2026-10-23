@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,8 +48,10 @@ public class ProcessamentoSalarialReadService {
         Integer.parseInt(query.getSize())
     );
 
-    var startDate = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
-    var endDate = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
+    var startDate = dataDoFiltro(query.getDataInicio(), "dataInicio");
+    var endDate = dataDoFiltro(query.getDataFim(), "dataFim");
+    if (startDate != null && endDate != null && endDate.isBefore(startDate))
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
     var directionId = StringUtils.hasText(query.getDirecaoId()) ? Long.valueOf(query.getDirecaoId()) : null;
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;
@@ -66,6 +69,21 @@ public class ProcessamentoSalarialReadService {
     PageMapper.fillPagination(page, response);
     response.setContent(page.getContent());
     return response;
+  }
+
+  /**
+   * Data de um filtro da lista. Aceita só data ou data com hora (ex.: "2026-10-01T00:00:00.000Z", que é o
+   * que o ecrã envia) e fica com a parte da data. Antes uma data com hora passava a null sem aviso e a lista
+   * vinha sem filtro (QA PS-006); agora uma data que não se percebe dá 400.
+   */
+  private static LocalDate dataDoFiltro(String valor, String campo) {
+    if (!StringUtils.hasText(valor)) return null;
+    var data = DateFormatter.stringToLocalDate(valor.trim());
+    if (data == null && valor.trim().length() > 10)
+      data = DateFormatter.stringToLocalDate(valor.trim().substring(0, 10));
+    if (data == null)
+      throw IgrpResponseStatusException.badRequest("Data inválida em '" + campo + "': " + valor);
+    return data;
   }
 
   public ResumoProcessamentoDTO getResumoProcessamentoSalarial(List<Long> procIds) {

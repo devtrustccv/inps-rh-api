@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.AbonosBeneficiosDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
@@ -30,6 +31,8 @@ public interface FaltaEntityRepository extends
   Optional<FaltaEntity> findByUuid(UUID uuid);
 
   List<FaltaEntity> findAllByPedidoIdOrderByDataInicioAsc(PedidoEntity pedidoId);
+
+  List<FaltaEntity> findAllByAbonoBenefIdIn(List<AbonosBeneficiosDetalheEntity> periodos);
 
   /**
    * O pedido já foi apanhado pelo processamento salarial? Basta uma falta para bloquear o pedido

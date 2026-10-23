@@ -179,6 +179,7 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
              f.uuid,
              f.nome,
              f.numDocumento,
+             f.nif,
              i.nome,
              s.nome,
              i.id,
@@ -222,7 +223,17 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
             t.nome
            )
       FROM DirecaoEntity t
-      WHERE :nome IS NULL OR LOWER(t.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
+      WHERE (:nome IS NULL OR LOWER(t.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+        AND EXISTS (
+            SELECT 1
+            FROM TiposRelacionamentoEntity tr
+            JOIN tr.funId f
+            JOIN tr.mobId m
+            WHERE m.instidId = t
+              AND tr.estActAdm = 1
+              AND f.estado NOT IN (Estado.I, Estado.P)
+        )
+      ORDER BY t.nome ASC
       """)
   Page<PesquisaCentroCustoResponseDTO> pesquisaCentroCusto(
       @Param("nome") String nome,
