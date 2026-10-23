@@ -250,9 +250,10 @@ public class ProcessamentoSalarialWriteService {
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
+    // QA PS-033: com Data Fim anterior o procedimento processava na mesma o mês da Data Início.
     if (request.getDataInicio() != null && request.getDataFim() != null
         && request.getDataFim().isBefore(request.getDataInicio()))
-      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início");
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
 
     var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 

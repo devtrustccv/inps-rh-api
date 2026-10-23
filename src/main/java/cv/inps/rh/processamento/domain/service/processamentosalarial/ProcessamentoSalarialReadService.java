@@ -41,18 +41,6 @@ public class ProcessamentoSalarialReadService {
   private final ObjectMapper objectMapper;
   private final DataSource dataSource;
 
-  // data que não se consegue ler dá 400: antes passava a null e o filtro era ignorado em silêncio
-  private static LocalDate parseFilterDate(String value, String label) {
-    if (!StringUtils.hasText(value))
-      return null;
-
-    var date = DateFormatter.stringToLocalDate(value.trim());
-    if (date == null)
-      throw IgrpResponseStatusException.badRequest(label + " inválida: " + value);
-
-    return date;
-  }
-
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
     var pageRequest = PageRequest.of(
@@ -60,12 +48,10 @@ public class ProcessamentoSalarialReadService {
         Integer.parseInt(query.getSize())
     );
 
-    var startDate = parseFilterDate(query.getDataInicio(), "Data Início");
-    var endDate = parseFilterDate(query.getDataFim(), "Data Fim");
-
+    var startDate = dataDoFiltro(query.getDataInicio(), "dataInicio");
+    var endDate = dataDoFiltro(query.getDataFim(), "dataFim");
     if (startDate != null && endDate != null && endDate.isBefore(startDate))
-      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início");
-
+      throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
     var directionId = StringUtils.hasText(query.getDirecaoId()) ? Long.valueOf(query.getDirecaoId()) : null;
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;
@@ -83,6 +69,21 @@ public class ProcessamentoSalarialReadService {
     PageMapper.fillPagination(page, response);
     response.setContent(page.getContent());
     return response;
+  }
+
+  /**
+   * Data de um filtro da lista. Aceita só data ou data com hora (ex.: "2026-10-01T00:00:00.000Z", que é o
+   * que o ecrã envia) e fica com a parte da data. Antes uma data com hora passava a null sem aviso e a lista
+   * vinha sem filtro (QA PS-006); agora uma data que não se percebe dá 400.
+   */
+  private static LocalDate dataDoFiltro(String valor, String campo) {
+    if (!StringUtils.hasText(valor)) return null;
+    var data = DateFormatter.stringToLocalDate(valor.trim());
+    if (data == null && valor.trim().length() > 10)
+      data = DateFormatter.stringToLocalDate(valor.trim().substring(0, 10));
+    if (data == null)
+      throw IgrpResponseStatusException.badRequest("Data inválida em '" + campo + "': " + valor);
+    return data;
   }
 
   public ResumoProcessamentoDTO getResumoProcessamentoSalarial(List<Long> procIds) {

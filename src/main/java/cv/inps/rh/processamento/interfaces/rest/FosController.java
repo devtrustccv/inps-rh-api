@@ -60,13 +60,13 @@ public class FosController {
   )
 
   public ResponseEntity<ListaFosDTO> getListaFos(
-      @RequestParam(value = "mesReferencia", required = false) String mesReferencia,
       @RequestParam(value = "dataInicio", required = false) String dataInicio,
       @RequestParam(value = "dataFim", required = false) String dataFim,
       @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size,
+      @RequestParam(value = "mesReferencia", required = false) String mesReferencia) {
 
-    final var query = new GetListaFosQuery(mesReferencia, dataInicio, dataFim, page, size);
+    final var query = new GetListaFosQuery(dataInicio, dataFim, page, size, mesReferencia);
 
     return queryBus.handle(query);
 

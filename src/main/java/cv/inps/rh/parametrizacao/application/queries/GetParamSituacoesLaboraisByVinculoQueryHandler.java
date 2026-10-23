@@ -48,9 +48,9 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
        return ResponseEntity.ok(semVinculo);
      }
 
-     // Mesmo critério da associação em Parametrização (ParamVinculoService):
-     // associações removidas ficam com ESTADO = 'E' (soft-delete) e não podem ser listadas.
-     var result = paramSitLaboralEntityRepository.findAllByVinculoIdAndEstadoNot(query.getVinculoId(), Estado.E.name())
+     // Só associações ativas: o ecrã de Parametrização (ParamVinculoService) também lista as
+     // inativas ('I') para as poder gerir, mas estas não podem ser escolhidas no Dossiê.
+     var result = paramSitLaboralEntityRepository.findAllByVinculoIdAndEstado(query.getVinculoId(), Estado.A.name())
          .stream()
          .filter(obj -> obj.getParamSit().getFlgSituacaoLaboral().equals(1))
          .filter(obj -> filtrar(obj.getParamSit(), query))

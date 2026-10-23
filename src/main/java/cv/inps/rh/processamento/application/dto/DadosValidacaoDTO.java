@@ -26,15 +26,6 @@ public class DadosValidacaoDTO {
   @JsonProperty("valor_atual")
   private BigDecimal valorAtual;
 
-  // RH_F_VALIDACAO2 (TIPO_MOVIMENTO): "quantidadeFuncionarios" e "diferenca" (spec, Validar Provisório)
-  @JsonProperty("quantidadeFuncionarios")
-  @JsonAlias({"quantidade", "quantidade_funcionarios"})
-  private Integer quantidadeFuncionarios;
-
-  @JsonProperty("diferenca")
-  @JsonAlias("diferenca_salarial")
-  private BigDecimal diferenca;
-
   @JsonProperty("tipo_movimento")
   private String tipoMovimento;
 
@@ -60,4 +51,14 @@ public class DadosValidacaoDTO {
 
   @JsonProperty("fun_id")
   private Integer funId;
+
+  // Chaves emitidas por RH_F_VALIDACAO2 (camelCase, ao contrário das restantes); sem estes campos
+  // a Quantidade e a Diferença eram descartadas na leitura (QA PS-018).
+  @JsonProperty("quantidadeFuncionarios")
+  @JsonAlias({"quantidade", "quantidade_funcionarios"})
+  private Integer quantidadeFuncionarios;
+
+  @JsonProperty("diferenca")
+  @JsonAlias("diferenca_salarial")
+  private BigDecimal diferenca;
 }

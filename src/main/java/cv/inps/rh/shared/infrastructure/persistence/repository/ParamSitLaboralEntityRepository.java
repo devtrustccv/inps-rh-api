@@ -23,4 +23,6 @@ public interface ParamSitLaboralEntityRepository extends
   List<ParamSitLaboralEntity> findAllByVinculoId(Long vinculoId);
 
   List<ParamSitLaboralEntity> findAllByVinculoIdAndEstadoNot(Long vinculoId, String estado);
+
+  List<ParamSitLaboralEntity> findAllByVinculoIdAndEstado(Long vinculoId, String estado);
 }

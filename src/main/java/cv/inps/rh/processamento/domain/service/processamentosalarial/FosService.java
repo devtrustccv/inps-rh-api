@@ -47,7 +47,10 @@ public class FosService {
     if (value == null || value.isBlank())
       return null;
 
+    // aceita também data com hora (ex.: "2026-10-01T00:00:00.000Z", que é o que o ecrã envia)
     var date = DateFormatter.stringToLocalDate(value.trim());
+    if (date == null && value.trim().length() > 10)
+      date = DateFormatter.stringToLocalDate(value.trim().substring(0, 10));
     if (date == null)
       throw IgrpResponseStatusException.badRequest(label + " inválida: " + value);
 
@@ -94,6 +97,16 @@ public class FosService {
         .toList());
 
     return wrapper;
+  }
+
+  // Totais da FOS no mesmo formato do procedimento (configXML): inteiros, contribuição (24,5%) arredondada.
+  // Antes ficava "657680.0" / "161131.60" e o TT_CONTRIB_CALC truncado (QA PS-024).
+  static BigDecimal totalRemuneracao(Double soma) {
+    return BigDecimal.valueOf(soma != null ? soma : 0d).setScale(0, RoundingMode.HALF_UP);
+  }
+
+  static BigDecimal totalContribuicao(BigDecimal totalRemuneracao) {
+    return totalRemuneracao.multiply(BigDecimal.valueOf(0.245)).setScale(0, RoundingMode.HALF_UP);
   }
 
   @Transactional(readOnly = true)
@@ -201,14 +214,11 @@ public class FosService {
 
     detalheXmlFosEntityRepository.delete(detail);
 
-    var sum = BigDecimal.valueOf(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+    var sum = totalRemuneracao(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+    var totalContribution = totalContribuicao(sum);
 
-    var totalContribution = sum
-        .multiply(BigDecimal.valueOf(0.245))
-        .setScale(2, RoundingMode.HALF_UP);
-
-    xmlFos.setTtRemuneracao(sum.stripTrailingZeros().toPlainString());
-    xmlFos.setTtContribuicao(totalContribution.toString());
+    xmlFos.setTtRemuneracao(sum.toPlainString());
+    xmlFos.setTtContribuicao(totalContribution.toPlainString());
     xmlFos.setTtContribCalc(totalContribution.longValue());
     fosEntityRepository.save(xmlFos);
   }

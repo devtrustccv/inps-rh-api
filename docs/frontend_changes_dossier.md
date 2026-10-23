@@ -163,3 +163,15 @@ Passa pelo **mesmo** endpoint, escolhendo a situação de ausência (ex.: `LIC_S
 - Regista automaticamente a **ausência** (período `dataInicio`–`dataFim`).
 - Na **aprovação** gera a **Ordem de Serviço** de Licença S/Vencimento (enviar `tipoOrdemServico`).
 - `dataFim` é **obrigatória** (ver secção 7).
+
+## 10. Combo "Situação Laboral" — só associações ativas (23/10/2026)
+
+`GET api/v1/parametrizacao/vinculos/situacoes-laborais/ativos?vinculoId=…` passa a devolver **só** as
+situações cuja associação ao vínculo está **ativa** (`ESTADO = 'A'`). As **inativas** (`I`) deixam de
+aparecer no combo (antes só eram excluídas as removidas, `E`). Ex.: vínculo 10 (Comissão de Serviço)
+devolve só `ATIVO`; a "Situação do Teste" inativa saiu. Sem `vinculoId` nada muda.
+
+O ecrã **Parametrização → Vínculo** (`GET configuracao/vinculo/{uuid}/situacoes-laborais`) continua a
+listar as inativas, para as poder gerir.
+
+**Ação front:** nenhuma — o contrato é o mesmo; só muda o conjunto devolvido.

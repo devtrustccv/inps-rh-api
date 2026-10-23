@@ -34,11 +34,11 @@ public interface AbonosBeneficiosEntityRepository extends
       SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO(
           null,
           t.estado,
-          tr.mobId.instidId.nome,
-          tr.mobId.secaoId.nome,
+          dir.nome,
+          sec.nome,
           f.nome,
-          tr.contrVinculoId.vinculoId.nome,
-          tr.cargoId.nome,
+          vin.nome,
+          cg.nome,
           ps.nome,
           psd.motivo,
           t.dataInicio,
@@ -49,12 +49,18 @@ public interface AbonosBeneficiosEntityRepository extends
       LEFT JOIN t.funId f
       LEFT JOIN t.paramSitId ps
       LEFT JOIN t.paramSitDetId psd
+      LEFT JOIN tr.mobId mob
+      LEFT JOIN mob.instidId dir
+      LEFT JOIN mob.secaoId sec
+      LEFT JOIN tr.contrVinculoId cv
+      LEFT JOIN cv.vinculoId vin
+      LEFT JOIN tr.cargoId cg
       WHERE tr.funId.id = f.id AND tr.estActAdm = 1
           AND (:nomefuncionario IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nomefuncionario, '%')))
           AND (:startDate IS NULL OR t.dataInicio = :startDate)
           AND (:endDate IS NULL OR t.dataFim = :endDate)
-          AND (:direcaoId IS NULL OR tr.mobId.instidId.id = :direcaoId)
-          AND (:tipoAbonoId IS NULL OR t.paramSitId.id = :tipoAbonoId)
+          AND (:direcaoId IS NULL OR dir.id = :direcaoId)
+          AND (:tipoAbonoId IS NULL OR ps.id = :tipoAbonoId)
           AND (:abonoUuid IS NULL OR t.uuid = :abonoUuid)
       """)
   Page<BaixaMedicaRowDTO> getListaBaixamedica(
@@ -71,12 +77,12 @@ public interface AbonosBeneficiosEntityRepository extends
       SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO(
           null,
           t.estado,
-          tr.mobId.instidId.nome,
-          tr.mobId.secaoId.nome,
+          dir.nome,
+          sec.nome,
           f.nome,
           f.uuid,
-          tr.contrVinculoId.vinculoId.nome,
-          tr.cargoId.nome,
+          vin.nome,
+          cg.nome,
           ps.id,
           ps.nome,
           psd.id,
@@ -93,6 +99,12 @@ public interface AbonosBeneficiosEntityRepository extends
       LEFT JOIN t.funId f
       LEFT JOIN t.paramSitId ps
       LEFT JOIN t.paramSitDetId psd
+      LEFT JOIN tr.mobId mob
+      LEFT JOIN mob.instidId dir
+      LEFT JOIN mob.secaoId sec
+      LEFT JOIN tr.contrVinculoId cv
+      LEFT JOIN cv.vinculoId vin
+      LEFT JOIN tr.cargoId cg
       WHERE tr.funId.id = f.id AND tr.estActAdm = 1 AND t.uuid = :abonoUuid
       """)
   Optional<BaixaMedicaDetailDTO> getBaixaMedica(@Param("abonoUuid") UUID abonoUuid);
