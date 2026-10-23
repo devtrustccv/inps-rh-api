@@ -40,6 +40,14 @@ public interface DocumentoEntityRepository extends
 
   List<DocumentoEntity> findAllByFunIdAndReferenciaNameInAndReferenciaIdAndEstado(FuncionarioEntity funId, List<String> referenciaName, String referenciaId, Estado estado);
 
+  List<DocumentoEntity> findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstadoAndUuidNotIn(
+      FuncionarioEntity funId,
+      String referenciaName,
+      String referenciaId,
+      Estado estado,
+      List<UUID> idsNotIn
+  );
+
   Optional<DocumentoEntity> findByReferenciaNameAndReferenciaUuidAndReferenciaIdAndFunIdAndEstado(
       String referenciaName,
       UUID referenciaUuid,

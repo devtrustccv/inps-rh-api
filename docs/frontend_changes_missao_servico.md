@@ -2,8 +2,6 @@
 
 **Última actualização:** 2026-09-16 · **Base de todos os endpoints:** `/api/v1/missao-servico`
 
-> Versão em HTML para partilhar: [evidencias_missao.html](evidencias_missao.html) — gerada a partir
-> deste ficheiro; em caso de divergência, vale o Markdown.
 
 Este documento substitui o changelog anterior. Está organizado **por ecrã**, pela ordem em que o
 utilizador os percorre. Cada capítulo traz os *lookups* que o ecrã precisa, o `GET` que o preenche,
@@ -36,6 +34,40 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 3. O ecrã a mostrar decide-se pela **etapa do processo**.
 4. `AUTORIZACAO` é agora uma **etapa própria**. Acabou o artifício de distinguir Cabimentação de
    Autorização pelo `estadoCabimento`.
+
+### Alterações de 2026-10-22 — bug report QA (14/10) 🔴
+
+Inclui o que os commits de 16/10 (568695b7) e 17/10 (0e25f614) trouxeram e não foi documentado.
+Validação item a item em `docs/validacao_bug_report_MISSAO_SERVICO1.0.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/validacao_bug_report_MISSAO_SERVICO1.0.md`)*.
+
+| Alteração | Impacto no front-end | Item |
+|---|---|---|
+| **Missão FINALIZADA é só de consulta**: `PUT /{uuid}/submissao` e todas as escritas por processo (`prestadores`, `requisicoes`, `logistica`, `validacao-ugal`, `aprovacao-rh`, `cabimento`, `autorizacao`) dão **400** *"A missão N/AAAA está finalizada e não admite alterações"*. Continuam permitidas as **avaliações** (`.../avaliacao`, `/{uuid}/avaliacoes`) e o `PUT /{uuid}/pagamento` | Abrir em só consulta quando `estado` ∈ {`FINALIZADO`, `I`}; desactivar Gravar/Seguinte | MS-019 |
+| **`estado` deixou de ser aceite** no `POST /submissao` e no `PUT /{uuid}/submissao` (era aplicado tal como vinha): a missão nasce `A` e o estado só muda pelo cancelamento ou pela autorização | Deixar de enviar `estado` (é ignorado) | MS-019 |
+| Mensagens de validação da submissão em português do ecrã: *"Indique o País de Destino."*, *"Indique o Âmbito da Missão."*, *"A Data Fim da missão não pode ser anterior à Data Início."*, etc. | Mostrar o `title`; validar também no cliente (País, Âmbito, datas, `minDate` na Data Fim) | MS-007 |
+| Linha de anexo vazia (`tipoDocumentoId` 0, `documento` "") é **ignorada** (568695b7) — antes dava 400/500 | Não criar a linha por defeito; o `GET` devolve `documentos: []` | MS-008, MS-010 |
+| Lista geral: `dataInicio` e `dataFim` (568695b7). `dataMissao` mantém-se = `dataInicio` | Coluna "Período Missão" = `dataInicio – dataFim`, mesmo num dia | MS-002 |
+| Datas `yyyy-MM-dd` | Tratar como **data local** (não `new Date("2026-10-14")`, que em Cabo Verde mostra 13/10) | MS-018 |
+| **Ajuda de custo por colaborador** (decisão de 22/10): base = parametrização da carreira **de cada** colaborador (`RH_T_PARAM_AJUDA_CUSTO`, nacional/estrangeiro). Antes: a do cargo superior para todos. O `valorDiario` do pedido só conta para quem não tem parametrização | Pré-preencher cada linha com `colaboradoresDisponiveis[].valorDiarioAjudaCusto` | MS-013 |
+| `GET .../AJUDA_CUSTO/logistica`: `colaboradoresDisponiveis[].valorDiarioAjudaCusto` (novo); `valorDiarioAjudaCusto` do processo só vem quando é igual para todos (senão `null`) | idem | MS-013 |
+| `ajudasCusto[]` ganha `valorDiarioBase`, `fracaoAplicada` (`"1"`, `"2/3"`, `"1/3"`) e `flgAlimentacao` (do alojamento do colaborador) | Repor o "Valor Diário (base)" ao reabrir e mostrar a fracção aplicada | MS-013 |
+| Ajuda de custo e alojamento com `valorDiario` **0** dão **400** (*"tem de ser maior que 0"*) — antes gravavam 0 e o processo avançava | — | MS-013 |
+| Ajuda de custo sem parametrização nem valor: 400 *"Não há valor de ajuda de custo parametrizado para a carreira de {nome}…"* | — | MS-013 |
+| Parametrização da ajuda de custo: `GET`/`POST /api/v1/missao-servico/configuracao-ajuda-custo` (0e25f614). O ecrã chamava **sem `/api/v1`** → 404 | Corrigir o URL | MS-021 |
+| Alojamento: `valorTotal` 0 ou vazio = valor diário × nº de dias (568695b7) | — | MS-017 |
+| `cabId` **0 = sem número**: o ecrã mandava 0 e gravava-se 0 (parecia um cabimento gerado). Agora 0 é ignorado e sai `null` | Enviar `cabId` só quando o utilizador o preenche | "cabimento sem número" |
+| Itens de cabimento/autorização: `referenciaDesc` (ex.: "Bilhete Passagem") | Mostrar em vez de `referencia` | MS-015 |
+| Pareceres (`parecerAtual`, `parecerUgal`, `parecerCoordenador`, `parecerDirector`, `historico[]`): `responsavelDesc` | Mostrar em vez de `responsavel` | MS-026 |
+| Detalhe `GET /{uuid}`: `etapaDesc` legível (era o código "SUBMISSAO") | — | MS-016 |
+| Avaliações do prestador (`GET /prestadores/{uuid}/avaliacoes`): `designacaoDesc` | Mostrar em vez da letra | MS-020 |
+| **Prestador: `nome` é ignorado** — o nome é sempre o da entidade do sistema financeiro (spec). O "Nome (opcional)" deixou de existir | Tirar o campo do formulário; na lista, `nome` = entidade | MS-029 |
+
+Só frontend (a API já devolve o necessário): paginação (`totalPages`, MS-001), `etapaDesc`/`parecerDesc`
+(MS-006), `nrMissaoFormatado` e mensagem própria no cancelar (MS-016), campo `estado` no prestador
+(MS-020), `?referencia=` nos tipos de documento (MS-022), mostrar o ficheiro e não o tipo nos
+documentos do processo (MS-024), etapa concluída em só consulta (MS-025), `colaboradorIds` no
+alojamento (MS-027), reidratar a logística a partir do `GET` emparelhando por `funcionarioUuid`
+(MS-013/MS-028), valores em pt-PT (MS-015), X fixo no diálogo (MS-030).
 
 ### Alterações de 2026-09-16
 
@@ -212,7 +244,7 @@ se escolhem na etapa Prestadores Serviço.
 ```jsonc
 {
   "entId": 100000007,                      // obrigatório — do lookup de entidades
-  "nome": "Atlantico Viagens",             // se omitido, usa-se o nome da entidade
+  "nome": "…",                             // IGNORADO desde 22/10 — o nome é sempre o da entidade
   "nif": "200987654",
   "email": "geral@atlanticoviagens.cv",    // obrigatório — email principal
   "telefone": "2612345",
@@ -364,9 +396,10 @@ O `GET /{uuid}/submissao` devolve `processos[]`, `colaboradores[]` (com `funUuid
 
 | Situação | Resposta |
 |---|---|
-| `dataFim` anterior a `dataInicio` | **400** `dataFim não pode ser anterior a dataInicio` |
-| Sem colaboradores | **400** `colaboradores é obrigatório` |
-| Sem `paisDestinoId`, `descricaoDestino`, `ambitoMissao`, `dataInicio`, `dataFim`, `autorizadoPor` ou `dataAutorizacao` | **400** `{campo} é obrigatório` |
+| `dataFim` anterior a `dataInicio` | **400** `A Data Fim da missão não pode ser anterior à Data Início.` |
+| Sem colaboradores | **400** `Adicione pelo menos um colaborador à missão.` |
+| Sem país, descrição do destino, âmbito, datas, "Autorizado por" ou data de autorização | **400** `Indique o País de Destino.` / `Indique a Descrição do Destino.` / `Indique o Âmbito da Missão.` / `Indique a Data Início da missão.` / `Indique a Data Fim da missão.` / `Indique quem autorizou a missão (Autorizado por).` / `Indique a Data de Autorização.` (22/10) |
+| Missão finalizada ou cancelada | **400** `A missão N/AAAA está finalizada ou cancelada e não pode ser alterada.` |
 
 > `alojamento` é o único campo marcado com `*` no ecrã que a API aceita em falta: quando não vem, a
 > criação assume **Sim**. É um valor por defeito deliberado.
@@ -501,8 +534,10 @@ No alojamento, o nº de dias é calculado a partir das datas (`dataFim − dataI
 
 ### O cálculo da ajuda de custo
 
-`valorDiario` é a **base** enviada pelo ecrã. O servidor aplica-lhe a fracção e devolve o
-`valorDiario` efectivo e o `valorTotal` — ambos só de leitura no ecrã.
+**Base (desde 22/10):** a parametrização da carreira **de cada colaborador**
+(`colaboradoresDisponiveis[].valorDiarioAjudaCusto`); o `valorDiario` do pedido só conta para quem
+não tem parametrização. O servidor aplica-lhe a fracção e devolve o `valorDiario` efectivo, o
+`valorTotal`, a `valorDiarioBase` e a `fracaoAplicada` — todos só de leitura no ecrã.
 
 | `flgAlojamento` | Alimentação no processo ALOJAMENTO | Fracção | Exemplo com base 6000 × 5 dias |
 |---|---|---|---|
@@ -627,7 +662,8 @@ São **etapas distintas** com a mesma estrutura de resposta — já não se dist
 alterar o `cabId` de uma linha já autorizada.
 
 > **`cabId` continua `null`** — a integração com o SGAL ainda não existe. Acabou a autorização
-> parcial: o `NEXT` exige todas as linhas.
+> parcial: o `NEXT` exige todas as linhas. **Desde 22/10 `cabId: 0` é ignorado** (era gravado e
+> parecia um número de cabimento); enviar `null` quando não é preenchido.
 
 ### Vista da missão inteira
 
@@ -834,7 +870,7 @@ das requisições — com o nº da missão e o motivo. Os colaboradores que **es
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
 | **"Ver Alerta"** (Lista Missão) | O analista retirou os alertas da missão do âmbito actual: `GET /api/v1/funcionarios/alertas` não devolve nada da missão. O botão pode ficar escondido |
-| Templates de notificação | Estão parametrizados em `RH_T_PARAM_NOTIFICACAO` com textos **provisórios**, a rever pelo negócio. O script para os outros ambientes é `docs/db/missao_servico_notificacoes_dml.sql` |
+| Templates de notificação | Estão parametrizados em `RH_T_PARAM_NOTIFICACAO` com textos **provisórios**, a rever pelo negócio. O script para os outros ambientes é `docs/sql/missao_servico_notificacoes_dml.sql` |
 
 ---
 
@@ -907,7 +943,7 @@ Ordem das etapas: `SUBMISSAO` → `ANALISE` → `EMISSAO_REQUISICAO` → `LOGIST
 | Ação | Etapa à frente da atual | Etapa já ultrapassada |
 |---|---|---|
 | `SAVE` | grava (só regista aviso no log) | grava |
-| `NEXT` | **400** | avança (sem retroceder) |
+| `NEXT` | **400** | avança (sem retroceder) — **excepto** pareceres (UGAL/RH) e cabimento, que exigem a etapa exacta: 400 *"O parecer só pode ser emitido com o processo na etapa …"* (MS-025: o ecrã deve abrir a etapa concluída em só consulta) |
 
 ```jsonc
 // PUT /{uuid}/cabimento com NEXT numa missão em SUBMISSAO

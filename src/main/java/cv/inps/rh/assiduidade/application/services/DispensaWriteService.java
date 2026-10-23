@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.util.*;
 
@@ -117,7 +118,7 @@ public class DispensaWriteService {
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       java.util.List<DocumentoEntity> documentos = new java.util.ArrayList<>();
       for (var d : req.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             Estado.P,
@@ -149,6 +150,10 @@ public class DispensaWriteService {
     var req = command.getDispensareq();
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    // O ciclo de correção ainda não existe na assiduidade: sem este guard o CORRIGIR caía no ramo
+    // da rejeição (ou rebentava na coluna de decisão, VARCHAR2(3)) — bug report QA AS-015.
+    if (ValidationUtil.isCorrigir(req.getValidar()))
+      throw IgrpResponseStatusException.badRequest(ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO);
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
 
@@ -205,7 +210,7 @@ public class DispensaWriteService {
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       List<DocumentoEntity> documentos = new ArrayList<>();
       for (var d : req.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             estado,
@@ -331,6 +336,7 @@ public class DispensaWriteService {
     // Documentos - substituição/sincronização
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DISPENSA.name(), dispensa.getUuid());
+    DocumentoMapper.validarAnexos(req.getDocumentos());
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
         req.getDocumentos(),

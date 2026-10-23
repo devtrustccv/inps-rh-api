@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -180,7 +181,7 @@ public class FaltaServiceWrite {
         && pedido != null) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d,
             estadoInicial,
@@ -232,8 +233,8 @@ public class FaltaServiceWrite {
   public Map<String, Object> validarFalta(ValidarFaltaCommand command) {
 
     var req = command.getFaltareq();
-    if (req == null || req.getValidar() == null)
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de falta ausentes");
 
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador do pedido de falta é obrigatório");
@@ -243,6 +244,19 @@ public class FaltaServiceWrite {
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido marcação de falta não encontrado com id: " + pedidoUuid));
+
+    // Ciclo CORRIGIR, padrão do dossiê ("edita-no-validar", mesmo endpoint):
+    //   CORRIGIR      checker devolve: pedido, faltas e validação P -> C, sem aplicar o payload;
+    //   validar=null  maker reenvia: aplica as correcções e reabre C -> P;
+    //   SIM/NAO       só sobre um pedido pendente — em C tem de ser reenviado primeiro.
+    if (req.getValidar() == EstadoValidacao.CORRIGIR)
+      return devolverParaCorrecao(pedido);
+    if (req.getValidar() == null) {
+      if (!Estado.C.name().equals(pedido.getEstado()))
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      return reenviarCorrecao(pedido, req);
+    }
+    garantirPendenteParaDecisao(pedido);
 
     // O despacho aplica os descontos — mesma corrida que na justificação.
     saldoLockService.lockColaborador(pedido.getFunId().getUuid());
@@ -255,19 +269,7 @@ public class FaltaServiceWrite {
     for (FaltaEntity f : faltas) {
 
       f.setEstado(novoEstado);
-
-      if (StringUtils.hasText(req.getParecer()))
-        f.setDecisaoResponsavel(req.getParecer());
-      if (StringUtils.hasText(req.getObservacao()))
-        f.setObsResponsavel(req.getObservacao());
-
-      // Mesmo guard do registo: o checker também não pode trocar o tipo por um que não seja falta.
-      var ps = resolverParamSituacao(req.getTipoJustificacao());
-      if (ps != null)
-        f.setParamSitId(ps);
-
-      if (StringUtils.hasText(req.getDeduzirFaltaEm()))
-        f.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(req.getDeduzirFaltaEm()).getCode());
+      aplicarCamposDoFormulario(f, req);
 
       // Despacho do RH: RH_T_FALTA.DESPACHO_RH é VARCHAR2(3) e guarda SIM/NAO — o equivalente
       // do DECISAO_RH da dispensa e das férias. É o registo da decisão do separador "Despacho RH"
@@ -290,6 +292,12 @@ public class FaltaServiceWrite {
 
     pedidoRepository.save(pedido);
 
+    // Anexos juntados no registo ou num reenvio nascem 'P': acompanham a decisão do pedido.
+    var anexos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+    anexos.stream().filter(d -> Estado.P.equals(d.getEstado())).forEach(d -> d.setEstado(novoEstado));
+    documentoEntityRepository.saveAll(anexos);
+
     // Pela referência (uuid do pedido) e não pelo funcionário — ver JustificarFaltaWriteService.
     funcionarioRules.getValidacaoPendenteByReferenciaUuid(
             pedido.getUuid(), TipoAcao.INSERT, Referencia.FALTA)
@@ -303,6 +311,102 @@ public class FaltaServiceWrite {
     resp.put("estado", novoEstado);
     resp.put("totalFaltas", faltas.size());
 
+    return resp;
+  }
+
+  /**
+   * Campos que o formulário de validação deixa mudar — os mesmos no despacho e no reenvio de uma
+   * correcção. Só sobrepõem o que veio preenchido, para uma validação sem alterações não apagar o
+   * que o maker escreveu.
+   */
+  private void aplicarCamposDoFormulario(FaltaEntity f, FaltaReqDTO req) {
+    if (StringUtils.hasText(req.getParecer()))
+      f.setDecisaoResponsavel(req.getParecer());
+    if (StringUtils.hasText(req.getObservacao()))
+      f.setObsResponsavel(req.getObservacao());
+
+    // Mesmo guard do registo: o checker também não pode trocar o tipo por um que não seja falta.
+    var ps = resolverParamSituacao(req.getTipoJustificacao());
+    if (ps != null)
+      f.setParamSitId(ps);
+
+    if (StringUtils.hasText(req.getDeduzirFaltaEm()))
+      f.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(req.getDeduzirFaltaEm()).getCode());
+  }
+
+  /** SIM/NAO só decidem um pedido pendente; um devolvido para correção tem de ser reenviado antes. */
+  private void garantirPendenteParaDecisao(PedidoEntity pedido) {
+    if (Estado.C.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido em correção: não pode ser validado. Corrija e reenvie primeiro.");
+    if (!Estado.P.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível validar um pedido de falta pendente de validação.");
+  }
+
+  /**
+   * CORRIGIR (checker): pedido, faltas pendentes e validação P -> C. Não aplica o payload nem toca
+   * em descontos — esses só existem depois do SIM. O dia continua ocupado (existeFaltaVivaNoDia só
+   * liberta I/E) e a reserva de saldo mantém-se (as consultas de reserva contam P e C).
+   */
+  private Map<String, Object> devolverParaCorrecao(PedidoEntity pedido) {
+    if (!Estado.P.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um pedido pendente de validação.");
+    var validacao = funcionarioRules.devolverParaCorrecao(pedido.getUuid(), Estado.P, Referencia.FALTA);
+    validacaoEntityRepository.save(validacao);
+
+    var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido).stream()
+        .filter(f -> Estado.P.equals(f.getEstado())).toList();
+    faltas.forEach(f -> f.setEstado(Estado.C));
+    faltaRepository.saveAll(faltas);
+
+    pedido.setEstado(Estado.C.name());
+    pedidoRepository.save(pedido);
+
+    return respostaCorrecao(pedido, faltas.size(), "Pedido de falta devolvido para correção.");
+  }
+
+  /**
+   * Reenvio (maker): aplica as correcções do formulário e volta a pôr pedido, faltas e validação
+   * em P. Não decide nem aplica descontos — isso fica para o SIM do checker.
+   */
+  private Map<String, Object> reenviarCorrecao(PedidoEntity pedido, FaltaReqDTO req) {
+    var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido).stream()
+        .filter(f -> Estado.C.equals(f.getEstado())).toList();
+    for (var f : faltas) {
+      aplicarCamposDoFormulario(f, req);
+      f.setEstado(Estado.P);
+    }
+    faltaRepository.saveAll(faltas);
+
+    // Anexos: semântica dos arrays da casa (null preserva, sem id cria, omitido fica 'E').
+    if (req.getDocumentos() != null) {
+      DocumentoMapper.validarAnexos(req.getDocumentos());
+      var existentes = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      var anexos = documentoMapper.syncDocumentos(new ArrayList<>(existentes), req.getDocumentos(),
+          TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, pedido.getFunId());
+      anexos.forEach(d -> {
+        if (d.getUuid() == null) d.setUuid(UuidCreator.getTimeOrderedEpoch());
+      });
+      documentoEntityRepository.saveAll(anexos);
+    }
+
+    pedido.setEstado(Estado.P.name());
+    pedidoRepository.save(pedido);
+    validacaoEntityRepository.save(funcionarioRules.reabrirParaValidacao(pedido.getUuid(), Referencia.FALTA));
+
+    return respostaCorrecao(pedido, faltas.size(), "Pedido de falta corrigido e reenviado para validação.");
+  }
+
+  private Map<String, Object> respostaCorrecao(PedidoEntity pedido, int totalFaltas, String mensagem) {
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("totalFaltas", totalFaltas);
+    resp.put("mensagem", mensagem);
     return resp;
   }
 

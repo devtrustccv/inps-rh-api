@@ -1052,6 +1052,206 @@ utilizador o `title` da resposta.
 
 ---
 
+## 🔴 29. Bug report QA SIPS-RH 1.0 — contratos que mudaram (21/10/2026)
+
+Branch `fix/assiduidade-bug-report-qa`. Inclui os campos do commit a4c77a30 (14/10), que não
+tinham sido documentados. Validação completa do report em `docs/validacao_bug_report_SIPS-RH1.0.md` *(removido do repo a 22/10; `git show 0e5b2d2a^:docs/validacao_bug_report_SIPS-RH1.0.md`)*.
+
+**Migration de BD:** `scripts/assiduidade_bug_report_AS_2.sql` (recria `RH_V_FALTA_MENSAL` com a
+coluna `MOTIVO`). Correr **antes** de pôr esta versão da API no ar — sem a coluna, a lista de faltas
+dá erro. O `scripts/assiduidade_bug_report_AS.sql` (14/10) já tem de estar aplicado.
+
+### Validar com "Corrigir" passa a dar 400 — todos os ecrãs de validação da assiduidade
+
+`POST falta/{pedidoId}`, `PUT falta/justificar/validar/{pedidoId}`, `PUT dispensa/{pedidoId}/validar`,
+`POST hora-extra/{pedidoId}`, `POST feria/{pedidoId}` com `validar = "CORRIGIR"`:
+
+| Antes | Agora |
+|---|---|
+| Justificar falta / marcar falta: 400 *"O valor do campo 'despacho_rh' é demasiado longo"* (QA AS-015). Restantes: tratado **como rejeição**, sem aviso | **400** *"A opção 'Corrigir' ainda não está disponível. Nenhuma alteração foi aplicada ao registo."* — nada é gravado |
+
+Mesma mensagem que o dossiê já devolve. **Substituído pela secção 30** nos fluxos com validação
+(falta, justificar, hora extra, férias); fica só na Dispensa.
+`PUT falta/justificar/validar/{pedidoId}` com `validar` omitido passa também a dar 400 *"Campo
+validar é obrigatório"* (antes rejeitava o pedido).
+
+### `GET falta` — lista Falta Justificada / Injustificada
+
+```json
+{
+  "estado": "INJUSTIFICADA",
+  "estadoDesc": "Injustificada",
+  "motivo": "Motivo Pessoal (5d)",
+  "valorADescontar": 42752.40,
+  "estadoProcessamento": "PEND",
+  "estadoProcessamentoDesc": "Pendente"
+}
+```
+
+| Campo | O que mudou |
+|---|---|
+| `estadoDesc` | a4c77a30 — "Justificada"/"Injustificada". **Mostrar este** (o ecrã mostrava "Indefinido", AS-007) |
+| `motivo` | **novo** — tipos de falta do mês com o número de faltas, separados por vírgula (AS-016). `null` se as faltas não tiverem tipo |
+| `valorADescontar` | passa a ser o **líquido** (`RH_T_FALTA.VALOR_DESCONTO`), como manda a spec: o que sobra depois de férias/dispensa cobrirem. Antes era o bruto — uma falta coberta por férias aparecia como desconto (AS-007/AS-018) |
+| `estadoProcessamentoDesc` | **novo** — "Pendente" / "Processado"; "Não aplicável" quando `descontoRenumeracao = false`. **Mostrar este** em vez do código (AS-017). `estadoProcessamento` (PEND/PROC) mantém-se |
+
+### `GET dispensa` — Lista Pedido Dispensa
+
+| Campo | O que mudou |
+|---|---|
+| `nomeColaborador` | a4c77a30 — **novo**, ligar à coluna Nome Colaborador (AS-009) |
+| `intervaloHoras` | a4c77a30 — `"00:00 / 04:00"` em vez de `"0 0:0:0.0 / 0 4:0:0.0"` |
+| `totalHorasSolicitadas` | **QUEBRA DE CONTRATO** — `number` (minutos, ex. `240`) → `string` HH:mm (`"04:00"`) (AS-009) |
+| `estadoDesc` | já existia ("Pendente"…) — **mostrar este**; o ecrã mostrava "Indefinido" |
+| `totalHorasDireito` | **QUEBRA DE CONTRATO** — era sempre `null` (`number`); passa a `string` HH:mm: soma do `TOTAL_HORA` das dispensas **pendentes e aprovadas** do colaborador **no mês** da dispensa (spec: `SUM(RH_T_DISPENSA.TOTAL_HORA)`; o período mensal foi decidido a 21/10). `null` só se faltar o colaborador |
+
+### `GET movimento-resumos` — Gestão Falta (a4c77a30)
+
+- `dataInicio`/`dataFim` aceitam `dd/MM/yyyy` (antes só ISO → 500, AS-003). O filtro é **ao mês**
+  (a vista é mensal): 13/10–15/10 devolve outubro inteiro.
+- `ilha` = id da ilha (`SIPSGLOBAL.GLB_T_GEOGRAFIA`), não do local de trabalho (AS-004).
+- `estado` tem de ser do domínio `AssiduidadeDiariaEstado` (`api/v1/enums`):
+  `CONFORME | INJUSTIFICADA | JUSTIFICADA | PENDENTE`. O ecrã mandava o estado genérico ("Em
+  correção" = `C`), que nunca casa (AS-004).
+- `motivoAusencia` — **novo**: tipos de falta do mês, ex. `"Motivo Pessoal (8d)"` (AS-001).
+- `totalFaltasJustificadas` já vinha preenchido; o ecrã mostrava `totalFalta` na coluna
+  Injustificada (AS-001/AS-013 — definição por decidir, ver validação do report).
+
+### `GET falta/justificar/pedido/{pedidoId}` — validação da justificação (a4c77a30)
+
+- `responsavelNome` — **novo**: mostrar em vez de "Responsável já definido (ID 36)" (AS-006).
+- `tipoJustificacao` vem com o id do tipo (ex. `17`) — o combo Tipo Falta tem de seleccionar por
+  este valor, numérico (AS-006: aparecia "Select an option…").
+
+### Marcar Falta — tabela Documentos (AS-014)
+
+Abrir sem linhas; a API ignora a linha vazia `{tipoDocumentoId: 0, documento: ""}` (a4c77a30), mas
+`tipoDocumentoId: null` dá 400 *"O campo Tipo de Documento do anexo é obrigatório"*.
+
+**Novo (todos os registos/edições/despachos da assiduidade com `documentos`):** uma linha **meio
+preenchida** deixa de ser descartada em silêncio (o anexo perdia-se):
+
+| Linha | Antes | Agora |
+|---|---|---|
+| `tipoDocumentoId > 0`, `documento` vazio | ignorada (anexo perdido; numa edição, o existente ficava `E`) | **400** *"Anexe o ficheiro do documento indicado."* |
+| `documento` preenchido, `tipoDocumentoId` 0 | ignorada | **400** *"Indique o Tipo de Documento do anexo."* |
+| as duas vazias | ignorada | ignorada (igual) |
+
+Numa edição, um anexo existente reenviado tem de levar `tipoDocumentoId` **e** `documento`. Só a
+assiduidade — dossiê e missão não mudam.
+
+---
+
+## 🔴 30. Ciclo CORRIGIR nos ecrãs de validação da assiduidade (21/10/2026)
+
+Branch `fix/assiduidade-bug-report-qa`. Substitui o 400 provisório da secção 29 nos fluxos com
+validação. Mesmo padrão do dossiê — **"edita-no-validar"**, no **mesmo endpoint** de validar:
+
+| Fluxo | Endpoint de validar |
+|---|---|
+| Marcar Falta | `POST falta/{pedidoId}` |
+| Justificar Falta | `PUT falta/justificar/validar/{pedidoId}` |
+| Hora Extra | `POST hora-extra/{pedidoId}` |
+| Férias (com substituição) | `POST feria/{pedidoId}` |
+
+| Quem | Pedido | Efeito | Resposta |
+|---|---|---|---|
+| Checker | `validar = "CORRIGIR"` sobre pedido **P** | pedido, linhas e validação **P → C**. O resto do corpo é **ignorado** (nada gravado) | 200, `estado: "C"`, `mensagem: "... devolvido para correção."` |
+| Maker | `validar` **vazio/omitido** sobre pedido **C**, com o formulário corrigido | aplica as correcções e **C → P**; a **mesma** linha de validação volta a P (não nasce outra) | 200, `estado: "P"`, `mensagem: "... corrigido e reenviado para validação."` |
+| Checker | `validar = "SIM"` / `"NAO"` sobre pedido **P** | como antes | como antes |
+
+**Erros (400):**
+
+| Situação | Mensagem |
+|---|---|
+| `SIM`/`NAO` sobre pedido em correção | *"... em correção: não pode ser validado. Corrija e reenvie primeiro."* |
+| `CORRIGIR` sobre pedido que não está P | *"Só é possível devolver para correção um ... pendente de validação."* |
+| `validar` vazio sobre pedido que não está C | *"Campo validar é obrigatório"* (como antes) |
+| **Novo:** `SIM`/`NAO` sobre pedido já decidido (Marcar Falta, Férias) | *"Só é possível validar um ... pendente de validação."* — antes decidia outra vez (descontava a dobrar / duplicava a ausência) |
+| Justificar: Editar ou Eliminar pedido em C | *"... foi devolvido para correção. Corrija e reenvie-o pelo formulário de validação."* |
+| Férias: Alterar pedido (`PUT feria/{pedidoId}`) em C | *"Pedido de férias devolvido para correção: ..."* |
+| Férias: reenvio com outro substituto | *"O substituto não se altera na correção. ..."* |
+
+**O que o maker pode corrigir no reenvio** (os campos que o formulário de validação já aceitava):
+- Marcar Falta: `parecer`, `observacao`, `tipoJustificacao`, `deduzirFaltaEm`, `documentos`.
+- Justificar: `motivo`, `obsResponsavel`, `responsavelId`, `tipoJustificacao` (obrigatório), `parecerResponsavel`, `deduzirFaltaEm`, `documentos`.
+- Hora Extra: `horaExtra[]` por `dataInicio` — `horasDiaria`, `percentagemReferente` (o valor é recalculado), `documento`.
+- Férias: `dataInicio`/`dataFim` (recalcula os dias), `parecer`, `obsParecer`, `responsavel`, `obsConvinienciaServico`, `documentos`.
+
+**Onde o maker encontra o que lhe devolveram:** como no dossiê, o inbox de validações
+(`GET funcionarios/validacoes`) mostra só **P**; o pedido em **C** aparece nos GET/listas do próprio
+fluxo com `estado: "C"` / `estadoDesc: "Em correção"` (Gestão Falta conta-o como pendente). Ao
+reenviar, volta ao inbox.
+
+**Enquanto está em C:** o dia continua ocupado (não se marca outra falta por cima) e a reserva de
+saldo de férias/dispensa mantém-se.
+
+**Sem ciclo (continua 400 *"A opção 'Corrigir' ainda não está disponível..."*):** Dispensa — não grava
+`RH_T_VALIDACAO` (a spec riscou-o), não há onde ancorar a correcção.
+
+**Mostrar a opção "Corrigir"** do combo `VALIDAR_REGISTO` nos 4 ecrãs acima; escondê-la na Dispensa.
+O botão "Reenviar" do maker envia o formulário com `validar` vazio.
+
+**Migration de BD:** `scripts/assiduidade_ciclo_corrigir_hora_extra.sql` e
+`scripts/assiduidade_ciclo_corrigir_resumo.sql` (vistas passam a mostrar/contar o C). Aplicadas em
+dev a 21/10.
+
+---
+
+## 🔴 31. Justificada / Injustificada — uma só regra nas duas listas (21/10/2026)
+
+Branch `fix/assiduidade-bug-report-qa`. Resolve AS-001, AS-002 OBS, AS-008 OBS, AS-013 e AS-016.
+A spec não define a regra (a fonte que indica, `SINTESE_DIARIA.ESTADO`, é sempre `A`); decidido
+com o utilizador.
+
+**Regra, por dia de falta:**
+
+| Dia | Conta como |
+|---|---|
+| Falta aprovada (A) com "Com Justificativo? = SIM" | **Justificada** |
+| Falta aprovada (A) com "Com Justificativo? = NÃO" | **Injustificada** |
+| Falta à espera de despacho (P) ou em correção (C) | **Pendente** |
+| Dia de falta sem registo (marcado sem justificativo, ou registo **rejeitado**/eliminado) | **Injustificada** |
+| Dia sem registo mas com ausência activa (ex.: dispensa validada) | não conta |
+
+O desconto no salário **deixou de decidir** o estado — continua só em "Desconto na Remuneração?".
+
+### `GET movimento-resumos` (Gestão Falta)
+
+| Campo | Antes | Agora |
+|---|---|---|
+| `totalFalta` | só os dias **por registar** | **todas** as faltas do mês |
+| `totalFaltasJustificadas` | qualquer falta aprovada | aprovadas **com** justificativo |
+| `totalFaltasInjustificadas` | — | **novo** |
+| `totalFaltasPendentes` | P | P e C |
+| `estado` | | INJUSTIFICADA se houver alguma; senão PENDENTE; senão JUSTIFICADA; senão CONFORME |
+
+**Garantido:** `totalFalta = totalFaltasJustificadas + totalFaltasInjustificadas + totalFaltasPendentes`.
+Coluna Total Justificada/Total Injustificada: mostrar `totalFaltasJustificadas / totalFaltasInjustificadas`
+(o ecrã mostrava `totalFalta` na Injustificada — AS-001).
+
+Deixa também de contar a dobrar um dia com duas faltas (rejeitada + nova) ou duas ausências.
+
+### `GET falta` (Falta Justificada / Injustificada)
+
+`estado`/`estadoDesc` do mês: **INJUSTIFICADA** se alguma falta aprovada do mês tiver "Com
+Justificativo? = NÃO"; senão **JUSTIFICADA**. Antes era pelo desconto no salário — uma licença
+justificada que desconta saía "Injustificada". Esta lista continua a mostrar só faltas aprovadas.
+
+### Painel de justificação (`GET falta/justificar/{funcionarioId}`)
+
+- **Dias rejeitados voltam a "Por justificar"** em `itensFalta` (antes ficavam escondidos para
+  sempre, apesar de o registo deixar justificá-los de novo). Continuam a aparecer no grupo do
+  pedido rejeitado, como histórico.
+- Um dia re-justificado aparece no grupo do pedido **novo** (antes podia ficar preso ao rejeitado).
+- Rótulo por dia: falta aprovada com "NÃO" passa de "Justificada" a **"Injustificada"**.
+
+**Migration de BD:** `scripts/assiduidade_decisao_a_resumo.sql` (nova coluna
+`TOTAL_FALTAS_INJUSTIFICADAS`; correr **antes** da API) e `scripts/assiduidade_decisao_a_falta_mensal.sql`.
+Aplicadas em dev a 21/10.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |

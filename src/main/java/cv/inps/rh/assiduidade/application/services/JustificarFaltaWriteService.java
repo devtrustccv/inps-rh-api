@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.commands.EditarPedidoJustificacaoCommand;
 import cv.inps.rh.assiduidade.application.commands.EliminarPedidoJustificacaoCommand;
 import cv.inps.rh.assiduidade.application.commands.JustificarFaltaCommand;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -223,7 +225,7 @@ public class JustificarFaltaWriteService {
     // utilizador: o anexo do grupo pertence ao pedido.
     if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty()) {
       for (var anexo : dto.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(anexo)) continue; // linha vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(anexo)) continue; // linha vazia do formulário
         var doc = documentoMapper.toEntity(
             anexo,
             estadoInicial,
@@ -280,6 +282,25 @@ public class JustificarFaltaWriteService {
 
     var funcionario = pedido.getFunId();
 
+    var dto = command.getJustificarfalta();
+    if (dto == null)
+      throw IgrpResponseStatusException.badRequest("Dados da justificação ausentes");
+
+    // Ciclo CORRIGIR, padrão do dossiê ("edita-no-validar", mesmo endpoint):
+    //   CORRIGIR      checker devolve: pedido, faltas e validação P -> C, sem aplicar o payload;
+    //   validar=null  maker reenvia: aplica as correcções e reabre C -> P;
+    //   SIM/NAO       só sobre um pedido pendente — em C tem de ser reenviado primeiro.
+    if (dto.getValidar() == EstadoValidacao.CORRIGIR)
+      return devolverParaCorrecao(pedido);
+    if (dto.getValidar() == null) {
+      if (!Estado.C.name().equals(pedido.getEstado()))
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      return reenviarCorrecao(pedido, dto);
+    }
+    if (Estado.C.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido em correção: não pode ser validado. Corrija e reenvie primeiro.");
+
     // O despacho só existe se houver despacho por dar. Verifica-se o MESMO que se altera a
     // seguir: o estado do pedido e a linha pendente em RH_T_VALIDACAO — é ela a autoridade
     // sobre "há algo por decidir", e foi para isso que foi criada.
@@ -297,8 +318,7 @@ public class JustificarFaltaWriteService {
     // o fluxo, e a que não pode correr em paralelo com outra do mesmo colaborador.
     saldoLockService.lockColaborador(funcionario.getUuid());
 
-    var dto = command.getJustificarfalta();
-    if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
+    if (dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
     // Parametrização da justificação — mesma tolerância ao "0" do formulário. O radio
@@ -325,33 +345,8 @@ public class JustificarFaltaWriteService {
     // síntese, logo item nenhum as conseguia endereçar, e ficavam em P pela mesma razão.
     for (var falta : faltas) {
 
-      // Do cabeçalho, como no registo. Só sobrepõe o motivo se veio no payload, para uma
-      // validação sem alterações não apagar o que o maker escreveu.
-      if (StringUtils.hasText(dto.getMotivo()))
-        falta.setDescricaoMotivo(dto.getMotivo());
-      falta.setObsResponsavel(dto.getObsResponsavel());
-      // Só sobrepõe se o checker indicou um responsável — senão mantém o da justificação.
-      if (responsavelValidacao != null)
-        falta.setResponsavelId(responsavelValidacao);
-      // Só sobrepõe se veio no payload — caso contrário mantém o que foi gravado na
-      // justificação, em vez de o apagar.
-      if (paramSituacao != null)
-        falta.setParamSitId(paramSituacao);
-      // Derivado do tipo EFECTIVO, como no editar: o checker pode trocar o tipo no despacho e a
-      // coluna ficava a dizer o contrario do desconto que o aplicar() fez (este decide pelo tipo).
-      falta.setFlgDescontoSal(faltaDescontoService.descontaSalario(falta) ? 1 : 0);
-      // "Parecer Responsavel" (spec :762 -> RH_T_FALTA.DECISAO_RESPONSAVEL) faz parte do
-      // formulario de validacao. So sobrepoe se veio, como o responsavel.
-      if (dto.getParecerResponsavel() != null)
-        falta.setDecisaoResponsavel(dto.getParecerResponsavel());
+      aplicarCamposDoFormulario(falta, dto, paramSituacao, responsavelValidacao);
       falta.setEstado(estadoFinal);
-
-      // "Deduzir Falta Em" vale o que o formulario enviou, como no registo e no editar: o ecra de
-      // validacao manda o estado completo (vem do GET do pedido), logo um combo vazio e o checker
-      // a retirar a deducao. Antes, vazio mantinha a do maker e nao havia forma de a tirar.
-      falta.setFlgDescontoFalta(StringUtils.hasText(dto.getDeduzirFaltaEm())
-          ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
-          : null);
 
       // Despacho do RH (SIM/NAO) em RH_T_FALTA.DESPACHO_RH — ver FaltaServiceWrite.
       if (dto.getValidar() != null)
@@ -373,6 +368,7 @@ public class JustificarFaltaWriteService {
     // com documentos omitido (= preservar) ficaria 'P' para sempre.
     var existentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+    DocumentoMapper.validarAnexos(dto.getDocumentos());
     var anexos = dto.getDocumentos() != null
         ? documentoMapper.syncDocumentos(
             new ArrayList<>(existentes),
@@ -421,6 +417,115 @@ public class JustificarFaltaWriteService {
     return resp;
 
 
+  }
+
+  /**
+   * Campos do formulário de validação — os mesmos no despacho e no reenvio de uma correcção.
+   */
+  private void aplicarCamposDoFormulario(FaltaEntity falta, JustificarFaltaDTO dto,
+                                         ParamSituacaoEntity paramSituacao, ResponsavelEntity responsavel) {
+    // Do cabeçalho, como no registo. Só sobrepõe o motivo se veio no payload, para uma
+    // validação sem alterações não apagar o que o maker escreveu.
+    if (StringUtils.hasText(dto.getMotivo()))
+      falta.setDescricaoMotivo(dto.getMotivo());
+    falta.setObsResponsavel(dto.getObsResponsavel());
+    // Só sobrepõe se o checker indicou um responsável — senão mantém o da justificação.
+    if (responsavel != null)
+      falta.setResponsavelId(responsavel);
+    // Só sobrepõe se veio no payload — caso contrário mantém o que foi gravado na
+    // justificação, em vez de o apagar.
+    if (paramSituacao != null)
+      falta.setParamSitId(paramSituacao);
+    // Derivado do tipo EFECTIVO, como no editar: o checker pode trocar o tipo no despacho e a
+    // coluna ficava a dizer o contrario do desconto que o aplicar() fez (este decide pelo tipo).
+    falta.setFlgDescontoSal(faltaDescontoService.descontaSalario(falta) ? 1 : 0);
+    // "Parecer Responsavel" (spec :762 -> RH_T_FALTA.DECISAO_RESPONSAVEL) faz parte do
+    // formulario de validacao. So sobrepoe se veio, como o responsavel.
+    if (dto.getParecerResponsavel() != null)
+      falta.setDecisaoResponsavel(dto.getParecerResponsavel());
+
+    // "Deduzir Falta Em" vale o que o formulario enviou, como no registo e no editar: o ecra de
+    // validacao manda o estado completo (vem do GET do pedido), logo um combo vazio e o checker
+    // a retirar a deducao. Antes, vazio mantinha a do maker e nao havia forma de a tirar.
+    falta.setFlgDescontoFalta(StringUtils.hasText(dto.getDeduzirFaltaEm())
+        ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
+        : null);
+  }
+
+  /**
+   * CORRIGIR (checker): pedido, faltas pendentes e validação P -> C, sem aplicar o payload nem
+   * descontos. O dia continua ocupado e a reserva de saldo mantém-se (as consultas contam P e C).
+   */
+  private Map<String, Object> devolverParaCorrecao(PedidoEntity pedido) {
+    if (!Estado.P.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um pedido de justificação pendente de validação.");
+    var validacao = funcionarioRules.devolverParaCorrecao(
+        pedido.getUuid(), Estado.P, Referencia.JUSTIFICAR_FALTA);
+    validacaoEntityRepository.save(validacao);
+
+    var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido).stream()
+        .filter(f -> Estado.P.equals(f.getEstado())).toList();
+    faltas.forEach(f -> f.setEstado(Estado.C));
+    faltaRepository.saveAll(faltas);
+
+    pedido.setEstado(Estado.C.name());
+    pedidoRepository.save(pedido);
+
+    LOGGER.info("[CORRIGIR] Pedido de justificação {} devolvido para correção ({} dias).",
+        pedido.getUuid(), faltas.size());
+    return respostaCorrecao(pedido, faltas.size(), "Pedido de justificação devolvido para correção.");
+  }
+
+  /**
+   * Reenvio (maker): aplica as correcções do formulário e volta a pôr pedido, faltas e validação
+   * em P. Não decide nem aplica descontos — isso fica para o SIM do checker.
+   */
+  private Map<String, Object> reenviarCorrecao(PedidoEntity pedido, JustificarFaltaDTO dto) {
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), true);
+    var responsavel = resolverResponsavel(dto.getResponsavelId());
+
+    var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido).stream()
+        .filter(f -> Estado.C.equals(f.getEstado())).toList();
+    for (var falta : faltas) {
+      aplicarCamposDoFormulario(falta, dto, paramSituacao, responsavel);
+      falta.setEstado(Estado.P);
+    }
+    faltaRepository.saveAll(faltas);
+
+    // Anexos: semântica dos arrays da casa (null preserva, sem id cria, omitido fica 'E').
+    if (dto.getDocumentos() != null) {
+      DocumentoMapper.validarAnexos(dto.getDocumentos());
+      var existentes = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      var anexos = documentoMapper.syncDocumentos(new ArrayList<>(existentes), dto.getDocumentos(),
+          TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, pedido.getFunId());
+      anexos.forEach(d -> {
+        if (d.getUuid() == null) d.setUuid(UuidCreator.getTimeOrderedEpoch());
+      });
+      documentoEntityRepository.saveAll(anexos);
+    }
+
+    pedido.setEstado(Estado.P.name());
+    pedidoRepository.save(pedido);
+    validacaoEntityRepository.save(
+        funcionarioRules.reabrirParaValidacao(pedido.getUuid(), Referencia.JUSTIFICAR_FALTA));
+
+    LOGGER.info("[CORRIGIR] Pedido de justificação {} corrigido e reenviado ({} dias).",
+        pedido.getUuid(), faltas.size());
+    return respostaCorrecao(pedido, faltas.size(),
+        "Pedido de justificação corrigido e reenviado para validação.");
+  }
+
+  private Map<String, Object> respostaCorrecao(PedidoEntity pedido, int totalRegistos, String mensagem) {
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("etapa", pedido.getEtapa());
+    resp.put("totalRegistos", totalRegistos);
+    resp.put("mensagem", mensagem);
+    return resp;
   }
 
   /**
@@ -537,6 +642,11 @@ public class JustificarFaltaWriteService {
       throw IgrpResponseStatusException.badRequest(
           "Não é possível " + accao + " este pedido: está em validação, à espera de despacho do RH. "
               + "Só é possível " + accao + " depois de o pedido ser validado ou rejeitado.");
+
+    if (Estado.C.name().equals(estado))
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível " + accao + " este pedido: foi devolvido para correção. "
+              + "Corrija e reenvie-o pelo formulário de validação.");
 
     if (Estado.I.name().equals(estado))
       throw IgrpResponseStatusException.badRequest(
@@ -695,6 +805,7 @@ public class JustificarFaltaWriteService {
     if (dto.getDocumentos() != null) {
       var existentes = documentoEntityRepository
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      DocumentoMapper.validarAnexos(dto.getDocumentos());
       var sincronizados = documentoMapper.syncDocumentos(
           new ArrayList<>(existentes), dto.getDocumentos(),
           TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, funcionario);

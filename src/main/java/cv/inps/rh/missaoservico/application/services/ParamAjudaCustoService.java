@@ -134,6 +134,16 @@ public class ParamAjudaCustoService {
    * {@code null} se nenhum colaborador tiver carreira parametrizada.
    */
   @Transactional(readOnly = true)
+  /**
+   * D2 (22/10/2026): a ajuda de custo é da função de CADA colaborador (spec: "o valor varia consoante
+   * a função que o colaborador desempenha") — já não se aplica a todos o do cargo superior.
+   * {@code null} quando a carreira dele não está parametrizada.
+   */
+  public BigDecimal valorDiarioBaseDoColaborador(MissaoServicoEntity missao, MissaoColaboradorEntity colaborador) {
+    return colaborador == null ? null : valorDiarioBase(missao, List.of(colaborador));
+  }
+
+  /** O valor mais alto entre as carreiras dos colaboradores (com um só colaborador, o dele). */
   public BigDecimal valorDiarioBase(MissaoServicoEntity missao, List<MissaoColaboradorEntity> colaboradores) {
     if (missao == null || colaboradores == null || colaboradores.isEmpty())
       return null;

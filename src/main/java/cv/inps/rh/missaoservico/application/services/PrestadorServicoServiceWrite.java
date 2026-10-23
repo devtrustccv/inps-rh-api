@@ -129,7 +129,9 @@ public class PrestadorServicoServiceWrite {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Entidade inválida: " + dto.getEntId()));
 
     prestador.setEntId(entidade.getId());
-    prestador.setNome(StringUtils.hasText(dto.getNome()) ? dto.getNome().trim() : entidade.getNome());
+    // MS-029/D8 (22/10/2026): o nome é sempre o da entidade do sistema financeiro (spec: o campo Nome
+    // é a pesquisa em INPSSIGOF.entidades). O "Nome (opcional)" que sobrepunha era invenção nossa.
+    prestador.setNome(entidade.getNome());
     prestador.setNif(trimToNull(dto.getNif()));
     prestador.setEmail(dto.getEmail().trim());
     prestador.setTelefone(trimToNull(dto.getTelefone()));

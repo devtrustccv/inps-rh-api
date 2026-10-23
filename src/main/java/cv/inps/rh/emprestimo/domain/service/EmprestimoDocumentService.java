@@ -32,12 +32,15 @@ public class EmprestimoDocumentService {
 
     var docs = new ArrayList<DocumentoEntity>();
 
+    var notDeletedUuids = new ArrayList<UUID>();
+
     documentos.forEach(doc -> {
 
       final DocumentoEntity newDoc;
 
       if (StringUtils.hasText(doc.getId())) {
         newDoc = documentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getId()));
+        notDeletedUuids.add(newDoc.getUuid());
       } else {
         newDoc = new DocumentoEntity();
         newDoc.setEstado(Estado.A);
@@ -52,6 +55,17 @@ public class EmprestimoDocumentService {
       newDoc.setUrl(doc.getUrl());
       docs.add(newDoc);
     });
+
+    if (!notDeletedUuids.isEmpty()) {
+      var deletedDocs = documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstadoAndUuidNotIn(funId,
+          referenceName,
+          referenceId,
+          Estado.A,
+          notDeletedUuids
+      );
+
+      documentoEntityRepository.saveAll(deletedDocs);
+    }
 
     documentoEntityRepository.saveAll(docs);
   }
