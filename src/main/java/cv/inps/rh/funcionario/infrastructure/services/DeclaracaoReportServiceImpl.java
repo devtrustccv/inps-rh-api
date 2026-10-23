@@ -2,16 +2,21 @@ package cv.inps.rh.funcionario.infrastructure.services;
 
 import cv.inps.rh.funcionario.application.service.DeclaracaoReportService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.documento.DocumentoSaidaRenderer;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RhVRelacaoLaboralEntityRepository;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,7 +25,9 @@ import java.util.UUID;
 public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
 
     private final DeclaracaoEntityRepository declaracaoRepository;
-    private final ParamDocOutputEntityRepository paramDocOutputRepository;
+    private final DocumentoSaidaRenderer documentoSaidaRenderer;
+    private final RhVRelacaoLaboralEntityRepository relacaoLaboralRepository;
+    private final DomainEntityRepository domainEntityRepository;
     private final ResourceLoader resourceLoader;
     private final PdfGenerator pdfGenerator;
 
@@ -42,10 +49,8 @@ public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
             () -> IgrpResponseStatusException.notFound("Declaracao not found for id: " + declaracaoId)
         );
 
-        var paramDocOutput = paramDocOutputRepository
-            .findByTipoDocumentoAndEstado(declaracao.getTipoDeclaracao(), "A").orElseThrow(
-                () -> IgrpResponseStatusException.notFound("Documento Output not found para tipo declaracao: " + declaracao.getTipoDeclaracao())
-            );
+        // Texto do Documento de Saída do tipo, com os marcadores ${...} substituídos (antes saía cru).
+        var paramDocOutput = documentoSaidaRenderer.render(declaracao.getTipoDeclaracao(), valoresBase(declaracao));
 
       var templateName = "declaracao/" + TEMPLATES.getOrDefault(declaracao.getTipoDeclaracao(), TEMPLATE_PADRAO);
 
@@ -65,5 +70,35 @@ public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
       data.put("watermark", watermark);
 
       return pdfGenerator.generate(templateName, data);
+    }
+
+    /**
+     * Valores que qualquer declaração pode usar no texto (${nomeColaborador}, ${cargo}…). Para um tipo com dados
+     * próprios, acrescentar aqui (ou montar outro mapa) — ver docs/guia_documentos_saida_marcadores.html.
+     */
+    private Map<String, Object> valoresBase(DeclaracaoEntity declaracao) {
+        var v = new LinkedHashMap<String, Object>();
+        var funcionario = declaracao.getPedidoId() != null ? declaracao.getPedidoId().getFunId() : declaracao.getFunId();
+        if (funcionario != null) {
+            v.put("nomeColaborador", funcionario.getNome());
+            v.put("nif", funcionario.getNif());
+        }
+        if (declaracao.getTiprelId() != null)
+            relacaoLaboralRepository.findById(declaracao.getTiprelId().getId()).ifPresent(r -> {
+                v.put("cargo", r.getCargoDesc());
+                v.put("categoria", r.getEscalaoDesc());
+                v.put("carreira", r.getCarreiraDesc());
+                v.put("vinculo", r.getVinculoDesc());
+                v.put("direcao", r.getDirecaoDesc());
+                v.put("seccao", r.getSeccaoDesc());
+            });
+        v.put("finalidade", declaracao.getFinalidade() == null ? null
+            : domainEntityRepository.getActiveDomainByCode("FINALIDADE_DECLARACAO")
+                .getOrDefault(declaracao.getFinalidade(), declaracao.getFinalidade()));
+        v.put("entidadeDestinatario", declaracao.getEntidadeDestinado());
+        v.put("dataPedido", declaracao.getDataPedido() != null
+            ? DateFormatter.EXTENDED_DATE_PT.format(declaracao.getDataPedido()) : null);
+        v.put("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
+        return v;
     }
 }

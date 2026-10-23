@@ -6,11 +6,16 @@ package cv.inps.rh.configuracao.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.commands.PreVisualizarDocumentoCommand;
 import cv.inps.rh.configuracao.application.commands.SaveOutputDocumentCommand;
 import cv.inps.rh.configuracao.application.commands.UpdateOutputDocumentCommand;
 import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
+import cv.inps.rh.configuracao.application.dto.DocumentoRenderizadoDTO;
+import cv.inps.rh.configuracao.application.dto.MarcadoresDocumentoDTO;
+import cv.inps.rh.configuracao.application.dto.PreVisualizarDocumentoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
+import cv.inps.rh.configuracao.application.queries.GetMarcadoresDocumentoQuery;
 import cv.inps.rh.configuracao.application.queries.GetOutputDocumentByIdQuery;
 import cv.inps.rh.configuracao.application.queries.GetOutputDocumentsQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -158,6 +163,66 @@ public class DocumentoOutputController {
   {
 
       final var command = new UpdateOutputDocumentCommand(updateOutputDocumentRequest, id);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "documentos-output/{id}/marcadores"
+  )
+  @Operation(
+    summary = "Get marcadores documento",
+    description = "Marcadores ${...} usados no titulo, corpo e assinado por do documento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MarcadoresDocumentoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<MarcadoresDocumentoDTO> getMarcadoresDocumento(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetMarcadoresDocumentoQuery(id);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "documentos-output/pre-visualizar"
+  )
+  @Operation(
+    summary = "Pre visualizar documento",
+    description = "Substitui os marcadores com os valores enviados, sem gravar nada",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DocumentoRenderizadoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<DocumentoRenderizadoDTO> preVisualizarDocumento(@Valid @RequestBody PreVisualizarDocumentoRequestDTO preVisualizarDocumentoRequest
+)
+  {
+
+      final var command = new PreVisualizarDocumentoCommand(preVisualizarDocumentoRequest);
 
       return commandBus.send(command);
 

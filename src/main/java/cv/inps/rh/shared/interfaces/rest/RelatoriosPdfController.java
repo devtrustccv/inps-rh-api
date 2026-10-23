@@ -58,7 +58,7 @@ public class RelatoriosPdfController {
   public ResponseEntity<ReportHtmlDTO> content(@PathVariable OrdemServico tipo, @RequestParam String funcionarioId) {
     var html = pdfGenerator.generateAsString(
         "os-general",
-        osService.generate(tipo, osService.content(tipo, funcionarioId).getHtml())
+        osService.generate(osService.renderizar(tipo, funcionarioId))
     );
     return ResponseEntity.ok(new ReportHtmlDTO(html));
   }

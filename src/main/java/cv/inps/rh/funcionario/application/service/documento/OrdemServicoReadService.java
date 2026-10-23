@@ -118,8 +118,7 @@ public class OrdemServicoReadService {
     var tipo = OrdemServico.valueOf(os.getReferente());
     var funcionarioUuid = os.getFunId().getUuid().toString();
 
-    var htmlDTO = ordemServicoService.content(tipo, funcionarioUuid);
-    var context = ordemServicoService.generate(tipo, htmlDTO.getHtml());
+    var context = ordemServicoService.generate(ordemServicoService.renderizar(tipo, funcionarioUuid));
 
     return ordemServicoPdfService.generate(context);
   }
