@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ public class NotificacaoMapper {
         dto.setEmail(entity.getEmail());
         dto.setDataEnvio(entity.getDataEnvio() != null ? entity.getDataEnvio() : null);
         dto.setEstado(entity.getEstado());
+        dto.setEstadoDescricao(EstadoNotificacao.descricaoDe(entity.getEstado()));
         // Adicionar outros campos se necessário
 
         return dto;

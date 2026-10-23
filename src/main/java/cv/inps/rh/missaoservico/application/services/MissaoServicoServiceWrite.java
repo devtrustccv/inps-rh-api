@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.*;
@@ -613,12 +614,12 @@ public class MissaoServicoServiceWrite {
   /** Envia um email a um destinatário externo e devolve o registo (com referência à missão) por gravar. */
   private NotificacaoEntity notificacaoExterna(MissaoServicoEntity missao, String tipoNotificacao,
                                                String email, String nome, String assunto, String message) {
-    String estado = "Enviado";
+    String estado = EstadoNotificacao.ENVIADO.name();
     try {
       emailService.sendEmail(email, assunto, MissaoProcessoSupport.corpoHtml(message));
     } catch (Exception e) {
       LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, e.getMessage());
-      estado = "Erro";
+      estado = EstadoNotificacao.ERRO.name();
     }
 
     var n = new NotificacaoEntity();

@@ -4,12 +4,14 @@ import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetPedidoDeclaracoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.PedidoDeclaracaoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,6 +40,20 @@ public class PedidoDeclaracaoReadService {
   private final DeclaracaoEntityRepository declaracaoRepository;
   private final PedidoDeclaracaoMapper pedidoDeclaracaoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
+  private final DomainEntityRepository domainEntityRepository;
+
+  /** Domínio do Tipo de Declaração (spec Transversal, Registar Pedido): ORDEM_SERVICO_DECLARACAO / DECLARACAO. */
+  public static final String DOMINIO_TIPO = "ORDEM_SERVICO_DECLARACAO";
+  public static final String REFERENCIA_TIPO = "DECLARACAO";
+  private static final String DOMINIO_FINALIDADE = "FINALIDADE_DECLARACAO";
+
+  private Map<String, String> tiposDeclaracao() {
+    return domainEntityRepository.getActiveDomainAndReferenciaByCode(DOMINIO_TIPO, REFERENCIA_TIPO);
+  }
+
+  private static String descricaoEstado(String codigo) {
+    return Estado.fromCode(codigo).map(Estado::getDescription).orElse(codigo);
+  }
 
   @Transactional(readOnly = true)
   public WrapperListaPedidoDeclaracaoDTO findAll(GetPedidoDeclaracoesQuery query) {
@@ -75,7 +92,14 @@ public class PedidoDeclaracaoReadService {
     Page<DeclaracaoEntity> page = declaracaoRepository.findAll(spec, pageable);
 
     WrapperListaPedidoDeclaracaoDTO response = new WrapperListaPedidoDeclaracaoDTO();
-    response.setContent(page.getContent().stream().map(pedidoDeclaracaoMapper::toDto).collect(Collectors.toList()));
+    // QA TR-15/16: a lista mostrava os códigos do tipo e do estado.
+    var tipos = tiposDeclaracao();
+    response.setContent(page.getContent().stream().map(e -> {
+      var dto = pedidoDeclaracaoMapper.toDto(e);
+      dto.setTipoDeclaracaoDesc(tipos.getOrDefault(dto.getTipoDeclaracao(), dto.getTipoDeclaracao()));
+      dto.setEstadoPedidoDesc(descricaoEstado(dto.getEstadoPedido()));
+      return dto;
+    }).collect(Collectors.toList()));
     response.setTotalPages(page.getTotalPages());
     response.setTotalElements(page.getTotalElements());
     response.setPageNumber(page.getNumber());
@@ -91,6 +115,12 @@ public class PedidoDeclaracaoReadService {
         () -> IgrpResponseStatusException.notFound("Declaracao not found for id: " + id)
     );
     var pedidoDeclaracao = pedidoDeclaracaoMapper.toResponseDto(entity);
+    pedidoDeclaracao.setTipoDeclaracaoDesc(tiposDeclaracao()
+        .getOrDefault(pedidoDeclaracao.getTipoDeclaracao(), pedidoDeclaracao.getTipoDeclaracao()));
+    if (pedidoDeclaracao.getFinalidade() != null)
+      pedidoDeclaracao.setFinalidadeDesc(domainEntityRepository.getActiveDomainByCode(DOMINIO_FINALIDADE)
+          .getOrDefault(pedidoDeclaracao.getFinalidade(), pedidoDeclaracao.getFinalidade()));
+    pedidoDeclaracao.setEstadoPedidoDesc(descricaoEstado(pedidoDeclaracao.getEstadoPedido()));
 
     var documentos = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), entity.getUuid());
@@ -104,6 +134,8 @@ public class PedidoDeclaracaoReadService {
         anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
         anexo.setTipoDocumentoDesc(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getNome() : null);
         anexo.setDocumento(d.getUrl());
+        anexo.setEstado(d.getEstado() != null ? d.getEstado().getCode() : null);
+        anexo.setEstadoDesc(d.getEstado() != null ? d.getEstado().getDescription() : null);
         return anexo;
       }).collect(Collectors.toList()));
     }

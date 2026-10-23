@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,5 +25,6 @@ public interface ParamDocOutputEntityRepository extends
 
   Optional<ParamDocOutputEntity> findByUuid(UUID uuid);
   Optional<ParamDocOutputEntity> findByTipoDocumentoAndEstado(String tipoDocumento, String estado);
+  List<ParamDocOutputEntity> findAllByTipoDocumentoAndEstado(String tipoDocumento, String estado);
 
 }

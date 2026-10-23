@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.missaoservico.application.dto.AvaliacaoPrestadorGravadaResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.ProcessoEtapaGravadaResponseDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -1372,12 +1373,12 @@ public class MissaoProcessoServiceWrite {
     var nome = param != null ? param.getNome() : prestador.getNome();
 
     for (var email : destinos) {
-      var estado = "Enviado";
+      var estado = EstadoNotificacao.ENVIADO.name();
       try {
         emailService.sendEmail(email, conteudo.assunto(), MissaoProcessoSupport.corpoHtml(conteudo.corpo()));
       } catch (Exception ex) {
         LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, ex.getMessage());
-        estado = "Erro";
+        estado = EstadoNotificacao.ERRO.name();
       }
 
       var n = new NotificacaoEntity();
