@@ -199,7 +199,7 @@ public class AdiantamentoService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO);
 
-    documentService.saveDocuments(
+    documentService.addDocuments(
         List.of(request),
         loan.getTiprel().getFunId(),
         loan.getUuid(),
@@ -221,7 +221,9 @@ public class AdiantamentoService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
 
       switch (request.getParecer()) {
         case FAVORAVEL -> {

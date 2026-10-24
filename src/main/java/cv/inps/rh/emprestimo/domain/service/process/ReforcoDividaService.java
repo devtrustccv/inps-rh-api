@@ -198,7 +198,9 @@ public class ReforcoDividaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
     pedidoEntityRepository.save(order);
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
@@ -252,7 +254,9 @@ public class ReforcoDividaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());

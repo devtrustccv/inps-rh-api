@@ -263,7 +263,7 @@ public class EmprestimoWriteService {
         entity.getPedido(), EtapaEmprestimo.PAGAMENTO, "PAGO", data.dataPagamento(), data.observacao());
 
     if (!CollectionUtils.isEmpty(data.files())) {
-      documentService.saveDocuments(
+      documentService.addDocuments(
           data.files(),
           entity.getTiprel().getFunId(),
           entity.getUuid(),
@@ -287,7 +287,7 @@ public class EmprestimoWriteService {
     if (CollectionUtils.isEmpty(files))
       return;
 
-    documentService.saveDocuments(
+    documentService.addDocuments(
         files,
         entity.getTiprel().getFunId(),
         entity.getUuid(),

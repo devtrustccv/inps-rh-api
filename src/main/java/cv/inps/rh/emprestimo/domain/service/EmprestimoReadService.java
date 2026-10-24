@@ -222,7 +222,9 @@ public class EmprestimoReadService {
     baseDecision.setDataExecucao((obj.getLastModifiedDate() != null
         ? obj.getLastModifiedDate()
         : obj.getCreatedDate()).toLocalDate());
-    baseDecision.setExecutadoPor(obj.getLastModifiedBy());
+    // Cada gravação cria uma decisão nova, e o utilizador de alteração só é preenchido quando ela é
+    // alterada depois; sem o de registo, "Executado Por" ficava vazio (ex.: após uma retificação).
+    baseDecision.setExecutadoPor(obj.getLastModifiedBy() != null ? obj.getLastModifiedBy() : obj.getCreatedBy());
 
     var responsavel = new BaseDecisaoDTO.Responsavel(
         obj.getParecerResponsavel(),
