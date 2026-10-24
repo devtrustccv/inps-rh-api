@@ -134,7 +134,7 @@ public class EmprestimoWriteService {
         generateSaveFinancialPlanForRecuperacao(entity, request);
       } else {
         if (entity.getJuro() != null && entity.getNrPrestacao() != null) {
-          generateSaveFinancialPlanForFundoSocial(entity);
+          generateSaveFinancialPlanForFundoSocial(entity, request.getNrPrestacaoPaga());
         }
       }
 
@@ -221,7 +221,7 @@ public class EmprestimoWriteService {
     );
   }
 
-  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity) {
+  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity, Long nrPrestacaoPaga) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(
         entity.getValorEmprestimo(),
@@ -230,7 +230,23 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
+    // "Total Prestações Pagas" do registo: as primeiras N prestações ficam pagas (FLG_PAGO/VALOR_PAGO).
+    var pagas = nrPrestacaoPaga != null ? nrPrestacaoPaga : 0L;
+    plan = plan.stream()
+        .map(row -> row.numero() <= pagas
+            ? new PlanoFinanceiroRowDTO(row.numero(), row.estado(), FinancialPlanHelper.FLG_PAGO, row.dataPagamento(),
+                row.saldoInicial(), row.pagamento(), row.principal(), row.juros(), row.saldoFinal())
+            : row)
+        .toList();
+
     emprestimoHelper.savePlans(entity, plan);
+
+    // Prestação arredondada às unidades, como no plano (e na Aquisição de Viatura) — antes ficava a
+    // do ecrã com cêntimos (ex.: 22138,98 em vez de 22139).
+    if (!plan.isEmpty()) {
+      entity.setValorPrestacao(plan.get(0).pagamento());
+      emprestimoEntityRepository.save(entity);
+    }
   }
 
   public void generateSaveFinancialPlanForRecuperacao(EmprestimoEntity entity, FundoSocialRequestDTO request) {
@@ -263,7 +279,7 @@ public class EmprestimoWriteService {
         entity.getPedido(), EtapaEmprestimo.PAGAMENTO, "PAGO", data.dataPagamento(), data.observacao());
 
     if (!CollectionUtils.isEmpty(data.files())) {
-      documentService.saveDocuments(
+      documentService.addDocuments(
           data.files(),
           entity.getTiprel().getFunId(),
           entity.getUuid(),
@@ -287,7 +303,7 @@ public class EmprestimoWriteService {
     if (CollectionUtils.isEmpty(files))
       return;
 
-    documentService.saveDocuments(
+    documentService.addDocuments(
         files,
         entity.getTiprel().getFunId(),
         entity.getUuid(),

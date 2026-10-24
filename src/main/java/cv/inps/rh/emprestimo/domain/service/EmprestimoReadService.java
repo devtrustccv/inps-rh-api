@@ -100,7 +100,7 @@ public class EmprestimoReadService {
     dto.setNrPrestacaoPaga(
         planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
             .stream()
-            .filter(p -> "PAGO".equalsIgnoreCase(p.getFlgPago()))
+            .filter(p -> FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
             .count()
     );
 
@@ -208,6 +208,10 @@ public class EmprestimoReadService {
     var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
     dto.setDocumentos(docs);
 
+    dto.setObservacaoEstado(entity.getObservacao());
+    dto.setDocumentosEstado(documentService.getDocuments(funId,
+        List.of(ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"), entity.getUuid()));
+
     return dto;
   }
 
@@ -222,7 +226,9 @@ public class EmprestimoReadService {
     baseDecision.setDataExecucao((obj.getLastModifiedDate() != null
         ? obj.getLastModifiedDate()
         : obj.getCreatedDate()).toLocalDate());
-    baseDecision.setExecutadoPor(obj.getLastModifiedBy());
+    // Cada gravação cria uma decisão nova, e o utilizador de alteração só é preenchido quando ela é
+    // alterada depois; sem o de registo, "Executado Por" ficava vazio (ex.: após uma retificação).
+    baseDecision.setExecutadoPor(obj.getLastModifiedBy() != null ? obj.getLastModifiedBy() : obj.getCreatedBy());
 
     var responsavel = new BaseDecisaoDTO.Responsavel(
         obj.getParecerResponsavel(),
@@ -376,7 +382,7 @@ public class EmprestimoReadService {
             v.getValorAdiantado(),
             v.getNrPrestacao(),
             planoFinanceiroEntityRepository.findAllByEmprestimo(v).stream()
-                .filter(p -> "A".equals(p.getEstado()) && "PAGO".equalsIgnoreCase(p.getFlgPago()))
+                .filter(p -> "A".equals(p.getEstado()) && FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
                 .count(),
             v.getValorPrestacao(),
             v.getDataInicio(),

@@ -57,6 +57,13 @@ public class ParametrizacaoService {
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
+  /** Tipo Movimento do Fundo Social: os do domínio CODIGO_FUNDO_SOCIAL (RH_T_DOMAINS.VALOR = SHORT_DESC). */
+  public List<TipoMovimentoDTO> getTiposMovimentosFundoSocial() {
+    return tipoMovimentoEntityRepository
+        .findAllByShortDescNoDominio("CODIGO_FUNDO_SOCIAL")
+        .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+  }
+
   public List<TipoMovimentoDTO> getTiposMovimentosPagamentosDesconto() {
     return tipoMovimentoEntityRepository
         .findAllByTipoInAndEstadoAndAmbAplId(List.of("PAG", "IMP"), ESTADO_ACTIVO, AMB_APL_ID)

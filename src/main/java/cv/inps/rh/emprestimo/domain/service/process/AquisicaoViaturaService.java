@@ -87,7 +87,11 @@ public class AquisicaoViaturaService {
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
-    entity.setJuro(request.getJuros());
+    // A taxa de juro é definida na Análise RH; o ecrã do Pedido não a envia. Sem esta guarda, voltar a
+    // gravar o Pedido (ex.: após retificação) apagava a taxa já introduzida.
+    if (request.getJuros() != null) {
+      entity.setJuro(request.getJuros());
+    }
     // Só validado se preenchido (21 dígitos), como no resto do sistema — antes era gravado sem validação.
     entity.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     entity.setNif(request.getNif());
@@ -262,7 +266,9 @@ public class AquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
@@ -317,7 +323,9 @@ public class AquisicaoViaturaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());

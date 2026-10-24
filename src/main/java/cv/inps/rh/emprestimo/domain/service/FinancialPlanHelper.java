@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public class FinancialPlanHelper {
 
+  /** RH_T_PLANO_FINANCEIRO.FLG_PAGO de uma prestação paga (com VALOR_PAGO = valor da prestação). */
+  public static final String FLG_PAGO = "SIM";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(FinancialPlanHelper.class);
   private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);
 
@@ -174,7 +177,7 @@ public class FinancialPlanHelper {
     int numeroPrestacoesPagasCounter = 0;
 
     for (int i = 1; i <= row.getNrPrestacao(); i++) {
-      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter < numeroPrestacoesPagos ? "PAGO" : null;
+      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter < numeroPrestacoesPagos ? FLG_PAGO : null;
       plano.add(
           new PlanoFinanceiroRowDTO(
               (long) i,

@@ -176,7 +176,7 @@ public class EmprestimoHelper {
 
     var allInitialPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(initialLoan);
     var allInitialPaidPlans = allInitialPlans.stream()
-        .filter(obj -> "PAGO".equals(obj.getFlgPago()))
+        .filter(obj -> FinancialPlanHelper.FLG_PAGO.equals(obj.getFlgPago()))
         .toList();
     var numberOfPaidPlans = allInitialPaidPlans.size();
     var firstNewPlanNumber = numberOfPaidPlans + 1L;
@@ -301,6 +301,10 @@ public class EmprestimoHelper {
           newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           newPlan.setEstado(obj.estado());
           newPlan.setFlgPago(obj.flagPago());
+          // Prestação já paga (ex.: "Total Prestações Pagas" no registo): valor pago = prestação.
+          if (FinancialPlanHelper.FLG_PAGO.equals(obj.flagPago())) {
+            newPlan.setValorPago(obj.pagamento());
+          }
           newPlan.setEmprestimo(entity);
           newPlan.setDataPagamento(obj.dataPagamento());
           newPlan.setNrOrdemPrestacao(obj.numero());

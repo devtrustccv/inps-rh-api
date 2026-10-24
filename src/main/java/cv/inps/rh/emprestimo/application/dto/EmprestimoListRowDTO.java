@@ -75,5 +75,8 @@ public class EmprestimoListRowDTO  {
 
   // Nº de versões do pedido (empréstimo inicial + subprocessos); > 1 => linha expansível.
   private Long numeroVersoes;
+  // Tipo do pedido (AQUISICAO_VIATURA, FUNDO_SOCIAL, RECUPERACAO): a Recuperação grava em
+  // tipoEmprestimo o tipo recuperado, por isso só o pedido a distingue do Fundo Social / Viatura.
+  private String tipoPedido;
 
 }
