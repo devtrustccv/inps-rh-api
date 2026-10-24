@@ -35,6 +35,12 @@ public class ParametrizacaoController {
     return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosPagamentosDesconto());
   }
 
+  @GetMapping("/tipo-movimento-fundo-social/ativos")
+  @Operation(summary = "Lista tipos de movimento do Fundo Social (domínio CODIGO_FUNDO_SOCIAL)")
+  public ResponseEntity<List<TipoMovimentoDTO>> getTiposMovimentoFundoSocialAtivos() {
+    return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosFundoSocial());
+  }
+
   @GetMapping("/estabelecimento/ativos")
   @Operation(summary = "Lista estabelecimentos ativos")
   public ResponseEntity<List<EstabelecimentoComboDTO>> getEstabelecimentosAtivos(@RequestParam(required = false) Long paisId) {

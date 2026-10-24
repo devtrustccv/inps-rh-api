@@ -71,7 +71,7 @@ public interface EmprestimoEntityRepository extends
              FROM PlanoFinanceiroEntity pf
              WHERE pf.emprestimo = e
              AND pf.estado = 'A'
-             AND pf.flgPago = 'PAGO'
+             AND pf.flgPago = 'SIM'
              AND pf.dataPagamento IS NOT NULL
            ),
           e.valorPago,
@@ -97,7 +97,8 @@ public interface EmprestimoEntityRepository extends
           ),
           (
             SELECT COUNT(versao) FROM EmprestimoEntity versao WHERE versao.pedido.id = p.id
-          )
+          ),
+          p.tipoPedido
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id

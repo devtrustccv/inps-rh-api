@@ -100,7 +100,7 @@ public class EmprestimoReadService {
     dto.setNrPrestacaoPaga(
         planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
             .stream()
-            .filter(p -> "PAGO".equalsIgnoreCase(p.getFlgPago()))
+            .filter(p -> FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
             .count()
     );
 
@@ -207,6 +207,10 @@ public class EmprestimoReadService {
 
     var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
     dto.setDocumentos(docs);
+
+    dto.setObservacaoEstado(entity.getObservacao());
+    dto.setDocumentosEstado(documentService.getDocuments(funId,
+        List.of(ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"), entity.getUuid()));
 
     return dto;
   }
@@ -378,7 +382,7 @@ public class EmprestimoReadService {
             v.getValorAdiantado(),
             v.getNrPrestacao(),
             planoFinanceiroEntityRepository.findAllByEmprestimo(v).stream()
-                .filter(p -> "A".equals(p.getEstado()) && "PAGO".equalsIgnoreCase(p.getFlgPago()))
+                .filter(p -> "A".equals(p.getEstado()) && FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
                 .count(),
             v.getValorPrestacao(),
             v.getDataInicio(),
