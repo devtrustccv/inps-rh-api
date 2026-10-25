@@ -96,6 +96,7 @@ public class EmprestimoHelper {
     var encerrado = java.util.Map.of(
         StatusEmprestimo.CANCELADO.name(), "cancelado",
         StatusEmprestimo.DESISTENCIA.name(), "encerrado por desistência",
+        StatusEmprestimo.NAO_AUTORIZADO.name(), "encerrado (não autorizado pela Comissão Executiva)",
         StatusEmprestimo.ATIVO.name(), "concluído");
     if (estado != null && encerrado.containsKey(estado)) {
       throw IgrpResponseStatusException.badRequest(
@@ -129,6 +130,31 @@ public class EmprestimoHelper {
    * o empréstimo em vigor (inicial, ou subprocesso já concluído — ATIVO/CABIMENTADO), a partir do
    * qual se cria uma versão nova. Um subprocesso cancelado/desistido não pode ser reaberto.
    */
+  /** Subprocesso terminado sem ficar em vigor: cancelado, desistência ou não autorizado. */
+  public static boolean isSubprocessoTerminado(String estado) {
+    return StatusEmprestimo.CANCELADO.name().equals(estado)
+        || StatusEmprestimo.DESISTENCIA.name().equals(estado)
+        || StatusEmprestimo.NAO_AUTORIZADO.name().equals(estado);
+  }
+
+  /**
+   * Subprocesso (Amortização/Renegociação) terminado sem ficar em vigor: o empréstimo anterior volta
+   * a ser o que está em vigor — plano reativado e o pedido (partilhado por todas as versões) volta a
+   * PAGAMENTO, a etapa final de um empréstimo concluído.
+   */
+  public void reporEmprestimoAnterior(EmprestimoEntity subprocesso) {
+
+    var anterior = subprocesso.getEmprestimo();
+    planoFinanceiroEntityRepository.inativarPlanos(subprocesso.getId());
+    if (planoFinanceiroEntityRepository.countByEmprestimo_IdAndEstado(anterior.getId(), Estado.A.name()) == 0) {
+      planoFinanceiroEntityRepository.reativarPlanos(anterior.getId());
+    }
+
+    var pedido = subprocesso.getPedido();
+    pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
+    pedidoEntityRepository.save(pedido);
+  }
+
   public static boolean isSubprocessoEmCurso(EmprestimoEntity base) {
     var estado = base.getEstado();
     // Empréstimo em vigor = Ativo (pago e em reembolso): é a partir dele que nasce uma versão nova.
@@ -139,9 +165,9 @@ public class EmprestimoHelper {
       }
       return false;
     }
-    if (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado)) {
+    if (isSubprocessoTerminado(estado)) {
       throw IgrpResponseStatusException.badRequest(
-          "Este subprocesso foi cancelado. Inicie um novo a partir do empréstimo em vigor.");
+          "Este subprocesso foi cancelado ou não autorizado. Inicie um novo a partir do empréstimo em vigor.");
     }
     // subprocesso ainda não concluído (inclui Cabimentado à espera do pagamento): edita-se no próprio registo
     return true;

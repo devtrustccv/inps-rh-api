@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.emprestimo.domain.service.EmprestimoNotificacaoService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -42,6 +43,7 @@ public class AquisicaoViaturaService {
   private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoNotificacaoService emprestimoNotificacaoService;
   private final EmprestimoWriteService emprestimoWriteService;
   private final ApplicationAuditorAware auditorAware;
   private final EmprestimoHelper emprestimoHelper;
@@ -331,10 +333,9 @@ public class AquisicaoViaturaService {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
-        case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
-        }
+        // Não Autorizado termina o processo (fica na Autorização, Não Autorizado e só de
+        // consulta) — antes voltava à Análise RH.
+        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
@@ -367,6 +368,12 @@ public class AquisicaoViaturaService {
     newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newObj.setCreatedDate(request.getData().atStartOfDay());
     pedidoDecisaoEntityRepository.save(newObj);
+
+    // Decisão da Comissão Executiva: notifica quem fez a Validação Responsável na Análise RH.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      emprestimoNotificacaoService.notificarDecisaoAutorizacao(
+          loan, EtapaEmprestimo.ANALISE_RH_PEDIDO, request.getParecer(), request.getObservacao());
+    }
   }
 
   @Transactional

@@ -3,6 +3,7 @@ package cv.inps.rh.emprestimo.domain.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
@@ -51,6 +52,14 @@ public class EmprestimoDocumentService {
 
     documentos.forEach(doc -> {
 
+      var semTipo = doc.getTipoDocumentoId() == null || doc.getTipoDocumentoId() <= 0;
+      // Linha vazia (os formulários abrem com uma linha de documento): não é um documento.
+      if (semTipo && !StringUtils.hasText(doc.getUrl()) && !StringUtils.hasText(doc.getId()))
+        return;
+      // Antes ia tipoDocumentoId 0 e o erro era "TipoDocumentoEntity not found for id: 0".
+      if (semTipo)
+        throw IgrpResponseStatusException.badRequest("Selecione o Tipo de Documento de cada documento anexado.");
+
       final DocumentoEntity newDoc;
 
       if (StringUtils.hasText(doc.getId())) {
@@ -65,9 +74,16 @@ public class EmprestimoDocumentService {
         newDoc.setDocId(1L);
       }
 
-      newDoc.setTpDocumentoId(doc.getTipoDocumentoId() != null ? tipoDocumentoEntityRepository.findByIdOrThrow(doc.getTipoDocumentoId()) : null);
+      var tipo = tipoDocumentoEntityRepository.findById(doc.getTipoDocumentoId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+              "O Tipo de Documento selecionado já não está disponível. Selecione outro."));
+      if (!StringUtils.hasText(doc.getUrl()) && !StringUtils.hasText(newDoc.getUrl()))
+        throw IgrpResponseStatusException.badRequest(
+            "Carregue o ficheiro do documento «%s».".formatted(tipo.getNome()));
+      newDoc.setTpDocumentoId(tipo);
       newDoc.setFunId(funId);
-      newDoc.setUrl(doc.getUrl());
+      if (StringUtils.hasText(doc.getUrl()))
+        newDoc.setUrl(doc.getUrl());
       docs.add(newDoc);
     });
 

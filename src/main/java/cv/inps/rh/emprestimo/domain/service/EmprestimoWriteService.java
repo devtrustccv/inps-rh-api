@@ -312,7 +312,7 @@ public class EmprestimoWriteService {
 
     if (entity.getEmprestimo() != null
         && (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado))) {
-      reporAposCancelarSubprocesso(entity);
+      emprestimoHelper.reporEmprestimoAnterior(entity);
     }
 
     if (CollectionUtils.isEmpty(files))
@@ -324,28 +324,6 @@ public class EmprestimoWriteService {
         entity.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_CHANGE_STATUS"
     );
-  }
-
-  /**
-   * Cancelar (ou desistir de) uma Amortização / Renegociação: o empréstimo anterior volta a ser o
-   * que está em vigor. Se o NEXT do pedido do subprocesso já tinha corrido, o plano do anterior
-   * foi inativado e o do subprocesso criado — repõe-se. A etapa do pedido (partilhado por todas
-   * as versões) volta a PAGAMENTO, a etapa final de um empréstimo concluído — o anterior está em
-   * vigor, logo já lá tinha chegado. Antes só se repunha se a etapa tivesse ADIANTAMENTO/REFORCO
-   * no nome, e um subprocesso cancelado no pedido (PEDIDO) ou na Análise RH da Renegociação
-   * (ANALISE_RH_PEDIDO) deixava a etapa errada na linha do empréstimo.
-   */
-  private void reporAposCancelarSubprocesso(EmprestimoEntity subprocesso) {
-
-    var anterior = subprocesso.getEmprestimo();
-    planoFinanceiroEntityRepository.inativarPlanos(subprocesso.getId());
-    if (planoFinanceiroEntityRepository.countByEmprestimo_IdAndEstado(anterior.getId(), Estado.A.name()) == 0) {
-      planoFinanceiroEntityRepository.reativarPlanos(anterior.getId());
-    }
-
-    var pedido = subprocesso.getPedido();
-    pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
-    pedidoEntityRepository.save(pedido);
   }
 
   /**

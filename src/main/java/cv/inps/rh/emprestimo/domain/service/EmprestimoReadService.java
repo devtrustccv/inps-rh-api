@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
@@ -366,8 +367,7 @@ public class EmprestimoReadService {
     var versoes = emprestimoEntityRepository.findAllByPedido_IdOrderByVersaoAscIdAsc(loan.getPedido().getId());
     // "Atual" = a versão mais recente não cancelada (a que está em curso, ou a em vigor)
     var idAtual = versoes.stream()
-        .filter(v -> !StatusEmprestimo.CANCELADO.name().equals(v.getEstado())
-            && !StatusEmprestimo.DESISTENCIA.name().equals(v.getEstado()))
+        .filter(v -> !EmprestimoHelper.isSubprocessoTerminado(v.getEstado()))
         .map(EmprestimoEntity::getId)
         .max(Long::compareTo)
         .orElse(null);

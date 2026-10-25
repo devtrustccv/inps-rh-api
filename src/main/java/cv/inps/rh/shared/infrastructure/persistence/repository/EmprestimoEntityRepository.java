@@ -84,7 +84,7 @@ public interface EmprestimoEntityRepository extends
             FROM EmprestimoEntity emCurso
             WHERE emCurso.id = (
               SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
-              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
             )
           ),
           (
@@ -92,7 +92,7 @@ public interface EmprestimoEntityRepository extends
             FROM EmprestimoEntity emCurso
             WHERE emCurso.id = (
               SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
-              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
             )
           ),
           (

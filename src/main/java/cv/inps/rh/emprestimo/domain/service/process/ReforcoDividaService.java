@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.emprestimo.domain.service.EmprestimoNotificacaoService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -31,6 +32,7 @@ public class ReforcoDividaService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoNotificacaoService emprestimoNotificacaoService;
   private final EmprestimoHelper adiantamentoEmprestimoHelper;
   private final ApplicationAuditorAware auditorAware;
 
@@ -262,10 +264,9 @@ public class ReforcoDividaService {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
-        case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
-          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
-        }
+        // Não Autorizado termina a Renegociação (antes voltava à Análise RH); o empréstimo
+        // anterior volta a ficar em vigor (ver o fim do método).
+        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
@@ -298,6 +299,17 @@ public class ReforcoDividaService {
     newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newObj.setCreatedDate(request.getData().atStartOfDay());
     pedidoDecisaoEntityRepository.save(newObj);
+
+    // Decisão da Comissão Executiva: notifica quem fez a Validação Responsável na Análise RH.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      emprestimoNotificacaoService.notificarDecisaoAutorizacao(
+          loan, EtapaEmprestimo.ANALISE_RH_REFORCO, request.getParecer(), request.getObservacao());
+    }
+
+    if (StatusEmprestimo.NAO_AUTORIZADO.name().equals(loan.getEstado()) && loan.getEmprestimo() != null) {
+      emprestimoEntityRepository.save(loan);
+      adiantamentoEmprestimoHelper.reporEmprestimoAnterior(loan);
+    }
   }
 
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
