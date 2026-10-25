@@ -14,6 +14,7 @@ import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntity
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVListaProcessamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
 import oracle.jdbc.OracleCallableStatement;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -86,16 +88,32 @@ public class ProcessamentoSalarialReadService {
     return data;
   }
 
+  private static String formatar(DecimalFormat format, Long valor) {
+    return valor == null ? null : format.format(valor);
+  }
+
   public ResumoProcessamentoDTO getResumoProcessamentoSalarial(List<Long> procIds) {
 
     var processedIds = procIds.stream().filter(Objects::nonNull).distinct().toList();
 
     var isOne = processedIds.size() == 1;
 
-    return new ResumoProcessamentoDTO(
-        isOne ? procSalCcRemunEntityRepository.getRemuneracoesForOne(processedIds.getFirst()) : procSalCcRemunEntityRepository.getRemuneracoes(processedIds),
-        isOne ? procSalCcPagEntityRepository.getPagamentosForOne(processedIds.getFirst()) : procSalCcPagEntityRepository.getPagamentos(processedIds)
-    );
+    var remuneracoes = isOne ? procSalCcRemunEntityRepository.getRemuneracoesForOne(processedIds.getFirst()) : procSalCcRemunEntityRepository.getRemuneracoes(processedIds);
+    var pagamentos = isOne ? procSalCcPagEntityRepository.getPagamentosForOne(processedIds.getFirst()) : procSalCcPagEntityRepository.getPagamentos(processedIds);
+
+    var format = NumberUtils.spaceDecimalFormat();
+
+    remuneracoes.forEach(r -> {
+      r.setQuantidadeFormatada(formatar(format, r.getQuantidade()));
+      r.setTotalFormatado(formatar(format, r.getTotal()));
+    });
+
+    pagamentos.forEach(p -> {
+      p.setQuantidadeFormatada(formatar(format, p.getQuantidade()));
+      p.setValorFormatado(formatar(format, p.getValor()));
+    });
+
+    return new ResumoProcessamentoDTO(remuneracoes, pagamentos);
   }
 
   public DetalhesProcessamentoDTO getDetalhesProcessamentoSalarial(GetDetalhesProcessamentoQuery query) {

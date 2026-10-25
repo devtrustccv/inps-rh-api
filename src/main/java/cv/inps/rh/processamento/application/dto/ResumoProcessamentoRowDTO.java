@@ -32,4 +32,8 @@ public class ResumoProcessamentoRowDTO {
 
   private Long total;
 
+  private String quantidadeFormatada;
+
+  private String totalFormatado;
+
 }

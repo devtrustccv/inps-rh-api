@@ -25,7 +25,9 @@ public interface ProcSalCcPagEntityRepository extends
               e.tipo,
               e.procSalId,
               COUNT(DISTINCT e.tiprelId),
-              sum(e.valor)
+              sum(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcPagEntity e
           WHERE e.procSalId IN (:procId)
@@ -41,7 +43,9 @@ public interface ProcSalCcPagEntityRepository extends
               e.tipo,
               null,
               COUNT(DISTINCT e.tiprelId),
-              sum(e.valor)
+              sum(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcPagEntity e
           WHERE e.procSalId IN (:procId)

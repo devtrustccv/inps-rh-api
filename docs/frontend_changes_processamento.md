@@ -1,6 +1,7 @@
 # Processamento Salarial — alterações de API para o front-end
 
-**Última actualização:** 2026-10-23 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`, `/fos`)
+**Última actualização:** 2026-10-25 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
+`/fos`)
 
 Changelog das alterações feitas ao backend do Processamento Salarial. Cada secção diz o que mudou no
 contrato e o que o ecrã tem de fazer. Spec de referência: `Especificação Tecnica Funcional - PROCESSAMENTO SALARIAL_23_10_2026.md`.
@@ -66,3 +67,25 @@ Movimento (`TIPO_MOVIMENTO`), a `diferenca` vem sempre 0. Não há nada a mudar 
 - Acrescentar o filtro Mês Referência.
 
 A FOS 18 (abril 2026, dados de teste) continua com `"657680.0"` gravado; só muda se for regenerada.
+
+---
+
+## 2. Resumo Processamento — valores formatados (25/10/2026)
+
+`POST /processamento-salarial/resumo`
+
+Cada linha de `remuneracao[]` e de `pagamento[]` traz agora, além dos números, o texto já formatado com
+separador de milhares por espaço (`NumberUtils.spaceDecimalFormat`, sem casas decimais). Os campos numéricos
+mantêm-se, sem alterações.
+
+| Lista           | Campo numérico | Campo formatado (novo) | Exemplo                   |
+|-----------------|----------------|------------------------|---------------------------|
+| `remuneracao[]` | `quantidade`   | `quantidadeFormatada`  | `1234` → `"1 234"`        |
+| `remuneracao[]` | `total`        | `totalFormatado`       | `1234567` → `"1 234 567"` |
+| `pagamento[]`   | `quantidade`   | `quantidadeFormatada`  | `12` → `"12"`             |
+| `pagamento[]`   | `valor`        | `valorFormatado`       | `98765` → `"98 765"`      |
+
+Se o valor numérico for `null`, o campo formatado também vem `null`.
+
+**Ação front:** mostrar os campos `*Formatad*` nas colunas Quantidade e Total/Valor do Resumo; continuar a usar
+os numéricos para somas ou ordenação.
