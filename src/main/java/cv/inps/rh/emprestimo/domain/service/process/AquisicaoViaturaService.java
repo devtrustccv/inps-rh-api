@@ -78,7 +78,10 @@ public class AquisicaoViaturaService {
       throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
     }
     entity.setNomeFornecedor(request.getNomeFornecedor().trim());
-    entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
+    entity.setBanco(Objects.nonNull(request.getBancoId()) && request.getBancoId() > 0
+        ? bancoEntityRepository.findById(request.getBancoId())
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("O banco selecionado não existe."))
+        : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());

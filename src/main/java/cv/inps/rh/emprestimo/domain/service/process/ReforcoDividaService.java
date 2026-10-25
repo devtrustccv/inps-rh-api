@@ -85,6 +85,7 @@ public class ReforcoDividaService {
     newLoan.setFinalidade(loan.getFinalidade());
     newLoan.setMotivoFecho(loan.getMotivoFecho());
     newLoan.setValorJuroTotal(loan.getValorJuroTotal());
+    newLoan.setDataInicio(EmprestimoHelper.dataInicioOriginal(loan));
     newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(
@@ -260,9 +261,16 @@ public class ReforcoDividaService {
     // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
     if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
+        // Só o Reforço de Capital segue para Contrato/Cabimento (há valor a pagar); aumento ou
+        // redução do nº de prestações termina aqui, com o plano novo já em vigor.
         case FAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
-          loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
+          if (EmprestimoHelper.isRenegociacaoComPagamento(loan.getTipoSituacao())) {
+            order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
+            loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
+          } else {
+            order.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
+            loan.setEstado(StatusEmprestimo.ATIVO.name());
+          }
         }
         // Não Autorizado termina a Renegociação (antes voltava à Análise RH); o empréstimo
         // anterior volta a ficar em vigor (ver o fim do método).
@@ -319,10 +327,14 @@ public class ReforcoDividaService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
 
+    // A data de início mantém-se a do empréstimo inicial (a renegociação não abre novo prazo).
+    loan.setDataInicio(EmprestimoHelper.dataInicioOriginal(loan));
+
     if (isNext) {
-      var comPagamento = TipoSituacao.REFORCO_CAPITAL.name().equals(loan.getTipoSituacao());
+      var comPagamento = EmprestimoHelper.isRenegociacaoComPagamento(loan.getTipoSituacao());
       loan.setEstado(comPagamento ? StatusEmprestimo.CABIMENTADO.name() : StatusEmprestimo.ATIVO.name());
     }
+    emprestimoEntityRepository.save(loan);
 
     var step = isNext ?
         EtapaEmprestimo.PAGAMENTO :
