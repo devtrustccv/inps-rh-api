@@ -202,7 +202,11 @@ public class EmprestimoReadService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name(),
+        // Fundo Social / Recuperação gravam os documentos com o tipo do pedido como referência —
+        // sem estes não apareciam no Ver Detalhe nem na Validação.
+        TipoPedido.FUNDO_SOCIAL.name(),
+        TipoPedido.RECUPERACAO.name()
     );
 
     var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());

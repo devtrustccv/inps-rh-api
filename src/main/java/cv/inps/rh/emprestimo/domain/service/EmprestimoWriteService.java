@@ -78,22 +78,13 @@ public class EmprestimoWriteService {
 
   public void saveOutroEmprestimo(TipoPedido tipoPedido, TipoPedido tipoEmprestimo, List<FundoSocialRequestDTO> requests) {
 
-    var isRecuperacao = tipoPedido == TipoPedido.RECUPERACAO;
-
     for (var request : requests) {
 
       var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId()));
 
       var entity = new EmprestimoEntity();
       entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-      entity.setTmId(request.getTipoMovimentoId());
-      entity.setDataInicio(request.getDataInicio());
-      entity.setDataFim(request.getDataFim());
       entity.setEstado(StatusEmprestimo.POR_SUBMETER.name());
-      entity.setValorPrestacao(request.getValorPrestacaoMensal());
-      entity.setValorEmprestimo(request.getValorTotalEmprestimo());
-      entity.setValorDivida(request.getValorTotalEmprestimo());
-      entity.setFinalidade(request.getFinalidade());
       entity.setTipoEmprestimo(tipoEmprestimo.name());
       entity.setTipoSituacao(tipoEmprestimo.name());
       // RH_T_EMPRESTIMO.NIF é NOT NULL na BD (pensado para o fornecedor da
@@ -103,12 +94,6 @@ public class EmprestimoWriteService {
       entity.setNif("N/A");
       entity.setVersao(1L);
       entity.setTiprel(currentRelation);
-      entity.setNrPrestacao(
-          request.getNrPrestacao() != null
-              ? request.getNrPrestacao()
-              : DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim())
-      );
-      entity.setJuro(request.getJuro());
 
       var funId = currentRelation.getFunId();
 
@@ -121,22 +106,8 @@ public class EmprestimoWriteService {
       order.setEstado(StatusEmprestimo.POR_SUBMETER.name());
       order = pedidoEntityRepository.save(order);
       entity.setPedido(order);
-      entity = emprestimoEntityRepository.save(entity);
 
-      documentService.saveDocuments(
-          request.getDocumentos(),
-          funId,
-          entity.getUuid(),
-          tipoPedido.name()
-      );
-
-      if (isRecuperacao) {
-        generateSaveFinancialPlanForRecuperacao(entity, request);
-      } else {
-        if (entity.getJuro() != null && entity.getNrPrestacao() != null) {
-          generateSaveFinancialPlanForFundoSocial(entity, request.getNrPrestacaoPaga());
-        }
-      }
+      aplicarDadosOutroEmprestimo(entity, tipoPedido, request);
 
       var validacao = new ValidacaoEntity();
       validacao.setUuid(UUID.randomUUID());
@@ -148,25 +119,69 @@ public class EmprestimoWriteService {
       validacao.setFunId(funId);
       validacao.setEstado(Estado.P);
       validacaoEntityRepository.save(validacao);
-
-      TipoMovimentoEntity tipoMovimento = request.getTipoMovimentoId() != null ? tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()) : null;
-      if (tipoMovimento != null) {
-        var defPagamentoEntity = new DefPagamentoEntity();
-        defPagamentoEntity.setTmId(tipoMovimento);
-        defPagamentoEntity.setValor(entity.getValorPrestacao());
-        defPagamentoEntity.setDataInicio(entity.getDataInicio());
-        defPagamentoEntity.setDataFim(entity.getDataFim());
-        defPagamentoEntity.setEstado(Estado.A);
-        defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
-        defPagamentoEntity.setFunId(funId);
-        var savedDefPag = defPagamentoEntityRepository.save(defPagamentoEntity);
-
-        var tipoRel = new TipoRelRemPagEntity();
-        tipoRel.setTiprelId(currentRelation);
-        tipoRel.setPagId(savedDefPag);
-        tipoRelRemPagEntityRepository.save(tipoRel);
-      }
     }
+  }
+
+  /**
+   * Dados do formulário de Fundo Social / Recuperação → empréstimo, documentos e plano (pendente).
+   * Usado no registo, na correção (reenvio) e na validação, onde o validador pode corrigir os dados.
+   * O colaborador e o tipo de pedido não mudam depois do registo.
+   */
+  private void aplicarDadosOutroEmprestimo(EmprestimoEntity entity, TipoPedido tipoPedido, FundoSocialRequestDTO request) {
+
+    entity.setTmId(request.getTipoMovimentoId());
+    entity.setDataInicio(request.getDataInicio());
+    entity.setDataFim(request.getDataFim());
+    entity.setValorPrestacao(request.getValorPrestacaoMensal());
+    entity.setValorEmprestimo(request.getValorTotalEmprestimo());
+    entity.setValorDivida(request.getValorTotalEmprestimo());
+    entity.setFinalidade(request.getFinalidade());
+    entity.setNrPrestacao(
+        request.getNrPrestacao() != null
+            ? request.getNrPrestacao()
+            : DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim())
+    );
+    entity.setJuro(request.getJuro());
+    entity = emprestimoEntityRepository.save(entity);
+
+    documentService.saveDocuments(
+        request.getDocumentos(),
+        entity.getTiprel().getFunId(),
+        entity.getUuid(),
+        tipoPedido.name()
+    );
+
+    // Corrigido na validação/reenvio: o plano (ainda pendente) é gerado de novo com os dados atuais.
+    planoFinanceiroEntityRepository.apagarPlanos(entity.getId());
+    if (tipoPedido == TipoPedido.RECUPERACAO) {
+      generateSaveFinancialPlanForRecuperacao(entity, request);
+    } else if (entity.getJuro() != null && entity.getNrPrestacao() != null) {
+      generateSaveFinancialPlanForFundoSocial(entity, request.getNrPrestacaoPaga());
+    }
+  }
+
+  /**
+   * Desconto do Fundo Social / Recuperação no processamento (RH_T_DEF_PAGAMENTO), criado só quando o
+   * empréstimo é validado — antes era criado no registo, ainda por validar (e ficava ativo mesmo
+   * que a validação o recusasse).
+   */
+  private void criarDefPagamento(EmprestimoEntity entity) {
+    if (entity.getTmId() == null)
+      return;
+    var defPagamentoEntity = new DefPagamentoEntity();
+    defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(entity.getTmId()));
+    defPagamentoEntity.setValor(entity.getValorPrestacao());
+    defPagamentoEntity.setDataInicio(entity.getDataInicio());
+    defPagamentoEntity.setDataFim(entity.getDataFim());
+    defPagamentoEntity.setEstado(Estado.A);
+    defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
+    defPagamentoEntity.setFunId(entity.getTiprel().getFunId());
+    var savedDefPag = defPagamentoEntityRepository.save(defPagamentoEntity);
+
+    var tipoRel = new TipoRelRemPagEntity();
+    tipoRel.setTiprelId(entity.getTiprel());
+    tipoRel.setPagId(savedDefPag);
+    tipoRelRemPagEntityRepository.save(tipoRel);
   }
 
   public List<PlanoFinanceiroRowDTO> generateSaveFinancialPlan(String uuid) {
@@ -333,35 +348,68 @@ public class EmprestimoWriteService {
     pedidoEntityRepository.save(pedido);
   }
 
-  // Fundo Social / Recuperação: decide o pedido criado em saveFundoSocial
-  // (que fica sempre em POR_SUBMETER com o plano financeiro pendente 'P').
+  /**
+   * Validação de Fundo Social / Recuperação, com o ciclo das outras validações ("edita-no-validar",
+   * mesmo endpoint):
+   *   CORRIGIR       validador devolve: validação P -> C, empréstimo Em Correção (dados não aplicados);
+   *   validar vazio  quem registou corrige e reenvia: aplica os dados e reabre a validação C -> P;
+   *   SIM / NAO      só sobre um empréstimo por validar; aplica as correções do validador e decide.
+   */
   public void validarEmprestimo(String uuid, ValidarEmprestimoRequestDTO request) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    if (!StatusEmprestimo.POR_SUBMETER.name().equals(entity.getEstado()))
-      throw IgrpResponseStatusException.badRequest("Só é possível validar empréstimos em estado Por Submeter");
-
     // Desde saveOutroEmprestimo(tipoPedido, tipoEmprestimo), uma Recuperação
     // grava o tipo real do empréstimo (AQUISICAO_VIATURA | FUNDO_SOCIAL) em
     // TIPO_EMPRESTIMO — o que a distingue é o tipo do pedido.
-    var tipoPedido = entity.getPedido() != null ? entity.getPedido().getTipoPedido() : null;
-    if (!TipoPedido.FUNDO_SOCIAL.name().equals(tipoPedido)
-        && !TipoPedido.RECUPERACAO.name().equals(tipoPedido))
+    var tipoPedidoCodigo = entity.getPedido() != null ? entity.getPedido().getTipoPedido() : null;
+    if (!TipoPedido.FUNDO_SOCIAL.name().equals(tipoPedidoCodigo)
+        && !TipoPedido.RECUPERACAO.name().equals(tipoPedidoCodigo))
       throw IgrpResponseStatusException.badRequest("Validação só se aplica a Fundo Social ou Recuperação");
+    var tipoPedido = TipoPedido.valueOf(tipoPedidoCodigo);
+    var referenciaUuid = UUID.fromString(entity.getUuid());
 
-    // Dominio VALIDAR_REGISTO (já existente e usado noutros módulos, ex.
-    // validacao-with-os-form.tsx): SIM | NAO | CORRIGIR.
+    var validar = StringUtils.hasText(request.getValidar()) ? request.getValidar().toUpperCase() : null;
+    var emCorrecao = StatusEmprestimo.EM_CORRECAO.name().equals(entity.getEstado());
+
+    if ("CORRIGIR".equals(validar)) {
+      if (!StatusEmprestimo.POR_SUBMETER.name().equals(entity.getEstado()))
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção um empréstimo por validar.");
+      var validacao = funcionarioRules.devolverParaCorrecao(referenciaUuid, Estado.P, Referencia.EMPRESTIMO);
+      validacao.setObs(request.getObservacao());
+      validacaoEntityRepository.save(validacao);
+      entity.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+      emprestimoEntityRepository.save(entity);
+      return;
+    }
+
+    if (validar == null) {
+      if (!emCorrecao)
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      if (request.getDados() == null)
+        throw IgrpResponseStatusException.badRequest("Os dados corrigidos são obrigatórios no reenvio.");
+      aplicarCorrecoes(entity, tipoPedido, request);
+      validacaoEntityRepository.save(funcionarioRules.reabrirParaValidacao(referenciaUuid, Referencia.EMPRESTIMO));
+      entity.setEstado(StatusEmprestimo.POR_SUBMETER.name());
+      emprestimoEntityRepository.save(entity);
+      return;
+    }
+
+    if (emCorrecao)
+      throw IgrpResponseStatusException.badRequest("Empréstimo em correção: não pode ser validado. Corrija e reenvie primeiro.");
+    if (!StatusEmprestimo.POR_SUBMETER.name().equals(entity.getEstado()))
+      throw IgrpResponseStatusException.badRequest("Só é possível validar empréstimos em estado Por Submeter");
+
+    // Dominio VALIDAR_REGISTO (validacao-with-os-form.tsx): SIM | NAO | CORRIGIR.
     final Estado validacaoEstado;
-    switch (request.getValidar().toUpperCase()) {
+    switch (validar) {
       case "SIM" -> {
+        if (request.getDados() != null)
+          aplicarCorrecoes(entity, tipoPedido, request);
         entity.setEstado(StatusEmprestimo.ATIVO.name());
         planoFinanceiroEntityRepository.ativarPlanosPendentes(entity.getId());
+        criarDefPagamento(entity);
         validacaoEstado = Estado.A;
-      }
-      case "CORRIGIR" -> {
-        entity.setEstado(StatusEmprestimo.EM_CORRECAO.name());
-        validacaoEstado = Estado.I;
       }
       case "NAO" -> {
         entity.setEstado(StatusEmprestimo.CANCELADO.name());
@@ -373,7 +421,7 @@ public class EmprestimoWriteService {
     emprestimoEntityRepository.save(entity);
 
     var pendingValidacao = validacaoEntityRepository.findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(
-        UUID.fromString(entity.getUuid()), Estado.P, TipoAcao.INSERT.name(), Referencia.EMPRESTIMO.name());
+        referenciaUuid, Estado.P, TipoAcao.INSERT.name(), Referencia.EMPRESTIMO.name());
 
     pendingValidacao.ifPresentOrElse(
         v -> {
@@ -387,7 +435,7 @@ public class EmprestimoWriteService {
           newValidacao.setTipoAccao(TipoAcao.INSERT.name());
           newValidacao.setReferenciaName(Referencia.EMPRESTIMO.name());
           newValidacao.setReferenciaId(entity.getId());
-          newValidacao.setReferenciaUuid(UUID.fromString(entity.getUuid()));
+          newValidacao.setReferenciaUuid(referenciaUuid);
           newValidacao.setFunId(entity.getTiprel().getFunId());
           newValidacao.setTiprelId(null);
           newValidacao.setEstado(validacaoEstado);
@@ -395,6 +443,15 @@ public class EmprestimoWriteService {
           validacaoEntityRepository.save(newValidacao);
         }
     );
+  }
+
+  /** Correções do formulário (validador ou reenvio); na Recuperação o tipo de empréstimo também. */
+  private void aplicarCorrecoes(EmprestimoEntity entity, TipoPedido tipoPedido, ValidarEmprestimoRequestDTO request) {
+    if (tipoPedido == TipoPedido.RECUPERACAO && StringUtils.hasText(request.getTipoEmprestimo())) {
+      entity.setTipoEmprestimo(request.getTipoEmprestimo());
+      entity.setTipoSituacao(request.getTipoEmprestimo());
+    }
+    aplicarDadosOutroEmprestimo(entity, tipoPedido, request.getDados());
   }
 }
 
