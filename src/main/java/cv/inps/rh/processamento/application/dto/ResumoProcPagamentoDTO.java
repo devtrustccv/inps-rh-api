@@ -27,8 +27,11 @@ public class ResumoProcPagamentoDTO {
 
   private Long procId;
 
-  // número de colaboradores (RH_T_TIPOS_RELACIONAMENTO) no tipo de movimento
   private Long quantidade;
 
   private Long valor;
+
+  private String quantidadeFormatada;
+
+  private String valorFormatado;
 }
