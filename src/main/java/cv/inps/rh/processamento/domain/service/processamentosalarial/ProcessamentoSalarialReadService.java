@@ -122,10 +122,15 @@ public class ProcessamentoSalarialReadService {
 
     var procId = Long.valueOf(query.getProcSalId());
 
-    var data = new DetalhesProcessamentoDTO();
-    data.setContent(isPayment ?
+    var detalhes = isPayment ?
         procSalCcPagEntityRepository.getDetalhesPagamento(query.getTipoMovimento(), procId) :
-        procSalCcRemunEntityRepository.getDetalhesRemuneracao(query.getTipoMovimento(), procId));
+        procSalCcRemunEntityRepository.getDetalhesRemuneracao(query.getTipoMovimento(), procId);
+
+    var format = NumberUtils.spaceDecimalFormat();
+    detalhes.forEach(d -> d.setValorFormatado(formatar(format, d.getValor())));
+
+    var data = new DetalhesProcessamentoDTO();
+    data.setContent(detalhes);
 
     return data;
   }

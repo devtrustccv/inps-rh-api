@@ -60,7 +60,8 @@ public interface ProcSalCcPagEntityRepository extends
               e.cargo,
               e.relacao,
               e.valor,
-              e.descricao
+              e.descricao,
+              null
           )
           FROM ProcSalCcPagEntity e
           WHERE e.tipo = :tipoMovimento AND e.procSalId = :procId

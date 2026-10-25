@@ -89,3 +89,11 @@ Se o valor numérico for `null`, o campo formatado também vem `null`.
 
 **Ação front:** mostrar os campos `*Formatad*` nas colunas Quantidade e Total/Valor do Resumo; continuar a usar
 os numéricos para somas ou ordenação.
+
+### 2.1 Detalhe Processamento — valor formatado
+
+`GET /processamento-salarial/resumo/detalhes`
+
+Cada linha de `content[]` traz `valorFormatado` (mesmo formato: `1234567` → `"1 234 567"`), além de `valor`.
+
+**Ação front:** mostrar `valorFormatado` na coluna Valor do Detalhe.

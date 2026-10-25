@@ -67,7 +67,8 @@ public interface ProcSalCcRemunEntityRepository extends
               e.cargo,
               e.relacao,
               e.valor,
-              e.descricao
+              e.descricao,
+              null
           )
           FROM ProcSalCcRemunEntity e
           WHERE e.tipo = :tipoMovimento AND e.procSalId = :procId
