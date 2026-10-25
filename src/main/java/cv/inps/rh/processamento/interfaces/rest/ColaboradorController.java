@@ -106,46 +106,57 @@ public class ColaboradorController {
     @Operation(
         summary = "Importar movimentos",
         description = """
-            Importa movimentos a partir de um ficheiro Excel.
+            Importa movimentos a partir de um ficheiro Excel (.xlsx ou .xls), enviado no campo `ficheiro`.
+            Modelo de exemplo: `docs/modelos/importacao_movimentos_modelo.xlsx`.
 
-            O ficheiro enviado deve conter os dados dos movimentos na primeira folha (sheet).
-            A primeira linha do ficheiro é considerada como cabeçalho e será ignorada durante o processamento.
+            Só é lida a primeira folha (sheet). A linha 1 é o cabeçalho e é ignorada. Linhas com a coluna A vazia
+            são ignoradas.
 
-            Formato esperado das colunas do ficheiro Excel:
+            Colunas:
 
-            - Coluna A (índice 0): UUID do Funcionário
-              - Deve conter um UUID válido do funcionário.
+            - Coluna A (índice 0): UUID do Funcionário — obrigatório
+              - UUID de um funcionário existente (RH_T_FUNCIONARIOS.UUID).
 
-            - Coluna B (índice 1): Coluna reservada
-              - Não é utilizada no processamento, mas deve manter a posição no ficheiro.
+            - Coluna B (índice 1): Nome do Funcionário — informativo
+              - Não é lido pelo sistema; serve só de referência para quem preenche, mas a coluna tem de existir nesta posição.
 
-            - Coluna C (índice 2): Tipo de Movimento de Retenção
-              - Valor textual.
+            - Coluna C (índice 2): ID do Tipo de Movimento de Retenção
+              - ID numérico de RH_T_TIPO_MOVIMENTO (ex: 205). Ao validar o movimento cria uma definição de pagamento.
 
-            - Coluna D (índice 3): Tipo de Movimento de Remuneração
-              - Valor textual.
+            - Coluna D (índice 3): ID do Tipo de Movimento de Remuneração
+              - ID numérico de RH_T_TIPO_MOVIMENTO (ex: 101). Ao validar o movimento cria uma definição de remuneração.
 
-            - Coluna E (índice 4): Percentagem
-              - Valor numérico decimal (ex: 10.5).
+            - Coluna E (índice 4): Percentagem — opcional
+              - Número decimal (ex: 10.5). Aceita célula numérica ou texto, com ponto ou vírgula.
 
-            - Coluna F (índice 5): Valor
-              - Valor numérico decimal (ex: 2500.00).
+            - Coluna F (índice 5): Valor — opcional
+              - Número decimal (ex: 2500.00). Aceita célula numérica ou texto, com ponto ou vírgula.
 
-            - Coluna G (índice 6): Data de Início
-              - Data no formato aceite pelo sistema (ex: 01/01/2026).
+            - Coluna G (índice 6): Data de Início — opcional
+              - Texto num dos formatos dd/MM/aaaa, dd-MM-aaaa, aaaa-MM-dd ou aaaa/MM/dd (ex: 01/01/2026).
+                Uma célula de data do Excel é lida no formato regional do ficheiro e pode não ser reconhecida.
 
-            - Coluna H (índice 7): Data de Fim
-              - Data no formato aceite pelo sistema (ex: 31/12/2026).
+            - Coluna H (índice 7): Data de Fim — opcional
+              - Mesmos formatos da Data de Início; não pode ser anterior à Data de Início.
 
-            - Coluna I (índice 8): Situação
-              - Valor textual que representa o estado do movimento.
+            - Coluna I (índice 8): Situação — opcional
+              - Texto livre.
 
-            Cada linha válida do ficheiro Excel irá originar um novo registo de movimento associado ao funcionário indicado pelo UUID.
+            Cada linha válida origina um registo em RH_T_IMPORTACAO_MOVIMENTO, associado ao funcionário da coluna A.
+
+            A importação é tudo ou nada: se alguma linha tiver erro (UUID inválido ou inexistente, número ou data
+            inválidos, Data de Fim anterior à Data de Início), o pedido devolve 400 com a lista de erros por linha
+            (ex: "Linha 3: Valor inválido (abc)") e nenhuma linha é gravada. Um ficheiro que não seja Excel, ou sem
+            movimentos, também devolve 400.
             """,
         responses = {
             @ApiResponse(
                 responseCode = "200",
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Ficheiro inválido ou com linhas inválidas; o detalhe traz a lista de erros por linha."
             ),
         }
     )
