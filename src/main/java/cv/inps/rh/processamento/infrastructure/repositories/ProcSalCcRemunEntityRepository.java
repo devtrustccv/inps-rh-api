@@ -25,7 +25,9 @@ public interface ProcSalCcRemunEntityRepository extends
               e.shortDesc,
               e.procSalId,
               COUNT(DISTINCT e.tiprelId),
-              SUM(e.valor)
+              SUM(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcRemunEntity e
           WHERE e.procSalId IN (:procId)
@@ -45,7 +47,9 @@ public interface ProcSalCcRemunEntityRepository extends
               e.shortDesc,
               null,
               COUNT(DISTINCT e.tiprelId),
-              SUM(e.valor)
+              SUM(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcRemunEntity e
           WHERE e.procSalId IN (:procId)
@@ -63,7 +67,8 @@ public interface ProcSalCcRemunEntityRepository extends
               e.cargo,
               e.relacao,
               e.valor,
-              e.descricao
+              e.descricao,
+              null
           )
           FROM ProcSalCcRemunEntity e
           WHERE e.tipo = :tipoMovimento AND e.procSalId = :procId

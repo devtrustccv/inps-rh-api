@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
@@ -59,7 +60,8 @@ public class EmprestimoReadService {
 
     var dto = new DetalhesEmprestimoDTO();
     dto.setNomeFornecedor(entity.getNomeFornecedor());
-    dto.setDataInicio(entity.getDataInicio());
+    // versões antigas de Amortização/Renegociação não copiavam a data: mostra a do empréstimo inicial
+    dto.setDataInicio(EmprestimoHelper.dataInicioOriginal(entity));
     dto.setDataFim(entity.getDataFim());
     dto.setValorPrestacao(entity.getValorPrestacao());
     dto.setMarca(entity.getMarca());
@@ -202,7 +204,11 @@ public class EmprestimoReadService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name(),
+        // Fundo Social / Recuperação gravam os documentos com o tipo do pedido como referência —
+        // sem estes não apareciam no Ver Detalhe nem na Validação.
+        TipoPedido.FUNDO_SOCIAL.name(),
+        TipoPedido.RECUPERACAO.name()
     );
 
     var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
@@ -285,7 +291,7 @@ public class EmprestimoReadService {
     plan.setValorEmprestimo(loan.getValorEmprestimo() == null ? "" : formatter.format(loan.getValorEmprestimo()));
     plan.setTaxaJuroAnual(loan.getJuro());
     plan.setPeriodoEmprestimo(loan.getNrPrestacao() != null ? (loan.getNrPrestacao() / 12) : null);
-    plan.setDataInicio(loan.getDataInicio());
+    plan.setDataInicio(EmprestimoHelper.dataInicioOriginal(loan));
     plan.setNumeroPagamento(loan.getNrPrestacao());
 
     // Plano gravado sempre que exista (os subprocessos não têm data de início, mas gravam o plano
@@ -344,7 +350,9 @@ public class EmprestimoReadService {
       Map.entry("ADIANTAMENTO_PAGAMENTO_ANTECIPADO", "Amortização — pagamento antecipado"),
       Map.entry("ADIANTAMENTO_DIMINUICAO_PRESTACAO", "Amortização — diminuição da prestação"),
       Map.entry("ADIANTAMENTO_PAGAMENTO_ANTECIPADO_DIMINUICAO_PRESTACAO", "Amortização — pagamento antecipado e diminuição da prestação"),
-      Map.entry("REFORCO_AUMENTO_VALOR", "Renegociação — aumento do valor"),
+      Map.entry("AMORTIZACAO_PARCIAL", "Amortização Parcial"),
+      Map.entry("AMORTIZACAO_TOTAL", "Amortização Total"),
+      Map.entry("REFORCO_AUMENTO_VALOR","Renegociação — aumento do valor"),
       Map.entry("REFORCO_AUMENTO_PRESTACAO", "Renegociação — aumento da prestação"),
       Map.entry("REFORCO_AUMENTO_VALOR_AUMENTO_PRESTACAO", "Renegociação — aumento do valor e da prestação"),
       Map.entry("AUMENTO_PRESTACAO", "Renegociação — aumento da prestação"),
@@ -362,8 +370,7 @@ public class EmprestimoReadService {
     var versoes = emprestimoEntityRepository.findAllByPedido_IdOrderByVersaoAscIdAsc(loan.getPedido().getId());
     // "Atual" = a versão mais recente não cancelada (a que está em curso, ou a em vigor)
     var idAtual = versoes.stream()
-        .filter(v -> !StatusEmprestimo.CANCELADO.name().equals(v.getEstado())
-            && !StatusEmprestimo.DESISTENCIA.name().equals(v.getEstado()))
+        .filter(v -> !EmprestimoHelper.isSubprocessoTerminado(v.getEstado()))
         .map(EmprestimoEntity::getId)
         .max(Long::compareTo)
         .orElse(null);

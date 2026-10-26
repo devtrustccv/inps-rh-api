@@ -96,6 +96,7 @@ public class EmprestimoHelper {
     var encerrado = java.util.Map.of(
         StatusEmprestimo.CANCELADO.name(), "cancelado",
         StatusEmprestimo.DESISTENCIA.name(), "encerrado por desistência",
+        StatusEmprestimo.NAO_AUTORIZADO.name(), "encerrado (não autorizado pela Comissão Executiva)",
         StatusEmprestimo.ATIVO.name(), "concluído");
     if (estado != null && encerrado.containsKey(estado)) {
       throw IgrpResponseStatusException.badRequest(
@@ -129,6 +130,53 @@ public class EmprestimoHelper {
    * o empréstimo em vigor (inicial, ou subprocesso já concluído — ATIVO/CABIMENTADO), a partir do
    * qual se cria uma versão nova. Um subprocesso cancelado/desistido não pode ser reaberto.
    */
+  /** Subprocesso terminado sem ficar em vigor: cancelado, desistência ou não autorizado. */
+  /** Renegociação com valor a pagar: só estas passam por Contrato e Cabimento/Pagamento. */
+  public static boolean isRenegociacaoComPagamento(String tipoSituacao) {
+    return TipoSituacao.REFORCO_CAPITAL.name().equals(tipoSituacao)
+        || TipoSituacao.REFORCO_AUMENTO_VALOR.name().equals(tipoSituacao)
+        || TipoSituacao.REFORCO_AUMENTO_VALOR_AUMENTO_PRESTACAO.name().equals(tipoSituacao);
+  }
+
+  /**
+   * Data de início do empréstimo inicial: as versões (Amortização/Renegociação) mantêm-na. Versões
+   * antigas não a copiavam — sobe pela cadeia até encontrar uma.
+   */
+  public static LocalDate dataInicioOriginal(EmprestimoEntity loan) {
+    var atual = loan;
+    for (int i = 0; atual != null && i < 50; i++) {
+      if (atual.getDataInicio() != null) {
+        return atual.getDataInicio();
+      }
+      atual = atual.getEmprestimo();
+    }
+    return null;
+  }
+
+  public static boolean isSubprocessoTerminado(String estado) {
+    return StatusEmprestimo.CANCELADO.name().equals(estado)
+        || StatusEmprestimo.DESISTENCIA.name().equals(estado)
+        || StatusEmprestimo.NAO_AUTORIZADO.name().equals(estado);
+  }
+
+  /**
+   * Subprocesso (Amortização/Renegociação) terminado sem ficar em vigor: o empréstimo anterior volta
+   * a ser o que está em vigor — plano reativado e o pedido (partilhado por todas as versões) volta a
+   * PAGAMENTO, a etapa final de um empréstimo concluído.
+   */
+  public void reporEmprestimoAnterior(EmprestimoEntity subprocesso) {
+
+    var anterior = subprocesso.getEmprestimo();
+    planoFinanceiroEntityRepository.inativarPlanos(subprocesso.getId());
+    if (planoFinanceiroEntityRepository.countByEmprestimo_IdAndEstado(anterior.getId(), Estado.A.name()) == 0) {
+      planoFinanceiroEntityRepository.reativarPlanos(anterior.getId());
+    }
+
+    var pedido = subprocesso.getPedido();
+    pedido.setEtapa(EtapaEmprestimo.PAGAMENTO.name());
+    pedidoEntityRepository.save(pedido);
+  }
+
   public static boolean isSubprocessoEmCurso(EmprestimoEntity base) {
     var estado = base.getEstado();
     // Empréstimo em vigor = Ativo (pago e em reembolso): é a partir dele que nasce uma versão nova.
@@ -139,9 +187,9 @@ public class EmprestimoHelper {
       }
       return false;
     }
-    if (StatusEmprestimo.CANCELADO.name().equals(estado) || StatusEmprestimo.DESISTENCIA.name().equals(estado)) {
+    if (isSubprocessoTerminado(estado)) {
       throw IgrpResponseStatusException.badRequest(
-          "Este subprocesso foi cancelado. Inicie um novo a partir do empréstimo em vigor.");
+          "Este subprocesso foi cancelado ou não autorizado. Inicie um novo a partir do empréstimo em vigor.");
     }
     // subprocesso ainda não concluído (inclui Cabimentado à espera do pagamento): edita-se no próprio registo
     return true;
@@ -190,7 +238,11 @@ public class EmprestimoHelper {
     // reforço mexe com valor em divida e com valor reforço
     // reforço sobre prestacao mexe com valor prestacao e com numero de prestacao
 
-    var startDate = newLoan.getDataInicio() != null ? newLoan.getDataInicio() : LocalDate.now(ZoneId.systemDefault());
+    // A versão mantém a data de início do empréstimo inicial: as prestações novas continuam o
+    // calendário a seguir às já pagas (sem data, começam no mês seguinte a hoje).
+    var startDate = newLoan.getDataInicio() != null
+        ? newLoan.getDataInicio().plusMonths(numberOfPaidPlans)
+        : LocalDate.now(ZoneId.systemDefault());
 
     List<PlanoFinanceiroRowDTO> newPlans = new ArrayList<>();
 
@@ -275,6 +327,39 @@ public class EmprestimoHelper {
             firstNewPlanNumber
         );
       }
+      // Amortização: parte do saldo em dívida (principal das prestações por pagar), não do valor
+      // inicial do empréstimo.
+      case AMORTIZACAO_PARCIAL -> {
+        var porPagar = prestacoesPorPagar(allInitialPlans);
+        var saldo = saldoEmDivida(porPagar);
+        if (value == null || value.signum() <= 0 || value.compareTo(saldo) >= 0) {
+          throw IgrpResponseStatusException.badRequest(String.format(
+              "Na Amortização Parcial o valor tem de ser superior a 0 e inferior ao saldo em dívida (%s). "
+                  + "Para liquidar a dívida escolha Amortização Total.", saldo.setScale(0, RoundingMode.HALF_UP).toPlainString()));
+        }
+
+        newLoan.setValorAdiantado(value);
+        newLoan.setValorDivida(saldo.subtract(value));
+        newLoan.setNrPrestacao((long) numberOfPaidPlans + porPagar.size());
+        emprestimoEntityRepository.save(newLoan);
+
+        // mantém o nº de prestações em falta; desce o valor da prestação
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+            porPagar.size(),
+            startDate,
+            firstNewPlanNumber
+        );
+      }
+      case AMORTIZACAO_TOTAL -> {
+        // liquida o saldo em dívida: ficam só as prestações já pagas
+        newLoan.setValorAdiantado(saldoEmDivida(prestacoesPorPagar(allInitialPlans)));
+        newLoan.setValorDivida(BigDecimal.ZERO);
+        newLoan.setNrPrestacao((long) numberOfPaidPlans);
+        newLoan.setValorPrestacao(BigDecimal.ZERO);
+        emprestimoEntityRepository.save(newLoan);
+      }
     }
 
     savePlans(newLoan, newPlans);
@@ -289,6 +374,21 @@ public class EmprestimoHelper {
           .reduce(BigDecimal.ZERO, BigDecimal::add));
       emprestimoEntityRepository.save(newLoan);
     }
+  }
+
+  // Sem filtrar o estado: o plano do empréstimo anterior fica inativo logo no 1.º Seguinte do
+  // pedido, e o pedido reenviado (após Retificação) ficava com saldo 0.
+  private static List<PlanoFinanceiroEntity> prestacoesPorPagar(List<PlanoFinanceiroEntity> planos) {
+    return planos.stream()
+        .filter(p -> !FinancialPlanHelper.FLG_PAGO.equals(p.getFlgPago()))
+        .toList();
+  }
+
+  private static BigDecimal saldoEmDivida(List<PlanoFinanceiroEntity> porPagar) {
+    return porPagar.stream()
+        .map(PlanoFinanceiroEntity::getValorPrincipal)
+        .filter(java.util.Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   // Fundo Social / Recuperação geram o plano já na submissão do pedido, mas
