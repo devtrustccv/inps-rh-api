@@ -60,14 +60,26 @@ public class EmprestimoHelper {
    * Regista a execução de uma etapa sem parecer em RH_T_PEDIDO_DECISAO, para o ecrã mostrar
    * "Executado Por" / "Data Execução" como nas restantes etapas (antes não havia registo).
    */
-  public void registarExecucaoEtapa(PedidoEntity pedido, EtapaEmprestimo etapa) {
-    registarExecucaoEtapa(pedido, etapa, DECISAO_EXECUTADO, LocalDate.now(ZoneId.systemDefault()), null);
+  public void registarExecucaoEtapa(EmprestimoEntity loan, EtapaEmprestimo etapa) {
+    registarExecucaoEtapa(loan, etapa, DECISAO_EXECUTADO, LocalDate.now(ZoneId.systemDefault()), null);
   }
 
-  public void registarExecucaoEtapa(PedidoEntity pedido, EtapaEmprestimo etapa, String decisaoValor,
+  /**
+   * Execução de uma etapa sem parecer (Contrato, Pagamento), por versão do empréstimo: o pedido é
+   * partilhado pelas versões e antes havia um só registo por etapa — o pagamento de um Reforço
+   * reescrevia o da Viatura. O registo ativo de outra versão é arquivado e a versão ganha o seu.
+   */
+  public void registarExecucaoEtapa(EmprestimoEntity loan, EtapaEmprestimo etapa, String decisaoValor,
                                     LocalDate data, String observacao) {
-    var decisao = pedidoDecisaoEntityRepository
-        .findByPedidoAndEtapaAndEstado(pedido, etapa.name(), Estado.A.name())
+    var pedido = loan.getPedido();
+    var atual = pedidoDecisaoEntityRepository
+        .findByPedidoAndEtapaAndEstado(pedido, etapa.name(), Estado.A.name());
+    var daVersao = atual.filter(d -> d.getReferenciaId() == null || d.getReferenciaId().equals(loan.getId()));
+    if (atual.isPresent() && daVersao.isEmpty()) {
+      atual.get().setEstado(Estado.I.name());
+      pedidoDecisaoEntityRepository.save(atual.get());
+    }
+    var decisao = daVersao
         .orElseGet(() -> {
           var nova = new PedidoDecisaoEntity();
           nova.setPedido(pedido);
@@ -78,6 +90,7 @@ public class EmprestimoHelper {
           nova.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           return nova;
         });
+    decisao.setReferenciaId(loan.getId());
     decisao.setDecisao(decisaoValor);
     decisao.setDataParecer(data);
     if (observacao != null) {

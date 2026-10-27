@@ -291,7 +291,7 @@ public class EmprestimoWriteService {
     emprestimoEntityRepository.save(entity);
 
     emprestimoHelper.registarExecucaoEtapa(
-        entity.getPedido(), EtapaEmprestimo.PAGAMENTO, "PAGO", data.dataPagamento(), data.observacao());
+        entity, EtapaEmprestimo.PAGAMENTO, "PAGO", data.dataPagamento(), data.observacao());
 
     if (!CollectionUtils.isEmpty(data.files())) {
       documentService.addDocuments(

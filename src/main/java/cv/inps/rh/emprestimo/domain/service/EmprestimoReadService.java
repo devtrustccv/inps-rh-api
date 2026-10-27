@@ -176,8 +176,18 @@ public class EmprestimoReadService {
         EtapaEmprestimo.PAGAMENTO.name()
     );
 
-    var decisions = pedidoDecisaoEntityRepository
-        .findByPedidoAndEtapaInAndEstado(order, steps, Estado.A.name()).stream()
+    // O pedido é partilhado pelas versões (Amortização / Renegociação): cada versão mostra as
+    // suas decisões (referenciaId = versão; a mais recente por etapa). Sem registo da versão, vale
+    // a decisão ativa do pedido desde que não seja explicitamente de outra versão (registos
+    // antigos não gravavam a versão). Antes o detalhe de uma versão mostrava as decisões de outra
+    // (ex.: o pagamento da Viatura num Reforço) e perdia as suas ao iniciar-se outro subprocesso.
+    var porEtapa = new java.util.HashMap<String, PedidoDecisaoEntity>();
+    pedidoDecisaoEntityRepository.findByPedidoAndEtapaInAndEstado(order, steps, Estado.A.name()).stream()
+        .filter(d -> d.getReferenciaId() == null || d.getReferenciaId().equals(entity.getId()))
+        .forEach(d -> porEtapa.put(d.getEtapa(), d));
+    pedidoDecisaoEntityRepository.findByPedidoAndReferenciaIdAndEtapaInOrderByIdAsc(order, entity.getId(), steps)
+        .forEach(d -> porEtapa.put(d.getEtapa(), d));
+    var decisions = porEtapa.values().stream()
         .collect(Collectors.toMap(
             PedidoDecisaoEntity::getEtapa,
             this::buildDecisionData
