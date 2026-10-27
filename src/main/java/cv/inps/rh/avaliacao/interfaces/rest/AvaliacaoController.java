@@ -479,6 +479,36 @@ public class AvaliacaoController {
   }
 
    @GetMapping(
+   value = "colaboradores/{funUuid}/carreira"
+  )
+  @Operation(
+    summary = "Get carreira do colaborador",
+    description = "Carreira/Cargo atual do colaborador (mesma regra da validação da definição de objectivos individual); id e nome nulos se não houver",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResumoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CarreiraResumoDTO> getCarreiraDoColaborador(
+    @PathVariable(value = "funUuid") java.util.UUID funUuid)
+  {
+
+      final var query = new GetCarreiraDoColaboradorQuery(funUuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "objectivos-comuns/{ano}"
   )
   @Operation(

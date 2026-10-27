@@ -40,7 +40,8 @@ public class ComponenteAvaliacaoService {
   private static final BigDecimal CEM = BigDecimal.valueOf(100);
   private static final String ESTADO_ATIVO = "A";
   private static final String ESTADO_INATIVO = "I";
-  private static final String ABRANGENCIA_DEFAULT = "INPS";
+  // Competências comportamentais/técnicas e atitudes pessoais são sempre avaliadas por colaborador.
+  private static final String ABRANGENCIA_DEFAULT = "INDIVIDUAL";
 
   private static final String COMPONENTE_OBJETIVO = "OBJETIVO";
   private static final String COMPONENTE_COMP_COMPORTAMENTAL = "COMPETENCIA_COMPORTAMENTAL";

@@ -325,6 +325,20 @@ public class AvaliacaoService {
         .toList();
   }
 
+  /**
+   * Carreira/Cargo atual do colaborador, pela mesma regra usada ao validar a definição individual
+   * (carreira PCCS ou, sem ela, a do escalão). Sem carreira identificável, id e nome vêm nulos.
+   */
+  @Transactional(readOnly = true)
+  public cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO getCarreiraDoColaborador(UUID funUuid) {
+    var id = carreiraDoColaborador(funUuid, null);
+    if (id == null) {
+      return new cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO();
+    }
+    var carreira = carreiraRepository.findByIdOrThrow(id);
+    return new cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO(carreira.getId(), carreira.getNome());
+  }
+
   private AvaliacaoEntity novaAvaliacao(
       DefinicaoObjectivoDTO dto,
       AbrangenciaAvaliacao abrangencia,
