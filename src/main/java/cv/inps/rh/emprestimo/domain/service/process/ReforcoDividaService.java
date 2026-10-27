@@ -350,6 +350,6 @@ public class ReforcoDividaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
     );
-    adiantamentoEmprestimoHelper.registarExecucaoEtapa(order, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
+    adiantamentoEmprestimoHelper.registarExecucaoEtapa(loan, EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO);
   }
 }

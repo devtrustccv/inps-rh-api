@@ -409,6 +409,6 @@ public class AquisicaoViaturaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
-    emprestimoHelper.registarExecucaoEtapa(order, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
+    emprestimoHelper.registarExecucaoEtapa(loan, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
   }
 }
