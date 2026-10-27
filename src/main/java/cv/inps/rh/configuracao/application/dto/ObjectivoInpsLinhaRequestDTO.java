@@ -21,7 +21,7 @@ public class ObjectivoInpsLinhaRequestDTO extends ParamLinhaBaseRequestDTO {
 
     private Long institId;
 
-    @NotBlank
+    // Objetivo e KPI são opcionais (linhas INDIVIDUAL ficam por preencher na definição).
     private String descricao;
 
     private String kpi;

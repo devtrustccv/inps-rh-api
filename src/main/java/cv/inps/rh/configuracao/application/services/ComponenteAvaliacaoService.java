@@ -458,7 +458,9 @@ public class ComponenteAvaliacaoService {
   private void fillBase(ParamLinhaBaseResponseDTO dto, ParamObjetivoEntity e) {
     dto.setId(e.getId());
     dto.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
-    dto.setAplicarATodos(e.getCargo() == null);
+    // Não há coluna "aplicar a todos": é a linha sem restrição. Considerar só o cargo marcava as
+    // linhas com carreira (e sem cargo) como "aplicar a todos", e o ecrã limpava-lhes a carreira.
+    dto.setAplicarATodos(e.getCargo() == null && e.getCarreira() == null && e.getInstitId() == null);
     dto.setCargoId(e.getCargo() != null ? e.getCargo().getId() : null);
     dto.setCarrPccsId(e.getCarreira() != null ? e.getCarreira().getId() : null);
     dto.setPonderacao(e.getPonderacao());
