@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class XmlFosService {
   private final FosEntityRepository fosEntityRepository;
   private final DetalheXmlFosEntityRepository detalheXmlFosEntityRepository;
 
-  public String buildXml(Long idXml) {
+  public XmlFosData buildXml(Long idXml) {
 
     var header = fosEntityRepository.findByIdOrThrow(idXml);
 
@@ -34,8 +35,8 @@ public class XmlFosService {
             safe(det.tipo())))
         .collect(Collectors.joining("\n"));
 
-    return """
-        <?xml version="1.0" encoding="UTF-8" ?>
+    var xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
         <fos xmlns="urn:inps:fos:v1" versao="1.0">
            <tp_edicao>%s</tp_edicao>
            <ano_ref>%s</ano_ref>
@@ -44,7 +45,7 @@ public class XmlFosService {
            <nu_contribuinte>%s</nu_contribuinte>
            <nome_contribuinte>INSTITUTO NACIONAL DE PREVIDENCIA SOCIAL</nome_contribuinte>
            <linhas>
-        %s
+                %s
            </linhas>
            <total_remuneracoes>%s</total_remuneracoes>
            <total_contribuicoes>%s</total_contribuicoes>
@@ -54,13 +55,21 @@ public class XmlFosService {
         safe(header.getTpEntrega()),
         safe(header.getAno()),
         safe(header.getMes()),
-        LocalDate.now().format(DATE_FORMATTER),
+        LocalDate.now(ZoneId.systemDefault()).format(DATE_FORMATTER),
         safe(header.getNuContribuinte()),
         details,
         safe(header.getTtRemuneracao()),
         safe(header.getTtContribuicao()),
         safe(header.getObs())
     );
+
+    return new XmlFosData(
+        header.getAno() + header.getMes(),
+        xml
+    );
+  }
+
+  public record XmlFosData(String referenceMonth, String xml) {
   }
 
   private String safe(String value) {

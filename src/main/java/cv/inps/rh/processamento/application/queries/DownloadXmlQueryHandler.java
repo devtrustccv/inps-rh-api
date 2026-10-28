@@ -27,10 +27,11 @@ public class DownloadXmlQueryHandler implements QueryHandler<DownloadXmlQuery, R
 
     LOGGER.debug("DownloadXmlQuery: {}", query);
 
-    var xml = xmlFosService.buildXml(query.getFosId()).getBytes();
+    var data = xmlFosService.buildXml(query.getFosId());
+    var xml = data.xml().getBytes();
 
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=fosXml.xml")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=%s.xml".formatted(data.referenceMonth()))
         .contentType(MediaType.APPLICATION_XML)
         .contentLength(xml.length)
         .body(xml);
