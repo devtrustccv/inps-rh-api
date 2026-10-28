@@ -2,6 +2,7 @@ package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,7 @@ public class GetDetalhesProcessamentoQuery implements Query {
 
   @NotBlank(message = "The field <tipoDetalhe> is required")
   private String tipoDetalhe;
+
+  @NotNull(message = "The field <idItemAto> is required")
+  private Long idItemAto;
 }
