@@ -8,7 +8,10 @@ import java.util.List;
 import static cv.inps.rh.missaoservico.application.constants.EtapaProcesso.*;
 
 /**
- * Os quatro processos de uma missão — domínio TIPO_PROCESSO — e o percurso de etapas de cada um.
+ * Os quatro processos de uma missão — domínio TIPO_PROCESSO_MISSAO — e o percurso de etapas de cada um.
+ *
+ * <p>O percurso efectivo vem da referência do domínio (ver {@code PercursoProcessoMissao}); o
+ * definido aqui só vale quando o domínio não tem referência válida.</p>
  *
  * <p>Decisão D2 do plano: bilhete e alojamento são contratados a um prestador (pedido de proposta
  * e requisição); o seguro escolhe a seguradora directamente na logística e a ajuda de custo é paga

@@ -46,6 +46,7 @@ import static cv.inps.rh.missaoservico.application.services.MissaoProcessoSuppor
 public class MissaoProcessoServiceRead {
 
   private final MissaoProcessoSupport support;
+  private final PercursoProcessoMissao percurso;
   private final RequisicaoPdfService requisicaoPdfService;
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
@@ -305,7 +306,7 @@ public class MissaoProcessoServiceRead {
         .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
         .toList();
     List<MissaoColaboradorResponseDTO> disponiveis;
-    if (tipo.temPrestador()) {
+    if (percurso.temPrestador(processo)) {
       var prestadorPorColab = support.prestadorPorColaborador(processo);
       disponiveis = ativos.stream()
           .filter(c -> prestadorPorColab.containsKey(c.getId()))

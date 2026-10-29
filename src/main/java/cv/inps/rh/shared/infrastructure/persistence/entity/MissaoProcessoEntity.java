@@ -35,7 +35,7 @@ public class MissaoProcessoEntity extends AuditEntity {
   @JoinColumn(name = "missao_serv_id", referencedColumnName = "id", nullable = false)
   private MissaoServicoEntity missaoServId;
 
-  // Domínio TIPO_PROCESSO: BILHETE_PASSAGEM | SEGURO_VIAGEM | AJUDA_CUSTO | ALOJAMENTO
+  // Domínio TIPO_PROCESSO_MISSAO: BILHETE_PASSAGEM | SEGURO_VIAGEM | AJUDA_CUSTO | ALOJAMENTO
   @NotBlank(message = "tipoProcesso is mandatory")
   @Column(name = "tipo_processo", length = 100, nullable = false)
   private String tipoProcesso;

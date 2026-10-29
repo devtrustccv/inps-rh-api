@@ -302,6 +302,9 @@ public class MissaoServicoServiceRead {
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
       dto.setValorSeguro(sums.get("SEGURO_VIAGEM"));
       dto.setProcessos(processosDaMissao.stream()
+          // Missão ativa: só os processos despoletados (os não escolhidos ficam inativos e não
+          // aparecem). Missão cancelada/finalizada: todos, como histórico.
+          .filter(p -> !ESTADO_ATIVO.equals(m.getEstado()) || ESTADO_ATIVO.equals(p.getEstado()))
           .sorted(Comparator.comparing(MissaoProcessoEntity::getId))
           .map(p -> {
             var pd = new MissaoProcessoResumoDTO();

@@ -27,6 +27,10 @@ public class MissaoSubmissaoRequestDTO  {
   private Long ilhaId;                    // só se o país de destino for Cabo Verde
   private Long concelhoId;                // só se o país de destino for Cabo Verde
   private Boolean alojamento;             // a instituição trata do alojamento? define o estado do processo ALOJAMENTO; null = não mexer (criação: sim)
+  // Processos a despoletar (valores de TIPO_PROCESSO_MISSAO, ex.: BILHETE_PASSAGEM). Só estes são
+  // criados; desmarcar um já existente desativa-o (enquanto estiver na 1.ª etapa). null = todos
+  // (comportamento anterior, com o ALOJAMENTO a seguir o campo alojamento).
+  private List<String> processos;
   private String descricaoDestino;
   private String ambitoMissao;
   private LocalDate dataInicio;
