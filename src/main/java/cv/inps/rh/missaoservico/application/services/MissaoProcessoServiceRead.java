@@ -332,6 +332,7 @@ public class MissaoProcessoServiceRead {
     response.setProcesso(support.toProcessoDto(processo));
     response.setDataInicioMissao(missao.getDataInicio());
     response.setDataFimMissao(missao.getDataFim());
+    response.setNumeroDiasMissao(missao.getNrDias());
     response.setBilhetesPassagem(bilhetes);
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);

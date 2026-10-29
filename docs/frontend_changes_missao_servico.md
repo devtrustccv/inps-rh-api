@@ -51,6 +51,8 @@ Validação item a item em `docs/validacao_bug_report_MISSAO_SERVICO1.0.md` *(re
 | **Ajuda de custo por colaborador** (decisão de 22/10): base = parametrização da carreira **de cada** colaborador (`RH_T_PARAM_AJUDA_CUSTO`, nacional/estrangeiro). Antes: a do cargo superior para todos. O `valorDiario` do pedido só conta para quem não tem parametrização | Pré-preencher cada linha com `colaboradoresDisponiveis[].valorDiarioAjudaCusto` | MS-013 |
 | `GET .../AJUDA_CUSTO/logistica`: `colaboradoresDisponiveis[].valorDiarioAjudaCusto` (novo); `valorDiarioAjudaCusto` do processo só vem quando é igual para todos (senão `null`) | idem | MS-013 |
 | `ajudasCusto[]` ganha `valorDiarioBase`, `fracaoAplicada` (`"1"`, `"2/3"`, `"1/3"`) e `flgAlimentacao` (do alojamento do colaborador) | Repor o "Valor Diário (base)" ao reabrir e mostrar a fracção aplicada | MS-013 |
+| **Total da ajuda de custo = diário efectivo × dias da MISSÃO** (spec; decisão de 29/10). Antes multiplicava pelos "Número Dias Alojamento". Os dias de alojamento continuam a ser gravados e devolvidos (`numeroDiasAlojamento`), mas não podem passar dos dias da missão (400 *"o número de dias de alojamento (X) não pode ser superior aos dias da missão (Y)"*) | Mostrar o Valor Total devolvido; pré-preencher os Dias com `numeroDiasMissao` | MS-013 |
+| `GET .../{tipo}/logistica`: campo novo `numeroDiasMissao` (dias da missão, inclusivos) | Usar como base do total e valor por defeito dos dias | MS-013 |
 | Ajuda de custo e alojamento com `valorDiario` **0** dão **400** (*"tem de ser maior que 0"*) — antes gravavam 0 e o processo avançava | — | MS-013 |
 | Ajuda de custo sem parametrização nem valor: 400 *"Não há valor de ajuda de custo parametrizado para a carreira de {nome}…"* | — | MS-013 |
 | Parametrização da ajuda de custo: `GET`/`POST /api/v1/missao-servico/configuracao-ajuda-custo` (0e25f614). O ecrã chamava **sem `/api/v1`** → 404 | Corrigir o URL | MS-021 |
@@ -60,6 +62,8 @@ Validação item a item em `docs/validacao_bug_report_MISSAO_SERVICO1.0.md` *(re
 | Pareceres (`parecerAtual`, `parecerUgal`, `parecerCoordenador`, `parecerDirector`, `historico[]`): `responsavelDesc` | Mostrar em vez de `responsavel` | MS-026 |
 | Detalhe `GET /{uuid}`: `etapaDesc` legível (era o código "SUBMISSAO") | — | MS-016 |
 | Avaliações do prestador (`GET /prestadores/{uuid}/avaliacoes`): `designacaoDesc` | Mostrar em vez da letra | MS-020 |
+| **"Autorizado por" preenchido pelo backend** (spec, Autorização Prévia; 29/10): novo `GET /api/v1/missao-servico/submissao/valores-iniciais` → `{ autorizadoPor, dataAutorizacao }` = nome do utilizador do login e hoje. Na gravação (`POST`/`PUT .../submissao`), `autorizadoPor` vazio passa a ser o utilizador do login e `dataAutorizacao` vazia passa a hoje; só sem utilizador nenhum dá 400. O nome vem do **token** do pedido (perfil IAM); sem token (dev/QA sem IAM) vem `anonymousUser`, o mesmo utilizador que fica em `USER_REGISTO_NAME` | Ao abrir uma missão nova chamar `valores-iniciais` e pré-preencher (editável); enviar o token do utilizador nos pedidos à API para vir o nome real | MS-005 |
+| **Lista de prestadores só com os ativos por defeito** (29/10): `GET /prestadores` sem `estado` → só `A`; `estado=I` → inativos; `estado=TODOS` → todos. A etapa Prestadores Serviço já recusava inativos (400), e o combo oferecia-os | Filtro Estado com "Ativo" por defeito; para ver todos enviar `estado=TODOS` | MS-029 |
 | **Prestador: `nome` é ignorado** — o nome é sempre o da entidade do sistema financeiro (spec). O "Nome (opcional)" deixou de existir | Tirar o campo do formulário; na lista, `nome` = entidade | MS-029 |
 
 Só frontend (a API já devolve o necessário): paginação (`totalPages`, MS-001), `etapaDesc`/`parecerDesc`
@@ -527,6 +531,7 @@ coluna "Prestador Serviço" do ecrã. O prestador não se envia: vem da requisi�
 // AJUDA_CUSTO
 { "ajudasCusto": [ { "colaboradorId": "<uuid>", "flgAlojamento": true,
                      "numeroDiasAlojamento": 5, "valorDiario": 6000 } ] }
+// valorTotal = valor diário efectivo × numeroDiasMissao (não × numeroDiasAlojamento)
 ```
 
 No alojamento, o nº de dias é calculado a partir das datas (`dataFim − dataInicio + 1`). Não se envia

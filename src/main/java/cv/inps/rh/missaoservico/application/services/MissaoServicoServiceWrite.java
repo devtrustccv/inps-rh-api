@@ -9,6 +9,7 @@ import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -70,6 +71,7 @@ public class MissaoServicoServiceWrite {
   private final EmailService emailService;
   private final MissaoProcessoSupport support;
   private final MissaoNotificacaoColaborador notificacaoColaborador;
+  private final AuthenticatedUserHelper authenticatedUserHelper;
 
   @Transactional
   public ResponseEntity<MissaoSubmissaoGravadaResponseDTO> submeter(SubmeterMissaoServicoCommand command) {
@@ -335,11 +337,16 @@ public class MissaoServicoServiceWrite {
     if (dto.getDataFim().isBefore(dto.getDataInicio())) {
       throw IgrpResponseStatusException.badRequest("A Data Fim da missão não pode ser anterior à Data Início.");
     }
+    // Spec (Autorização Prévia): "Autorizado por" vem preenchido com o utilizador que submete (editável) e a
+    // Data Autorização com a data corrente. Em falta no pedido, aplica-se esse valor por defeito (QA MS-005).
+    if (!StringUtils.hasText(dto.getAutorizadoPor())) {
+      dto.setAutorizadoPor(authenticatedUserHelper.getNomeUtilizadorAtual());
+    }
     if (!StringUtils.hasText(dto.getAutorizadoPor())) {
       throw IgrpResponseStatusException.badRequest("Indique quem autorizou a missão (Autorizado por).");
     }
     if (dto.getDataAutorizacao() == null) {
-      throw IgrpResponseStatusException.badRequest("Indique a Data de Autorização.");
+      dto.setDataAutorizacao(LocalDate.now());
     }
     if (CollectionUtils.isEmpty(dto.getColaboradores())) {
       throw IgrpResponseStatusException.badRequest("Adicione pelo menos um colaborador à missão.");
@@ -672,7 +679,8 @@ public class MissaoServicoServiceWrite {
       var linha = linhaPorId.get(det.getMissaoLogistId().getId());
       var vars = support.varsMissao(missao);
       vars.put("valorDiario", valorOuVazio(linha.getValorDiario()));
-      vars.put("nrDiasAjuda", linha.getNrDias() != null ? String.valueOf(linha.getNrDias()) : "");
+      // A ajuda de custo paga-se pelos dias da missão (NR_DIAS da linha são os dias de alojamento).
+      vars.put("nrDiasAjuda", missao.getNrDias() != null ? String.valueOf(missao.getNrDias()) : "");
       vars.put("valorTotal", valorOuVazio(linha.getValorTotal()));
       vars.put("referenciaPagamento", missao.getReferenciaPagamento());
       vars.put("dataPagamento", missao.getDataPagamento() != null ? missao.getDataPagamento().toString() : "");

@@ -702,6 +702,11 @@ public class MissaoProcessoServiceWrite {
       if (item.getNumeroDiasAlojamento() == null || item.getNumeroDiasAlojamento() < 0) {
         throw IgrpResponseStatusException.badRequest("ajudasCusto: numeroDiasAlojamento é obrigatório e não pode ser negativo");
       }
+      var diasMissao = missao.getNrDias();
+      if (diasMissao != null && item.getNumeroDiasAlojamento() > diasMissao) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: o número de dias de alojamento ("
+            + item.getNumeroDiasAlojamento() + ") não pode ser superior aos dias da missão (" + diasMissao + ")");
+      }
       var colab = colaboradoresDaLinha(missao.getUuid(), List.of(item.getColaboradorId()), "ajudasCusto").getFirst();
       // D2: valor diário base parametrizado (RH_T_PARAM_AJUDA_CUSTO) da carreira DESTE colaborador,
       // nacional/estrangeiro conforme o destino. Sem parametrização usa-se o do ecrã.
@@ -720,9 +725,11 @@ public class MissaoProcessoServiceWrite {
 
       var log = novaLinha(missao, processo);
       log.setFlgAlojamento(item.getFlgAlojamento() ? "SIM" : "NAO");
+      // Spec: NR_DIAS = "Número Dias Alojamento"; Valor Total = valor diário × nº de dias DE MISSÃO
+      // (antes multiplicava pelos dias de alojamento — ex.: missão de 11 dias paga só 8).
       log.setNrDias(item.getNumeroDiasAlojamento());
       log.setValorDiario(diario);
-      log.setValorTotal(diario.multiply(BigDecimal.valueOf(item.getNumeroDiasAlojamento())));
+      log.setValorTotal(diario.multiply(BigDecimal.valueOf(diasMissao != null ? diasMissao : item.getNumeroDiasAlojamento())));
       log.setMoeda("CVE");
       out.add(new LinhaLogistica(log, List.of(colab), null));
     }

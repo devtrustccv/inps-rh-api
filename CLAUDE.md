@@ -83,6 +83,13 @@ detalheAlteracoes.congelar(validacao, DossierCampos.T_<TABELA>, campos, antes,
 - FKs: `.referencia(...)` lê o id sem inicializar o proxy e resolve o nome por PK
   (`ReferenciaNomeResolver`); se o nome sair como `"XEntity #id"`, falta o getter em `GETTERS_CANDIDATOS`.
 
+## Documentos de Saída (texto com marcadores)
+
+O texto dos Documentos de Saída (`RH_T_PARAM_DOC_OUTPUT`) usa marcadores `${nome}`. Para gerar um documento:
+`DocumentoSaidaRenderer.render(tipoDocumento, Map valores)` (em `shared/domain/service/documento/`) — os valores vêm de onde
+o programador quiser. Ordens de Serviço (providers) e Declarações já passam pelo motor. Guia completo:
+[docs/guia_documentos_saida_marcadores.html](docs/guia_documentos_saida_marcadores.html).
+
 ## Armadilhas comuns
 
 - Ao criar entidade nova, não esquecer `@EntityListeners(AuditingEntityListener.class)` — sem isso, os campos auditáveis ficam nulos.

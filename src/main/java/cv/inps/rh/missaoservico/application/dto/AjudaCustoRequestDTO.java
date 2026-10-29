@@ -27,7 +27,7 @@ public class AjudaCustoRequestDTO {
   //   100% se colaborador tem alojamento próprio (flgAlojamento = false)
   //   2/3  se empresa paga alojamento sem alimentação
   //   1/3  se empresa paga alojamento com alimentação
-  // valorTotal = valorDiario × numeroDiasAlojamento → calculado no service
+  // valorTotal = valor diário efectivo × nº de dias da missão → calculado no service
   private BigDecimal valorDiario;         // calculado pelo service
   private BigDecimal valorTotal;
 
