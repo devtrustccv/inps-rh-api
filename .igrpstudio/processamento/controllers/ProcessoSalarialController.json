@@ -265,6 +265,11 @@
           "type": "string",
           "name": "tipoDetalhe",
           "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "idItemActo",
+          "isRequired": true
         }
       ]
     },

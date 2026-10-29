@@ -123,16 +123,13 @@ public class ProcessamentoSalarialReadService {
     var procId = Long.valueOf(query.getProcSalId());
 
     var detalhes = isPayment ?
-        procSalCcPagEntityRepository.getDetalhesPagamento(query.getTipoMovimento(), procId) :
-        procSalCcRemunEntityRepository.getDetalhesRemuneracao(query.getTipoMovimento(), procId);
+        procSalCcPagEntityRepository.getDetalhesPagamento(query.getTipoMovimento(), procId, query.getIdItemAto()) :
+        procSalCcRemunEntityRepository.getDetalhesRemuneracao(query.getTipoMovimento(), procId, query.getIdItemAto());
 
     var format = NumberUtils.spaceDecimalFormat();
     detalhes.forEach(d -> d.setValorFormatado(formatar(format, d.getValor())));
 
-    var data = new DetalhesProcessamentoDTO();
-    data.setContent(detalhes);
-
-    return data;
+    return new DetalhesProcessamentoDTO(detalhes);
   }
 
   public List<DadosValidacaoDTO> getDadosValidacao(GetDadosValidacaoQuery query) {
@@ -141,7 +138,7 @@ public class ProcessamentoSalarialReadService {
       var sql = "{ ? = call RH_PK_VALIDACAO_SALARIAL_DB.RH_F_VALIDACAO2(?, ?) }";
 
       try (var connection = dataSource.getConnection();
-           var stmt = connection.prepareCall(sql).unwrap(OracleCallableStatement.class);) {
+           var stmt = connection.prepareCall(sql).unwrap(OracleCallableStatement.class)) {
 
         stmt.registerOutParameter(1, OracleTypes.CLOB);
 

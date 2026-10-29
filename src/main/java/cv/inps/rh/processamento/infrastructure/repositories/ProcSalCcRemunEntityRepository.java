@@ -71,11 +71,14 @@ public interface ProcSalCcRemunEntityRepository extends
               null
           )
           FROM ProcSalCcRemunEntity e
-          WHERE e.tipo = :tipoMovimento AND e.procSalId = :procId
+          WHERE e.tipo = :tipoMovimento
+                AND e.procSalId = :procId
+                AND (:idItemAto IS NULL OR e.itemActo = :idItemAto)
       """)
   List<DetalhesProcessamentoRowDTO> getDetalhesRemuneracao(
       @Param("tipoMovimento") String tipoMovimento,
-      @Param("procId") Long procSalId
+      @Param("procId") Long procSalId,
+      @Param("idItemAto") Long idItemAto
   );
 
   List<ProcSalCcRemunEntity> findByProcSalId(Long procFuncId);
