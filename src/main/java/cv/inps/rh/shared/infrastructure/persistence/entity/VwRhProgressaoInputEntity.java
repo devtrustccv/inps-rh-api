@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @Getter
 @Entity
 @Immutable
-@Table(name = "VW_PROGRESSAO_PROMOCAO")
+@Table(name = "RH_V_PROGRESSAO_PROMOCAO")
 @ToString
 public class VwRhProgressaoInputEntity {
 
