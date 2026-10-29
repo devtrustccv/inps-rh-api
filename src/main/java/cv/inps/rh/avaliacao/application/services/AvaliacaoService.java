@@ -687,6 +687,18 @@ public class AvaliacaoService {
   private record CompetenciaLinha(Long paramId, String competencia) {
   }
 
+  /**
+   * A descrição da competência é obrigatória na BD e vem do Manual de Funções (direção + carreira)
+   * ou da escolhida no ecrã — sem nenhuma das duas explica-se o que falta em vez de falhar com
+   * "campo obrigatório em falta".
+   */
+  private void exigirDescricaoCompetencia(String descricao, ParamObjetivoEntity p) {
+    if (!StringUtils.hasText(descricao)) {
+      throw IgrpResponseStatusException.badRequest("Competência " + p.getNumeroOrdem()
+          + ": escolha a competência ou registe o Manual de Funções da direção e Carreira / Cargo.");
+    }
+  }
+
   private void criarLinhasAvaliacao(
       AvaliacaoEntity avaliacao,
       List<ParamObjetivoEntity> params,
@@ -716,6 +728,15 @@ public class AvaliacaoService {
           ? primeiroPreenchido(manualDescricao, obj.getObjectivo(), p.getDescricao())
           : p.getDescricao());
       e.setKpi(individual ? primeiroPreenchido(obj.getKpi(), p.getKpi()) : p.getKpi());
+      // Objectivo e KPI são obrigatórios na BD: sem eles a gravação falhava com uma mensagem genérica.
+      if (!StringUtils.hasText(e.getObjectivos())) {
+        throw IgrpResponseStatusException.badRequest("Objectivo " + p.getNumeroOrdem()
+            + " (" + p.getAbrangencia() + "): escolha ou indique o objectivo.");
+      }
+      if (!StringUtils.hasText(e.getKpi())) {
+        throw IgrpResponseStatusException.badRequest("Objectivo " + p.getNumeroOrdem()
+            + " (" + p.getAbrangencia() + "): indique o KPI.");
+      }
       e.setMeta(obj.getMeta());
       e.setPonderacao(p.getPonderacao());
       objectivoRepository.save(e);
@@ -734,6 +755,7 @@ public class AvaliacaoService {
       e.setAbrangencia(p.getAbrangencia());
       // Spec: "Preenchido apartir de Tabela RH_T_PARAM_MFUNCAO, CUJO cargo = cargo do colaborador"
       e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
+      exigirDescricaoCompetencia(e.getDescricao(), p);
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoComportamentais());
@@ -752,6 +774,7 @@ public class AvaliacaoService {
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
       e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
+      exigirDescricaoCompetencia(e.getDescricao(), p);
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoTecnica());
