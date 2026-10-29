@@ -157,9 +157,14 @@ public class ManualFuncaoService {
       entity.setSeccaoId(null);
     }
 
-    var cargo = cargoRepository.findById(dto.getCargoId())
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamCargoEntity not found for id: " + dto.getCargoId()));
-    entity.setCargo(cargo);
+    // Cargo é opcional (o ecrã passou a ter só "Carreira / Cargo"): como no registo, só se procura quando vem.
+    // Antes fazia findById(null) e qualquer edição sem cargo dava 400 "The given id must not be null" (QA AV-20).
+    if (dto.getCargoId() != null) {
+      entity.setCargo(cargoRepository.findById(dto.getCargoId())
+          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamCargoEntity not found for id: " + dto.getCargoId())));
+    } else {
+      entity.setCargo(null);
+    }
 
     if (dto.getCarrPccsId() != null) {
       entity.setCarreira(carreiraRepository.findByIdOrThrow(dto.getCarrPccsId()));
