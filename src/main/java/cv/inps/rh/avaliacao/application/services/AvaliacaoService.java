@@ -41,6 +41,9 @@ public class AvaliacaoService {
 
   private static final String ESTADO_ATIVO = "A";
 
+  /** Vínculo laboral "Efetivo" (RH_V_RELACAO_LABORAL.VINCULO_ID): só estes têm objectivos individuais. */
+  private static final Long VINCULO_EFETIVO_ID = 1L;
+
   private final AvaliacaoEntityRepository avaliacaoRepository;
   private final AvaliacaoObjectivoEntityRepository objectivoRepository;
   private final AvaliacaoCompetenciaEntityRepository competenciaRepository;
@@ -182,7 +185,17 @@ public class AvaliacaoService {
 
       if (existente != null) {
         periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(existente, pp));
-        ignorados.add(funcionario.getNome());
+        if (existente.getUuid() != null && existente.getUuid().toString().equals(dto.getUuid())) {
+          // Edição desta mesma definição: grava o que mudou nas linhas (meta, KPI, objectivo
+          // individual, competência, atitude) — antes as alterações eram ignoradas.
+          atualizarLinhasAvaliacao(existente, dto,
+              resolverDescricaoManual(instit != null ? instit.getId() : null,
+                  dto.getSeccaoId(), cargoDoColaborador(funUuid, dto.getCargoId()),
+                  carreiraDoColaborador(funUuid, dto.getCarrPccsId())));
+          created.add(existente.getUuid().toString());
+        } else {
+          ignorados.add(funcionario.getNome());
+        }
         continue;
       }
 
@@ -232,6 +245,7 @@ public class AvaliacaoService {
    * Os colaboradores da definição individual. Sem colaboradores indicados, a definição aplica-se a
    * todos os colaboradores activos da Carreira/Cargo (e da direção, se indicada), por isso um dos
    * dois é obrigatório. Com Carreira/Cargo, os colaboradores indicados têm de pertencer a ela.
+   * Em qualquer caso, só entram colaboradores com vínculo efetivo.
    */
   private List<UUID> resolverColaboradores(
       DefinicaoObjectivoDTO dto, ParamCarreiraEntity carreira, DirecaoEntity instit) {
@@ -245,13 +259,29 @@ public class AvaliacaoService {
             "Indique a Carreira / Cargo ou pelo menos um colaborador.");
       }
       var daCarreira = tiposRelacionamentoRepository.findFuncionarioUuidsDaCarreiraPccs(
-          carreira.getId(), instit != null ? instit.getId() : null);
+          carreira.getId(), instit != null ? instit.getId() : null, VINCULO_EFETIVO_ID);
       if (daCarreira.isEmpty()) {
         throw IgrpResponseStatusException.badRequest(
-            "Não há colaboradores activos na Carreira / Cargo " + carreira.getNome()
+            "Não há colaboradores efetivos activos na Carreira / Cargo " + carreira.getNome()
                 + (instit != null ? " da direção " + instit.getNome() : "") + ".");
       }
       return daCarreira;
+    }
+
+    // Só colaboradores com vínculo efetivo têm objectivos individuais. A edição de uma definição
+    // já existente (pedido com uuid) não é bloqueada, para não prender as criadas antes da regra.
+    var edicao = StringUtils.hasText(dto.getUuid());
+    var naoEfetivos = edicao ? List.<String>of() : indicados.stream()
+        .filter(u -> !VINCULO_EFETIVO_ID.equals(relacaoLaboralRepository
+            .findFirstByFuncionarioUuidAndEstActAdm(u.toString(), 1L)
+            .map(RhVRelacaoLaboralEntity::getVinculoId)
+            .orElse(null)))
+        .map(u -> funcionarioRepository.findByUuidOrThrow(u).getNome())
+        .toList();
+    if (!naoEfetivos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só colaboradores com vínculo efetivo podem ter objectivos definidos. Não efetivo(s): "
+              + String.join(", ", naoEfetivos) + ".");
     }
 
     if (carreira != null) {
@@ -316,7 +346,7 @@ public class AvaliacaoService {
    */
   @Transactional(readOnly = true)
   public List<cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO> getCarreirasComColaboradores(Long institId) {
-    var ids = tiposRelacionamentoRepository.findCarreirasPccsComColaboradores(institId).stream()
+    var ids = tiposRelacionamentoRepository.findCarreirasPccsComColaboradores(institId, VINCULO_EFETIVO_ID).stream()
         .filter(java.util.Objects::nonNull)
         .toList();
     return carreiraRepository.findAllById(ids).stream()
@@ -519,6 +549,17 @@ public class AvaliacaoService {
 
     var rotulos = periodoService.descricoesDosPeriodos();
 
+    // O que já foi registado em cada período (avaliação e/ou autoavaliação): a lista só mostra
+    // os períodos com registo e a ação "Ver …" correspondente.
+    var comAvaliacao = new java.util.HashSet<String>();
+    var comAutoAvaliacao = new java.util.HashSet<String>();
+    for (var m : periodoService.medicoesDe(rows.stream().map(AvaliacaoEntity::getId).toList())) {
+      if (m.getAvaliacao() == null) continue;
+      var chave = m.getAvaliacao().getId() + "|" + m.getPeriodicidade();
+      if (m.getAvaliacaoValor() != null || StringUtils.hasText(m.getRealizado())) comAvaliacao.add(chave);
+      if (m.getAutoAvaliacao() != null || StringUtils.hasText(m.getAutoRealizado())) comAutoAvaliacao.add(chave);
+    }
+
     var contentAll = grouped.values().stream().map(list -> {
       var base = list.getFirst();
 
@@ -553,6 +594,9 @@ public class AvaliacaoService {
         dto.setAvaliacaoFinal(d.getAvaliacaoFinal());
         dto.setAvaliacaoQualitativa(d.getAvaliacaoQualitativa());
         dto.setEstado(d.getEstado());
+        var chave = d.getAvaliacao().getId() + "|" + d.getPeriodicidade();
+        dto.setTemAvaliacao(comAvaliacao.contains(chave) || d.getAvaliacaoFinal() != null);
+        dto.setTemAutoAvaliacao(comAutoAvaliacao.contains(chave));
         return dto;
       }).toList();
 
@@ -584,6 +628,63 @@ public class AvaliacaoService {
     PageMapper.fillPagination(page, response);
     response.setContent(page.getContent());
     return response;
+  }
+
+  /**
+   * Atualiza no lugar as linhas de uma definição existente, ligadas pela linha do componente
+   * (paramId). Não apaga nem recria linhas, para não perder avaliações já registadas nelas;
+   * as regras de origem dos textos são as mesmas da criação.
+   */
+  private void atualizarLinhasAvaliacao(AvaliacaoEntity avaliacao, DefinicaoObjectivoDTO dto,
+      String manualDescricao) {
+    var uuid = avaliacao.getUuid();
+
+    var objectivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(uuid);
+    for (var obj : listaOuVazia(dto.getObjectivos())) {
+      objectivos.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(obj.getParamId()))
+          .findFirst()
+          .ifPresent(e -> {
+            var p = e.getParamObjetivo();
+            if ("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia())) {
+              e.setObjectivos(primeiroPreenchido(obj.getObjectivo(), e.getObjectivos(), manualDescricao));
+              e.setKpi(primeiroPreenchido(obj.getKpi(), p.getKpi()));
+            }
+            e.setMeta(obj.getMeta());
+            objectivoRepository.save(e);
+          });
+    }
+
+    var competencias = competenciaRepository.findAllByAvaliacao_Uuid(uuid);
+    var linhasCompetencia = new ArrayList<CompetenciaLinha>();
+    listaOuVazia(dto.getCompetenciasComportamentais())
+        .forEach(c -> linhasCompetencia.add(new CompetenciaLinha(c.getParamId(), c.getCompetencia())));
+    listaOuVazia(dto.getCompetenciasTecnicas())
+        .forEach(c -> linhasCompetencia.add(new CompetenciaLinha(c.getParamId(), c.getCompetencia())));
+    for (var c : linhasCompetencia) {
+      competencias.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(c.paramId()))
+          .findFirst()
+          .ifPresent(e -> {
+            e.setDescricao(primeiroPreenchido(c.competencia(), e.getDescricao(), manualDescricao));
+            competenciaRepository.save(e);
+          });
+    }
+
+    var atitudes = atitudeRepository.findAllByAvaliacao_Uuid(uuid);
+    for (var a : listaOuVazia(dto.getAtitudesPessoais())) {
+      atitudes.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(a.getParamId()))
+          .findFirst()
+          .ifPresent(e -> {
+            e.setDescricao(primeiroPreenchido(a.getAtitudePessoal(), e.getDescricao(),
+                e.getParamObjetivo().getDescricao()));
+            atitudeRepository.save(e);
+          });
+    }
+  }
+
+  private record CompetenciaLinha(Long paramId, String competencia) {
   }
 
   private void criarLinhasAvaliacao(
@@ -668,7 +769,8 @@ public class AvaliacaoService {
       e.setParamObjetivo(p);
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
-      e.setDescricao(p.getDescricao());
+      // O texto escrito no ecrã (campo editável); sem ele, o da parametrização.
+      e.setDescricao(primeiroPreenchido(obj.getAtitudePessoal(), p.getDescricao()));
       e.setPonderacao(p.getPonderacao());
       atitudeRepository.save(e);
     });

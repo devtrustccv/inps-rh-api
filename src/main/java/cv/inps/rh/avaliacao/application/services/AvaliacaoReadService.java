@@ -262,6 +262,8 @@ public class AvaliacaoReadService {
   private CompetenciaComportAvaliacaoDTO toCompetenciaComportamental(AvaliacaoCompetenciaEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new CompetenciaComportAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
@@ -275,6 +277,8 @@ public class AvaliacaoReadService {
   private CompetenciaTecAvaliacaoDTO toCompetenciaTecnica(AvaliacaoCompetenciaEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new CompetenciaTecAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
@@ -288,6 +292,8 @@ public class AvaliacaoReadService {
   private AtitudePessoalAvaliacaoDTO toAtitude(AvaliacaoAtitudePessoalEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new AtitudePessoalAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     // Ler do próprio registo; fallback ao paramObjetivo para dados migrados antes do V3
     dto.setNumeroOrdem(e.getNumeroOrdem() != null
         ? e.getNumeroOrdem()
