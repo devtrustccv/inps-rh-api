@@ -23,6 +23,7 @@ public class ProcessoLogisticaResponseDTO {
   private MissaoProcessoResponseDTO processo;
   private LocalDate dataInicioMissao;     // valor por defeito das datas do alojamento
   private LocalDate dataFimMissao;
+  private Integer numeroDiasMissao;       // dias da missão (inclusivos) — base do total da ajuda de custo
   // Só a secção do tipo do processo vem preenchida; as restantes vêm vazias
   private List<BilhetePassagemResponseDTO> bilhetesPassagem;
   private List<SeguroViagemResponseDTO> segurosViagem;

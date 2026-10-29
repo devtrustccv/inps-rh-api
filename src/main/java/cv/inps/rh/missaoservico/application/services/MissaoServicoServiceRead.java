@@ -10,6 +10,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.missaoservico.application.dto.NotificacaoMissaoResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -37,6 +38,7 @@ public class MissaoServicoServiceRead {
   private static final String ESTADO_INATIVO = "I";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
+  private final AuthenticatedUserHelper authenticatedUserHelper;
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
   private final DocumentoEntityRepository documentoRepository;
   private final DocumentoMapper documentoMapper;
@@ -64,6 +66,15 @@ public class MissaoServicoServiceRead {
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Valores por defeito do formulário de nova missão (spec, Autorização Prévia): "Autorizado por" = nome do
+   * utilizador do login (editável) e Data Autorização = hoje (QA MS-005).
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoValoresIniciaisDTO> valoresIniciaisSubmissao(GetValoresIniciaisSubmissaoQuery query) {
+    return ResponseEntity.ok(new MissaoValoresIniciaisDTO(authenticatedUserHelper.getNomeUtilizadorAtual(), LocalDate.now()));
   }
 
   @Transactional(readOnly = true)

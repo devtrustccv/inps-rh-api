@@ -161,6 +161,35 @@ public class MissaoController {
   }
 
    @GetMapping(
+   value = "submissao/valores-iniciais"
+  )
+  @Operation(
+    summary = "Get valores iniciais submissao",
+    description = "Valores por defeito do formulario de nova missao: autorizadoPor (utilizador do login) e dataAutorizacao (hoje)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoValoresIniciaisDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<MissaoValoresIniciaisDTO> getValoresIniciaisSubmissao()
+  {
+
+      final var query = new GetValoresIniciaisSubmissaoQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "{uuid}/submissao"
   )
   @Operation(

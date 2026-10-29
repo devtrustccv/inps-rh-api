@@ -38,6 +38,12 @@
       "required": false
     },
     {
+      "name": "numeroDiasMissao",
+      "type": "integer",
+      "objectType": "java",
+      "required": false
+    },
+    {
       "name": "bilhetesPassagem",
       "type": "BilhetePassagemResponse",
       "objectType": "dto",

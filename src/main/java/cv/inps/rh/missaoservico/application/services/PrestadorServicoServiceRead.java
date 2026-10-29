@@ -55,8 +55,11 @@ public class PrestadorServicoServiceRead {
       if (ilhaId != null) {
         predicates.add(cb.equal(root.get("ilhaId").get("id"), ilhaId));
       }
-      if (StringUtils.hasText(estado)) {
-        predicates.add(cb.equal(root.get("estado"), estado.trim()));
+      // QA MS-029: por defeito só os ativos (a etapa Prestadores Serviço recusa os inativos, e o combo
+      // oferecia-os); os inativos só pelo filtro (estado=I), todos com estado=TODOS.
+      var filtroEstado = StringUtils.hasText(estado) ? estado.trim() : ESTADO_ATIVO;
+      if (!"TODOS".equalsIgnoreCase(filtroEstado)) {
+        predicates.add(cb.equal(root.get("estado"), filtroEstado));
       }
       return cb.and(predicates.toArray(Predicate[]::new));
     };
