@@ -188,9 +188,10 @@ public class ProcessoSalarialController {
   public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
       @RequestParam(value = "tipoMovimento") String tipoMovimento,
       @RequestParam(value = "procSalId") String procSalId,
-      @RequestParam(value = "tipoDetalhe") String tipoDetalhe
+      @RequestParam(value = "tipoDetalhe") String tipoDetalhe,
+      @RequestParam(value = "idItemActo") Long idItemActo
   ) {
-    final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe);
+    final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe, idItemActo);
 
     return queryBus.handle(query);
   }

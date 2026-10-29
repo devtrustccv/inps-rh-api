@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.emprestimo.domain.service.EmprestimoNotificacaoService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -42,6 +43,7 @@ public class AquisicaoViaturaService {
   private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoNotificacaoService emprestimoNotificacaoService;
   private final EmprestimoWriteService emprestimoWriteService;
   private final ApplicationAuditorAware auditorAware;
   private final EmprestimoHelper emprestimoHelper;
@@ -76,7 +78,10 @@ public class AquisicaoViaturaService {
       throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
     }
     entity.setNomeFornecedor(request.getNomeFornecedor().trim());
-    entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
+    entity.setBanco(Objects.nonNull(request.getBancoId()) && request.getBancoId() > 0
+        ? bancoEntityRepository.findById(request.getBancoId())
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("O banco selecionado não existe."))
+        : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());
@@ -87,7 +92,11 @@ public class AquisicaoViaturaService {
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
-    entity.setJuro(request.getJuros());
+    // A taxa de juro é definida na Análise RH; o ecrã do Pedido não a envia. Sem esta guarda, voltar a
+    // gravar o Pedido (ex.: após retificação) apagava a taxa já introduzida.
+    if (request.getJuros() != null) {
+      entity.setJuro(request.getJuros());
+    }
     // Só validado se preenchido (21 dígitos), como no resto do sistema — antes era gravado sem validação.
     entity.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     entity.setNif(request.getNif());
@@ -262,7 +271,9 @@ public class AquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
@@ -317,16 +328,17 @@ public class AquisicaoViaturaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
-        case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
-        }
+        // Não Autorizado termina o processo (fica na Autorização, Não Autorizado e só de
+        // consulta) — antes voltava à Análise RH.
+        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
@@ -359,6 +371,12 @@ public class AquisicaoViaturaService {
     newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newObj.setCreatedDate(request.getData().atStartOfDay());
     pedidoDecisaoEntityRepository.save(newObj);
+
+    // Decisão da Comissão Executiva: notifica quem fez a Validação Responsável na Análise RH.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      emprestimoNotificacaoService.notificarDecisaoAutorizacao(
+          loan, EtapaEmprestimo.ANALISE_RH_PEDIDO, request.getParecer(), request.getObservacao());
+    }
   }
 
   @Transactional
@@ -391,6 +409,6 @@ public class AquisicaoViaturaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
-    emprestimoHelper.registarExecucaoEtapa(order, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
+    emprestimoHelper.registarExecucaoEtapa(loan, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
   }
 }

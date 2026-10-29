@@ -3,6 +3,7 @@ package cv.inps.rh.emprestimo.domain.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,16 +27,38 @@ public class EmprestimoDocumentService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
 
+  /**
+   * Sincroniza os documentos de uma etapa com a lista enviada pelo ecrã: os que deixaram de vir são
+   * eliminados. null = a etapa não enviou documentos (não mexe); lista vazia = o utilizador removeu todos.
+   */
   public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, String referenceName) {
+    persistDocuments(documentos, funId, referenceId, referenceName, true);
+  }
 
-    if (Objects.isNull(documentos) || documentos.isEmpty())
+  /** Só acrescenta/actualiza (anexos avulsos: mudança de estado, pagamento, comprovativo) — não elimina nada. */
+  public void addDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, String referenceName) {
+    persistDocuments(documentos, funId, referenceId, referenceName, false);
+  }
+
+  private void persistDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId,
+                                String referenceName, boolean removeMissing) {
+
+    if (Objects.isNull(documentos) || (!removeMissing && documentos.isEmpty()))
       return;
 
     var docs = new ArrayList<DocumentoEntity>();
 
-    var notDeletedUuids = new ArrayList<UUID>();
+    var notDeletedUuids = new HashSet<UUID>();
 
     documentos.forEach(doc -> {
+
+      var semTipo = doc.getTipoDocumentoId() == null || doc.getTipoDocumentoId() <= 0;
+      // Linha vazia (os formulários abrem com uma linha de documento): não é um documento.
+      if (semTipo && !StringUtils.hasText(doc.getUrl()) && !StringUtils.hasText(doc.getId()))
+        return;
+      // Antes ia tipoDocumentoId 0 e o erro era "TipoDocumentoEntity not found for id: 0".
+      if (semTipo)
+        throw IgrpResponseStatusException.badRequest("Selecione o Tipo de Documento de cada documento anexado.");
 
       final DocumentoEntity newDoc;
 
@@ -50,21 +74,33 @@ public class EmprestimoDocumentService {
         newDoc.setDocId(1L);
       }
 
-      newDoc.setTpDocumentoId(doc.getTipoDocumentoId() != null ? tipoDocumentoEntityRepository.findByIdOrThrow(doc.getTipoDocumentoId()) : null);
+      var tipo = tipoDocumentoEntityRepository.findById(doc.getTipoDocumentoId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+              "O Tipo de Documento selecionado já não está disponível. Selecione outro."));
+      if (!StringUtils.hasText(doc.getUrl()) && !StringUtils.hasText(newDoc.getUrl()))
+        throw IgrpResponseStatusException.badRequest(
+            "Carregue o ficheiro do documento «%s».".formatted(tipo.getNome()));
+      newDoc.setTpDocumentoId(tipo);
       newDoc.setFunId(funId);
-      newDoc.setUrl(doc.getUrl());
+      if (StringUtils.hasText(doc.getUrl()))
+        newDoc.setUrl(doc.getUrl());
       docs.add(newDoc);
     });
 
-    if (!notDeletedUuids.isEmpty()) {
-      var deletedDocs = documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstadoAndUuidNotIn(funId,
-          referenceName,
-          referenceId,
-          Estado.A,
-          notDeletedUuids
-      );
-
-      documentoEntityRepository.saveAll(deletedDocs);
+    // Documentos que deixaram de vir na lista foram removidos no ecrã: passam a Eliminado. Antes eram
+    // encontrados mas gravados sem alteração (e nada era removido se a lista só tinha documentos novos
+    // ou vinha vazia), por isso o documento eliminado voltava a aparecer ao regressar à etapa.
+    if (removeMissing) {
+      documentoEntityRepository.findAllByFunIdAndReferenciaNameInAndReferenciaIdAndEstado(funId,
+              List.of(referenceName),
+              referenceId,
+              Estado.A
+          ).stream()
+          .filter(doc -> !notDeletedUuids.contains(doc.getUuid()))
+          .forEach(doc -> {
+            doc.setEstado(Estado.E);
+            docs.add(doc);
+          });
     }
 
     documentoEntityRepository.saveAll(docs);

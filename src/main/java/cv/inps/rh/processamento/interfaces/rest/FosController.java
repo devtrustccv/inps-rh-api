@@ -350,7 +350,7 @@ public class FosController {
               responseCode = "200",
 
               content = @Content(
-                  mediaType = "application/json",
+                  mediaType = "application/xml",
                   schema = @Schema(
                       implementation = byte[].class,
                       type = "byte[]")

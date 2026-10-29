@@ -22,5 +22,11 @@ public enum TipoSituacao {
 
   REDUCAO_PRESTACAO,
 
-  REFORCO_CAPITAL
+  REFORCO_CAPITAL,
+
+  // Domínio TIPO_SITUACAO_RENEGOCIACAO/AMORTIZACAO (changelog v2 §11) — substituem os
+  // ADIANTAMENTO_* acima no pedido de Amortização de dívida.
+  AMORTIZACAO_PARCIAL,
+
+  AMORTIZACAO_TOTAL
 }

@@ -67,8 +67,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    // Mensagens para o utilizador (o caminho técnico do campo, ex. documentos[0].url, fica no log).
+    LOGGER.warn("Validação falhou: {}", ex.getBindingResult().getFieldErrors().stream()
+        .map(fe -> fe.getField() + ": " + fe.getDefaultMessage()).collect(Collectors.joining("; ")));
     var allErrors = ex.getBindingResult().getFieldErrors().stream()
-        .map(fe -> String.format("Campo '%s': %s", fe.getField(), fe.getDefaultMessage()))
+        .map(fe -> mensagemCampo(fe.getField(), fe.getDefaultMessage()))
+        .distinct()
         .collect(Collectors.joining("; "));
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -78,6 +82,17 @@ public class GlobalExceptionHandler {
     return problemDetail;
   }
 
+
+  private static final java.util.regex.Pattern CAMPO_OBRIGATORIO =
+      java.util.regex.Pattern.compile("The field <(.+)> is required");
+
+  /** "The field <x> is required" (mensagem dos DTOs gerados) → "O campo «x» é obrigatório." */
+  private static String mensagemCampo(String campo, String mensagem) {
+    if (mensagem == null || mensagem.isBlank())
+      return "O campo «" + campo.substring(campo.lastIndexOf('.') + 1) + "» é inválido.";
+    var m = CAMPO_OBRIGATORIO.matcher(mensagem);
+    return m.matches() ? "O campo «" + m.group(1) + "» é obrigatório." : mensagem;
+  }
 
   @ExceptionHandler(ConstraintViolationException.class)
   public ProblemDetail handleConstraintViolationException(ConstraintViolationException ex) {

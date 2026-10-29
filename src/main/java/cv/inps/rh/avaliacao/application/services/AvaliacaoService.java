@@ -167,15 +167,11 @@ public class AvaliacaoService {
 
     var periodos = resolverPeriodos(dto);
 
-    if (dto.getFunUuids() == null || dto.getFunUuids().isEmpty()) {
-      throw IgrpResponseStatusException.badRequest(
-          "A abrangência INDIVIDUAL exige pelo menos um colaborador.");
-    }
-
     var instit = dto.getInstitId() != null ? instituicaoRepository.findByIdOrThrow(dto.getInstitId()) : null;
+    var funUuids = resolverColaboradores(dto, carreira, instit);
     var ignorados = new ArrayList<String>();
 
-    for (var funUuid : dto.getFunUuids()) {
+    for (var funUuid : funUuids) {
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(funUuid);
 
@@ -233,6 +229,46 @@ public class AvaliacaoService {
   }
 
   /**
+   * Os colaboradores da definição individual. Sem colaboradores indicados, a definição aplica-se a
+   * todos os colaboradores activos da Carreira/Cargo (e da direção, se indicada), por isso um dos
+   * dois é obrigatório. Com Carreira/Cargo, os colaboradores indicados têm de pertencer a ela.
+   */
+  private List<UUID> resolverColaboradores(
+      DefinicaoObjectivoDTO dto, ParamCarreiraEntity carreira, DirecaoEntity instit) {
+    var indicados = dto.getFunUuids() == null
+        ? List.<UUID>of()
+        : dto.getFunUuids().stream().filter(java.util.Objects::nonNull).distinct().toList();
+
+    if (indicados.isEmpty()) {
+      if (carreira == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Indique a Carreira / Cargo ou pelo menos um colaborador.");
+      }
+      var daCarreira = tiposRelacionamentoRepository.findFuncionarioUuidsDaCarreiraPccs(
+          carreira.getId(), instit != null ? instit.getId() : null);
+      if (daCarreira.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest(
+            "Não há colaboradores activos na Carreira / Cargo " + carreira.getNome()
+                + (instit != null ? " da direção " + instit.getNome() : "") + ".");
+      }
+      return daCarreira;
+    }
+
+    if (carreira != null) {
+      var foraDaCarreira = indicados.stream()
+          .filter(u -> !carreira.getId().equals(carreiraDoColaborador(u, null)))
+          .map(u -> funcionarioRepository.findByUuidOrThrow(u).getNome())
+          .toList();
+      if (!foraDaCarreira.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest(
+            "Não pertence(m) à Carreira / Cargo " + carreira.getNome() + ": "
+                + String.join(", ", foraDaCarreira) + ".");
+      }
+    }
+    return indicados;
+  }
+
+  /**
    * As direções a abranger. INPS não tem nenhuma (uma linha com INSTIT_ID nulo);
    * DIRECAO exige pelo menos uma e aceita várias, porque o ecrã tem
    * "+ Adicionar Direção à Lista".
@@ -272,6 +308,35 @@ public class AvaliacaoService {
     return instituicaoRepository.findComColaboradoresActivos().stream()
         .map(d -> new cv.inps.rh.avaliacao.application.dto.DirecaoResumoDTO(d.getId(), d.getNome()))
         .toList();
+  }
+
+  /**
+   * Carreiras/Cargo com colaboradores activos — só as da direção indicada, ou todas sem direção.
+   * Alimenta o combo Carreira / Cargo da definição de objectivos individuais.
+   */
+  @Transactional(readOnly = true)
+  public List<cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO> getCarreirasComColaboradores(Long institId) {
+    var ids = tiposRelacionamentoRepository.findCarreirasPccsComColaboradores(institId).stream()
+        .filter(java.util.Objects::nonNull)
+        .toList();
+    return carreiraRepository.findAllById(ids).stream()
+        .sorted(Comparator.comparing(c -> Objects.toString(c.getNome(), "")))
+        .map(c -> new cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO(c.getId(), c.getNome()))
+        .toList();
+  }
+
+  /**
+   * Carreira/Cargo atual do colaborador, pela mesma regra usada ao validar a definição individual
+   * (carreira PCCS ou, sem ela, a do escalão). Sem carreira identificável, id e nome vêm nulos.
+   */
+  @Transactional(readOnly = true)
+  public cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO getCarreiraDoColaborador(UUID funUuid) {
+    var id = carreiraDoColaborador(funUuid, null);
+    if (id == null) {
+      return new cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO();
+    }
+    var carreira = carreiraRepository.findByIdOrThrow(id);
+    return new cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO(carreira.getId(), carreira.getNome());
   }
 
   private AvaliacaoEntity novaAvaliacao(

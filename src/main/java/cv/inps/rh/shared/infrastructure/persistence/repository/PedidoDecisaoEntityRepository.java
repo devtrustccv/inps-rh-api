@@ -31,4 +31,7 @@ public interface PedidoDecisaoEntityRepository extends
 
   List<PedidoDecisaoEntity> findByPedidoAndEtapaInAndEstado(PedidoEntity pedido, List<String> etapa, String estado);
 
+  // Decisões de uma versão do empréstimo (todas, a mais recente por último).
+  List<PedidoDecisaoEntity> findByPedidoAndReferenciaIdAndEtapaInOrderByIdAsc(PedidoEntity pedido, Long referenciaId, List<String> etapa);
+
 }

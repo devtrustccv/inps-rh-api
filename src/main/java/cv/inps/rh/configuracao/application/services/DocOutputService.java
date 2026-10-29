@@ -56,9 +56,10 @@ public class DocOutputService {
   public ParamDocOutputEntity create(DocOutputRequestDTO request) {
 
     ParamDocOutputEntity entity = mapper.toEntity(request);
-    exigirTipoLivre(entity.getTipoDocumento(), null);
+    entity.setEstado(estado(request));
+    if ("A".equals(entity.getEstado()))
+      exigirTipoLivre(entity.getTipoDocumento(), null);
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    entity.setEstado("A");
 
     if (request.getResponsavelId() != null)
       entity.setResponsavel(responsavel(request.getResponsavelId()));
@@ -72,9 +73,11 @@ public class DocOutputService {
     ParamDocOutputEntity oldEntity = findById(id);
 
     ParamDocOutputEntity newEntity = mapper.toEntity(request);
-    exigirTipoLivre(newEntity.getTipoDocumento(), oldEntity.getId());
+    newEntity.setEstado(estado(request));
+    // Só pode haver um ativo por tipo; um documento inativo não ocupa o tipo.
+    if ("A".equals(newEntity.getEstado()))
+      exigirTipoLivre(newEntity.getTipoDocumento(), oldEntity.getId());
     newEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    newEntity.setEstado("A");
     // QA TR-04: sem responsável no pedido mantém-se o anterior (antes perdia-se em silêncio).
     newEntity.setResponsavel(request.getResponsavelId() != null
         ? responsavel(request.getResponsavelId())
@@ -83,6 +86,22 @@ public class DocOutputService {
     oldEntity.setEstado("I");
     repository.save(oldEntity);
     return repository.save(newEntity);
+  }
+
+  /** Estado pedido no formulário: A ou I (vazio = A). */
+  private static String estado(DocOutputRequestDTO request) {
+    var estado = StringUtils.hasText(request.getEstado()) ? request.getEstado().trim().toUpperCase() : "A";
+    if (!"A".equals(estado) && !"I".equals(estado))
+      throw IgrpResponseStatusException.badRequest("Estado inválido: " + request.getEstado() + " (use A ou I).");
+    return estado;
+  }
+
+  /** Eliminar = inativar (o histórico das versões fica; a Ordem de Serviço só lê os ativos). */
+  @Transactional
+  public ParamDocOutputEntity delete(String id) {
+    ParamDocOutputEntity entity = findById(id);
+    entity.setEstado("I");
+    return repository.save(entity);
   }
 
   /**

@@ -89,6 +89,11 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 
+  // Última mudança de estado (cancelamento/desistência): observação e anexos, só de leitura.
+  private String observacaoEstado;
+
+  private List<DocumentoDTO> documentosEstado = new ArrayList<>();
+
   @Valid
   private DecisaoEmprestimoDTO decisao;
 

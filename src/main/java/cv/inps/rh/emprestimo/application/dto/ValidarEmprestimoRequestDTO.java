@@ -1,7 +1,8 @@
 package cv.inps.rh.emprestimo.application.dto;
 
+import jakarta.validation.Valid;
+
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,8 +13,15 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class ValidarEmprestimoRequestDTO {
 
-  @NotBlank(message = "The field <validar> is required")
+  // SIM | NAO | CORRIGIR; vazio = reenvio de um empréstimo devolvido para correção.
   private String validar;
 
   private String observacao;
+
+  // Dados do formulário: correções do validador (SIM) ou do reenvio após correção.
+  @Valid
+  private FundoSocialRequestDTO dados;
+
+  // Recuperação: tipo do empréstimo recuperado (AQUISICAO_VIATURA | FUNDO_SOCIAL), se corrigido.
+  private String tipoEmprestimo;
 }

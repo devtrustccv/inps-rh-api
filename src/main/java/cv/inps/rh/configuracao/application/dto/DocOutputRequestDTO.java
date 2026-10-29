@@ -24,5 +24,7 @@ public class DocOutputRequestDTO  {
   private String assinadoPor;
   /** RH_T_RESPONSAVEL.ID — o `responsavelId` devolvido por GET configuracao/responsaveis/search (spec: RESPONSAVEL_ID). */
   private Long responsavelId;
+  /** A (ativo) ou I (inativo). Vazio = A. */
+  private String estado;
 
 }

@@ -30,6 +30,10 @@ import java.util.Optional;
 @Service
 public class AdiantamentoService {
 
+  // Changelog v2 §11 (antes 'ADIANTAMENTO PAGAMENTO DIVIDA' / '... NAO ACEITE')
+  static final String MOTIVO_FECHO_ACEITE = "AMORTIZAÇÃO DIVIDA";
+  static final String MOTIVO_FECHO_NAO_ACEITE = "AMORTIZAÇÃO DIVIDA NAO ACEITE";
+
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
@@ -63,7 +67,8 @@ public class AdiantamentoService {
     newLoan.setValorDivida(initialLoan.getValorDivida());
     newLoan.setValorEmprestimo(initialLoan.getValorEmprestimo());
     newLoan.setEmprestimo(initialLoan);
-    newLoan.setNrPrestacao(obj.getNumeroPrestacao());
+    // Amortização Parcial/Total não pedem o nº de prestações (é calculado ao submeter)
+    newLoan.setNrPrestacao(obj.getNumeroPrestacao() != null ? obj.getNumeroPrestacao() : initialLoan.getNrPrestacao());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     newLoan.setPedido(initialLoan.getPedido());
     newLoan.setJuro(initialLoan.getJuro());
@@ -86,6 +91,7 @@ public class AdiantamentoService {
     newLoan.setMotivoFecho(initialLoan.getMotivoFecho());
     newLoan.setValorReforco(initialLoan.getValorReforco());
     newLoan.setValorJuroTotal(initialLoan.getValorJuroTotal());
+    newLoan.setDataInicio(EmprestimoHelper.dataInicioOriginal(initialLoan));
     newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(
@@ -119,7 +125,11 @@ public class AdiantamentoService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO);
-    loan.setBanco(request.getBancoId() != null ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
+    // Banco por escolher chegava como 0 e findById(0).orElseThrow() dava erro 500.
+    loan.setBanco(request.getBancoId() != null && request.getBancoId() > 0
+        ? bancoEntityRepository.findById(request.getBancoId())
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("O banco selecionado não existe."))
+        : null);
     loan.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     loan.setSwift(request.getSwift());
 
@@ -136,8 +146,9 @@ public class AdiantamentoService {
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório"));
 
       switch (responsavelParecer) {
+        // Changelog v2 §11: o Anexar Comprovativo passou para dentro da Verificação.
         case FAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
+          order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
         case DESFAVORAVEL -> {
@@ -199,7 +210,7 @@ public class AdiantamentoService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO);
 
-    documentService.saveDocuments(
+    documentService.addDocuments(
         List.of(request),
         loan.getTiprel().getFunId(),
         loan.getUuid(),
@@ -216,22 +227,52 @@ public class AdiantamentoService {
   public void verificar(String emprestimoId, VerificarAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+    var order = loan.getPedido();
+    // Processos que ficaram na antiga etapa Anexar Comprovativo continuam já na Verificação.
+    if (EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name().equals(order.getEtapa())) {
+      order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+    }
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO);
 
-    var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+    // Changelog v2 §11: o comprovativo de depósito/transferência anexa-se na própria Verificação.
+    if (request.getDocumentos() != null) {
+      documentService.saveDocuments(
+          request.getDocumentos(),
+          loan.getTiprel().getFunId(),
+          loan.getUuid(),
+          ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
+      );
+    }
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
 
       switch (request.getParecer()) {
         case FAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+          var temComprovativo = request.getDocumentos() != null && request.getDocumentos().stream()
+              .anyMatch(d -> d != null && d.getTipoDocumentoId() != null && d.getTipoDocumentoId() > 0
+                  && org.springframework.util.StringUtils.hasText(d.getUrl()));
+          if (!temComprovativo) {
+            throw IgrpResponseStatusException.badRequest(
+                "Anexe o comprovativo de depósito/transferência antes de concluir a Verificação.");
+          }
           loan.setEstado(StatusEmprestimo.ATIVO.name());
-          emprestimoEntityRepository.save(loan);
+          // a versão anterior fecha por amortização
+          if (loan.getEmprestimo() != null) {
+            loan.getEmprestimo().setMotivoFecho(MOTIVO_FECHO_ACEITE);
+            emprestimoEntityRepository.save(loan.getEmprestimo());
+          }
         }
-        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
+        // Não Conforme: a amortização não é aceite — o subprocesso termina e volta a valer o
+        // plano do empréstimo anterior.
+        case DESFAVORAVEL -> {
+          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
+          loan.setMotivoFecho(MOTIVO_FECHO_NAO_ACEITE);
+        }
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
         default ->
-            throw IgrpResponseStatusException.badRequest("Invalid action for this step %s", request.getAction());
+            throw IgrpResponseStatusException.badRequest("Parecer inválido para a Verificação.");
       }
     }
 
@@ -261,5 +302,9 @@ public class AdiantamentoService {
     pedidoDecisaoEntityRepository.save(newObj);
 
     emprestimoEntityRepository.save(loan);
+
+    if (StatusEmprestimo.NAO_AUTORIZADO.name().equals(loan.getEstado()) && loan.getEmprestimo() != null) {
+      emprestimoHelper.reporEmprestimoAnterior(loan);
+    }
   }
 }

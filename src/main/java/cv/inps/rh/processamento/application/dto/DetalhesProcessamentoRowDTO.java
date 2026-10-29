@@ -27,4 +27,6 @@ public class DetalhesProcessamentoRowDTO {
 
   private String descricao;
 
+  private String valorFormatado;
+
 }

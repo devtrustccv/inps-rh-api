@@ -338,4 +338,45 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
   @Query("SELECT t.mobId.instidId.id FROM TiposRelacionamentoEntity t WHERE t.id = :tiprelId")
   Optional<Long> findDirecaoIdDaMobilidade(@Param("tiprelId") Long tiprelId);
 
+  /**
+   * Carreiras/Cargo (RH_T_PARAM_CARREIRA) com colaboradores com relação laboral activa
+   * (EST_ACT_ADM = 1), opcionalmente só os da direção indicada. A carreira do colaborador é a do
+   * PCCS da carreira e, sem ela, a do escalão (da carreira ou do próprio tiprel).
+   */
+  @Query("""
+      SELECT DISTINCT COALESCE(cp.id, e1p.id, e2p.id)
+      FROM TiposRelacionamentoEntity t
+      LEFT JOIN t.carreiraId car
+      LEFT JOIN car.carrPccsId cp
+      LEFT JOIN car.escalaoId e1
+      LEFT JOIN e1.paramCarrId e1p
+      LEFT JOIN t.escalaoId e2
+      LEFT JOIN e2.paramCarrId e2p
+      WHERE t.estActAdm = 1
+        AND t.id IN (SELECT v.tiprelId FROM RhVRelacaoLaboralEntity v
+                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId))
+      """)
+  List<Long> findCarreirasPccsComColaboradores(@Param("institId") Long institId);
+
+  /**
+   * Colaboradores com relação laboral activa numa Carreira/Cargo (mesma regra de
+   * {@link #findCarreirasPccsComColaboradores}), opcionalmente só os da direção indicada.
+   */
+  @Query("""
+      SELECT DISTINCT t.funId.uuid
+      FROM TiposRelacionamentoEntity t
+      LEFT JOIN t.carreiraId car
+      LEFT JOIN car.carrPccsId cp
+      LEFT JOIN car.escalaoId e1
+      LEFT JOIN e1.paramCarrId e1p
+      LEFT JOIN t.escalaoId e2
+      LEFT JOIN e2.paramCarrId e2p
+      WHERE t.estActAdm = 1
+        AND COALESCE(cp.id, e1p.id, e2p.id) = :carrPccsId
+        AND t.id IN (SELECT v.tiprelId FROM RhVRelacaoLaboralEntity v
+                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId))
+      """)
+  List<UUID> findFuncionarioUuidsDaCarreiraPccs(
+      @Param("carrPccsId") Long carrPccsId, @Param("institId") Long institId);
+
 }

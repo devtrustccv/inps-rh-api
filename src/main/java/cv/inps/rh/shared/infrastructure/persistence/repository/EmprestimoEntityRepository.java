@@ -71,7 +71,7 @@ public interface EmprestimoEntityRepository extends
              FROM PlanoFinanceiroEntity pf
              WHERE pf.emprestimo = e
              AND pf.estado = 'A'
-             AND pf.flgPago = 'PAGO'
+             AND pf.flgPago = 'SIM'
              AND pf.dataPagamento IS NOT NULL
            ),
           e.valorPago,
@@ -84,7 +84,7 @@ public interface EmprestimoEntityRepository extends
             FROM EmprestimoEntity emCurso
             WHERE emCurso.id = (
               SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
-              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
             )
           ),
           (
@@ -92,12 +92,13 @@ public interface EmprestimoEntityRepository extends
             FROM EmprestimoEntity emCurso
             WHERE emCurso.id = (
               SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
-              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA')
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
             )
           ),
           (
             SELECT COUNT(versao) FROM EmprestimoEntity versao WHERE versao.pedido.id = p.id
-          )
+          ),
+          p.tipoPedido
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id
