@@ -129,18 +129,25 @@ public class ProcessoAvaliacaoService {
     var existentes = periodoService.medicoesDoPeriodo(avaliacao.getId(), periodo);
     var alteradas = new ArrayList<AvaliacaoPeriodicidadeEntity>();
 
+    // Cada linha do pedido casa com a da avaliação pelo paramId (o que o GET devolve) ou, sem ele, pelo número de
+    // ordem. Uma linha com valores que não casa com nada dá 400 — antes era ignorada e a resposta dizia
+    // "gravada" sem gravar nada (QA AV-26). A transacção desfaz o resto.
+    var naoEncontradas = new ArrayList<String>();
+
     if (dto.getObjectivos() != null) {
       var objectivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(avaliacao.getUuid());
       dto.getObjectivos().forEach(o -> {
-        if (o == null || o.getNumero() == null) {
+        if (o == null) {
           return;
         }
         objectivos.stream()
-            .filter(e -> e != null && o.getNumero().equals(e.getNumeroOrdem()))
+            .filter(e -> e != null && casa(o.getParamId(), o.getNumero(), e.getParamObjetivo(), e.getNumeroOrdem()))
             .findFirst()
-            .ifPresent(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
-                ComponenteAvaliacaoRef.OBJECTIVO, e.getId(),
-                new Valores(o.getRealizado(), o.getAvaliacao()))));
+            .ifPresentOrElse(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
+                    ComponenteAvaliacaoRef.OBJECTIVO, e.getId(),
+                    new Valores(o.getRealizado(), o.getAvaliacao()))),
+                () -> { if (o.getRealizado() != null || o.getAvaliacao() != null)
+                  naoEncontradas.add(descricaoLinha("Objectivo", o.getParamId(), o.getNumero())); });
       });
     }
 
@@ -148,42 +155,53 @@ public class ProcessoAvaliacaoService {
 
     if (dto.getCompetenciasComportamentais() != null) {
       dto.getCompetenciasComportamentais().forEach(c -> {
-        if (c == null || c.getNumeroOrdem() == null) {
+        if (c == null) {
           return;
         }
-        competenciaPorOrdem(competencias, COMP_COMPORTAMENTAL, c.getNumeroOrdem())
-            .ifPresent(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
-                ComponenteAvaliacaoRef.COMPETENCIA_COMPORTAMENTAIS, e.getId(),
-                new Valores(null, c.getAvaliacao()))));
+        competenciaDaLinha(competencias, COMP_COMPORTAMENTAL, c.getParamId(), c.getNumeroOrdem())
+            .ifPresentOrElse(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
+                    ComponenteAvaliacaoRef.COMPETENCIA_COMPORTAMENTAIS, e.getId(),
+                    new Valores(null, c.getAvaliacao()))),
+                () -> { if (c.getAvaliacao() != null)
+                  naoEncontradas.add(descricaoLinha("Competência comportamental", c.getParamId(), c.getNumeroOrdem())); });
       });
     }
 
     if (dto.getCompetenciasTecnicas() != null) {
       dto.getCompetenciasTecnicas().forEach(c -> {
-        if (c == null || c.getNumeroOrdem() == null) {
+        if (c == null) {
           return;
         }
-        competenciaPorOrdem(competencias, COMP_TECNICA, c.getNumeroOrdem())
-            .ifPresent(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
-                ComponenteAvaliacaoRef.COMPETENCIA_TECNICA, e.getId(),
-                new Valores(null, c.getAvaliacao()))));
+        competenciaDaLinha(competencias, COMP_TECNICA, c.getParamId(), c.getNumeroOrdem())
+            .ifPresentOrElse(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
+                    ComponenteAvaliacaoRef.COMPETENCIA_TECNICA, e.getId(),
+                    new Valores(null, c.getAvaliacao()))),
+                () -> { if (c.getAvaliacao() != null)
+                  naoEncontradas.add(descricaoLinha("Competência técnica", c.getParamId(), c.getNumeroOrdem())); });
       });
     }
 
     if (dto.getAtitudesPessoais() != null) {
       var atitudes = atitudeRepository.findAllByAvaliacao_Uuid(avaliacao.getUuid());
       dto.getAtitudesPessoais().forEach(a -> {
-        if (a == null || a.getNumeroOrdem() == null) {
+        if (a == null) {
           return;
         }
         atitudes.stream()
             .filter(e -> e != null && e.getParamObjetivo() != null
-                && a.getNumeroOrdem().equals(e.getParamObjetivo().getNumeroOrdem()))
+                && casa(a.getParamId(), a.getNumeroOrdem(), e.getParamObjetivo(), e.getParamObjetivo().getNumeroOrdem()))
             .findFirst()
-            .ifPresent(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
-                ComponenteAvaliacaoRef.ATITUDE_PESSOAL, e.getId(),
-                new Valores(null, a.getAvaliacao()))));
+            .ifPresentOrElse(e -> alteradas.add(escrever(existentes, escritor, avaliacao, periodo,
+                    ComponenteAvaliacaoRef.ATITUDE_PESSOAL, e.getId(),
+                    new Valores(null, a.getAvaliacao()))),
+                () -> { if (a.getAvaliacao() != null)
+                  naoEncontradas.add(descricaoLinha("Atitude pessoal", a.getParamId(), a.getNumeroOrdem())); });
       });
+    }
+
+    if (!naoEncontradas.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Linhas que não pertencem a esta avaliação: "
+          + String.join(", ", naoEncontradas) + ". Recarregue a avaliação e volte a gravar.");
     }
 
     periodoService.guardarMedicoes(alteradas);
@@ -204,16 +222,25 @@ public class ProcessoAvaliacaoService {
     return medicao;
   }
 
-  private java.util.Optional<AvaliacaoCompetenciaEntity> competenciaPorOrdem(
-      List<AvaliacaoCompetenciaEntity> competencias, String componente, Integer numeroOrdem) {
-    if (competencias == null) {
+  /** Casa pelo paramId quando vem; sem ele, pelo número de ordem. */
+  private static boolean casa(Long paramIdPedido, Integer ordemPedido, ParamObjetivoEntity param, Integer ordem) {
+    if (paramIdPedido != null)
+      return param != null && paramIdPedido.equals(param.getId());
+    return ordemPedido != null && ordemPedido.equals(ordem);
+  }
+
+  private java.util.Optional<AvaliacaoCompetenciaEntity> competenciaDaLinha(
+      List<AvaliacaoCompetenciaEntity> competencias, String componente, Long paramId, Integer numeroOrdem) {
+    if (competencias == null)
       return java.util.Optional.empty();
-    }
     return competencias.stream()
-        .filter(e -> e != null
-            && componente.equalsIgnoreCase(e.getComponente())
-            && numeroOrdem.equals(e.getNumeroOrdem()))
+        .filter(e -> e != null && componente.equalsIgnoreCase(e.getComponente())
+            && casa(paramId, numeroOrdem, e.getParamObjetivo(), e.getNumeroOrdem()))
         .findFirst();
+  }
+
+  private static String descricaoLinha(String tipo, Long paramId, Integer ordem) {
+    return tipo + (ordem != null ? " nº " + ordem : "") + (paramId != null ? " (paramId " + paramId + ")" : "");
   }
 
   /** Realizado e nota de uma componente, tal como vêm do pedido. */

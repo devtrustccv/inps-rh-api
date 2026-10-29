@@ -41,7 +41,10 @@ public class GlobalExceptionHandler {
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
 
-    problemDetail.setTitle(ex.getMessage());
+    // "The given id must not be null" (findById(null) do Spring Data) não diz nada ao utilizador.
+    problemDetail.setTitle(ex.getMessage() != null && ex.getMessage().startsWith("The given id must not be null")
+        ? "Falta indicar um dos campos obrigatórios (um identificador veio vazio)."
+        : ex.getMessage());
 
     return problemDetail;
   }
@@ -86,19 +89,34 @@ public class GlobalExceptionHandler {
   private static final java.util.regex.Pattern CAMPO_OBRIGATORIO =
       java.util.regex.Pattern.compile("The field <(.+)> is required");
 
-  /** "The field <x> is required" (mensagem dos DTOs gerados) → "O campo «x» é obrigatório." */
-  private static String mensagemCampo(String campo, String mensagem) {
+  /** Mensagens por defeito do Bean Validation que não dizem o campo (o utilizador via só "não deve ser nulo"). */
+  private static final java.util.Set<String> OBRIGATORIO_SEM_CAMPO = java.util.Set.of(
+      "não deve ser nulo", "não deve estar em branco", "não deve estar vazio",
+      "must not be null", "must not be blank", "must not be empty");
+
+  /**
+   * "The field <x> is required" (DTOs gerados) ou "não deve ser nulo" (defeito do Bean Validation) →
+   * "O campo «x» é obrigatório."; outra mensagem por defeito (começa por minúscula, ex.: "deve ser maior que 0")
+   * leva o nome do campo à frente. Mensagens próprias (frases completas) ficam como estão.
+   */
+  static String mensagemCampo(String campo, String mensagem) {
+    var nome = campo.substring(campo.lastIndexOf('.') + 1);
     if (mensagem == null || mensagem.isBlank())
-      return "O campo «" + campo.substring(campo.lastIndexOf('.') + 1) + "» é inválido.";
+      return "O campo «" + nome + "» é inválido.";
     var m = CAMPO_OBRIGATORIO.matcher(mensagem);
-    return m.matches() ? "O campo «" + m.group(1) + "» é obrigatório." : mensagem;
+    if (m.matches())
+      return "O campo «" + m.group(1) + "» é obrigatório.";
+    if (OBRIGATORIO_SEM_CAMPO.contains(mensagem.trim()))
+      return "O campo «" + nome + "» é obrigatório.";
+    return Character.isLowerCase(mensagem.charAt(0)) ? "O campo «" + nome + "» " + mensagem + "." : mensagem;
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
   public ProblemDetail handleConstraintViolationException(ConstraintViolationException ex) {
 
     var allErrors = ex.getConstraintViolations().stream()
-        .map(v -> String.format("Campo '%s': %s", v.getPropertyPath(), v.getMessage()))
+        .map(v -> mensagemCampo(String.valueOf(v.getPropertyPath()), v.getMessage()))
+        .distinct()
         .collect(Collectors.joining("; "));
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);

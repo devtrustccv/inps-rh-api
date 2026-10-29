@@ -1,5 +1,17 @@
 # Avaliação de Desempenho — alterações de API
 
+## 2026-10-29 — Bug report QA de 29/10 (AV-09/11, AV-17, AV-20, AV-23, AV-26, AV-27)
+
+| Mudança | Ação front | Item |
+|---|---|---|
+| **Definição individual sem período**: `POST .../avaliacoes/objectivos` com `abrangencia = INDIVIDUAL` deixa de exigir `periodicidade`/`periodicidades` (na spec 24/09 o campo está riscado). Sem período, ou com o **tipo** do ciclo (ex.: `"SEMESTRAL"`, o que o campo desactivado mostra), cria todos os períodos do ciclo do ano. A edição tal como o `GET objectivos/{uuid}` a devolve (`periodicidade: null`) já não dá 400 | Campo Periodicidade só de leitura; pode deixar de o enviar | AV-09, AV-11, AV-21 |
+| **Meta herdada dos comuns**: numa linha INPS/DIREÇÃO da definição individual sem `meta`, usa-se a meta do mesmo objectivo (`paramId`) nos objectivos comuns do ano (INPS, ou a direção do colaborador). Na edição, meta em branco mantém a gravada. Sem meta em lado nenhum → 400 *"Objectivo N (ABRANGÊNCIA): indique a meta…"* (antes era o erro técnico de coluna obrigatória) | Pode mostrar a meta dos comuns só de leitura nas linhas INPS/DIREÇÃO | AV-17 |
+| **Avaliação individual pré-preenchida com os comuns**: `GET .../avaliacoes/{uuid}?periodicidade=X` — nas linhas de objectivo INPS/DIREÇÃO sem medição própria, `realizado`, `avaliacao` e `resultado` vêm do que foi avaliado nos objectivos comuns nesse período. Ao gravar a avaliação passam a ser medição própria | Mostrar os valores (editáveis) | AV-23 |
+| **Avaliação/autoavaliação: linha que não existe → 400**: as linhas casam pelo `paramId` (o que o GET devolve) e, sem ele, pelo número de ordem. Uma linha com valores que não casa com nada dá 400 *"Linhas que não pertencem a esta avaliação: Objectivo nº 99… Recarregue a avaliação e volte a gravar."* e nada é gravado (antes respondia "gravada" e não gravava) | Enviar o `paramId` de cada linha; mostrar o `title` do 400 | AV-26 |
+| **Lista de avaliações sem os objectivos comuns**: `GET .../avaliacoes` só devolve avaliações de colaboradores (as linhas INPS/DIREÇÃO têm o seu ecrã) | — | AV-27 |
+| **Manual de Funções — edição sem cargo**: `PUT .../manual-funcao/{uuid}` sem `cargoId` deixou de dar 400 *"The given id must not be null"* | — | AV-20, AV-05 |
+| **Erros de validação dizem o campo** (todos os módulos): `detail` passa de *"não deve ser nulo"* a *"O campo «institId» é obrigatório."* | Mostrar o `detail` | — |
+
 ## 2026-09-24 — Lista "Objectivos / Avaliação Comuns"
 
 Spec de referência: `docs/Especificação Tecnica Funcional - AVALIAÇÃO DESEMPENHO_24_09_2026.md`
@@ -89,8 +101,8 @@ avaliação. No modo definição ("+ Novo Objectivo") não se mostram.
   ou nada.
 - `id` é o `id` da linha devolvido no GET (§2). As linhas de `instituicao` têm de ser INPS e
   as de `direcoes` têm de ser DIRECAO, todas do ano do path.
-- As notas são validadas contra `NIVEIS_AVD` **antes** de qualquer escrita, tal como na
-  avaliação individual.
+- As notas são validadas **antes** de qualquer escrita, tal como na avaliação individual: desde 29/10
+  (812dd6ee) aceita-se qualquer valor ≥ 0 (já não é o nível de `NIVEIS_AVD`; ver o topo do documento).
 - Grava **só** `RH_T_AVD_PERIODICIDADE` (`REFERENCIA = OBJECTIVO`, `TIPO_PROCESSO = AVALIACAO`),
   como diz a spec. Não calcula nota global nem mexe no estado.
 - Reenviar o mesmo período substitui os valores.
@@ -101,7 +113,7 @@ avaliação. No modo definição ("+ Novo Objectivo") não se mostram.
 | Período fora do ciclo do ano | 400 |
 | Corpo sem linhas | 400 |
 | `id` repetido, de outro ano ou no bloco errado | 400 |
-| Nota fora de `NIVEIS_AVD` | 400, sem nada gravado |
+| Nota negativa | 400, sem nada gravado |
 | Ano sem objectivos comuns | 404 |
 
 ### 4. `POST .../objectivos` com `abrangencia = INPS | DIRECAO` — muda
@@ -491,8 +503,8 @@ e o filtro Unidade que o ecrã tem:
 
 Novo query param `?seccaoId=` (filtro **Unidade**), que antes era ignorado.
 
-**As notas passam a ser validadas.** `avaliacao` e `autoAvaliacao` têm de ser um dos níveis
-do domínio `NIVEIS_AVD`. Antes aceitava-se qualquer número — uma nota de `9999` produzia
+**As notas passam a ser validadas.** ~~`avaliacao` e `autoAvaliacao` têm de ser um dos níveis
+do domínio `NIVEIS_AVD`.~~ **Desde 29/10 (812dd6ee): qualquer valor ≥ 0** (QA AV-15/AV-18). Antes aceitava-se qualquer número — uma nota de `9999` produzia
 resultado `1205` e classificação nula.
 
 ```json

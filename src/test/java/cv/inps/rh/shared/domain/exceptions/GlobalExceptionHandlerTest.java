@@ -63,4 +63,21 @@ class GlobalExceptionHandlerTest {
     assertThat(handler.handleErroBaseDadosEmbrulhado(ex).getStatus())
         .isEqualTo(HttpStatus.BAD_REQUEST.value());
   }
+
+  @Test
+  void mensagemDeCampoDizSempreQualEOCampo() {
+    // DTO gerado
+    assertThat(GlobalExceptionHandler.mensagemCampo("dataInicio", "The field <dataInicio> is required"))
+        .isEqualTo("O campo «dataInicio» é obrigatório.");
+    // defeito do Bean Validation, que antes chegava ao ecrã só como "não deve ser nulo" (QA AV-20)
+    assertThat(GlobalExceptionHandler.mensagemCampo("institId", "não deve ser nulo"))
+        .isEqualTo("O campo «institId» é obrigatório.");
+    assertThat(GlobalExceptionHandler.mensagemCampo("itens[0].descricao", "não deve estar em branco"))
+        .isEqualTo("O campo «descricao» é obrigatório.");
+    assertThat(GlobalExceptionHandler.mensagemCampo("ponderacao", "deve ser maior que 0"))
+        .isEqualTo("O campo «ponderacao» deve ser maior que 0.");
+    // mensagem própria fica como está
+    assertThat(GlobalExceptionHandler.mensagemCampo("x", "Indique a Data Início da missão."))
+        .isEqualTo("Indique a Data Início da missão.");
+  }
 }
