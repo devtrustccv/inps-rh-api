@@ -111,7 +111,8 @@ public class AvaliacaoService {
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-            "ParamObjetivoDetEntity not found for ano: " + dto.getAno()));
+            "Não existe parametrização da avaliação de desempenho para o ano " + dto.getAno()
+                + ". Configure (ou clone) os componentes desse ano primeiro."));
 
     var secao = dto.getSeccaoId() != null
         ? secaoRepository.findByIdOrThrow(dto.getSeccaoId())
@@ -759,7 +760,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getObjectivos()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "O objectivo indicado (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoObjectivoEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -793,7 +794,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getCompetenciasComportamentais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A competência comportamental indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -813,7 +814,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getCompetenciasTecnicas()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A competência técnica indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -832,7 +833,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getAtitudesPessoais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A atitude pessoal indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoAtitudePessoalEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);

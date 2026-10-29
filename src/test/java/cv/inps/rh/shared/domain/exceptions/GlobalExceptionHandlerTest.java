@@ -80,4 +80,31 @@ class GlobalExceptionHandlerTest {
     assertThat(GlobalExceptionHandler.mensagemCampo("x", "Indique a Data Início da missão."))
         .isEqualTo("Indique a Data Início da missão.");
   }
+
+  @Test
+  void naoEncontradoSemNomesDeClasses() {
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("AvaliacaoEntity not found for id: abc-1"))
+        .isEqualTo("A avaliação indicada não existe (id abc-1).");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("ParamCargoEntity not found for id: 9"))
+        .isEqualTo("O cargo indicado não existe (id 9).");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("DirecaoEntity not found"))
+        .isEqualTo("A direção indicada não existe.");
+    // entidade sem nome conhecido: sai do nome da classe
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("ParamTipoDocumentoEntity not found for codigo: X"))
+        .isEqualTo("O registo de tipo documento indicado não existe (codigo X).");
+    // títulos que já são frases ficam como estão
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("Já existe parametrização para o ano: 2031"))
+        .isEqualTo("Já existe parametrização para o ano: 2031");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado(null)).isNull();
+  }
+
+  @Test
+  void formatoInvalidoDizCampoEFormato() {
+    assertThat(GlobalExceptionHandler.mensagemFormato("dataInicio", java.time.LocalDate.class, "30/03/2031"))
+        .isEqualTo("O campo «dataInicio» tem de ser uma data no formato AAAA-MM-DD (recebido: «30/03/2031»).");
+    assertThat(GlobalExceptionHandler.mensagemFormato("instituicao[0].id", java.util.UUID.class, "9"))
+        .isEqualTo("O campo «instituicao[0].id» tem de ser um identificador (UUID) válido (recebido: «9»).");
+    assertThat(GlobalExceptionHandler.mensagemFormato("ano", Integer.class, null))
+        .isEqualTo("O campo «ano» tem de ser um número.");
+  }
 }

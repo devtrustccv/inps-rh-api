@@ -1,5 +1,21 @@
 # Avaliação de Desempenho — alterações de API
 
+## 2026-10-29 — Mensagens de erro legíveis (bateria AVD como cliente)
+
+Os status HTTP **não mudam**; só o texto do `title`/`detail`, que passa a ser frase para o utilizador.
+
+| Antes | Agora | Onde |
+|---|---|---|
+| `title` *"AvaliacaoEntity not found for id: …"* (e o mesmo para manual, escala, cargo, direção, colaborador, parametrização…) | *"A avaliação indicada não existe (id …)."* | 404 de todos os módulos |
+| *"ParamObjetivoDetEntity not found for ano: 2099"* | *"Não existe parametrização da avaliação de desempenho para o ano 2099. Configure (ou clone) os componentes desse ano primeiro."* | `POST .../avaliacoes/objectivos` |
+| *"ParamObjetivo não encontrado: id=… para o ano …"* | *"O objectivo indicado (paramId …) não faz parte da parametrização da avaliação de 2031."* (idem competência/atitude) | `POST .../avaliacoes/objectivos` |
+| `title` *"Malformed JSON request"* + `detail` técnico do Jackson | `title` *"Dados inválidos no pedido"*, `detail` *"O campo «dataInicio» tem de ser uma data no formato AAAA-MM-DD (recebido: «30/03/2031»)."* | todos os módulos |
+| Parâmetro de query em falta (ex. `periodicidade`) → corpo por defeito do Spring sem mensagem | `title` *"O parâmetro «periodicidade» é obrigatório."* | todos os módulos |
+| Parâmetro com tipo errado (`ano=abc`) → *"For input string: "abc""* | *"O parâmetro «ano» tem de ser um número (recebido: «abc»)."* | todos os módulos |
+| Escala: *"quantitativaDe não pode ser maior que quantitativaAte"* / *"O classificação qualitativa 'X' não existe no domínio …"* | *"No nível 5, a pontuação «De» (9) não pode ser maior que a pontuação «Até» (1)."* / *"A classificação qualitativa «X» não é válida. Valores aceites: …"* | `POST .../escala` |
+
+Ação front: mostrar sempre o `title` e, quando vier, o `detail`.
+
 ## 2026-10-29 — Bug report QA de 29/10 (AV-09/11, AV-17, AV-20, AV-23, AV-26, AV-27)
 
 | Mudança | Ação front | Item |
