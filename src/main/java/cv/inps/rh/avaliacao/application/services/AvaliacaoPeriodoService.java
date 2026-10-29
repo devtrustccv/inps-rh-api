@@ -160,6 +160,12 @@ public class AvaliacaoPeriodoService {
     return avdIds.isEmpty() ? List.of() : detalheRepository.findAllByAvaliacao_IdIn(avdIds);
   }
 
+  /** As medições (todas as componentes e períodos) de várias avaliações. */
+  @Transactional(readOnly = true)
+  public List<AvaliacaoPeriodicidadeEntity> medicoesDe(List<Long> avdIds) {
+    return avdIds.isEmpty() ? List.of() : periodicidadeRepository.findAllByAvaliacao_IdIn(avdIds);
+  }
+
   // --------------------------------------------------------------- medições
 
   /** A medição de uma componente num período, criando-a se ainda não existir. */
