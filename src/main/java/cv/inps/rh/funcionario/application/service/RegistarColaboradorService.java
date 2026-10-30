@@ -293,7 +293,7 @@ public class RegistarColaboradorService {
     contratoHistoricoWriteService.registrarNovo(contrato);
 
     if (dto.getAnexos() != null) {
-      var list = dto.getAnexos().stream().map(a -> documentoMapper.toEntity(
+      var list = dto.getAnexos().stream().filter(DocumentoMapper::anexoPreenchidoOuErro).map(a -> documentoMapper.toEntity(
           a,
           Estado.P,
           TableName.RH_T_FUNCIONARIOS.name(),

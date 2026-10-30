@@ -1252,6 +1252,49 @@ Aplicadas em dev a 21/10.
 
 ---
 
+## 🔴 32. Reteste QA SIPS-RH 1.1 (30/10/2026)
+
+### Backend — o que mudou
+
+| Mudança | Endpoint | O que o ecrã deve fazer | Item |
+|---|---|---|---|
+| **Linha de anexo vazia aceite** em Férias, Dispensa, Hora Extra, Falta, Justificar, Licença e Declaração: `{"tipoDocumentoId": null, "documento": ""}` é ignorada (antes o 1.º Guardar dava 400 *"O campo Tipo de Documento do anexo é obrigatório"*). Linha meio preenchida continua 400: *"Indique o Tipo de Documento do anexo."* / *"Anexe o ficheiro do documento indicado."* (na Licença era descartada em silêncio) | todos os POST/PUT com `documentos`/`anexos` | Nada (pode continuar a abrir com uma linha vazia) | AS-012, AS-014, RG-008 |
+| **`alerta`** novo na resposta de `POST falta/justificar/{funcionarioId}` e `PUT falta/justificar/validar/{pedidoId}`. Vem preenchido quando "Deduzir em Férias" não é coberto pelo saldo: *"O colaborador não tem férias por gozar. Os 4 dia(s) a deduzir em férias serão descontados no vencimento."* ou *"O saldo de férias só cobre 3 de 5 dia(s). Os restantes 2 serão descontados no vencimento."*; `null` nos outros casos. **Não bloqueia**: o pedido é gravado (regra de 10/09: o saldo cobre o que consegue, o resto vai ao vencimento) | justificar / validar | **Mostrar o `alerta` (aviso amarelo) depois do Guardar quando não for `null`.** Opcional: avisar antes com `GET feria/saldo/{funcionarioId}` | RG-006 |
+| **Dias cobertos por licença ou férias** (`RH_T_AUSENCIA` activa ou pendente) saem do painel de `GET falta/justificar/{funcionarioId}`; justificar um desses dias dá 400 *"O dia 22-10-2026 está coberto por uma licença/ausência registada e não precisa de justificação."* (antes criava uma falta duplicada) | justificar | — | RG-003 |
+| **Falta antes do início do vínculo → 400**: *"A falta de 04-11-2026 é anterior ao início do vínculo do colaborador (01-01-2027): não há salário para calcular o desconto."* (antes gravava com valor 0). Aplica-se a marcar com justificativo e a justificar | `POST falta`, `POST falta/justificar/…` | Mostrar o `title` | AS-018 |
+| **Lista de Férias — uma linha por colaborador/ano** (antes repetia a linha por cada férias gozada e somava o direito N vezes: 22 × 6 = 132). `totalGozado` = soma das férias gozadas aprovadas (a mesma do `GET feria/saldo`). `pedidoUuid` = último pedido de **férias** do ano, ou `""` se não houver | `GET feria` | "Editar Pedido" só com `pedidoUuid` preenchido | RG-010 |
+| **`GET feria/{pedidoId}`** (e alterar/validar férias) com o uuid de um pedido que não é de férias → 404 *"Pedido de férias não encontrado"* (antes 500) | `GET/PUT/POST feria/{pedidoId}` | — | RG-010 |
+| **`horasDisponiveis`** preenchido no GET da dispensa = o que **resta** no mês (spec: `T_DISPENSA` menos as horas usadas) — o mesmo que `horasRestantes` de `GET dispensa/saldo/{funcionarioId}?data=`, sem contar a própria dispensa. Atenção: no `GET dispensa/saldo`, `horasDisponiveis` é o direito mensal (4h) e o que resta é `horasRestantes` | `GET dispensa/{dispensaId}`, `GET dispensa/{pedidoId}/validacao` | Mostrar em "Horas Disponíveis" | RG-008 |
+| 🔴 **Lista Faltas Justificada/Injustificada**: justificadas e injustificadas do mesmo mês em **linhas separadas** (antes uma linha "Injustificada" juntava as duas). Datas `dataInicio`/`dataFim` passam a `dd-MM-yyyy` (antes `yyyy-MM-dd`), como nas outras listas | `GET falta` | Não reformatar as datas | AS-008, AS-016 |
+| `referenciaNameDesc = "Aumento Salarial"` nas validações de aumento salarial (antes `null`). O aumento é global: `nomeColaborador` vem vazio de propósito | `GET funcionarios/validacoes` | Mostrar "—" quando `nomeColaborador` vem vazio | Obs. validação |
+
+### Backend — encontrado no smoke do módulo (30/10)
+
+| Mudança | Endpoint | O que o ecrã deve fazer |
+|---|---|---|
+| 🔴 `feria.substituidoPor` no GET do pedido passa a ser o **uuid do funcionário** substituto (antes vinha o uuid do vínculo, que o registo e o reenvio não aceitam) | `GET feria/{pedidoId}` | Usar o valor tal como vem no combo de substituto |
+| Férias com data fim antes da data início → 400 *"Data de fim não pode ser anterior à data de início"* (antes gravava com dias negativos e o saldo subia) | `POST feria`, `PUT feria/{pedidoId}` | Mostrar o `title` |
+| Férias que se sobrepõem a outras férias vivas do colaborador → 400 *"O colaborador já tem férias marcadas entre … e …."* (antes aceitava dois pedidos nos mesmos dias) | `POST feria`, `PUT feria/{pedidoId}` | Mostrar o `title` |
+| Substituto igual ao próprio colaborador → 400 *"O substituto não pode ser o próprio colaborador."* | `POST feria`, `PUT feria/{pedidoId}` | Tirar o próprio colaborador do combo de substituto |
+| Hora extra com `horasDiaria` fora de 1–24 → 400 *"As horas diárias da hora extra têm de estar entre 1 e 24 (recebido: 0)."* (antes gravava 0 horas) | `POST hora-extra`, `POST hora-extra/{pedidoId}` | Mostrar o `title` |
+
+### Frontend — o que o ecrã tem de usar (sem mudança de backend)
+
+| Ecrã | O que corrigir | Campo / endpoint | Item |
+|---|---|---|---|
+| Gestão Falta | 2.º número de "Total Justificada / Total Injustificada" | `totalFaltasInjustificadas` (não `totalFalta`). O total 30 = 7 J + 18 I + 5 P está certo | AS-013 |
+| Faltas Justificada/Injustificada | Estado Processamento | `estadoProcessamentoDesc` ("Pendente" / "Não aplicável" / "Processado"), não `estadoProcessamento` | AS-017 |
+| Faltas Justificada/Injustificada | Paginação | `pageNumber` / `pageSize` + `totalElements` | Obs. |
+| Faltas Justificada/Injustificada, Validar Informações | Abrir já com dados | Fazer o GET sem filtros ao montar o ecrã | Obs. |
+| Pedido Dispensa (lista) | "NaN:NaN" | `totalHorasDireito` / `totalHorasSolicitadas` já vêm em texto `HH:mm` — mostrar como vêm | AS-009 |
+| Pedido Dispensa (Editar) | "02:00 AM" | `totalHoras` é uma duração `HH:mm`, não uma hora do dia — campo de texto, não time-picker de 12 h | RG-008 |
+| Pedido Dispensa (Editar) | Validação da dispensa | A dispensa **não** entra em "Validar Informações" (spec 20/10, passo riscado): validar no próprio formulário com `GET dispensa/{pedidoId}/validacao` + `PUT dispensa/{pedidoId}/validar` (`validar` = `SIM`/`NAO`) | RG-008 |
+| Lista Férias | Estado "Indefinido" | `estadoDesc` | RG-010 |
+| Validar justificação | Erro de destinatário depois de gravar | Com Notificar = Sim, `destinatarios` é obrigatório em `POST funcionarios/notificacoes/notificar`: validar **antes** do PUT validar, ou retirar o bloco (o colaborador já é notificado automaticamente) | RG-007 |
+| Pedido Férias | Dias acima do saldo | O backend recusa ao gravar; para avisar antes: `GET feria/saldo/{funcionarioId}` | Obs. |
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |

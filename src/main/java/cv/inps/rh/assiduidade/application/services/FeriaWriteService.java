@@ -96,8 +96,11 @@ public class FeriaWriteService {
     if (temSubstituicao && tipoRelAtual.getCargoId() == null)
       throw IgrpResponseStatusException.badRequest("Substituição não aplicável: colaborador não ocupa nenhum cargo");
 
+    exigirSemFeriasNoIntervalo(funcionario.getId(), req.getDataInicio(), req.getDataFim());
+
     TiposRelacionamentoEntity tipoRelAtualFuncSubstituto = null;
     if (temSubstituicao) {
+      exigirSubstitutoDiferente(req.getColaborador(), req.getSubstituidoPor());
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
       tipoRelAtualFuncSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
       var s = new SubstituicaoEntity();
@@ -174,7 +177,7 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+    var ferias = feriasGozadasRepository.findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
@@ -353,7 +356,7 @@ public class FeriaWriteService {
 
     // 1. Buscar férias existentes PELO MESMO PEDIDO
     var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido de férias não encontrado"));
 
@@ -381,6 +384,8 @@ public class FeriaWriteService {
 
     if (dataInicio == null || dataFim == null)
       throw IgrpResponseStatusException.badRequest("Data início e fim são obrigatórias");
+    if (dataFim.isBefore(dataInicio))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
 
     // 2. Inactivar registo antigo (spec: inativa e cria novo)
     ferias.setEstado(Estado.I);
@@ -436,6 +441,8 @@ public class FeriaWriteService {
       novasFerias.setResponsavelId(responsavel.getId());
     }
 
+    // O pedido antigo já está em I, por isso não conta contra si próprio.
+    exigirSemFeriasNoIntervalo(funcionario.getId(), dataInicio, dataFim);
     novasFerias = feriasGozadasRepository.save(novasFerias);
 
     // Spec, "Alteração": ponto 3 — gravar RH_T_SUBSTITUICAO caso haja substituto.
@@ -445,6 +452,7 @@ public class FeriaWriteService {
         throw IgrpResponseStatusException.badRequest(
             "Substituição não aplicável: colaborador não ocupa nenhum cargo");
 
+      exigirSubstitutoDiferente(funcionario.getUuid(), base.getSubstituidoPor());
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(base.getSubstituidoPor());
       var tipoRelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
 
@@ -481,7 +489,7 @@ public class FeriaWriteService {
   @Transactional
   public Map<String, ?> enviarDireitoFerias(EnviarDireitoFeriasCommand command) {
     var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de férias não encontrado"));
 
     var funcionario = ferias.getFunId();
@@ -548,6 +556,19 @@ public class FeriaWriteService {
         ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars);
   }
 
+  /** Dois pedidos de férias nos mesmos dias gozavam (e descontavam) os dias duas vezes. */
+  private void exigirSemFeriasNoIntervalo(Long funId, LocalDate inicio, LocalDate fim) {
+    if (feriasGozadasRepository.countFeriasVivasNoIntervalo(funId, inicio, fim) > 0)
+      throw IgrpResponseStatusException.badRequest(
+          "O colaborador já tem férias marcadas entre " + cv.inps.rh.shared.util.DateFormatter.localDateToString(inicio)
+              + " e " + cv.inps.rh.shared.util.DateFormatter.localDateToString(fim) + ".");
+  }
+
+  private static void exigirSubstitutoDiferente(java.util.UUID colaborador, java.util.UUID substituto) {
+    if (Objects.equals(colaborador, substituto))
+      throw IgrpResponseStatusException.badRequest("O substituto não pode ser o próprio colaborador.");
+  }
+
   private void validatePedido(PedidoFeriaReqDTO req) {
 
     if (req.getColaborador() == null)
@@ -556,6 +577,9 @@ public class FeriaWriteService {
       throw IgrpResponseStatusException.badRequest("Data de início obrigatória");
     if (req.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Data de fim obrigatória");
+    // Sem isto o pedido gravava NUM_DIA negativo (calculado das datas) e o saldo subia.
+    if (req.getDataFim().isBefore(req.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
     if (req.getNumDias() == null)
       throw IgrpResponseStatusException.badRequest("Número de dias obrigatório");
 

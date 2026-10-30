@@ -4,7 +4,6 @@
 package cv.inps.rh.shared.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +20,8 @@ public class AnexoReqDTO  {
 
   private Long id ;
 
-  @NotNull(message = "O campo Tipo de Documento do anexo é obrigatório")
+  // Sem @NotNull: o formulário traz uma linha vazia por defeito. Quem grava decide com
+  // DocumentoMapper.anexoPreenchidoOuErro (linha vazia ignorada, meio preenchida dá 400).
   private Long tipoDocumentoId ;
 
 

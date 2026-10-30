@@ -135,6 +135,7 @@ public class PedidoDeclaracaoWriteService {
       if (command.getPedidodeclaracao().getAnexos() != null && !command.getPedidodeclaracao().getAnexos().isEmpty()) {
         List<DocumentoEntity> documentos = new java.util.ArrayList<>();
         for (var d : command.getPedidodeclaracao().getAnexos()) {
+          if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha de anexo vazia do formulário
           var doc = documentoMapper.toEntity(
               d,
               Estado.P,
