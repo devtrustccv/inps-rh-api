@@ -92,6 +92,7 @@ public class HoraExtraServiceWrite {
 
       if (dto.getHorasDiaria() == null)
         throw IgrpResponseStatusException.badRequest("Horas diárias obrigatórias");
+      exigirHorasDiariasValidas(dto.getHorasDiaria());
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(dto.getColaborador());
 
@@ -372,13 +373,22 @@ public class HoraExtraServiceWrite {
     return ajustes;
   }
 
+  /** Hora extra de 0 (ou negativa, ou mais de um dia) não tem valor a pagar — gravava-se na mesma. */
+  private static void exigirHorasDiariasValidas(Long horasDiaria) {
+    if (horasDiaria <= 0 || horasDiaria > 24)
+      throw IgrpResponseStatusException.badRequest(
+          "As horas diárias da hora extra têm de estar entre 1 e 24 (recebido: " + horasDiaria + ").");
+  }
+
   /**
    * Ajuste de uma linha (horas, percentagem, anexo) vindo do formulário de validação. O anexo
    * fica no estado indicado: o da decisão no despacho, P no reenvio.
    */
   private void aplicarAjuste(HoraExtraEntity he, HoraExtraDTO ajuste, Estado estado) {
-    if (ajuste.getHorasDiaria() != null)
+    if (ajuste.getHorasDiaria() != null) {
+      exigirHorasDiariasValidas(ajuste.getHorasDiaria());
       he.setHorasDiarias(ajuste.getHorasDiaria());
+    }
     if (ajuste.getPercentagemReferente() != null)
       he.setPercentagemReferente(ajuste.getPercentagemReferente());
 

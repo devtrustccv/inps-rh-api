@@ -141,7 +141,8 @@ public class FeriaReadService {
 
     if (entity.getTiprelIdSubstituido() != null) {
       var substituido = tiposRelacionamentoEntityRepository.findById(entity.getTiprelIdSubstituido()).orElse(null);
-      req.setSubstituidoPor(substituido != null ? substituido.getUuid() : null);
+      // uuid do FUNCIONÁRIO, como o registo e o reenvio o recebem (antes vinha o do vínculo).
+      req.setSubstituidoPor(substituido != null ? substituido.getFunId().getUuid() : null);
       req.setSubstituidoPorNome(substituido != null ? substituido.getFunId().getNome() : null);
     }
 

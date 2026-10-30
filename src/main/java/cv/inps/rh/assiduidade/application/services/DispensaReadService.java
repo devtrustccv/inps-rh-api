@@ -232,9 +232,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
-      // Mesmo cálculo do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
       dto.setHorasDisponiveis(dispensaHorasService
-          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasDisponiveis());
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository
@@ -307,9 +308,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
-      // Mesmo cálculo do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
       dto.setHorasDisponiveis(dispensaHorasService
-          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasDisponiveis());
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository
