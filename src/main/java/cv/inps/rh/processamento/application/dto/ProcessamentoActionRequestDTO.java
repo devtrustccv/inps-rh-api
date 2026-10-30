@@ -18,6 +18,12 @@ public record ProcessamentoActionRequestDTO(
     @NotEmpty(message = "The field <idsProcessamento> must not be empty")
     List<Long> idsProcessamento,
 
-    TipoValidacaoProcessamentoSalarial tipoValidacao
+    TipoValidacaoProcessamentoSalarial tipoValidacao,
+
+    // Só na acção VALIDAR: decisão (domínio VALIDAR_REGISTO — SIM, NAO, CORRIGIR) e observação,
+    // obrigatória quando não se valida (é o motivo enviado a quem tem de corrigir).
+    String validar,
+
+    String observacao
 ) {
 }

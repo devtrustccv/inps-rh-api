@@ -171,3 +171,16 @@ Análise sem "Em conformidade" no registo (TR-13) — a spec de 29/08 não os pr
 - Filtros `nomeColaborador`, `direcaoId`, `seccaoId` passam a funcionar (eram ignorados).
 - "Ver Notificação": `GET alertas/{uuid}/notificacoes` com o **uuid**. Hoje vem sempre vazio: o JOB ainda não gera
   notificações (destinatários por definir).
+
+## 9. Documentos de Saída — marcadores `${…}` (23/10/2026)
+
+Só acréscimos (os endpoints existentes não mudam). Mesmo caminho `configuracao/documentos-output`:
+
+- `GET configuracao/documentos-output/{uuid}/marcadores` → `{ tipoDocumento, marcadores: ["nomeColaborador", …] }`
+  — os `${…}` que o texto usa (título, corpo, "Assinado por").
+- `POST configuracao/documentos-output/pre-visualizar` → `{ titulo, corpo, corpoHtml, assinadoPor, responsavel, marcadoresEmFalta }`
+  — body `{ tipoDocumento, valores: {nome: valor} }` (documento ativo) ou `{ titulo?, corpo, assinadoPor?, valores }` (texto por gravar).
+  Não grava nada. Sem tipo nem corpo → 400; tipo sem documento ativo → 404.
+
+No texto: `${nome}`, `${nome:-valor por defeito}`, `$${nome}` (literal); marcador sem valor sai "—".
+As declarações (PDF) passam a substituir os marcadores. Guia para programadores: `docs/guia_documentos_saida_marcadores.html`.

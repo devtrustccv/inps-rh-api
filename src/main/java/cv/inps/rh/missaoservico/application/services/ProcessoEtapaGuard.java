@@ -20,6 +20,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessoEtapaGuard {
 
+  private final PercursoProcessoMissao percurso;
+
+  public ProcessoEtapaGuard(PercursoProcessoMissao percurso) {
+    this.percurso = percurso;
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessoEtapaGuard.class);
 
   private static final String ESTADO_ATIVO = "A";
@@ -27,7 +33,7 @@ public class ProcessoEtapaGuard {
   /** Exige que o processo percorra a etapa do ecrã, esteja activo e, ao avançar, já a tenha atingido. */
   public void exigirEtapa(MissaoProcessoEntity processo, EtapaProcesso etapaEcra, boolean avancando) {
     var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
-    if (!tipo.percorre(etapaEcra)) {
+    if (!percurso.percorre(processo, etapaEcra)) {
       throw IgrpResponseStatusException.badRequest(
           "O processo " + tipo.name() + " não passa pela etapa " + etapaEcra.name());
     }
@@ -54,8 +60,7 @@ public class ProcessoEtapaGuard {
    * Devolve a etapa em que o processo ficou.
    */
   public EtapaProcesso avancarApos(MissaoProcessoEntity processo, EtapaProcesso etapaConcluida) {
-    var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
-    var alvo = tipo.seguinte(etapaConcluida);
+    var alvo = percurso.seguinte(processo, etapaConcluida);
     if (alvo == null) {
       alvo = etapaConcluida;
     }
@@ -70,7 +75,7 @@ public class ProcessoEtapaGuard {
   /** Devolve o processo a uma etapa anterior — só por decisão explícita (parecer desfavorável). */
   public void devolver(MissaoProcessoEntity processo, EtapaProcesso etapa) {
     var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
-    if (!tipo.percorre(etapa)) {
+    if (!percurso.percorre(processo, etapa)) {
       throw new IllegalStateException("O processo " + tipo.name() + " não passa pela etapa " + etapa.name());
     }
     processo.setEtapa(etapa.name());

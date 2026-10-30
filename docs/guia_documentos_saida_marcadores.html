@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marcadores nos Documentos de Saída</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #57606a; --line: #d0d7de;
+    --code-bg: #f6f8fa; --accent: #1f4e79; --ok: #1a7f37; --warn: #9a6700; --note-bg: #eef5fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --line: #30363d;
+      --code-bg: #161b22; --accent: #79b8ff; --ok: #3fb950; --warn: #d29922; --note-bg: #10243a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --line: #30363d;
+    --code-bg: #161b22; --accent: #79b8ff; --ok: #3fb950; --warn: #d29922; --note-bg: #10243a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Arial, sans-serif; }
+  main { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.9rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.35rem; margin: 2.2rem 0 .6rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); color: var(--accent); }
+  h3 { font-size: 1.05rem; margin: 1.4rem 0 .4rem; }
+  p.lead { color: var(--muted); margin-top: 0; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: .9em; background: var(--code-bg);
+         padding: .1em .35em; border-radius: 4px; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: .88rem; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .95rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); }
+  .table-wrap { overflow-x: auto; }
+  .note { background: var(--note-bg); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 4px; margin: 1rem 0; }
+  .warn { border-left-color: var(--warn); }
+  ol li, ul li { margin: .25rem 0; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 2.4rem; margin: 1rem 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem;
+        border-radius: 50%; background: var(--accent); color: var(--bg); font-weight: 600; text-align: center; line-height: 1.7rem; }
+  footer { margin-top: 3rem; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Marcadores nos Documentos de Saída</h1>
+  <p class="lead">Como pôr dados variáveis no texto de um Documento de Saída (Configuração → Documentos Output) e
+    preenchê-los a partir do código — Ordens de Serviço, Declarações ou qualquer documento novo.</p>
+
+  <div class="note">
+    <strong>Em resumo:</strong> escreve-se o texto com <code>${nome}</code> onde deve entrar um dado; no código monta-se
+    um <code>Map</code> com os valores (vindos de onde quiser: BD, cálculo, texto fixo) e chama-se
+    <code>DocumentoSaidaRenderer.render(tipoDocumento, valores)</code>. O motor troca os marcadores no título,
+    no corpo e no "Assinado por".
+  </div>
+
+  <h2>1. Escrever o texto</h2>
+  <p>No ecrã <em>Documentos de Saída</em> (ou pela API <code>configuracao/documentos-output</code>), o título, o corpo e o
+    "Assinado por" aceitam marcadores:</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Escreve no texto</th><th>Sai no documento</th></tr>
+    <tr><td><code>${nomeColaborador}</code></td><td>O valor de <code>"nomeColaborador"</code> no mapa.</td></tr>
+    <tr><td><code>${dataReuniao:-a definir}</code></td><td>O valor, ou <em>"a definir"</em> se não for passado (valor por defeito).</td></tr>
+    <tr><td><code>${cargo}</code> sem valor</td><td><strong>—</strong> (travessão). Fica um aviso no log com o nome do marcador.</td></tr>
+    <tr><td><code>$${nome}</code></td><td>O texto literal <code>${nome}</code> (para escrever um marcador sem o substituir).</td></tr>
+  </table>
+  </div>
+  <p>Os nomes aceitam letras, números, <code>_</code> e <code>.</code> (ex.: <code>${morada.cidade}</code>). Um valor
+    <code>null</code> ou só com espaços conta como "sem valor".</p>
+  <p>Exemplo de corpo:</p>
+<pre><code>Declara-se que ${nomeColaborador}, ${cargo}, pertence ao quadro desta Instituição e aufere o
+vencimento ilíquido mensal de ${vencimento} (${vencimentoPorExtenso}).
+A reunião realiza-se a ${dataReuniao:-a definir}.</code></pre>
+
+  <h2>2. Preencher os valores no código</h2>
+  <p>Injete <code>cv.inps.rh.shared.domain.service.documento.DocumentoSaidaRenderer</code> e passe o tipo do documento
+    (o valor de <code>RH_T_PARAM_DOC_OUTPUT.TIPO_DOCUMENTO</code>) e o mapa de valores:</p>
+<pre><code>@Service
+@RequiredArgsConstructor
+public class MinhaDeclaracaoService {
+
+  private final DocumentoSaidaRenderer renderer;
+  private final PdfGenerator pdfGenerator;
+
+  public byte[] gerar(FuncionarioEntity funcionario) {
+    // 1. Os valores vêm de onde for preciso: BD, cálculo, texto fixo…
+    var valores = new HashMap&lt;String, Object&gt;();
+    valores.put("nomeColaborador", funcionario.getNome());
+    valores.put("cargo", cargoDoColaborador(funcionario));            // null → sai "—"
+    valores.put("vencimento", "134 600 CVE");
+    valores.put("vencimentoPorExtenso", ValorPorExtenso.escudos(new BigDecimal("134600")));
+
+    // 2. O motor carrega o documento ATIVO do tipo e troca os marcadores
+    DocumentoRenderizado doc = renderer.render("CREDITO_HABITACAO", valores);
+
+    // 3. Usar o resultado num template (ver secção 3)
+    return pdfGenerator.generate("declaracao/declaracao_credito_habitacao",
+        Map.of("param", doc, "watermark", false));
+  }
+}</code></pre>
+
+  <h3>O que vem em <code>DocumentoRenderizado</code></h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Getter</th><th>Conteúdo</th></tr>
+    <tr><td><code>getTitulo()</code></td><td>Título com os marcadores trocados.</td></tr>
+    <tr><td><code>getCorpo()</code></td><td>Corpo com os valores tal como foram passados — para templates que imprimem com <code>th:text</code>.</td></tr>
+    <tr><td><code>getCorpoHtml()</code></td><td>Corpo com os <strong>valores</strong> escapados para HTML (<code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, aspas) — para templates com <code>th:utext</code>. O texto do corpo em si não é tocado (pode ter HTML próprio) e os acentos ficam como estão.</td></tr>
+    <tr><td><code>getAssinadoPor()</code></td><td>"Assinado por" com os marcadores trocados.</td></tr>
+    <tr><td><code>getResponsavel()</code></td><td>Nome do responsável configurado no documento (ou <code>null</code>).</td></tr>
+    <tr><td><code>getMarcadoresEmFalta()</code></td><td>Marcadores que não tinham valor nem valor por defeito (saíram como "—").</td></tr>
+  </table>
+  </div>
+
+  <h3>Outras operações do motor</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Método</th><th>Para quê</th></tr>
+    <tr><td><code>render(tipo, valores)</code></td><td>Uso normal. Marcador sem valor → "—" + aviso no log. Nunca bloqueia o documento.</td></tr>
+    <tr><td><code>renderEstrito(tipo, valores)</code></td><td>Igual, mas um marcador sem valor dá <strong>400</strong> com a lista dos que faltam. Usar quando o documento não pode sair incompleto.</td></tr>
+    <tr><td><code>render(entity, valores)</code></td><td>Renderiza um <code>ParamDocOutputEntity</code> já carregado (ex.: uma versão que ainda não está ativa).</td></tr>
+    <tr><td><code>marcadores(tipo)</code></td><td>Lista os <code>${…}</code> que o texto ativo usa — para saber que chaves preencher.</td></tr>
+    <tr><td><code>MarcadoresTexto.substituir(texto, valores, html, emFalta)</code></td><td>Só a substituição, sobre um texto qualquer (sem BD, sem Spring). Útil em testes.</td></tr>
+  </table>
+  </div>
+
+  <h2>3. Usar o resultado num template</h2>
+  <p>O <code>DocumentoRenderizado</code> tem getters, por isso entra diretamente no Thymeleaf:</p>
+<pre><code>&lt;h1 th:text="${param.titulo}"&gt;Declaração&lt;/h1&gt;
+&lt;p th:text="${param.corpo}"&gt;texto&lt;/p&gt;                 &lt;!-- th:text  → getCorpo()     --&gt;
+&lt;div th:utext="${conteudo}"&gt;&lt;/div&gt;                     &lt;!-- th:utext → getCorpoHtml() --&gt;
+&lt;strong th:text="${param.assinadoPor}"&gt;&lt;/strong&gt;</code></pre>
+  <div class="note warn">
+    Com <code>th:utext</code> use sempre <code>getCorpoHtml()</code>: com <code>getCorpo()</code> um valor como
+    <code>"João &amp; Filhos"</code> ou <code>"&lt;Lda&gt;"</code> partia o HTML do PDF.
+  </div>
+
+  <h2>4. Onde já está ligado</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Documento</th><th>Quem monta os valores</th><th>Valores disponíveis</th></tr>
+    <tr>
+      <td>Ordens de Serviço (10 tipos)</td>
+      <td>Um <code>OrdemServicoProvider</code> por tipo em <code>shared/domain/service/ordemservico/</code>
+        (<code>buildVariables(funcionarioId)</code>); <code>OrdemServicoService.renderizar(tipo, funcionarioId)</code> chama o motor.</td>
+      <td>Os do provider do tipo (ex.: Transferência: <code>nomeColaborador</code>, <code>cargo</code>, <code>escalao</code>,
+        <code>direcao</code>, <code>seccao</code>, <code>ilha</code>, <code>dataEfeito</code>). Para acrescentar um dado:
+        acrescentá-lo ao <code>vars(…)</code> do provider e usá-lo no texto.</td>
+    </tr>
+    <tr>
+      <td>Declarações (PDF do Pedido de Declaração)</td>
+      <td><code>DeclaracaoReportServiceImpl.valoresBase(declaracao)</code></td>
+      <td><code>nomeColaborador</code>, <code>nif</code>, <code>cargo</code>, <code>categoria</code>, <code>carreira</code>,
+        <code>vinculo</code>, <code>direcao</code>, <code>seccao</code>, <code>finalidade</code> (descrição),
+        <code>entidadeDestinatario</code>, <code>dataPedido</code> e <code>dataEmissao</code> (por extenso).</td>
+    </tr>
+  </table>
+  </div>
+  <p>Os textos das declarações que estão hoje na BD ainda têm "XXXXXXXX" escrito à mão: basta trocá-los pelos marcadores acima.</p>
+
+  <h2>5. Testar sem gerar o documento</h2>
+  <p>Dois endpoints no mesmo controller dos Documentos de Saída (<code>configuracao/documentos-output</code>, sem <code>api/v1</code>):</p>
+  <h3>Que marcadores tem um documento</h3>
+<pre><code>GET configuracao/documentos-output/{uuid}/marcadores
+
+200 → { "tipoDocumento": "TRANSFERENCIA",
+        "marcadores": ["nomeColaborador", "cargo", "escalao", "direcao", "seccao", "ilha", "dataEfeito"] }</code></pre>
+  <h3>Pré-visualizar (não grava nada)</h3>
+  <p>Sem <code>corpo</code> usa o documento ativo do <code>tipoDocumento</code>; com <code>corpo</code> usa o texto enviado
+    (para experimentar um texto antes de o gravar).</p>
+<pre><code>POST configuracao/documentos-output/pre-visualizar
+{
+  "tipoDocumento": "TRANSFERENCIA",
+  "valores": { "nomeColaborador": "Ana Lima", "cargo": "Técnica", "ilha": "Santiago" }
+}
+
+200 → { "titulo": "Transferência",
+        "corpo": "… é transferido o colaborador Ana Lima, Técnica —, da — - —, para a Ilha de Santiago …",
+        "corpoHtml": "…", "assinadoPor": "Djon Doe", "responsavel": null,
+        "marcadoresEmFalta": ["escalao", "direcao", "seccao", "dataEfeito"] }</code></pre>
+  <p>Sem <code>tipoDocumento</code> nem <code>corpo</code> → 400; tipo sem documento ativo → 404.</p>
+
+  <h2>6. Passo a passo para um documento novo</h2>
+  <ol class="steps">
+    <li>Criar o tipo no domínio <code>ORDEM_SERVICO_DECLARACAO</code> (o combo "Tipo de Documento" vem dele).</li>
+    <li>Registar o Documento de Saída desse tipo com o texto e os marcadores <code>${…}</code> que precisar.
+      Só pode haver <strong>um documento ativo por tipo</strong>.</li>
+    <li>No código, montar o mapa com uma chave por marcador e chamar <code>renderer.render(tipo, valores)</code>
+      (ou <code>renderEstrito</code> se nada pode faltar).</li>
+    <li>Passar o <code>DocumentoRenderizado</code> ao template (<code>getCorpo()</code> com <code>th:text</code>,
+      <code>getCorpoHtml()</code> com <code>th:utext</code>).</li>
+    <li>Confirmar com <code>GET …/{uuid}/marcadores</code> e <code>POST …/pre-visualizar</code> que todas as chaves são
+      preenchidas (<code>marcadoresEmFalta</code> vazio).</li>
+  </ol>
+
+  <h2>7. Regras a saber</h2>
+  <ul>
+    <li>Editar um Documento de Saída cria uma versão nova e inativa a anterior — o motor usa sempre a <strong>ativa</strong>.</li>
+    <li>O valor é convertido com <code>String.valueOf</code>: formate datas e números antes de os pôr no mapa
+      (ex.: <code>DateFormatter.EXTENDED_DATE_PT</code> dá "23 de outubro de 2026").</li>
+    <li>Um marcador escrito mal no texto (ex.: <code>${nomeColaboradr}</code>) sai como "—" e aparece em
+      <code>marcadoresEmFalta</code> e no log — é a forma de o detetar.</li>
+    <li>Código: <code>shared/domain/service/documento/</code> (<code>DocumentoSaidaRenderer</code>, <code>DocumentoRenderizado</code>,
+      <code>MarcadoresTexto</code>); testes em <code>MarcadoresTextoTest</code>.</li>
+  </ul>
+
+  <footer>RH INPS Service · atualizado a 23/10/2026</footer>
+</main>
+</body>
+</html>

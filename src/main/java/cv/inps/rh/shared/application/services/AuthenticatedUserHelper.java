@@ -52,6 +52,35 @@ public class AuthenticatedUserHelper {
         .orElse(sub);
   }
 
+  /**
+   * Nome do utilizador do login para mostrar/pré-preencher (ex.: "Autorizado por" da missão).
+   *
+   * <p>Vem do token validado pelo resource server: perfil IAM, senão as claims do token. Mesmo com
+   * {@code app.security.enabled=false} um token enviado é validado (inválido → 401). Sem token (dev/QA sem
+   * IAM) devolve o nome da autenticação corrente — "anonymousUser", o mesmo que o auditor grava em
+   * USER_REGISTO_NAME; null se não houver autenticação nenhuma.</p>
+   */
+  public String getNomeUtilizadorAtual() {
+    var jwt = getJwt();
+    if (jwt.isEmpty()) {
+      var auth = SecurityContextHolder.getContext().getAuthentication();
+      return auth != null && auth.getName() != null && !auth.getName().isBlank() ? auth.getName() : null;
+    }
+    var perfil = getProfile().map(p -> p.getFullName() != null ? p.getFullName() : p.getUsername()).orElse(null);
+    if (perfil != null && !perfil.isBlank()) return perfil;
+    return nomeDasClaims(jwt.get().getClaimAsString("name"), jwt.get().getClaimAsString("given_name"),
+        jwt.get().getClaimAsString("family_name"), jwt.get().getClaimAsString("preferred_username"),
+        jwt.get().getClaimAsString("email"));
+  }
+
+  static String nomeDasClaims(String name, String given, String family, String preferred, String email) {
+    if (name != null && !name.isBlank()) return name.trim();
+    var completo = ((given != null ? given : "") + " " + (family != null ? family : "")).trim();
+    if (!completo.isEmpty()) return completo;
+    if (preferred != null && !preferred.isBlank()) return preferred.trim();
+    return email != null && !email.isBlank() ? email.trim() : null;
+  }
+
   public Optional<IAMUserProfileEntity> getProfile() {
     var sub = getSub();
     if (sub == null) return Optional.empty();

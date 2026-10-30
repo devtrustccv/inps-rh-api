@@ -340,7 +340,7 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
 
   /**
    * Carreiras/Cargo (RH_T_PARAM_CARREIRA) com colaboradores com relação laboral activa
-   * (EST_ACT_ADM = 1), opcionalmente só os da direção indicada. A carreira do colaborador é a do
+   * (EST_ACT_ADM = 1), opcionalmente só os da direção e do vínculo indicados. A carreira do colaborador é a do
    * PCCS da carreira e, sem ela, a do escalão (da carreira ou do próprio tiprel).
    */
   @Query("""
@@ -354,9 +354,11 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
       LEFT JOIN e2.paramCarrId e2p
       WHERE t.estActAdm = 1
         AND t.id IN (SELECT v.tiprelId FROM RhVRelacaoLaboralEntity v
-                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId))
+                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId)
+                       AND (:vinculoId IS NULL OR v.vinculoId = :vinculoId))
       """)
-  List<Long> findCarreirasPccsComColaboradores(@Param("institId") Long institId);
+  List<Long> findCarreirasPccsComColaboradores(
+      @Param("institId") Long institId, @Param("vinculoId") Long vinculoId);
 
   /**
    * Colaboradores com relação laboral activa numa Carreira/Cargo (mesma regra de
@@ -374,9 +376,11 @@ public interface TiposRelacionamentoEntityRepository extends JpaRepository<Tipos
       WHERE t.estActAdm = 1
         AND COALESCE(cp.id, e1p.id, e2p.id) = :carrPccsId
         AND t.id IN (SELECT v.tiprelId FROM RhVRelacaoLaboralEntity v
-                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId))
+                     WHERE v.estActAdm = 1 AND (:institId IS NULL OR v.direcaoId = :institId)
+                       AND (:vinculoId IS NULL OR v.vinculoId = :vinculoId))
       """)
   List<UUID> findFuncionarioUuidsDaCarreiraPccs(
-      @Param("carrPccsId") Long carrPccsId, @Param("institId") Long institId);
+      @Param("carrPccsId") Long carrPccsId, @Param("institId") Long institId,
+      @Param("vinculoId") Long vinculoId);
 
 }

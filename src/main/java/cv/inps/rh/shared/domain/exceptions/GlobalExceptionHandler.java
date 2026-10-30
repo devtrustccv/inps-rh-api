@@ -30,8 +30,44 @@ public class GlobalExceptionHandler {
 
     var body = ex.getBody();
     body.setProperty("igrpType", "validation");
+    body.setTitle(mensagemNaoEncontrado(body.getTitle()));
 
     return body;
+  }
+
+  private static final java.util.regex.Pattern ENTIDADE_NAO_ENCONTRADA =
+      java.util.regex.Pattern.compile("(\\w+?)Entity not found(?: for (\\w+))?(?::\\s*(.*))?");
+
+  /** Nome das entidades que mais aparecem no "XEntity not found"; as restantes saem do nome da classe. */
+  private static final java.util.Map<String, String> NOMES_ENTIDADE = java.util.Map.ofEntries(
+      java.util.Map.entry("Avaliacao", "A avaliação"),
+      java.util.Map.entry("ParamObjetivoDet", "A parametrização da avaliação"),
+      java.util.Map.entry("ParamManualFuncao", "O manual de funções"),
+      java.util.Map.entry("ParamEscalaAvaliacao", "O nível da escala"),
+      java.util.Map.entry("ParamCargo", "O cargo"),
+      java.util.Map.entry("ParamCarreira", "A carreira"),
+      java.util.Map.entry("Direcao", "A direção"),
+      java.util.Map.entry("Secao", "A secção"),
+      java.util.Map.entry("Seccao", "A secção"),
+      java.util.Map.entry("Funcionario", "O colaborador"),
+      java.util.Map.entry("TiposRelacionamento", "A relação laboral"),
+      java.util.Map.entry("Validacao", "A validação"));
+
+  /**
+   * "AvaliacaoEntity not found for id: 0000…" (texto técnico do findByIdOrThrow) →
+   * "A avaliação indicada não existe (id 0000…)."; qualquer outro título fica como está.
+   */
+  static String mensagemNaoEncontrado(String titulo) {
+    if (titulo == null) return null;
+    var m = ENTIDADE_NAO_ENCONTRADA.matcher(titulo.trim());
+    if (!m.matches()) return titulo;
+    var nome = NOMES_ENTIDADE.getOrDefault(m.group(1),
+        "O registo de " + m.group(1).replaceFirst("^Param", "").replaceAll("(?<=[a-z])(?=[A-Z])", " ").toLowerCase());
+    var valor = m.group(3) != null && !m.group(3).isBlank() ? m.group(3).trim() : null;
+    var campo = m.group(2) == null || "id".equalsIgnoreCase(m.group(2)) || "uuid".equalsIgnoreCase(m.group(2))
+        ? "id" : m.group(2);
+    return nome + " indicad" + (nome.startsWith("A ") ? "a" : "o") + " não existe"
+        + (valor != null ? " (" + campo + " " + valor + ")." : ".");
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
@@ -41,7 +77,10 @@ public class GlobalExceptionHandler {
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
 
-    problemDetail.setTitle(ex.getMessage());
+    // "The given id must not be null" (findById(null) do Spring Data) não diz nada ao utilizador.
+    problemDetail.setTitle(ex.getMessage() != null && ex.getMessage().startsWith("The given id must not be null")
+        ? "Falta indicar um dos campos obrigatórios (um identificador veio vazio)."
+        : ex.getMessage());
 
     return problemDetail;
   }
@@ -86,19 +125,34 @@ public class GlobalExceptionHandler {
   private static final java.util.regex.Pattern CAMPO_OBRIGATORIO =
       java.util.regex.Pattern.compile("The field <(.+)> is required");
 
-  /** "The field <x> is required" (mensagem dos DTOs gerados) → "O campo «x» é obrigatório." */
-  private static String mensagemCampo(String campo, String mensagem) {
+  /** Mensagens por defeito do Bean Validation que não dizem o campo (o utilizador via só "não deve ser nulo"). */
+  private static final java.util.Set<String> OBRIGATORIO_SEM_CAMPO = java.util.Set.of(
+      "não deve ser nulo", "não deve estar em branco", "não deve estar vazio",
+      "must not be null", "must not be blank", "must not be empty");
+
+  /**
+   * "The field <x> is required" (DTOs gerados) ou "não deve ser nulo" (defeito do Bean Validation) →
+   * "O campo «x» é obrigatório."; outra mensagem por defeito (começa por minúscula, ex.: "deve ser maior que 0")
+   * leva o nome do campo à frente. Mensagens próprias (frases completas) ficam como estão.
+   */
+  static String mensagemCampo(String campo, String mensagem) {
+    var nome = campo.substring(campo.lastIndexOf('.') + 1);
     if (mensagem == null || mensagem.isBlank())
-      return "O campo «" + campo.substring(campo.lastIndexOf('.') + 1) + "» é inválido.";
+      return "O campo «" + nome + "» é inválido.";
     var m = CAMPO_OBRIGATORIO.matcher(mensagem);
-    return m.matches() ? "O campo «" + m.group(1) + "» é obrigatório." : mensagem;
+    if (m.matches())
+      return "O campo «" + m.group(1) + "» é obrigatório.";
+    if (OBRIGATORIO_SEM_CAMPO.contains(mensagem.trim()))
+      return "O campo «" + nome + "» é obrigatório.";
+    return Character.isLowerCase(mensagem.charAt(0)) ? "O campo «" + nome + "» " + mensagem + "." : mensagem;
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
   public ProblemDetail handleConstraintViolationException(ConstraintViolationException ex) {
 
     var allErrors = ex.getConstraintViolations().stream()
-        .map(v -> String.format("Campo '%s': %s", v.getPropertyPath(), v.getMessage()))
+        .map(v -> mensagemCampo(String.valueOf(v.getPropertyPath()), v.getMessage()))
+        .distinct()
         .collect(Collectors.joining("; "));
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -129,10 +183,54 @@ public class GlobalExceptionHandler {
       return problem;
     }
 
-    problem.setTitle("Malformed JSON request");
-    problem.setDetail(ex.getMessage());
+    // O detalhe técnico do Jackson (classes Java, posição no JSON) fica no log; o utilizador vê o campo e o formato.
+    if (ex.getCause() instanceof com.fasterxml.jackson.databind.exc.MismatchedInputException mie
+        && !mie.getPath().isEmpty()) {
+      var campo = mie.getPath().stream()
+          .map(r -> r.getFieldName() != null ? r.getFieldName() : "[" + r.getIndex() + "]")
+          .collect(Collectors.joining(".")).replace(".[", "[");
+      problem.setTitle("Dados inválidos no pedido");
+      problem.setDetail(mensagemFormato(campo, mie.getTargetType(),
+          mie instanceof InvalidFormatException f ? f.getValue() : null));
+      return problem;
+    }
+
+    problem.setTitle("Dados inválidos no pedido");
+    problem.setDetail("O pedido não pôde ser lido: o conteúdo enviado não é um JSON válido.");
 
     return problem;
+  }
+
+  @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+  public ProblemDetail handleParametroEmFalta(org.springframework.web.bind.MissingServletRequestParameterException ex) {
+    var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problem.setTitle("O parâmetro «" + ex.getParameterName() + "» é obrigatório.");
+    return problem;
+  }
+
+  @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+  public ProblemDetail handleParametroInvalido(
+      org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+    var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problem.setTitle(mensagemFormato(ex.getName(), ex.getRequiredType(), ex.getValue())
+        .replaceFirst("^O campo", "O parâmetro"));
+    return problem;
+  }
+
+  static String mensagemFormato(String campo, Class<?> tipo, Object valor) {
+    var recebido = valor != null ? " (recebido: «" + valor + "»)" : "";
+    String esperado;
+    if (tipo == null) esperado = "um valor válido";
+    else if (tipo == java.time.LocalDate.class) esperado = "uma data no formato AAAA-MM-DD";
+    else if (tipo == java.time.LocalDateTime.class) esperado = "uma data e hora no formato AAAA-MM-DDThh:mm:ss";
+    else if (tipo == java.time.LocalTime.class) esperado = "uma hora no formato hh:mm";
+    else if (tipo == java.util.UUID.class) esperado = "um identificador (UUID) válido";
+    else if (Number.class.isAssignableFrom(tipo) || (tipo.isPrimitive() && tipo != boolean.class)) esperado = "um número";
+    else if (tipo == Boolean.class || tipo == boolean.class) esperado = "verdadeiro ou falso";
+    else if (java.util.Collection.class.isAssignableFrom(tipo) || tipo.isArray()) esperado = "uma lista";
+    else if (tipo == String.class) esperado = "um texto";
+    else esperado = "um valor válido";
+    return "O campo «" + campo + "» tem de ser " + esperado + recebido + ".";
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)

@@ -41,6 +41,9 @@ public class AvaliacaoService {
 
   private static final String ESTADO_ATIVO = "A";
 
+  /** Vínculo laboral "Efetivo" (RH_V_RELACAO_LABORAL.VINCULO_ID): só estes têm objectivos individuais. */
+  private static final Long VINCULO_EFETIVO_ID = 1L;
+
   private final AvaliacaoEntityRepository avaliacaoRepository;
   private final AvaliacaoObjectivoEntityRepository objectivoRepository;
   private final AvaliacaoCompetenciaEntityRepository competenciaRepository;
@@ -108,7 +111,8 @@ public class AvaliacaoService {
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-            "ParamObjetivoDetEntity not found for ano: " + dto.getAno()));
+            "Não existe parametrização da avaliação de desempenho para o ano " + dto.getAno()
+                + ". Configure (ou clone) os componentes desse ano primeiro."));
 
     var secao = dto.getSeccaoId() != null
         ? secaoRepository.findByIdOrThrow(dto.getSeccaoId())
@@ -182,7 +186,17 @@ public class AvaliacaoService {
 
       if (existente != null) {
         periodos.forEach(pp -> periodoService.obterOuCriarDetalhe(existente, pp));
-        ignorados.add(funcionario.getNome());
+        if (existente.getUuid() != null && existente.getUuid().toString().equals(dto.getUuid())) {
+          // Edição desta mesma definição: grava o que mudou nas linhas (meta, KPI, objectivo
+          // individual, competência, atitude) — antes as alterações eram ignoradas.
+          atualizarLinhasAvaliacao(existente, dto,
+              resolverDescricaoManual(instit != null ? instit.getId() : null,
+                  dto.getSeccaoId(), cargoDoColaborador(funUuid, dto.getCargoId()),
+                  carreiraDoColaborador(funUuid, dto.getCarrPccsId())));
+          created.add(existente.getUuid().toString());
+        } else {
+          ignorados.add(funcionario.getNome());
+        }
         continue;
       }
 
@@ -218,9 +232,12 @@ public class AvaliacaoService {
         ? dto.getPeriodicidades()
         : (StringUtils.hasText(dto.getPeriodicidade()) ? List.of(dto.getPeriodicidade()) : List.<String>of());
 
-    if (pedidos.isEmpty()) {
-      throw IgrpResponseStatusException.badRequest(
-          "É obrigatório indicar pelo menos um período (periodicidade ou periodicidades).");
+    // Spec 24/09 (Registo dos objectivos individuais): o campo Semestre está riscado — a definição é do ano.
+    // Sem período, ou com o tipo do ciclo (o que o ecrã mostra desactivado, ex. "SEMESTRAL"), abrange todos os
+    // períodos do ciclo parametrizado no ano (QA AV-09/AV-11; antes dava 400).
+    var tipo = periodoService.tipoDoAno(dto.getAno());
+    if (pedidos.isEmpty() || (pedidos.size() == 1 && tipo.name().equalsIgnoreCase(pedidos.getFirst().trim()))) {
+      return List.copyOf(tipo.periodos());
     }
 
     var validados = new LinkedHashSet<String>();
@@ -232,6 +249,7 @@ public class AvaliacaoService {
    * Os colaboradores da definição individual. Sem colaboradores indicados, a definição aplica-se a
    * todos os colaboradores activos da Carreira/Cargo (e da direção, se indicada), por isso um dos
    * dois é obrigatório. Com Carreira/Cargo, os colaboradores indicados têm de pertencer a ela.
+   * Em qualquer caso, só entram colaboradores com vínculo efetivo.
    */
   private List<UUID> resolverColaboradores(
       DefinicaoObjectivoDTO dto, ParamCarreiraEntity carreira, DirecaoEntity instit) {
@@ -245,13 +263,29 @@ public class AvaliacaoService {
             "Indique a Carreira / Cargo ou pelo menos um colaborador.");
       }
       var daCarreira = tiposRelacionamentoRepository.findFuncionarioUuidsDaCarreiraPccs(
-          carreira.getId(), instit != null ? instit.getId() : null);
+          carreira.getId(), instit != null ? instit.getId() : null, VINCULO_EFETIVO_ID);
       if (daCarreira.isEmpty()) {
         throw IgrpResponseStatusException.badRequest(
-            "Não há colaboradores activos na Carreira / Cargo " + carreira.getNome()
+            "Não há colaboradores efetivos activos na Carreira / Cargo " + carreira.getNome()
                 + (instit != null ? " da direção " + instit.getNome() : "") + ".");
       }
       return daCarreira;
+    }
+
+    // Só colaboradores com vínculo efetivo têm objectivos individuais. A edição de uma definição
+    // já existente (pedido com uuid) não é bloqueada, para não prender as criadas antes da regra.
+    var edicao = StringUtils.hasText(dto.getUuid());
+    var naoEfetivos = edicao ? List.<String>of() : indicados.stream()
+        .filter(u -> !VINCULO_EFETIVO_ID.equals(relacaoLaboralRepository
+            .findFirstByFuncionarioUuidAndEstActAdm(u.toString(), 1L)
+            .map(RhVRelacaoLaboralEntity::getVinculoId)
+            .orElse(null)))
+        .map(u -> funcionarioRepository.findByUuidOrThrow(u).getNome())
+        .toList();
+    if (!naoEfetivos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só colaboradores com vínculo efetivo podem ter objectivos definidos. Não efetivo(s): "
+              + String.join(", ", naoEfetivos) + ".");
     }
 
     if (carreira != null) {
@@ -316,7 +350,7 @@ public class AvaliacaoService {
    */
   @Transactional(readOnly = true)
   public List<cv.inps.rh.avaliacao.application.dto.CarreiraResumoDTO> getCarreirasComColaboradores(Long institId) {
-    var ids = tiposRelacionamentoRepository.findCarreirasPccsComColaboradores(institId).stream()
+    var ids = tiposRelacionamentoRepository.findCarreirasPccsComColaboradores(institId, VINCULO_EFETIVO_ID).stream()
         .filter(java.util.Objects::nonNull)
         .toList();
     return carreiraRepository.findAllById(ids).stream()
@@ -457,6 +491,9 @@ public class AvaliacaoService {
       if (query.getAno() != null) {
         predicates.add(cb.equal(root.get("ano"), query.getAno()));
       }
+      // Lista de avaliações = avaliações de colaboradores. As linhas dos objectivos comuns (INPS/DIREÇÃO, sem
+      // colaborador) têm o seu ecrã próprio e apareciam aqui sem nome nem períodos (QA AV-27).
+      predicates.add(cb.isNotNull(root.get("funcionario")));
       if (query.getDirecao() != null) {
         predicates.add(cb.equal(root.get("institId").get("id"), query.getDirecao()));
       }
@@ -519,6 +556,17 @@ public class AvaliacaoService {
 
     var rotulos = periodoService.descricoesDosPeriodos();
 
+    // O que já foi registado em cada período (avaliação e/ou autoavaliação): a lista só mostra
+    // os períodos com registo e a ação "Ver …" correspondente.
+    var comAvaliacao = new java.util.HashSet<String>();
+    var comAutoAvaliacao = new java.util.HashSet<String>();
+    for (var m : periodoService.medicoesDe(rows.stream().map(AvaliacaoEntity::getId).toList())) {
+      if (m.getAvaliacao() == null) continue;
+      var chave = m.getAvaliacao().getId() + "|" + m.getPeriodicidade();
+      if (m.getAvaliacaoValor() != null || StringUtils.hasText(m.getRealizado())) comAvaliacao.add(chave);
+      if (m.getAutoAvaliacao() != null || StringUtils.hasText(m.getAutoRealizado())) comAutoAvaliacao.add(chave);
+    }
+
     var contentAll = grouped.values().stream().map(list -> {
       var base = list.getFirst();
 
@@ -553,6 +601,9 @@ public class AvaliacaoService {
         dto.setAvaliacaoFinal(d.getAvaliacaoFinal());
         dto.setAvaliacaoQualitativa(d.getAvaliacaoQualitativa());
         dto.setEstado(d.getEstado());
+        var chave = d.getAvaliacao().getId() + "|" + d.getPeriodicidade();
+        dto.setTemAvaliacao(comAvaliacao.contains(chave) || d.getAvaliacaoFinal() != null);
+        dto.setTemAutoAvaliacao(comAutoAvaliacao.contains(chave));
         return dto;
       }).toList();
 
@@ -586,6 +637,116 @@ public class AvaliacaoService {
     return response;
   }
 
+  /**
+   * Atualiza no lugar as linhas de uma definição existente, ligadas pela linha do componente
+   * (paramId). Não apaga nem recria linhas, para não perder avaliações já registadas nelas;
+   * as regras de origem dos textos são as mesmas da criação.
+   */
+  private void atualizarLinhasAvaliacao(AvaliacaoEntity avaliacao, DefinicaoObjectivoDTO dto,
+      String manualDescricao) {
+    var uuid = avaliacao.getUuid();
+
+    var objectivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(uuid);
+    for (var obj : listaOuVazia(dto.getObjectivos())) {
+      objectivos.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(obj.getParamId()))
+          .findFirst()
+          .ifPresent(e -> {
+            var p = e.getParamObjetivo();
+            if ("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia())) {
+              e.setObjectivos(primeiroPreenchido(obj.getObjectivo(), e.getObjectivos(), manualDescricao));
+              e.setKpi(primeiroPreenchido(obj.getKpi(), p.getKpi()));
+            }
+            // Meta em branco na edição: mantém a gravada, senão a dos objectivos comuns (antes ia null → 400 técnico).
+            e.setMeta(primeiroPreenchido(obj.getMeta(), e.getMeta(), metaDosComuns(avaliacao, p)));
+            exigirMeta(e.getMeta(), p);
+            objectivoRepository.save(e);
+          });
+    }
+
+    var competencias = competenciaRepository.findAllByAvaliacao_Uuid(uuid);
+    var linhasCompetencia = new ArrayList<CompetenciaLinha>();
+    listaOuVazia(dto.getCompetenciasComportamentais())
+        .forEach(c -> linhasCompetencia.add(new CompetenciaLinha(c.getParamId(), c.getCompetencia())));
+    listaOuVazia(dto.getCompetenciasTecnicas())
+        .forEach(c -> linhasCompetencia.add(new CompetenciaLinha(c.getParamId(), c.getCompetencia())));
+    for (var c : linhasCompetencia) {
+      competencias.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(c.paramId()))
+          .findFirst()
+          .ifPresent(e -> {
+            e.setDescricao(primeiroPreenchido(c.competencia(), e.getDescricao(), manualDescricao));
+            competenciaRepository.save(e);
+          });
+    }
+
+    var atitudes = atitudeRepository.findAllByAvaliacao_Uuid(uuid);
+    for (var a : listaOuVazia(dto.getAtitudesPessoais())) {
+      atitudes.stream()
+          .filter(e -> e.getParamObjetivo() != null && e.getParamObjetivo().getId().equals(a.getParamId()))
+          .findFirst()
+          .ifPresent(e -> {
+            e.setDescricao(primeiroPreenchido(a.getAtitudePessoal(), e.getDescricao(),
+                e.getParamObjetivo().getDescricao()));
+            atitudeRepository.save(e);
+          });
+    }
+  }
+
+  private record CompetenciaLinha(Long paramId, String competencia) {
+  }
+
+  /**
+   * Meta do mesmo objectivo (paramId) nos objectivos comuns do ano: INPS, ou a DIREÇÃO do colaborador. Na
+   * definição individual as linhas INPS/DIREÇÃO herdam-na quando o ecrã não a envia (QA AV-17).
+   */
+  private String metaDosComuns(AvaliacaoEntity avaliacao, ParamObjetivoEntity p) {
+    var abrangencia = p.getAbrangencia();
+    if (avaliacao.getFuncionario() == null || abrangencia == null || "INDIVIDUAL".equalsIgnoreCase(abrangencia))
+      return null;
+    Long institId = null;
+    if ("DIRECAO".equalsIgnoreCase(abrangencia)) {
+      institId = direcaoDoColaborador(avaliacao);
+      if (institId == null) return null;
+    }
+    return avaliacaoRepository.findComuns(avaliacao.getAno(), abrangencia, institId).stream()
+        .findFirst()
+        .flatMap(comum -> objectivoRepository.findAllByAvaliacaoObj_Uuid(comum.getUuid()).stream()
+            .filter(o -> o.getParamObjetivo() != null && o.getParamObjetivo().getId().equals(p.getId()))
+            .map(AvaliacaoObjectivoEntity::getMeta)
+            .filter(StringUtils::hasText)
+            .findFirst())
+        .orElse(null);
+  }
+
+  /** Direção da avaliação ou, sem ela, a do vínculo actual do colaborador. */
+  private Long direcaoDoColaborador(AvaliacaoEntity avaliacao) {
+    if (avaliacao.getInstitId() != null) return avaliacao.getInstitId().getId();
+    return tiposRelacionamentoRepository.findAtualByFuncionarioUuid(avaliacao.getFuncionario().getUuid())
+        .map(tr -> tr.getMobId() != null && tr.getMobId().getInstidId() != null ? tr.getMobId().getInstidId().getId() : null)
+        .orElse(null);
+  }
+
+  /** META é obrigatória na BD: sem ela (nem nos comuns) explica-se o que falta em vez do erro técnico. */
+  private void exigirMeta(String meta, ParamObjetivoEntity p) {
+    if (!StringUtils.hasText(meta)) {
+      throw IgrpResponseStatusException.badRequest("Objectivo " + p.getNumeroOrdem() + " (" + p.getAbrangencia()
+          + "): indique a meta" + ("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia()) ? "." : " (não há meta definida nos objectivos comuns)."));
+    }
+  }
+
+  /**
+   * A descrição da competência é obrigatória na BD e vem do Manual de Funções (direção + carreira)
+   * ou da escolhida no ecrã — sem nenhuma das duas explica-se o que falta em vez de falhar com
+   * "campo obrigatório em falta".
+   */
+  private void exigirDescricaoCompetencia(String descricao, ParamObjetivoEntity p) {
+    if (!StringUtils.hasText(descricao)) {
+      throw IgrpResponseStatusException.badRequest("Competência " + p.getNumeroOrdem()
+          + ": escolha a competência ou registe o Manual de Funções da direção e Carreira / Cargo.");
+    }
+  }
+
   private void criarLinhasAvaliacao(
       AvaliacaoEntity avaliacao,
       List<ParamObjetivoEntity> params,
@@ -599,7 +760,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getObjectivos()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "O objectivo indicado (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoObjectivoEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -615,7 +776,17 @@ public class AvaliacaoService {
           ? primeiroPreenchido(manualDescricao, obj.getObjectivo(), p.getDescricao())
           : p.getDescricao());
       e.setKpi(individual ? primeiroPreenchido(obj.getKpi(), p.getKpi()) : p.getKpi());
-      e.setMeta(obj.getMeta());
+      // Objectivo e KPI são obrigatórios na BD: sem eles a gravação falhava com uma mensagem genérica.
+      if (!StringUtils.hasText(e.getObjectivos())) {
+        throw IgrpResponseStatusException.badRequest("Objectivo " + p.getNumeroOrdem()
+            + " (" + p.getAbrangencia() + "): escolha ou indique o objectivo.");
+      }
+      if (!StringUtils.hasText(e.getKpi())) {
+        throw IgrpResponseStatusException.badRequest("Objectivo " + p.getNumeroOrdem()
+            + " (" + p.getAbrangencia() + "): indique o KPI.");
+      }
+      e.setMeta(StringUtils.hasText(obj.getMeta()) ? obj.getMeta() : metaDosComuns(avaliacao, p));
+      exigirMeta(e.getMeta(), p);
       e.setPonderacao(p.getPonderacao());
       objectivoRepository.save(e);
     });
@@ -623,7 +794,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getCompetenciasComportamentais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A competência comportamental indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -633,6 +804,7 @@ public class AvaliacaoService {
       e.setAbrangencia(p.getAbrangencia());
       // Spec: "Preenchido apartir de Tabela RH_T_PARAM_MFUNCAO, CUJO cargo = cargo do colaborador"
       e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
+      exigirDescricaoCompetencia(e.getDescricao(), p);
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoComportamentais());
@@ -642,7 +814,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getCompetenciasTecnicas()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A competência técnica indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -651,6 +823,7 @@ public class AvaliacaoService {
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
       e.setDescricao(primeiroPreenchido(manualDescricao, obj.getCompetencia(), p.getDescricao()));
+      exigirDescricaoCompetencia(e.getDescricao(), p);
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
       e.setPeso(det.getPesoTecnica());
@@ -660,7 +833,7 @@ public class AvaliacaoService {
     listaOuVazia(dto.getAtitudesPessoais()).forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
       if (p == null) throw IgrpResponseStatusException.badRequest(
-          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
+          "A atitude pessoal indicada (paramId " + obj.getParamId() + ") não faz parte da parametrização da avaliação de " + det.getAno() + ".");
       var e = new AvaliacaoAtitudePessoalEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -668,7 +841,8 @@ public class AvaliacaoService {
       e.setParamObjetivo(p);
       e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
-      e.setDescricao(p.getDescricao());
+      // O texto escrito no ecrã (campo editável); sem ele, o da parametrização.
+      e.setDescricao(primeiroPreenchido(obj.getAtitudePessoal(), p.getDescricao()));
       e.setPonderacao(p.getPonderacao());
       atitudeRepository.save(e);
     });

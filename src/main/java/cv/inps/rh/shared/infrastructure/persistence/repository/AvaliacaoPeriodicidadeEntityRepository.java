@@ -23,6 +23,9 @@ public interface AvaliacaoPeriodicidadeEntityRepository extends
 
   List<AvaliacaoPeriodicidadeEntity> findAllByAvaliacao_Id(Long avdId);
 
+  /** As medições de várias avaliações — um só select para a página da lista. */
+  List<AvaliacaoPeriodicidadeEntity> findAllByAvaliacao_IdIn(List<Long> avdIds);
+
   /** As medições de um período em várias avaliações — um só select para os blocos de um ano. */
   List<AvaliacaoPeriodicidadeEntity> findAllByAvaliacao_IdInAndPeriodicidade(List<Long> avdIds, String periodicidade);
 
