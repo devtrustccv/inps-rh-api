@@ -52,6 +52,18 @@ public class EmprestimoReadService {
     return paramEmprestimoEntityRepository.listAll();
   }
 
+  /**
+   * EM-010: a Viatura não grava Data Fim — calcula-se pela data de início e o nº de prestações
+   * (última prestação). Antes aparecia "-" nos Outros Empréstimos e no Detalhe do Processo.
+   */
+  private static LocalDate dataFim(EmprestimoEntity loan) {
+    if (loan.getDataFim() != null) {
+      return loan.getDataFim();
+    }
+    var inicio = EmprestimoHelper.dataInicioOriginal(loan);
+    return inicio != null && loan.getNrPrestacao() != null ? inicio.plusMonths(loan.getNrPrestacao()) : null;
+  }
+
   public DetalhesEmprestimoDTO getEmprestimoByUuid(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
@@ -62,7 +74,7 @@ public class EmprestimoReadService {
     dto.setNomeFornecedor(entity.getNomeFornecedor());
     // versões antigas de Amortização/Renegociação não copiavam a data: mostra a do empréstimo inicial
     dto.setDataInicio(EmprestimoHelper.dataInicioOriginal(entity));
-    dto.setDataFim(entity.getDataFim());
+    dto.setDataFim(dataFim(entity));
     dto.setValorPrestacao(entity.getValorPrestacao());
     dto.setMarca(entity.getMarca());
     dto.setAnoFabrico(entity.getAnoFabrico());
@@ -99,12 +111,20 @@ public class EmprestimoReadService {
     dto.setTipoEmprestimo(entity.getTipoEmprestimo());
     dto.setTipoMovimentoId(entity.getTmId());
     dto.setFinalidade(entity.getFinalidade());
+    var planoDetalhe = planoFinanceiroEntityRepository.findAllByEmprestimo(entity);
     dto.setNrPrestacaoPaga(
-        planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
+        planoDetalhe
             .stream()
             .filter(p -> FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
             .count()
     );
+    // EM-016: Principal e Juro mensal da prestação (Recuperação) — 1.ª prestação do plano.
+    planoDetalhe.stream()
+        .min(java.util.Comparator.comparing(p -> p.getNrOrdemPrestacao() == null ? Long.MAX_VALUE : p.getNrOrdemPrestacao()))
+        .ifPresent(p -> {
+          dto.setValorPrincipalMensal(p.getValorPrincipal());
+          dto.setValorJuroMensal(p.getValorJuros());
+        });
 
     var otherLoans = emprestimoOutroEntityRepository.findByReferenciaOrigemAndFunAndEstado(order, order.getFunId(), Estado.A.name())
         .stream()
@@ -131,8 +151,8 @@ public class EmprestimoReadService {
         .map(obj -> new OutrosEmprestimosDTO(
             obj.getUuid(),
             obj.getTipoEmprestimo(),
-            obj.getDataInicio(),
-            obj.getDataFim(),
+            EmprestimoHelper.dataInicioOriginal(obj),
+            dataFim(obj),
             obj.getValorEmprestimo(),
             obj.getValorPrestacao()
         ))

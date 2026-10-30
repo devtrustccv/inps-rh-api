@@ -25,6 +25,9 @@ public interface ParamEmprestimoEntityRepository extends
 
   Optional<ParamEmprestimoEntity> findByUuid(String uuid);
 
+  // Limites ativos de uma carreira (PCCS)
+  Optional<ParamEmprestimoEntity> findFirstByCarrPccs_IdAndEstadoOrderByIdDesc(Long carrPccsId, String estado);
+
   default ParamEmprestimoEntity findByUuidOrThrow(String uuid) {
     return this.findByUuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.of(

@@ -135,13 +135,16 @@ public class FinancialPlanHelper {
 
     for (int i = 1; i <= prazoMeses; i++) {
 
+      // EM-017: a prestação fixa inclui os juros do mês (sobre o saldo); o saldo desce só pelo
+      // capital. Antes descia pela prestação inteira e o plano ficava sem juros.
       var dataPagamento = dataInicio.plusMonths(i);
-      var principal = prestacaoFixa;
+      var juros = saldoInicial.multiply(taxaMensal, MC);
+      var principal = prestacaoFixa.subtract(juros);
       var pagamentoAtual = prestacaoFixa;
       // Ajuste no último mês para zerar saldo
       if (i == prazoMeses) {
         principal = saldoInicial;
-        pagamentoAtual = principal;
+        pagamentoAtual = principal.add(juros);
       }
 
       var saldoFinal = saldoInicial.subtract(principal);
@@ -158,7 +161,7 @@ public class FinancialPlanHelper {
               saldoInicial.setScale(0, RoundingMode.HALF_UP),
               pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
               principal.setScale(0, RoundingMode.HALF_UP),
-              null,
+              juros.setScale(0, RoundingMode.HALF_UP),
               saldoFinal.setScale(0, RoundingMode.HALF_UP)
           )
       );
@@ -169,29 +172,49 @@ public class FinancialPlanHelper {
     return plano;
   }
 
+  /**
+   * EM-015: plano da Recuperação (empréstimo em curso trazido para o sistema) com as prestações do
+   * formulário — Principal + Juro mensal (juro = valor x taxa anual / 12) — uma por mês a partir da
+   * Data Início, com o saldo a descer pelo principal. Antes todas as linhas tinham a mesma data e o
+   * mesmo saldo, principal = prestação inteira e "juros" = a taxa. Fica pendente até à Validação,
+   * como o do Fundo Social.
+   */
   public static List<PlanoFinanceiroRowDTO> generateFinancialPlanForRecuperacao(FundoSocialRequestDTO row) {
 
     var plano = new ArrayList<PlanoFinanceiroRowDTO>();
+    var n = row.getNrPrestacao() != null ? row.getNrPrestacao().intValue() : 0;
+    if (n <= 0 || row.getValorTotalEmprestimo() == null || row.getDataInicio() == null) {
+      return plano;
+    }
+    var valor = row.getValorTotalEmprestimo();
+    var prestacao = Optional.ofNullable(row.getValorPrestacaoMensal()).orElse(BigDecimal.ZERO);
+    var taxaMensal = Optional.ofNullable(row.getJuro()).orElse(BigDecimal.ZERO)
+        .divide(BigDecimal.valueOf(1200), MC);
+    var juroMensal = valor.multiply(taxaMensal, MC).setScale(2, RoundingMode.HALF_UP);
+    var principalMensal = prestacao.subtract(juroMensal);
+    if (principalMensal.signum() <= 0) {
+      principalMensal = valor.divide(BigDecimal.valueOf(n), 2, RoundingMode.HALF_UP);
+    }
+    long pagas = Optional.ofNullable(row.getNrPrestacaoPaga()).orElse(0L);
 
-    long numeroPrestacoesPagos = Optional.ofNullable(row.getNrPrestacaoPaga()).orElse(0L);
-    int numeroPrestacoesPagasCounter = 0;
-
-    for (int i = 1; i <= row.getNrPrestacao(); i++) {
-      var flagPago = numeroPrestacoesPagos > 0L && numeroPrestacoesPagasCounter < numeroPrestacoesPagos ? FLG_PAGO : null;
+    var saldo = valor;
+    for (int i = 1; i <= n; i++) {
+      var principal = i == n || principalMensal.compareTo(saldo) > 0 ? saldo : principalMensal;
+      var saldoFinal = saldo.subtract(principal);
       plano.add(
           new PlanoFinanceiroRowDTO(
               (long) i,
-              Estado.A.name(),
-              flagPago,
-              row.getDataInicio(),
-              row.getValorTotalEmprestimo(),
-              row.getValorPrestacaoMensal(),
-              row.getValorPrestacaoMensal(),
-              row.getJuro(),
-              row.getValorTotalEmprestimo()
+              Estado.P.name(),
+              i <= pagas ? FLG_PAGO : null,
+              row.getDataInicio().plusMonths(i - 1L),
+              saldo.setScale(2, RoundingMode.HALF_UP),
+              principal.add(juroMensal).setScale(2, RoundingMode.HALF_UP),
+              principal.setScale(2, RoundingMode.HALF_UP),
+              juroMensal,
+              saldoFinal.setScale(2, RoundingMode.HALF_UP)
           )
       );
-      numeroPrestacoesPagasCounter++;
+      saldo = saldoFinal;
     }
 
     return plano;
