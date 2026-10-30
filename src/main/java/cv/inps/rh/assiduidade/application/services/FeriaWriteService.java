@@ -174,7 +174,7 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+    var ferias = feriasGozadasRepository.findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
@@ -353,7 +353,7 @@ public class FeriaWriteService {
 
     // 1. Buscar férias existentes PELO MESMO PEDIDO
     var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido de férias não encontrado"));
 
@@ -481,7 +481,7 @@ public class FeriaWriteService {
   @Transactional
   public Map<String, ?> enviarDireitoFerias(EnviarDireitoFeriasCommand command) {
     var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de férias não encontrado"));
 
     var funcionario = ferias.getFunId();

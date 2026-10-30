@@ -25,6 +25,17 @@ public interface FeriasGozadasEntityRepository extends
 
     Optional<FeriasGozadasEntity> findByPedidoId_Uuid(UUID uuid);
 
+    Optional<FeriasGozadasEntity> findFirstByPedidoId_UuidAndPedidoId_TipoPedidoOrderByIdAsc(UUID uuid, String tipoPedido);
+
+    /**
+     * Férias gozadas de um pedido de FÉRIAS. As deduções de uma justificação de falta também
+     * geram férias gozadas (uma por dia) com o uuid do pedido da justificação; procurar só por
+     * uuid dava NonUniqueResult (500) e abria no ecrã de férias um pedido que não é de férias.
+     */
+    default Optional<FeriasGozadasEntity> findPedidoFeria(UUID uuid) {
+        return findFirstByPedidoId_UuidAndPedidoId_TipoPedidoOrderByIdAsc(uuid, "FERIA");
+    }
+
     @Query("SELECT COALESCE(SUM(fg.numDia), 0) FROM FeriasGozadasEntity fg" +
         " WHERE fg.funId.uuid = :funcionarioId AND fg.anoId.id = :anoId AND fg.estado = 'A'")
     Integer sumNumDiaByFuncionarioIdAndAno(@Param("funcionarioId") UUID funcionarioId, @Param("anoId") Long anoId);

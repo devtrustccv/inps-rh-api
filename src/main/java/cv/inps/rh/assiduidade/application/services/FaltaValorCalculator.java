@@ -90,6 +90,24 @@ public class FaltaValorCalculator {
   }
 
   /**
+   * Recusa uma falta num dia anterior ao início do vínculo (QA AS-018, decisão E).
+   *
+   * <p>O salário base desse dia não existe (GET_SALARIO_BASE devolve 0), por isso a falta
+   * gravava "Desconto Remuneração = Sim" com valor 0 sem ninguém saber. Melhor dizer já.
+   */
+  public void exigirDentroDoVinculo(
+      cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tiprel, LocalDate dia) {
+    if (tiprel == null || dia == null || tiprel.getDataInicio() == null)
+      return;
+    if (dia.isBefore(tiprel.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest(
+          "A falta de " + cv.inps.rh.shared.util.DateFormatter.localDateToString(dia)
+              + " é anterior ao início do vínculo do colaborador ("
+              + cv.inps.rh.shared.util.DateFormatter.localDateToString(tiprel.getDataInicio())
+              + "): não há salário para calcular o desconto.");
+  }
+
+  /**
    * Valor da falta de um dia = valor à hora × horas de ausência nesse dia.
    *
    * @param horasAusencia horas de ausência do dia, no formato {@code HH:MM}

@@ -128,7 +128,7 @@ public class FeriaReadService {
     // saía como 500. Um identificador inválido é erro do cliente: 400.
     var pedidoUuid = ValidationUtil.parseUuid(query.getPedidoId(), "Identificador do pedido de férias");
 
-    var entity = feriasGozadasEntityRepository.findByPedidoId_Uuid(pedidoUuid)
+    var entity = feriasGozadasEntityRepository.findPedidoFeria(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Pedido de férias não encontrado: " + query.getPedidoId()));
 

@@ -96,7 +96,7 @@ public class BaixaMedicaServiceWrite {
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d, Estado.P,
             TableName.RH_T_ABONOS_BENEFICIOS.name(),
@@ -281,7 +281,7 @@ public class BaixaMedicaServiceWrite {
       FuncionarioEntity funId = abono.getFunId();
       List<DocumentoEntity> novos = new ArrayList<>();
       for (var d : ajuste.getDocumentos()) {
-        if (!DocumentoMapper.anexoPreenchido(d)) continue; // linha de anexo vazia do formulário
+        if (!DocumentoMapper.anexoPreenchidoOuErro(d)) continue; // linha de anexo vazia do formulário
         var doc = documentoMapper.toEntity(
             d, estado,
             TableName.RH_T_ABONOS_BENEFICIOS.name(),
