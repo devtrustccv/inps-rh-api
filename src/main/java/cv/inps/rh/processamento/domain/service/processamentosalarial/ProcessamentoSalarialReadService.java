@@ -54,6 +54,10 @@ public class ProcessamentoSalarialReadService {
     var endDate = dataDoFiltro(query.getDataFim(), "dataFim");
     if (startDate != null && endDate != null && endDate.isBefore(startDate))
       throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
+    // O filtro é por mês de referência: entram os processamentos cujo mês/ano esteja no intervalo,
+    // por isso alarga-se do 1.º dia do mês da Data Início ao último dia do mês da Data Fim.
+    if (startDate != null) startDate = startDate.withDayOfMonth(1);
+    if (endDate != null) endDate = endDate.withDayOfMonth(endDate.lengthOfMonth());
     var directionId = StringUtils.hasText(query.getDirecaoId()) ? Long.valueOf(query.getDirecaoId()) : null;
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;

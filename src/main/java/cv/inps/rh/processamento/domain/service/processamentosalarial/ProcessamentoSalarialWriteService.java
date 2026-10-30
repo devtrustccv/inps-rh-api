@@ -114,6 +114,20 @@ public class ProcessamentoSalarialWriteService {
 
   @Transactional
   public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
+    validar(ids, tipoValidacao, null, null);
+  }
+
+  /**
+   * Validação provisória (processamentos em PROCESSADO) ou definitiva (em VALIDADO_PROVISORIO).
+   *
+   * <p>{@code validar} = NAO (rejeitar) ou CORRIGIR (retificação): o processamento regressa à etapa
+   * anterior — a provisória volta ao Processamento e a definitiva à Validação Provisória (estado
+   * PROCESSADO) — e os intervenientes dessa etapa são notificados com o motivo. A observação é
+   * obrigatória nesse caso. Sem {@code validar} (ou SIM) valida, como antes.</p>
+   */
+  @Transactional
+  public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao,
+      String validar, String observacao) {
 
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
@@ -121,6 +135,12 @@ public class ProcessamentoSalarialWriteService {
     var isDefinitivo = TipoValidacaoProcessamentoSalarial.DEFINITIVO.equals(tipoValidacao);
     var statusPesquisa = isDefinitivo ? StatusProcessamento.VALIDADO_PROVISORIO : StatusProcessamento.PROCESSADO;
     var statusRegisto = isDefinitivo ? StatusProcessamento.VALIDADO_DEFINITIVO : StatusProcessamento.VALIDADO_PROVISORIO;
+
+    var decisao = StringUtils.hasText(validar) ? validar.trim().toUpperCase() : "SIM";
+    if (!"SIM".equals(decisao)) {
+      devolverAEtapaAnterior(ids, isDefinitivo, statusPesquisa, decisao, observacao);
+      return;
+    }
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     var username = applicationAuditorAware.getCurrentSubjectName();
@@ -134,12 +154,56 @@ public class ProcessamentoSalarialWriteService {
         null
     );
     if (updatedRows != ids.size())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado %s".formatted(statusPesquisa.name()));
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível validar processamentos no estado \"%s\" (que ainda não foram validados)."
+              .formatted(statusPesquisa.name()));
 
     publicarNotificacoes(
         processes,
         isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
         isDefinitivo ? "Validação definitiva" : "Validação provisória"
+    );
+  }
+
+  /**
+   * Rejeição ou pedido de retificação na validação: provisória → fica em PROCESSADO (etapa
+   * Processamento, para corrigir/reprocessar) e notifica quem processou; definitiva → volta a
+   * PROCESSADO (etapa Validação Provisória) e notifica quem validou provisoriamente.
+   */
+  private void devolverAEtapaAnterior(List<Long> ids, boolean isDefinitivo,
+      StatusProcessamento statusPesquisa, String decisao, String observacao) {
+
+    if (!"NAO".equals(decisao) && !"CORRIGIR".equals(decisao))
+      throw IgrpResponseStatusException.badRequest("Decisão de validação inválida: " + decisao
+          + ". Valores aceites: SIM, NAO, CORRIGIR.");
+    if (!StringUtils.hasText(observacao))
+      throw IgrpResponseStatusException.badRequest(
+          "A Observação é obrigatória quando não valida: indique a justificação da retificação ou da não aprovação.");
+
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var foraDoEstado = processes.stream()
+        .filter(p -> !statusPesquisa.name().equals(p.getEstado()))
+        .map(ProcessamentoSalarialEntity::getId)
+        .toList();
+    if (processes.size() != ids.size() || !foraDoEstado.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível validar processamentos no estado \"%s\" (que ainda não foram validados)."
+              .formatted(statusPesquisa.name()));
+
+    if (isDefinitivo) {
+      processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+          ids, List.of(statusPesquisa.name()), StatusProcessamento.PROCESSADO.name(),
+          null, null, null, null);
+    }
+
+    var acao = ("NAO".equals(decisao) ? "Não aprovação" : "Pedido de retificação")
+        + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
+        + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
+        + ". Motivo: " + observacao.trim();
+    publicarNotificacoes(
+        processes,
+        isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
+        acao
     );
   }
 
