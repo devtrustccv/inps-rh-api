@@ -1,6 +1,5 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,12 +13,12 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "RH_T_SUBSIDIO_FERIAS")
-public class SubsidioFeriaEntity extends AuditEntity {
+@Table(name = "RH_T_SUBSIDIOS")
+public class SubsidioEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RH_T_SUBSIDIO_FERIAS_id_gen")
-  @SequenceGenerator(name = "RH_T_SUBSIDIO_FERIAS_id_gen", sequenceName = "SEQ_SUBSIDIO_FERIAS", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RH_T_SUBSIDIOS_id_gen")
+  @SequenceGenerator(name = "RH_T_SUBSIDIOS_id_gen", sequenceName = "SEQ_SUBSIDIO_FERIAS", allocationSize = 1)
   @Column(name = "ID", nullable = false)
   private Long id;
 
@@ -27,16 +26,14 @@ public class SubsidioFeriaEntity extends AuditEntity {
   @Column(name = "ANO_REFERENTE", nullable = false)
   private Long anoReferente;
 
-  @NotNull
-  @Column(name = "ESCALAO_ID", nullable = false)
+  @Column(name = "ESCALAO_ID")
   private Long escalaoId;
 
   @NotNull
   @Column(name = "MES_TRAB", nullable = false)
   private Long mesTrab;
 
-  @NotNull
-  @Column(name = "DIAS_TRAB", nullable = false)
+  @Column(name = "DIAS_TRAB")
   private Long diasTrab;
 
   @NotNull
@@ -53,6 +50,29 @@ public class SubsidioFeriaEntity extends AuditEntity {
   @OnDelete(action = OnDeleteAction.RESTRICT)
   @JoinColumn(name = "FUN_ID", nullable = false)
   private FuncionarioEntity fun;
+
+  @NotNull
+  @Column(name = "DATA_REGISTO", nullable = false)
+  private LocalDate dataRegisto;
+
+  @NotNull
+  @Column(name = "USER_REGISTO_ID", nullable = false)
+  private Long userRegistoId;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "USER_REGISTO_NAME", nullable = false, length = 200)
+  private String userRegistoName;
+
+  @Column(name = "USER_ALTERACAO_ID")
+  private Long userAlteracaoId;
+
+  @Size(max = 200)
+  @Column(name = "USER_ALTERACAO_NAME", length = 200)
+  private String userAlteracaoName;
+
+  @Column(name = "DATA_ALTERACAO")
+  private LocalDate dataAlteracao;
 
   @Size(max = 100)
   @NotNull
@@ -83,4 +103,30 @@ public class SubsidioFeriaEntity extends AuditEntity {
 
   @Column(name = "PROC_SAL_ID")
   private Long procSalId;
+
+  @Column(name = "VALOR_SALARIO_BASE")
+  private Long valorSalarioBase;
+
+  @Column(name = "PERC_SALARIO")
+  private Long percSalario;
+
+  @Column(name = "FALTAS")
+  private Long faltas;
+
+  @Column(name = "PERC_FALTA")
+  private Long percFalta;
+
+  @Column(name = "VALOR_CHEQUE_BRINDE")
+  private Long valorChequeBrinde;
+
+  @Column(name = "VALOR_PRENDA_NATAL")
+  private Long valorPrendaNatal;
+
+  @Column(name = "REFERENCIA_ID")
+  private Long referenciaId;
+
+  @Column(name = "OBSERVACAO")
+  private Long observacao;
+
+
 }

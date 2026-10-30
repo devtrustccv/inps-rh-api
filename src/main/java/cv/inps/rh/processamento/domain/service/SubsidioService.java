@@ -8,7 +8,7 @@ import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
 import cv.inps.rh.processamento.domain.models.SubsidioNatalStatus;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SubsidioNatalEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SubsidioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
@@ -35,11 +35,10 @@ import java.util.UUID;
 public class SubsidioService {
 
   private final JdbcTemplate jdbcTemplate;
-  private final SubsidioNatalEntityRepository subsidioNatalEntityRepository;
+  private final SubsidioEntityRepository SubsidioEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final VSubsidioFeriaEntityRepository vsubsidioFeriaEntityRepository;
-  private final SubsidioFeriaEntityRepository subsidioFeriaEntityRepository;
   private final VSubsidioFeriasDetailEntityRepository subsidioFeriasDetailEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ApplicationAuditorAware applicationAuditorAware;
@@ -48,29 +47,29 @@ public class SubsidioService {
     switch (status) {
       case ATIVAR -> {
 
-        final SubsidioNatalEntity subs;
+        final SubsidioEntity subs;
 
         if (subsidioId != null) {
-          subs = subsidioNatalEntityRepository.findByIdOrThrow(subsidioId);
+          subs = SubsidioEntityRepository.findByIdOrThrow(subsidioId);
         } else {
           var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
-          subs = new SubsidioNatalEntity();
+          subs = new SubsidioEntity();
           subs.setFun(fun);
           subs.setEstado(Estado.P.name());
           subs.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           subs.setReferenciaId(fun.getId());
         }
         subs.setAnoReferente(ano);
-        subs.setValorSalarioBase(safeValueOf(data.salario()));
-        subs.setMesTrab(data.mesesTrabalho());
-        subs.setPercSalario(safeValueOf(data.percSalario()));
-        subs.setFaltas(safeValueOf(data.faltas()));
-        subs.setPercFalta(safeValueOf(data.percFalta()));
-        subs.setValorSubsidio(safeValueOf(data.valorSubsidio()));
-        subs.setChequeBrinde(safeValueOf(data.valorChequeBrinde()));
-        subs.setPrendaNatal(safeValueOf(data.valorPrendaNatal()));
+        subs.setValorSalarioBase(NumberUtils.safeValueOf(data.salario()));
+        subs.setMesTrab(NumberUtils.safeValueOf(data.mesesTrabalho()));
+        subs.setPercSalario(NumberUtils.safeValueOf(data.percSalario()));
+        subs.setFaltas(NumberUtils.safeValueOf(data.faltas()));
+        subs.setPercFalta(NumberUtils.safeValueOf(data.percFalta()));
+        subs.setValorSubsidio(NumberUtils.safeValueOf(data.valorSubsidio()));
+        subs.setValorChequeBrinde(NumberUtils.safeValueOf(data.valorChequeBrinde()));
+        subs.setValorPrendaNatal(NumberUtils.safeValueOf(data.valorPrendaNatal()));
 
-        var saved = subsidioNatalEntityRepository.save(subs);
+        var saved = SubsidioEntityRepository.save(subs);
 
         if (subsidioId == null) {
           var fun = subs.getFun();
@@ -85,15 +84,7 @@ public class SubsidioService {
           validacaoEntityRepository.save(validation);
         }
       }
-      case INATIVAR -> subsidioNatalEntityRepository.updateEstadoById(subsidioId, status.getCode());
-    }
-  }
-
-  private Long safeValueOf(String val) {
-    try {
-      return Long.parseLong(val);
-    } catch (Exception _) {
-      return null;
+      case INATIVAR -> SubsidioEntityRepository.updateEstadoById(subsidioId, status.getCode());
     }
   }
 
@@ -187,15 +178,15 @@ public class SubsidioService {
   }
 
   public void alterarEstadoSubsisioferias(Long subsidioId) {
-    var subsidioFeria = subsidioFeriaEntityRepository.findById(subsidioId).orElseThrow();
+    var subsidioFeria = SubsidioEntityRepository.findById(subsidioId).orElseThrow();
     subsidioFeria.setFlgAtivoInactivo(Estado.A.name().equals(subsidioFeria.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
-    subsidioFeriaEntityRepository.save(subsidioFeria);
+    SubsidioEntityRepository.save(subsidioFeria);
   }
 
   public void validarSubsidioFerias(Long subsidioId) {
-    var subsidioFeria = subsidioFeriaEntityRepository.findById(subsidioId).orElseThrow();
+    var subsidioFeria = SubsidioEntityRepository.findById(subsidioId).orElseThrow();
     subsidioFeria.setEstado(Estado.A.name());
-    subsidioFeriaEntityRepository.save(subsidioFeria);
+    SubsidioEntityRepository.save(subsidioFeria);
   }
 
   public void calcularSubsidioferias(Integer ano) {
