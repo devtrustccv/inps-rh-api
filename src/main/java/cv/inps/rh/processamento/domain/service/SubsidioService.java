@@ -54,6 +54,7 @@ public class SubsidioService {
         } else {
           var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
           subs = new SubsidioEntity();
+          subs.setTipoSubsidio(TipoSubsidio.NATAL.name());
           subs.setFun(fun);
           subs.setEstado(Estado.P.name());
           subs.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -86,6 +87,10 @@ public class SubsidioService {
       }
       case INATIVAR -> SubsidioEntityRepository.updateEstadoById(subsidioId, status.getCode());
     }
+  }
+
+  private enum TipoSubsidio {
+    FERIA, NATAL
   }
 
   public List<SubsidioResponseNatalDTO> getDataSubsidioNatal(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {

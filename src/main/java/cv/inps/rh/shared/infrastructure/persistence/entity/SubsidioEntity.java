@@ -128,5 +128,10 @@ public class SubsidioEntity {
   @Column(name = "OBSERVACAO")
   private Long observacao;
 
+  @Size(max = 20)
+  @NotNull
+  @Column(name = "TIPO_SUBSIDIO", nullable = false, length = 20)
+  private String tipoSubsidio;
+
 
 }
