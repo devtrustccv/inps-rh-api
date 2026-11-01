@@ -14,31 +14,25 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.AllArgsConstructor;
-import oracle.jdbc.internal.OracleCallableStatement;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Connection;
-import java.sql.Types;
 import java.time.Year;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
 @Service
 public class SubsidioService {
 
-  private final JdbcTemplate jdbcTemplate;
-  private final SubsidioEntityRepository SubsidioEntityRepository;
+  private final SubsidioEntityRepository subsidioEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final VSubsidioFeriaEntityRepository vsubsidioFeriaEntityRepository;
+  private final VSubsidioNatalEntityRepository vsubsidioNatalEntityRepository;
   private final VSubsidioFeriasDetailEntityRepository subsidioFeriasDetailEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ApplicationAuditorAware applicationAuditorAware;
@@ -50,7 +44,7 @@ public class SubsidioService {
         final SubsidioEntity subs;
 
         if (subsidioId != null) {
-          subs = SubsidioEntityRepository.findByIdOrThrow(subsidioId);
+          subs = subsidioEntityRepository.findByIdOrThrow(subsidioId);
         } else {
           var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
           subs = new SubsidioEntity();
@@ -70,7 +64,7 @@ public class SubsidioService {
         subs.setValorChequeBrinde(NumberUtils.safeValueOf(data.valorChequeBrinde()));
         subs.setValorPrendaNatal(NumberUtils.safeValueOf(data.valorPrendaNatal()));
 
-        var saved = SubsidioEntityRepository.save(subs);
+        var saved = subsidioEntityRepository.save(subs);
 
         if (subsidioId == null) {
           var fun = subs.getFun();
@@ -85,7 +79,7 @@ public class SubsidioService {
           validacaoEntityRepository.save(validation);
         }
       }
-      case INATIVAR -> SubsidioEntityRepository.updateEstadoById(subsidioId, status.getCode());
+      case INATIVAR -> subsidioEntityRepository.updateEstadoById(subsidioId, status.getCode());
     }
   }
 
@@ -93,77 +87,20 @@ public class SubsidioService {
     FERIA, NATAL
   }
 
-  public List<SubsidioResponseNatalDTO> getDataSubsidioNatal(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
+  @Transactional(readOnly = true)
+  public WrapperListDTO getDataSubsidioNatal(Long anoProcessamento, Long direcaoId, Long funId, Integer page, Integer size) {
 
-    var list = new ArrayList<SubsidioResponseNatalDTO>();
+    var data = vsubsidioNatalEntityRepository.findSubsidioNatalByAno(
+        anoProcessamento != null ? anoProcessamento : Year.now(ZoneId.systemDefault()).getValue(),
+        direcaoId,
+        funId,
+        PageRequest.of(page, size)
+    );
 
-    var sql = """
-        BEGIN
-            RH_PK_SUBSISIO_NATAL_F_DB.LOAD_LIST(
-                ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?
-            );
-        END;
-        """;
-
-    jdbcTemplate.execute((Connection con) -> {
-
-      var cs = con.prepareCall(sql).unwrap(OracleCallableStatement.class);
-
-      cs.setObject(1, direcaoId);
-      cs.setObject(2, funId);
-      cs.setObject(3, valorCBrinde);
-      cs.setObject(4, anoProcessamento);
-
-      cs.registerIndexTableOutParameter(5, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(6, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(7, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(8, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(9, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(10, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(11, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(12, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(13, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(14, 1000, Types.VARCHAR, 4000);
-      cs.registerIndexTableOutParameter(15, 1000, Types.VARCHAR, 4000);
-
-      cs.execute();
-
-      var nomes = (String[]) cs.getPlsqlIndexTable(5);
-      var salarios = (String[]) cs.getPlsqlIndexTable(6);
-      var meses = (String[]) cs.getPlsqlIndexTable(7);
-      var percSalario = (String[]) cs.getPlsqlIndexTable(8);
-      var faltas = (String[]) cs.getPlsqlIndexTable(9);
-      var percFalta = (String[]) cs.getPlsqlIndexTable(10);
-      var subsidios = (String[]) cs.getPlsqlIndexTable(11);
-      var brindes = (String[]) cs.getPlsqlIndexTable(12);
-      var prendas = (String[]) cs.getPlsqlIndexTable(13);
-      var estados = (String[]) cs.getPlsqlIndexTable(14);
-      var ids = (String[]) cs.getPlsqlIndexTable(15);
-
-      if (nomes != null) {
-        for (int i = 0; i < nomes.length; i++) {
-          var responseRow = new SubsidioResponseNatalDTO(
-              nomes[i],
-              salarios[i],
-              meses[i],
-              percSalario[i],
-              faltas[i],
-              percFalta[i],
-              subsidios[i],
-              brindes[i],
-              prendas[i],
-              estados[i],
-              ids[i]
-          );
-          list.add(responseRow);
-        }
-      }
-
-      return null;
-    });
-
-    return list;
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent());
+    return response;
   }
 
   @Transactional(readOnly = true)
@@ -183,15 +120,15 @@ public class SubsidioService {
   }
 
   public void alterarEstadoSubsisioferias(Long subsidioId) {
-    var subsidioFeria = SubsidioEntityRepository.findById(subsidioId).orElseThrow();
+    var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
     subsidioFeria.setFlgAtivoInactivo(Estado.A.name().equals(subsidioFeria.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
-    SubsidioEntityRepository.save(subsidioFeria);
+    subsidioEntityRepository.save(subsidioFeria);
   }
 
   public void validarSubsidioFerias(Long subsidioId) {
-    var subsidioFeria = SubsidioEntityRepository.findById(subsidioId).orElseThrow();
+    var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
     subsidioFeria.setEstado(Estado.A.name());
-    SubsidioEntityRepository.save(subsidioFeria);
+    subsidioEntityRepository.save(subsidioFeria);
   }
 
   public void calcularSubsidioferias(Integer ano) {

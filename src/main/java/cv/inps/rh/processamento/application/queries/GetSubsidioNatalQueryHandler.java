@@ -2,18 +2,15 @@ package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.domain.service.SubsidioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-
 @Component
-public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNatalQuery, ResponseEntity<List<SubsidioResponseNatalDTO>>> {
+public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNatalQuery, ResponseEntity<WrapperListDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetSubsidioNatalQueryHandler.class);
 
@@ -24,15 +21,16 @@ public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNat
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<List<SubsidioResponseNatalDTO>> handle(GetSubsidioNatalQuery query) {
+  public ResponseEntity<WrapperListDTO> handle(GetSubsidioNatalQuery query) {
 
     LOGGER.debug("GetSubsidioNatalQuery: {}", query);
 
     var data = subsidioNatalService.getDataSubsidioNatal(
+        query.getAnoProcessamento(),
         query.getDirecaoId(),
         query.getFuncionarioId(),
-        Optional.ofNullable(query.getValorBrinde()).map(Double::valueOf).orElse(null),
-        query.getAnoProcessamento()
+        query.getPage(),
+        query.getSize()
     );
 
     return ResponseEntity.ok(data);
