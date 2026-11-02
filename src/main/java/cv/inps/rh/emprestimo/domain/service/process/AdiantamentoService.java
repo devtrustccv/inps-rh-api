@@ -138,7 +138,7 @@ public class AdiantamentoService {
 
     if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+      loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
     } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
           .map(BaseDecisaoDTO.Responsavel::parecer)
@@ -157,7 +157,7 @@ public class AdiantamentoService {
         }
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+          loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
         }
       }
     }

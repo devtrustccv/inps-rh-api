@@ -31,6 +31,16 @@ public record PlanoFinanceiroRowDTO(
     BigDecimal juros,
 
     @JsonSerialize(using = PlanoFinanceiroSerializer.class)
-    BigDecimal saldoFinal
+    BigDecimal saldoFinal,
+    // Ponto 33: só nas linhas de um subprocesso (Amortização / Renegociação) no plano — data em que
+    // foi feito e a descrição (ex.: "Amortizado Parcial").
+    LocalDate dataEstado,
+    String renegociacao
 ) {
+  public PlanoFinanceiroRowDTO(Long numero, String estado, String flagPago, LocalDate dataPagamento,
+      BigDecimal saldoInicial, BigDecimal pagamento, BigDecimal principal, BigDecimal juros,
+      BigDecimal saldoFinal) {
+    this(numero, estado, flagPago, dataPagamento, saldoInicial, pagamento, principal, juros, saldoFinal,
+        null, null);
+  }
 }

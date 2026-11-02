@@ -162,7 +162,7 @@ public class AquisicaoViaturaService {
       // depende do responsável nem de action=NEXT (Gravar ou Seguinte têm
       // o mesmo efeito aqui).
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+      loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
     } else if (isNextDecision) {
 
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
@@ -179,7 +179,7 @@ public class AquisicaoViaturaService {
         }
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+          loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
         }
       }
     }

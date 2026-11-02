@@ -78,5 +78,8 @@ public class EmprestimoListRowDTO  {
   // Tipo do pedido (AQUISICAO_VIATURA, FUNDO_SOCIAL, RECUPERACAO): a Recuperação grava em
   // tipoEmprestimo o tipo recuperado, por isso só o pedido a distingue do Fundo Social / Viatura.
   private String tipoPedido;
+  // Total das Amortizações concluídas do pedido até à versão em vigor (ponto 35): o valor de cada
+  // Amortização fica só na sua versão e desaparecia da lista depois de um Reforço.
+  private BigDecimal valorAmortizado;
 
 }
