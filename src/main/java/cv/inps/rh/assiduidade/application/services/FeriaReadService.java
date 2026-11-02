@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.assiduidade.application.dto.FeriasGozadaItemDTO;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
@@ -8,19 +9,17 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
 import cv.inps.rh.shared.util.ValidationUtil;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.VFeriasMensalEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasGozadasEntity;
+import cv.inps.rh.shared.infrastructure.persistence.projections.FeriasResumoAnoProjection;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +27,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,14 +52,29 @@ public class FeriaReadService {
         ? Integer.parseInt(query.getPageSize())
         : 20;
 
-    Specification<VFeriasMensalEntity> spec = buildSpec(query);
+    // Uma linha por funcionário e ano (lista pai); as férias gozadas desse ano vão em
+    // feriasGozadas (lista filho), lidas numa só consulta para a página toda.
+    UUID funcionario = null;
+    if (StringUtils.hasText(query.getFuncionarioUuid())) {
+      try {
+        funcionario = UUID.fromString(query.getFuncionarioUuid());
+      } catch (IllegalArgumentException ignored) {
+        // Ignore invalid UUIDs
+      }
+    }
+    String nome = StringUtils.hasText(query.getColaborador())
+        ? "%" + query.getColaborador().trim().toLowerCase() + "%"
+        : null;
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-    Page<VFeriasMensalEntity> page = vFeriasMensalEntityRepository.findAll(spec, pageable);
+    Page<FeriasResumoAnoProjection> page = vFeriasMensalEntityRepository.findResumoPorAno(
+        query.getAnoReferente(), query.getDirecao(), query.getSeccao(), nome, funcionario,
+        PageRequest.of(pageNumber, pageSize));
+
+    var gozadasPorLinha = feriasGozadasDaPagina(page.getContent());
 
     var content = page.getContent()
         .stream()
-        .map(this::toDTO)
+        .map(r -> toDTO(r, gozadasPorLinha.getOrDefault(chave(r.getUuidFuncionario(), r.getAno()), List.of())))
         .toList();
 
     var wrapper = new WrapperListaFeriaDTO();
@@ -67,58 +83,56 @@ public class FeriaReadService {
     return wrapper;
   }
 
-  private Specification<VFeriasMensalEntity> buildSpec(GetListaFeriaQuery query) {
-    return (root, cq, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
-
-      if (query.getAnoReferente() != null) {
-        predicates.add(cb.equal(root.get("ano"), query.getAnoReferente()));
-      }
-      if (query.getIlha() != null) {
-        predicates.add(cb.equal(root.get("ilhaId"), query.getIlha()));
-      }
-      if (query.getDirecao() != null) {
-        predicates.add(cb.equal(root.get("direcaoId"), query.getDirecao()));
-      }
-      if (query.getSeccao() != null) {
-        predicates.add(cb.equal(root.get("secaoId"), query.getSeccao()));
-      }
-      if (StringUtils.hasText(query.getColaborador())) {
-        predicates
-            .add(cb.like(cb.lower(root.get("nomeColaborador")), "%" + query.getColaborador().toLowerCase() + "%"));
-      }
-
-      if (StringUtils.hasText(query.getFuncionarioUuid())) {
-        try {
-          var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
-          predicates.add(cb.equal(root.get("uuidFuncionario"), funcUuid));
-        } catch (IllegalArgumentException ignored) {
-          // Ignore invalid UUIDs
-        }
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
+  private Map<String, List<FeriasGozadaItemDTO>> feriasGozadasDaPagina(List<FeriasResumoAnoProjection> linhas) {
+    if (linhas.isEmpty()) return Map.of();
+    var funcionarios = linhas.stream().map(FeriasResumoAnoProjection::getUuidFuncionario).collect(Collectors.toSet());
+    var anos = linhas.stream().map(r -> String.valueOf(r.getAno())).collect(Collectors.toSet());
+    return feriasGozadasEntityRepository.findDaListaFerias(funcionarios, anos, Estado.E)
+        .stream()
+        .collect(Collectors.groupingBy(
+            fg -> chave(fg.getFunId().getUuid(), Integer.valueOf(fg.getAnoId().getAno())),
+            Collectors.mapping(this::toGozadaDTO, Collectors.toList())));
   }
 
-  private FeriasListDTO toDTO(VFeriasMensalEntity e) {
+  private static String chave(UUID funcionario, Integer ano) {
+    return funcionario + "|" + ano;
+  }
+
+  private FeriasListDTO toDTO(FeriasResumoAnoProjection r, List<FeriasGozadaItemDTO> gozadas) {
     var dto = new FeriasListDTO();
-    dto.setPedidoId(e.getPedidoId());
-    dto.setPedidoUuid(e.getUuidPedido() != null ? e.getUuidPedido().toString() : "");
-    dto.setUuidFuncionario(e.getUuidFuncionario().toString());
-    dto.setNomeColaborador(e.getNomeColaborador());
-    dto.setDirecao(e.getDirecao());
-    dto.setSecao(e.getSecao());
-    dto.setVinculo(e.getVinculo());
-    dto.setCategoria(e.getCategoria());
-    dto.setTotalDireito(e.getTotalDireito());
-    dto.setTotalDireitoAno(e.getTotalDireitoAno());
-    dto.setTotalPlaneado(e.getTotalPlaneado());
-    dto.setTotalGozado(e.getTotalGozado());
-    dto.setAno(e.getAno());
-    dto.setEstado(e.getEstado());
-    dto.setEstadoDesc(e.getEstadoDesc());
+    dto.setUuidFuncionario(r.getUuidFuncionario().toString());
+    dto.setNomeColaborador(r.getNomeColaborador());
+    dto.setDirecao(r.getDirecao());
+    dto.setSecao(r.getSecao());
+    dto.setVinculo(r.getVinculo());
+    dto.setCategoria(r.getCategoria());
+    dto.setTotalDireito(inteiro(r.getTotalDireito()));
+    dto.setTotalDireitoAno(inteiro(r.getTotalDireitoAno()));
+    dto.setTotalPlaneado(inteiro(r.getTotalPlaneado()));
+    dto.setTotalGozado(inteiro(r.getTotalGozado()));
+    dto.setAno(r.getAno());
+    dto.setFeriasGozadas(new ArrayList<>(gozadas));
     return dto;
+  }
+
+  private FeriasGozadaItemDTO toGozadaDTO(FeriasGozadasEntity fg) {
+    var pedido = fg.getPedidoId();
+    var dto = new FeriasGozadaItemDTO();
+    dto.setId(fg.getId());
+    dto.setUuid(fg.getUuid() != null ? fg.getUuid().toString() : null);
+    dto.setPedidoUuid(pedido != null && pedido.getUuid() != null ? pedido.getUuid().toString() : null);
+    dto.setTipoPedido(pedido != null ? pedido.getTipoPedido() : null);
+    dto.setDataInicio(fg.getDataInicio());
+    dto.setDataFim(fg.getDataFim());
+    dto.setNumDias(fg.getNumDia());
+    dto.setEstado(fg.getEstado() != null ? fg.getEstado().getCode() : null);
+    dto.setEstadoDesc(fg.getEstado() != null ? fg.getEstado().getDescription() : null);
+    dto.setObservacao(fg.getMotivoAlteracao());
+    return dto;
+  }
+
+  private static Integer inteiro(Number n) {
+    return n != null ? n.intValue() : 0;
   }
 
 

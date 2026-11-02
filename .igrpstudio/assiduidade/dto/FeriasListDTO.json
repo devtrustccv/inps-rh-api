@@ -184,6 +184,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "feriasGozadas",
+      "objectType": "dto",
+      "type": "FeriasGozadaItem",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "assiduidade"
     }
   ],
   "id": "bsypc50vx0"
