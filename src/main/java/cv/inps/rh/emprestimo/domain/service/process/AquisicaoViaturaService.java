@@ -78,6 +78,7 @@ public class AquisicaoViaturaService {
       throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
     }
     entity.setNomeFornecedor(request.getNomeFornecedor().trim());
+    emprestimoHelper.validarLimitesEmprestimo(currentRelation, request.getValorEmprestimo(), request.getNumeroPrestacoes());
     entity.setBanco(Objects.nonNull(request.getBancoId()) && request.getBancoId() > 0
         ? bancoEntityRepository.findById(request.getBancoId())
             .orElseThrow(() -> IgrpResponseStatusException.badRequest("O banco selecionado não existe."))
@@ -143,8 +144,12 @@ public class AquisicaoViaturaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_PEDIDO);
+    emprestimoHelper.validarLimitesEmprestimo(loan.getTiprel(), request.getValorEmprestimo(), request.getNumeroPrestacao());
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
+    // EM-009: o valor alterado pelo RH passa a ser também o valor em dívida (Saldo em Dívida da
+    // lista) — antes ficava o do pedido até à Validação Responsável.
+    loan.setValorDivida(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
 
     var order = loan.getPedido();
@@ -264,6 +269,7 @@ public class AquisicaoViaturaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO);
+    EmprestimoHelper.exigirObservacao(request.getParecer(), request.getObservacao());
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
 

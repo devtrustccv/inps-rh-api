@@ -153,11 +153,25 @@ public class EmprestimoWriteService {
 
     // Corrigido na validação/reenvio: o plano (ainda pendente) é gerado de novo com os dados atuais.
     planoFinanceiroEntityRepository.apagarPlanos(entity.getId());
+    List<PlanoFinanceiroRowDTO> plano = List.of();
     if (tipoPedido == TipoPedido.RECUPERACAO) {
-      generateSaveFinancialPlanForRecuperacao(entity, request);
+      plano = generateSaveFinancialPlanForRecuperacao(entity, request);
     } else if (entity.getJuro() != null && entity.getNrPrestacao() != null) {
-      generateSaveFinancialPlanForFundoSocial(entity, request.getNrPrestacaoPaga());
+      plano = generateSaveFinancialPlanForFundoSocial(entity, request.getNrPrestacaoPaga());
     }
+
+    // EM-016: as prestações já pagas (Total Prestações Pagas) contam como Valor Pago e saem do
+    // Saldo em Dívida — antes ficavam 0 e o valor total.
+    var valorPago = plano.stream()
+        .filter(r -> FinancialPlanHelper.FLG_PAGO.equals(r.flagPago()))
+        .map(PlanoFinanceiroRowDTO::pagamento)
+        .filter(java.util.Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    entity.setValorPago(valorPago);
+    entity.setValorDivida(request.getValorTotalEmprestimo() != null
+        ? request.getValorTotalEmprestimo().subtract(valorPago)
+        : null);
+    emprestimoEntityRepository.save(entity);
   }
 
   /**
@@ -236,7 +250,7 @@ public class EmprestimoWriteService {
     );
   }
 
-  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity, Long nrPrestacaoPaga) {
+  public List<PlanoFinanceiroRowDTO> generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity, Long nrPrestacaoPaga) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(
         entity.getValorEmprestimo(),
@@ -262,13 +276,15 @@ public class EmprestimoWriteService {
       entity.setValorPrestacao(plan.get(0).pagamento());
       emprestimoEntityRepository.save(entity);
     }
+    return plan;
   }
 
-  public void generateSaveFinancialPlanForRecuperacao(EmprestimoEntity entity, FundoSocialRequestDTO request) {
+  public List<PlanoFinanceiroRowDTO> generateSaveFinancialPlanForRecuperacao(EmprestimoEntity entity, FundoSocialRequestDTO request) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForRecuperacao(request);
 
     emprestimoHelper.savePlans(entity, plan);
+    return plan;
   }
 
   /**
@@ -306,6 +322,13 @@ public class EmprestimoWriteService {
   public void mudarEstadoEmprestimo(String uuid, String estado, String observacao, List<DocumentoDTO> files) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    // EM-014: o motivo é obrigatório; EM-012: um processo já encerrado não muda de estado.
+    if (!StringUtils.hasText(observacao)) {
+      throw IgrpResponseStatusException.badRequest("Indique a observação (motivo da alteração de estado).");
+    }
+    if (EmprestimoHelper.isSubprocessoTerminado(entity.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("O processo já está encerrado e não pode mudar de estado.");
+    }
     entity.setEstado(estado);
     entity.setObservacao(observacao);
     emprestimoEntityRepository.save(entity);

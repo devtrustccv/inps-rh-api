@@ -122,8 +122,8 @@ public class FaltaReadService {
     dto.setNomeColaborador(e.getNomeFuncionario());
     dto.setDirecao(e.getNomeDirecao());
     dto.setCategoria(e.getNomeCargo());
-    dto.setDataInicio(e.getDataInicio() != null ? e.getDataInicio().toString() : null);
-    dto.setDataFim(e.getDataFim() != null ? e.getDataFim().toString() : null);
+    dto.setDataInicio(e.getDataInicio() != null ? DateFormatter.localDateToString(e.getDataInicio()) : null);
+    dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
     dto.setTotalHorasAusente(e.getTotHorAus() != null ? formatarHoras(e.getTotHorAus()) : null);
     dto.setNumFalta(e.getTotFaltas());
     dto.setValorADescontar(e.getTotValDesc());

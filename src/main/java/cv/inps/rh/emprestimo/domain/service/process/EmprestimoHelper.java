@@ -13,6 +13,8 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
@@ -41,6 +43,34 @@ public class EmprestimoHelper {
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
+  private final ParamEmprestimoEntityRepository paramEmprestimoEntityRepository;
+
+  /** Máximo de prestações quando a carreira do colaborador não tem parametrização. */
+  public static final long NUMERO_LIMITE_PRESTACOES = 72L;
+
+  /**
+   * Limites do pedido (especificação 3.2.3.1): valor ≤ limite da carreira do colaborador e nº de
+   * prestações ≤ limite parametrizado (72 por omissão) — RH_T_PARAM_EMPRESTIMO. Antes não havia
+   * validação e aceitava, por exemplo, 999 999 999 CVE em 100 prestações.
+   */
+  public void validarLimitesEmprestimo(TiposRelacionamentoEntity tiprel, java.math.BigDecimal valor, Long nrPrestacoes) {
+    var carrPccs = tiprel != null && tiprel.getCarreiraId() != null ? tiprel.getCarreiraId().getCarrPccsId() : null;
+    var param = carrPccs == null ? java.util.Optional.<cv.inps.rh.shared.infrastructure.persistence.entity.ParamEmprestimoEntity>empty()
+        : paramEmprestimoEntityRepository.findFirstByCarrPccs_IdAndEstadoOrderByIdDesc(carrPccs.getId(), Estado.A.name());
+
+    var valorLimite = param.map(cv.inps.rh.shared.infrastructure.persistence.entity.ParamEmprestimoEntity::getValorLimite).orElse(null);
+    if (valor != null && valorLimite != null && valor.compareTo(valorLimite) > 0) {
+      throw IgrpResponseStatusException.badRequest(String.format(
+          "Valor Empréstimo ultrapassou o limite do valor do empréstimo (limite: %s CVE).",
+          valorLimite.stripTrailingZeros().toPlainString()));
+    }
+    var numeroLimite = param.map(cv.inps.rh.shared.infrastructure.persistence.entity.ParamEmprestimoEntity::getNumeroLimite)
+        .orElse(NUMERO_LIMITE_PRESTACOES);
+    if (nrPrestacoes != null && nrPrestacoes > numeroLimite) {
+      throw IgrpResponseStatusException.badRequest(String.format(
+          "Número de prestações ultrapassou o limite estipulado (máximo: %d).", numeroLimite));
+    }
+  }
 
   private static final List<String> ETAPAS_SUBPROCESSO = List.of(
       EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
@@ -164,6 +194,18 @@ public class EmprestimoHelper {
       atual = atual.getEmprestimo();
     }
     return null;
+  }
+
+  /**
+   * EM-011 (melhoria 11/08): Não Conforme e Retificação exigem observação — é o que a etapa
+   * anterior mostra como motivo.
+   */
+  public static void exigirObservacao(cv.inps.rh.emprestimo.application.constants.ParecerProcesso parecer, String observacao) {
+    if ((parecer == cv.inps.rh.emprestimo.application.constants.ParecerProcesso.DESFAVORAVEL
+        || parecer == cv.inps.rh.emprestimo.application.constants.ParecerProcesso.RETIFICACAO)
+        && !org.springframework.util.StringUtils.hasText(observacao)) {
+      throw IgrpResponseStatusException.badRequest("A observação é obrigatória quando o parecer é Não Conforme ou Retificação.");
+    }
   }
 
   public static boolean isSubprocessoTerminado(String estado) {

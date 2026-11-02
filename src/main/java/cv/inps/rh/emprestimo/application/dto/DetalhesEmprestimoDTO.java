@@ -33,6 +33,11 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
   private BigDecimal valorPrestacao;
 
+  // Recuperação: Principal e Juro mensal da prestação (1.ª linha do plano) — EM-016.
+  private BigDecimal valorPrincipalMensal;
+
+  private BigDecimal valorJuroMensal;
+
 
   private String cabimentacaoOrcamental;
 

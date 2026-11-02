@@ -41,7 +41,7 @@
         <igrp.auth.version>0.2.0-beta.8</igrp.auth.version>
         <java.version>26</java.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
-        <springdoc.version>2.9.1</springdoc.version>
+        <springdoc.version>2.10.0</springdoc.version>
     </properties>
     <dependencies>
 
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
-            <version>23.26.3.0.0</version>
+            <version>23.26.4.0.0</version>
         </dependency>
 
         <dependency>
@@ -191,7 +191,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.5.1</version>
+            <version>6.0.0</version>
         </dependency>
 
         <dependency>
@@ -203,7 +203,7 @@
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf</artifactId>
-            <version>10.6.0</version>
+            <version>10.7.0</version>
             <scope>compile</scope>
         </dependency>
 

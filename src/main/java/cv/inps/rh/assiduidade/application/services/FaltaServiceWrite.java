@@ -486,6 +486,7 @@ public class FaltaServiceWrite {
 
     // Valor do dia = valor à hora x horas de ausência. O valor à hora vem de
     // CALCULO_FALTA_DIARIO (salário base / 30 / jornada diária), com fallback em Java.
+    faltaValorCalculator.exigirDentroDoVinculo(tipoRel, dia);
     falta.setValor(faltaValorCalculator.valorDia(tipoRel.getId(), dia, horasAusenciaPorDia));
 
     return falta;

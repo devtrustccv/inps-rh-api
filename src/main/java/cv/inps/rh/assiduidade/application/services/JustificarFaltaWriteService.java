@@ -23,6 +23,7 @@ import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.service.SaldoLockService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.TimeUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -65,6 +66,7 @@ public class JustificarFaltaWriteService {
   private final FaltaValorCalculator faltaValorCalculator;
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final SaldoLockService saldoLockService;
+  private final AusenciaEntityRepository ausenciaRepository;
 
   /**
    * Responsável do parecer. O DTO envia a PK de RH_T_RESPONSAVEL — a mesma que a leitura
@@ -162,6 +164,11 @@ public class JustificarFaltaWriteService {
         throw IgrpResponseStatusException.badRequest(
             "Já existe uma falta associada à data " + sintese.getData());
       }
+      if (ausenciaRepository.existeAusenciaNoDia(funcionario.getId(), sintese.getData())) {
+        throw IgrpResponseStatusException.badRequest(
+            "O dia " + DateFormatter.localDateToString(sintese.getData())
+                + " está coberto por uma licença/ausência registada e não precisa de justificação.");
+      }
 
       FaltaEntity falta = new FaltaEntity();
       falta.setPedidoId(pedido);
@@ -178,6 +185,7 @@ public class JustificarFaltaWriteService {
       // Valor à hora x horas de ausência do dia — via CALCULO_FALTA_DIARIO com
       // fallback em Java. O valor enviado pelo cliente é meramente indicativo.
       var horasAusencia = TimeUtils.intervalFormatToHHmm(sintese.getHorasAusencia());
+      faltaValorCalculator.exigirDentroDoVinculo(tipoRelAtual, dia);
       var valor = faltaValorCalculator.valorDia(tipoRelAtual.getId(), dia, horasAusencia);
       falta.setValor(valor);
       valorTotal = valorTotal.add(valor);
@@ -253,7 +261,10 @@ public class JustificarFaltaWriteService {
       validacao.setReferenciaId(pedido.getId());
       validacao.setReferenciaUuid(pedido.getUuid());
       validacaoEntityRepository.save(validacao);
-    } else {
+    }
+    // Antes de aplicar: o aplicar consome o saldo (RG-006 — o ecrã mostra o alerta, não bloqueia).
+    var alerta = faltaDescontoService.alertaDeducaoFerias(faltas, pedido);
+    if (!requerValidacao) {
       // Sem validação, os descontos são aplicados de imediato.
       for (var falta : faltas)
         faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
@@ -269,6 +280,7 @@ public class JustificarFaltaWriteService {
     if (!faltas.isEmpty())
       resp.put("valorDiario", faltas.getFirst().getValor());
     resp.put("valorTotal", valorTotal);
+    resp.put("alerta", alerta);
     return resp;
   }
 
@@ -351,8 +363,14 @@ public class JustificarFaltaWriteService {
       // Despacho do RH (SIM/NAO) em RH_T_FALTA.DESPACHO_RH — ver FaltaServiceWrite.
       if (dto.getValidar() != null)
         falta.setDespachoRh(dto.getValidar().getCode());
+    }
 
-      if (estadoFinal == Estado.A)
+    // Alerta antes de aplicar (o aplicar consome o saldo) e depois de o formulário ter
+    // definido a dedução de cada falta — RG-006.
+    String alerta = null;
+    if (estadoFinal == Estado.A) {
+      alerta = faltaDescontoService.alertaDeducaoFerias(faltas, pedido);
+      for (var falta : faltas)
         faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
     }
 
@@ -414,6 +432,7 @@ public class JustificarFaltaWriteService {
     resp.put("estado", pedido.getEstado());
     resp.put("etapa", pedido.getEtapa());
     resp.put("totalRegistos", faltas.size());
+    resp.put("alerta", alerta);
     return resp;
 
 

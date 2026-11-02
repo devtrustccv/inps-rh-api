@@ -41,6 +41,7 @@ public class DispensaReadService {
   private final DispensaEntityRepository dispensaRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final ResponsavelEntityRepository responsavelEntityRepository;
+  private final DispensaHorasService dispensaHorasService;
 
   @Transactional(readOnly = true)
   public WrapperListaDispensaDTO getListaDispensa(GetListaDispensaQuery query) {
@@ -231,6 +232,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      dto.setHorasDisponiveis(dispensaHorasService
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository
@@ -303,6 +308,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      dto.setHorasDisponiveis(dispensaHorasService
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository

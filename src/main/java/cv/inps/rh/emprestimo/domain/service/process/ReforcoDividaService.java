@@ -193,6 +193,7 @@ public class ReforcoDividaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO);
+    EmprestimoHelper.exigirObservacao(request.getParecer(), request.getObservacao());
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
     emprestimoEntityRepository.save(loan);
