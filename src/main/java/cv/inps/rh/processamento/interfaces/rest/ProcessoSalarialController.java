@@ -6,6 +6,7 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.*;
 import cv.inps.rh.processamento.application.dto.*;
 import cv.inps.rh.processamento.application.queries.*;
@@ -228,18 +229,19 @@ public class ProcessoSalarialController {
               responseCode = "200",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = SubsidioResponseNatalDTO.class)
+                  schema = @Schema(implementation = SubsidioNatalResponseDTO.class)
               )
           ),
       }
   )
-  public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
+  public ResponseEntity<WrapperListDTO> getSubsidioNatal(
       @RequestParam(value = "direcaoId", required = false) Long direcaoId,
-      @RequestParam(value = "funcionarioId") Long funcionarioId,
-      @RequestParam(value = "valorBrinde", required = false) Long valorBrinde,
-      @RequestParam(value = "anoProcessamento") Long anoProcessamento
+      @RequestParam(value = "funcionarioId", required = false) Long funcionarioId,
+      @RequestParam(value = "anoProcessamento", required = false) Long anoProcessamento,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size
   ) {
-    final var query = new GetSubsidioNatalQuery(direcaoId, funcionarioId, valorBrinde, anoProcessamento);
+    final var query = new GetSubsidioNatalQuery(direcaoId, funcionarioId, anoProcessamento, page, size);
 
     return queryBus.handle(query);
   }
