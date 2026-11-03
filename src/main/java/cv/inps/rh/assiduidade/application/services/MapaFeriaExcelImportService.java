@@ -47,15 +47,21 @@ public class MapaFeriaExcelImportService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MapaFeriaExcelImportService.class);
 
   /**
-   * Colunas do modelo, por índice (0-based). O modelo é um layout fixo do RH, por isso lê-se por
-   * posição; o cabeçalho é validado à cabeça para apanhar um ficheiro trocado antes de gravar seja
-   * o que for.
+   * Colunas do modelo antigo do RH (spec 07/09), por índice 0-based. Só se usam quando o cabeçalho
+   * não traz os nomes do modelo do "Exportar Direito" (ver {@link #colunas}).
    */
   private static final int COL_ID_COLABORADOR = 1;
   private static final int COL_INICIO_FERIAS_1 = 13;
   private static final int COL_FIM_FERIAS_1 = 14;
   private static final int COL_INICIO_FERIAS_2 = 16;
   private static final int COL_FIM_FERIAS_2 = 17;
+
+  /** Onde estão, neste ficheiro, as colunas que a importação lê. */
+  record Colunas(int id, int inicio1, int fim1, int inicio2, int fim2) {
+  }
+
+  private static final Colunas MODELO_ANTIGO = new Colunas(
+      COL_ID_COLABORADOR, COL_INICIO_FERIAS_1, COL_FIM_FERIAS_1, COL_INICIO_FERIAS_2, COL_FIM_FERIAS_2);
 
   /** Texto esperado na coluna do id, para confirmar que é mesmo o modelo do mapa. */
   private static final String CABECALHO_ID = "ID";
@@ -93,7 +99,7 @@ public class MapaFeriaExcelImportService {
     try (Workbook wb = WorkbookFactory.create(ficheiro.getInputStream())) {
 
       Sheet sheet = wb.getSheetAt(0);
-      validarCabecalho(sheet);
+      var colunas = colunas(sheet);
 
       // Linha 0 é o cabeçalho do modelo.
       for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -106,7 +112,7 @@ public class MapaFeriaExcelImportService {
         // Valida a linha INTEIRA antes de gravar: recolhe todos os problemas de uma vez, para o RH
         // não ter de reimportar o ficheiro a descobrir um erro de cada vez.
         var errosLinha = new ArrayList<String>();
-        var periodos = validarLinha(row, errosLinha);
+        var periodos = validarLinha(row, colunas, errosLinha);
 
         if (!errosLinha.isEmpty()) {
           errosLinha.forEach(e -> erros.add("Linha " + numeroLinha + ": " + e));
@@ -114,7 +120,7 @@ public class MapaFeriaExcelImportService {
         }
 
         try {
-          periodosImportados += gravarLinha(row, anoEntity, periodos);
+          periodosImportados += gravarLinha(row, colunas, anoEntity, periodos);
           colaboradores++;
         } catch (Exception e) {
           erros.add("Linha " + numeroLinha + ": " + e.getMessage());
@@ -146,11 +152,11 @@ public class MapaFeriaExcelImportService {
    * {@code erros} em vez de parar no primeiro problema — o colaborador pode não existir E as datas
    * estarem trocadas, e o RH tem direito a saber as duas coisas de uma vez.
    */
-  private List<LocalDate[]> validarLinha(Row row, List<String> erros) {
+  private List<LocalDate[]> validarLinha(Row row, Colunas colunas, List<String> erros) {
 
     Long idColaborador = null;
     try {
-      idColaborador = lerLong(row.getCell(COL_ID_COLABORADOR));
+      idColaborador = lerLong(row.getCell(colunas.id()));
       if (idColaborador == null) {
         erros.add("ID do colaborador em falta");
       } else if (!funcionarioRepository.existsById(idColaborador)) {
@@ -161,8 +167,8 @@ public class MapaFeriaExcelImportService {
     }
 
     var periodos = new ArrayList<LocalDate[]>();
-    validarPeriodo(periodos, erros, row, COL_INICIO_FERIAS_1, COL_FIM_FERIAS_1, "1");
-    validarPeriodo(periodos, erros, row, COL_INICIO_FERIAS_2, COL_FIM_FERIAS_2, "2");
+    validarPeriodo(periodos, erros, row, colunas.inicio1(), colunas.fim1(), "1");
+    validarPeriodo(periodos, erros, row, colunas.inicio2(), colunas.fim2(), "2");
 
     if (periodos.isEmpty() && erros.isEmpty())
       erros.add("Nenhum período de férias preenchido");
@@ -215,9 +221,9 @@ public class MapaFeriaExcelImportService {
   }
 
   /** Grava os períodos já validados. Devolve quantos períodos foram criados. */
-  private int gravarLinha(Row row, AnoEntity anoEntity, List<LocalDate[]> periodos) {
+  private int gravarLinha(Row row, Colunas colunas, AnoEntity anoEntity, List<LocalDate[]> periodos) {
 
-    var idColaborador = lerLong(row.getCell(COL_ID_COLABORADOR));
+    var idColaborador = lerLong(row.getCell(colunas.id()));
     var funcionario = funcionarioRepository.findById(idColaborador)
         .orElseThrow(() -> new IllegalArgumentException(
             "Colaborador " + idColaborador + " não encontrado"));
@@ -242,13 +248,44 @@ public class MapaFeriaExcelImportService {
     return periodos.size();
   }
 
-  private void validarCabecalho(Sheet sheet) {
+  /**
+   * Localiza as colunas pelo nome do cabeçalho — o Excel do "Exportar Direito" é o modelo a preencher
+   * (ID, DATA_INICIO_1, DATA_FIM_1, DATA_INICIO2, DATA_FIM2). Sem esses nomes, aceita o modelo antigo
+   * do RH por posição, desde que tenha "ID" na segunda coluna; senão o ficheiro é recusado antes de
+   * gravar seja o que for.
+   */
+  Colunas colunas(Sheet sheet) {
     Row cabecalho = sheet.getRow(0);
-    var valor = cabecalho != null ? lerTexto(cabecalho.getCell(COL_ID_COLABORADOR)) : null;
+    if (cabecalho == null)
+      throw IgrpResponseStatusException.badRequest("O ficheiro do mapa de férias não tem cabeçalho.");
+
+    var indices = new java.util.HashMap<String, Integer>();
+    for (int c = Math.max(0, cabecalho.getFirstCellNum()); c < cabecalho.getLastCellNum(); c++) {
+      var nome = lerTexto(cabecalho.getCell(c));
+      if (nome != null && !nome.isBlank())
+        indices.putIfAbsent(normalizar(nome), c);
+    }
+    var id = indices.get("ID");
+    var i1 = indices.get("DATAINICIO1");
+    var f1 = indices.get("DATAFIM1");
+    var i2 = indices.get("DATAINICIO2");
+    var f2 = indices.get("DATAFIM2");
+    if (id != null && i1 != null && f1 != null && i2 != null && f2 != null)
+      return new Colunas(id, i1, f1, i2, f2);
+
+    var valor = lerTexto(cabecalho.getCell(COL_ID_COLABORADOR));
     if (valor == null || !CABECALHO_ID.equalsIgnoreCase(valor.trim()))
       throw IgrpResponseStatusException.badRequest(
-          "O ficheiro não corresponde ao modelo do mapa de férias "
-              + "(esperava-se \"ID\" na segunda coluna do cabeçalho)");
+          "O ficheiro não corresponde ao modelo do mapa de férias: use o Excel do \"Exportar Direito\" "
+              + "(colunas ID, DATA_INICIO_1, DATA_FIM_1, DATA_INICIO2, DATA_FIM2).");
+    return MODELO_ANTIGO;
+  }
+
+  /** "DATA_INICIO_1", "Data Início 1" e "DATA_INICIO1" contam como o mesmo cabeçalho. */
+  static String normalizar(String cabecalho) {
+    var semAcentos = java.text.Normalizer.normalize(cabecalho, java.text.Normalizer.Form.NFD)
+        .replaceAll("\\p{M}", "");
+    return semAcentos.toUpperCase().replaceAll("[^A-Z0-9]", "");
   }
 
   private boolean linhaVazia(Row row) {
@@ -274,7 +311,7 @@ public class MapaFeriaExcelImportService {
     }
   }
 
-  private LocalDate lerData(Cell cell) {
+  LocalDate lerData(Cell cell) {
     if (cell == null || cell.getCellType() == CellType.BLANK) return null;
 
     if (cell.getCellType() == CellType.NUMERIC) {
