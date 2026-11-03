@@ -346,9 +346,9 @@ public class ProcessamentoSalarialWriteService {
 
     var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
-    try (var connection = dataSource.getConnection()) {
+    try (var connection = dataSource.getConnection();
+         var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);) {
 
-      var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);
       stmt.setString(1, startDate);
       stmt.setString(2, endDate);
       stmt.setPlsqlIndexTable(
@@ -360,22 +360,16 @@ public class ProcessamentoSalarialWriteService {
           32767
       );
 
-      if (request.getRelacionamentoId() == null) {
+      if (request.getRelacionamentoId() == null)
         stmt.setNull(4, Types.NUMERIC);
-      } else {
+      else
         stmt.setLong(4, request.getRelacionamentoId());
-      }
 
       stmt.setString(5, request.getTipo());
-
       stmt.setString(6, applicationAuditorAware.getCurrentSubjectName());
-
       stmt.setInt(7, 0);
-
       stmt.registerOutParameter(8, Types.VARCHAR);
-
       stmt.setString(9, request.getObservacao());
-
       stmt.execute();
 
       return stmt.getString(8);
