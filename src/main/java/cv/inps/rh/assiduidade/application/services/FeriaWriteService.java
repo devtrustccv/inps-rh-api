@@ -69,6 +69,7 @@ public class FeriaWriteService {
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final NotificacaoDestinatarioResolver destinatarioResolver;
   private final SaldoLockService saldoLockService;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.FeriasEntityRepository feriasEntityRepository;
 
 
   @Transactional
@@ -486,52 +487,52 @@ public class FeriaWriteService {
   }
 
 
+  /**
+   * "Enviar direito" da Lista de Férias: a linha é o direito do colaborador num ano (já não um
+   * pedido), por isso o envio é por colaborador + ano. Vai para o colaborador e para o seu
+   * responsável (o mesmo resolver das outras notificações, sem duplicados).
+   *
+   * <p>Variáveis do template DIREITO_FERIAS: nome, ano, direito (do ano), gozado (do ano) e
+   * saldoRestante (acumulado, como antes).</p>
+   */
   @Transactional
   public Map<String, ?> enviarDireitoFerias(EnviarDireitoFeriasCommand command) {
-    var ferias = feriasGozadasRepository
-        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de férias não encontrado"));
+    var uuid = cv.inps.rh.shared.util.ValidationUtil.parseUuid(command.getFuncionarioId(), "Identificador do colaborador");
+    var funcionario = funcionarioRepository.findByUuidOrThrow(uuid);
+    int ano = command.getAno() != null ? command.getAno() : LocalDate.now().getYear();
 
-    var funcionario = ferias.getFunId();
-    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
+    var direitos = feriasEntityRepository.findAllByFunId_UuidAndAnoId_AnoOrderByIdAsc(uuid, String.valueOf(ano));
+    if (direitos.isEmpty())
+      throw IgrpResponseStatusException.notFound(
+          "O colaborador não tem direito de férias registado em " + ano + ".");
 
+    var anual = saldoFeriaService.detalhe(uuid, ano, null);
     var vars = Map.of(
         "nome", funcionario.getNome() != null ? funcionario.getNome() : "",
-        "dataInicio", ferias.getDataInicio() != null ? ferias.getDataInicio().toString() : "",
-        "dataFim", ferias.getDataFim() != null ? ferias.getDataFim().toString() : "",
-        "numDias", ferias.getNumDia() != null ? ferias.getNumDia().toString() : "0",
-        "saldoRestante", String.valueOf(saldo)
+        "ano", String.valueOf(ano),
+        "direito", String.valueOf(anual.direito()),
+        "gozado", String.valueOf(anual.gozado()),
+        "saldoRestante", String.valueOf(saldoFeriaService.getSaldo(uuid))
     );
 
-    funcionario.getContactos().stream()
-        .filter(c -> "EMAIL".equalsIgnoreCase(c.getTipoContacto()))
-        .map(ContactoEntity::getContacto)
-        .findFirst()
-        .ifPresentOrElse(
-            email -> notificacaoDispatchService.enviar(
-                "DIREITO_FERIAS", email, funcionario.getNome(),
-                ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars),
-            () -> LOGGER.warn("Funcionário {} sem email para envio de direito de férias", funcionario.getUuid())
-        );
+    var destinatarios = destinatarioResolver.resolver(funcionario, List.of(
+        cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao.COLABORADOR,
+        cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao.RESPONSAVEL_COLABORADOR));
+    if (destinatarios.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Nem o colaborador nem o seu responsável têm email registado: o direito de férias não foi enviado.");
 
-    // O email do responsável sai dos contactos do funcionário que ocupa o lugar (ver
-    // NotificacaoDestinatarioResolver): a coluna RH_T_RESPONSAVEL.EMAIL, que aqui se lia
-    // directamente, está nula em todas as linhas porque nenhum fluxo da aplicação a escreve — a
-    // chefia nunca era notificada.
-    if (ferias.getResponsavelId() != null) {
-      responsavelEntityRepository.findById(ferias.getResponsavelId())
-          .flatMap(destinatarioResolver::resolverResponsavel)
-          .ifPresentOrElse(
-              destinatario -> notificacaoDispatchService.enviar(
-                  "DIREITO_FERIAS", destinatario.email(), destinatario.nome(),
-                  ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(),
-                  destinatario.funcionario(), vars),
-              () -> LOGGER.warn("Responsável {} sem email para envio de direito de férias",
-                  ferias.getResponsavelId())
-          );
-    }
+    var direito = direitos.getFirst();
+    destinatarios.forEach(d -> notificacaoDispatchService.enviar(
+        "DIREITO_FERIAS", d.email(), d.nome(),
+        direito.getId(), "RH_T_FERIAS", direito.getUuid(), d.funcionario(), vars));
 
-    return Map.of("pedidoId", command.getPedidoId(), "enviado", true);
+    var resp = new java.util.LinkedHashMap<String, Object>();
+    resp.put("funcionarioId", uuid);
+    resp.put("ano", ano);
+    resp.put("enviado", true);
+    resp.put("destinatarios", destinatarios.stream().map(d -> d.nome() + " <" + d.email() + ">").toList());
+    return resp;
   }
 
   private void enviarNotificacaoValidacaoFerias(FeriasGozadasEntity ferias, FuncionarioEntity funcionario) {

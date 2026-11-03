@@ -1133,11 +1133,11 @@ public class AssiduidadeController {
   }
 
   @PostMapping(
-    value = "feria/{pedidoId}/direito-ferias"
+    value = "feria/direito-ferias/{funcionarioId}"
   )
   @Operation(
     summary = "Enviar direito de ferias",
-    description = "Envia email dos direitos de ferias ao colaborador e ao responsavel",
+    description = "Envia por email o direito de férias do colaborador no ano (direito, gozado e saldo) ao colaborador e ao seu responsável. Acção da linha da Lista de Férias (colaborador + ano).",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -1149,15 +1149,16 @@ public class AssiduidadeController {
     }
   )
   public ResponseEntity<Map<String, ?>> enviarDireitoFerias(
-      @PathVariable(value = "pedidoId") String pedidoId) {
-    final var command = new EnviarDireitoFeriasCommand(pedidoId);
+      @PathVariable(value = "funcionarioId") String funcionarioId,
+      @RequestParam(value = "ano", required = false) Integer ano) {
+    final var command = new EnviarDireitoFeriasCommand(funcionarioId, ano);
     return commandBus.send(command);
   }
 
   @GetMapping(value = "feria/exportar-direito", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
   @Operation(
     summary = "Exportar direito ferias",
-    description = "Gera ficheiro Excel com os direitos de férias por colaborador e direção. Colunas: CODIGO_DIRECAO, NOME_DIRECAO, ID_COLABORADOR, NOME_COLABORADOR, TOTAL_DIREITO, TOTAL_DIREITO_ANO.",
+    description = "Gera o Excel do direito de férias do ano (uma linha por colaborador): NUMERO, ID, NOME_COLABORADOR, DATA_ADMISSAO, DIRECAO, SECAO, ILHA, MUNICIPIO, CARGO, DIAS_REMANESCENTE, TOTAL_DIAS_FERIAS, DATA_INICIO_1, DATA_FIM_1, DATA_INICIO2, DATA_FIM2. É o modelo do Importar Mapa.",
     responses = {
       @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
     }

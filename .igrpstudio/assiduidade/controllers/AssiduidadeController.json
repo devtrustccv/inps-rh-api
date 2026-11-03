@@ -1400,7 +1400,7 @@
     },
     {
       "actionName": "enviarDireitoFerias",
-      "path": "feria/{pedidoId}/direito-ferias",
+      "path": "feria/direito-ferias/{funcionarioId}",
       "method": "POST",
       "responses": {
         "200": {
@@ -1418,9 +1418,16 @@
       },
       "pathVariables": [
         {
-          "name": "pedidoId",
+          "name": "funcionarioId",
           "type": "string",
           "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "ano",
+          "isRequired": false
         }
       ]
     },

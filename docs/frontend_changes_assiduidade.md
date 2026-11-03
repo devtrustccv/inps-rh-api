@@ -1324,6 +1324,31 @@ cabeçalho** (`ID`, `DATA_INICIO_1`, `DATA_FIM_1`, `DATA_INICIO2`, `DATA_FIM2` �
 
 Ação front: o botão "Importar Mapa" pode sugerir o Excel do "Exportar Direito" como modelo.
 
+### 🔴 Enviar direito — por colaborador + ano
+
+`POST api/v1/assiduidade/feria/{pedidoId}/direito-ferias` → **`POST api/v1/assiduidade/feria/direito-ferias/{funcionarioId}?ano=2026`**
+(`ano` opcional, por defeito o corrente). A linha do pai da Lista de Férias é o direito do colaborador
+num ano e já não traz pedido, por isso o envio deixou de ser por pedido. Usar `content[].uuidFuncionario`
+e `content[].ano` da linha.
+
+Envia (template `DIREITO_FERIAS`) ao colaborador e ao seu responsável. Variáveis: `{nome}`, `{ano}`,
+`{direito}`, `{gozado}`, `{saldoRestante}` (acumulado).
+
+```json
+{ "funcionarioId": "01a11d16-…", "ano": 2026, "enviado": true, "destinatarios": ["Rui … <rui.rej@example.com>"] }
+```
+
+| Caso | Resposta |
+|---|---|
+| sem direito registado nesse ano | 404 *"O colaborador não tem direito de férias registado em 2025."* |
+| nem o colaborador nem o responsável têm email | 400 *"Nem o colaborador nem o seu responsável têm email registado: o direito de férias não foi enviado."* (antes respondia `enviado: true` sem enviar) |
+
+### Saldo anual com várias linhas de direito no ano
+
+`GET feria/saldo/{funcionarioId}?ano=` dava 500 quando o colaborador tem mais do que uma linha de
+direito no mesmo ano (Wilson 2026: 22 + 12). Passa a somar as linhas do ano (`direito: 34`), como a
+lista e o export.
+
 ### Lista de Férias (pai/filho, commit 5b2bd2ec) — o que o ecrã deve usar
 
 - Pai = `content[]` (uma linha por colaborador e ano; `ano` novo; sem estado — retirar a coluna).

@@ -24,7 +24,16 @@ public interface FeriasEntityRepository extends
                         "FeriasEntity not found for id: " + id));
     }
 
-  Optional<FeriasEntity> findByFunId_UuidAndAnoId(UUID funIdUuid, AnoEntity anoId);
+  /** Linhas de direito do colaborador num ano — pode haver mais do que uma (ex.: direito + acerto). */
+  java.util.List<FeriasEntity> findAllByFunId_UuidAndAnoId_AnoOrderByIdAsc(UUID funIdUuid, String ano);
+
+    /**
+     * Direito do ano = soma das linhas de direito activas desse ano. Antes lia-se uma só linha
+     * (Optional) e um colaborador com duas linhas no ano dava NonUniqueResult (500) no saldo.
+     */
+    @Query("SELECT COALESCE(SUM(f.numDia), 0) FROM FeriasEntity f WHERE f.funId.uuid = :funcionarioId"
+        + " AND f.anoId = :ano AND f.estado = cv.inps.rh.shared.application.constants.Estado.A")
+    Integer sumNumDiaByFuncionarioIdAndAno(@Param("funcionarioId") UUID funcionarioId, @Param("ano") AnoEntity ano);
 
     @Query("SELECT COALESCE(SUM(f.numDia), 0) FROM FeriasEntity f WHERE f.funId.uuid = :funcionarioId")
     Integer sumNumDiaByFuncionarioId(@Param("funcionarioId") UUID funcionarioId);
