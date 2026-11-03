@@ -344,7 +344,7 @@ public class ProcessamentoSalarialWriteService {
     if (ccIds.length == 0)
       ccIds = new String[]{null};
 
-    var procedure = "{ call RH_PK_PROCESSAMENTO_SAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
+    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
     try (var connection = dataSource.getConnection()) {
 
