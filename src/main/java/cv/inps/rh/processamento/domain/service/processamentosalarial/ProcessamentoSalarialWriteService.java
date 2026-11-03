@@ -112,11 +112,6 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  @Transactional
-  public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
-    validar(ids, tipoValidacao, null, null);
-  }
-
   /**
    * Validação provisória (processamentos em PROCESSADO) ou definitiva (em VALIDADO_PROVISORIO).
    *
@@ -127,7 +122,7 @@ public class ProcessamentoSalarialWriteService {
    */
   @Transactional
   public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao,
-      String validar, String observacao) {
+                      String validar, String observacao) {
 
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
@@ -171,11 +166,11 @@ public class ProcessamentoSalarialWriteService {
    * PROCESSADO (etapa Validação Provisória) e notifica quem validou provisoriamente.
    */
   private void devolverAEtapaAnterior(List<Long> ids, boolean isDefinitivo,
-      StatusProcessamento statusPesquisa, String decisao, String observacao) {
+                                      StatusProcessamento statusPesquisa, String decisao, String observacao) {
 
     if (!"NAO".equals(decisao) && !"CORRIGIR".equals(decisao))
       throw IgrpResponseStatusException.badRequest("Decisão de validação inválida: " + decisao
-          + ". Valores aceites: SIM, NAO, CORRIGIR.");
+                                                   + ". Valores aceites: SIM, NAO, CORRIGIR.");
     if (!StringUtils.hasText(observacao))
       throw IgrpResponseStatusException.badRequest(
           "A Observação é obrigatória quando não valida: indique a justificação da retificação ou da não aprovação.");
@@ -197,9 +192,9 @@ public class ProcessamentoSalarialWriteService {
     }
 
     var acao = ("NAO".equals(decisao) ? "Não aprovação" : "Pedido de retificação")
-        + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
-        + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
-        + ". Motivo: " + observacao.trim();
+               + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
+               + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
+               + ". Motivo: " + observacao.trim();
     publicarNotificacoes(
         processes,
         isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
@@ -346,11 +341,10 @@ public class ProcessamentoSalarialWriteService {
         .map(String::valueOf)
         .toArray(String[]::new);
 
-    if (ccIds.length == 0) {
+    if (ccIds.length == 0)
       ccIds = new String[]{null};
-    }
 
-    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?) }";
+    var procedure = "{ call RH_PK_PROCESSAMENTO_SAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
     try (var connection = dataSource.getConnection()) {
 
@@ -379,6 +373,8 @@ public class ProcessamentoSalarialWriteService {
       stmt.setInt(7, 0);
 
       stmt.registerOutParameter(8, Types.VARCHAR);
+
+      stmt.setString(9, request.getObservacao());
 
       stmt.execute();
 

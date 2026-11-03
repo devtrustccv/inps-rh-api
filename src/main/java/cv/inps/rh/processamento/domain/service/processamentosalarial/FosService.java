@@ -13,9 +13,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FosEntityReposito
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Transactional
@@ -47,7 +48,6 @@ public class FosService {
     if (value == null || value.isBlank())
       return null;
 
-    // aceita também data com hora (ex.: "2026-10-01T00:00:00.000Z", que é o que o ecrã envia)
     var date = DateFormatter.stringToLocalDate(value.trim());
     if (date == null && value.trim().length() > 10)
       date = DateFormatter.stringToLocalDate(value.trim().substring(0, 10));
@@ -72,7 +72,6 @@ public class FosService {
     if (startDate != null && endDate != null && endDate.isBefore(startDate))
       throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início");
 
-    // DT_REGISTO é comparado ao dia (trunc): a Data Fim inclui o próprio dia
     var page = fosEntityRepository.getFos(
         mesReferencia == null ? null : Integer.valueOf(mesReferencia.substring(0, 4)),
         mesReferencia == null ? null : Integer.valueOf(mesReferencia.substring(4)),
@@ -259,7 +258,7 @@ public class FosService {
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
     var referenceDate = FosUtil.getReferenceDate(command.getAno(), command.getMes());
-    var currentMonth = LocalDate.now().withDayOfMonth(1);
+    var currentMonth = LocalDate.now(ZoneId.systemDefault()).withDayOfMonth(1);
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
 
@@ -292,8 +291,6 @@ public class FosService {
   public String substituirXml(Long id) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(id);
-
-    // substitui-se o que já foi entregue (spec: "substituir o ficheiro XML que já foi entregue")
     if (fosXml.getDtEntrega() == null)
       throw IgrpResponseStatusException.badRequest("Só é possível substituir uma declaração já entregue");
 
@@ -301,13 +298,12 @@ public class FosService {
   }
 
   private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
-    // erro Oracle dos procedimentos (ex.: Nº Segurado maior que a coluna) → 400 com mensagem, em vez de 500
     return new SimpleJdbcCall(dataSource) {
       @Override
-      public Map<String, Object> execute(SqlParameterSource parameterSource) {
+      public @NonNull Map<String, Object> execute(@NonNull SqlParameterSource parameterSource) {
         try {
           return super.execute(parameterSource);
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
           LOGGER.error("Erro no procedimento RH_PK_GERA_XML_DB.{}", procedureName, e);
           throw IgrpResponseStatusException.badRequest(e.getMessage());
         }

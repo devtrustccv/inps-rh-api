@@ -52,7 +52,7 @@ public final class FosUtil {
       return amount;
     try {
       return new BigDecimal(amount.trim()).stripTrailingZeros().toPlainString();
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException _) {
       return amount;
     }
   }
