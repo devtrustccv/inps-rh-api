@@ -1295,6 +1295,68 @@ Aplicadas em dev a 21/10.
 
 ---
 
+## 🔴 33. Exportar Direito = modelo do Mapa de Férias (documento FERIAS, 03/11/2026)
+
+### `GET api/v1/assiduidade/feria/exportar-direito?anoReferente=&direcaoId=`
+
+O Excel passa a ter as 15 colunas do documento, **uma linha por colaborador com direito no ano**
+(sem `anoReferente` usa o ano corrente):
+
+| Coluna | Origem |
+|---|---|
+| `NUMERO` | contagem |
+| `ID` | `RH_T_FUNCIONARIOS.ID` |
+| `NOME_COLABORADOR` | `RH_T_FUNCIONARIOS.NOME` |
+| `DATA_ADMISSAO` | início do 1.º contrato (`MIN(RH_T_CONTRATO_VINCULO.DATA_INICIO)`) |
+| `DIRECAO`, `SECAO`, `ILHA`, `MUNICIPIO`, `CARGO` | vínculo activo (`RH_V_RELACAO_LABORAL`): ilha e município do local de trabalho; cargo vazio se o vínculo não tiver |
+| `DIAS_REMANESCENTE` | direito − gozado dos **anos anteriores** (nunca negativo) |
+| `TOTAL_DIAS_FERIAS` | direito do ano (soma das linhas de direito do ano) + remanescente |
+| `DATA_INICIO_1`, `DATA_FIM_1`, `DATA_INICIO2`, `DATA_FIM2` | períodos 1 e 2 do mapa activo do ano, se existir; senão vazios para o RH preencher |
+
+Antes tinha 6 colunas (`CODIGO_DIRECAO`, `NOME_DIRECAO`, `ID_COLABORADOR`, `NOME_COLABORADOR`, `TOTAL_DIREITO`, `TOTAL_DIREITO_ANO`).
+
+### `POST api/v1/assiduidade/mapa-feria/importar` (multipart `ficheiro` + `ano`)
+
+Aceita o Excel do Exportar Direito tal como sai (preenchido): as colunas são localizadas **pelo nome do
+cabeçalho** (`ID`, `DATA_INICIO_1`, `DATA_FIM_1`, `DATA_INICIO2`, `DATA_FIM2` — maiúsculas, espaços,
+`_` e acentos indiferentes). O modelo antigo do RH (por posição) continua a ser aceite. Outro ficheiro →
+400 *"O ficheiro não corresponde ao modelo do mapa de férias: use o Excel do "Exportar Direito" (…)"*.
+
+Ação front: o botão "Importar Mapa" pode sugerir o Excel do "Exportar Direito" como modelo.
+
+### 🔴 Enviar direito — por colaborador + ano
+
+`POST api/v1/assiduidade/feria/{pedidoId}/direito-ferias` → **`POST api/v1/assiduidade/feria/direito-ferias/{funcionarioId}?ano=2026`**
+(`ano` opcional, por defeito o corrente). A linha do pai da Lista de Férias é o direito do colaborador
+num ano e já não traz pedido, por isso o envio deixou de ser por pedido. Usar `content[].uuidFuncionario`
+e `content[].ano` da linha.
+
+Envia (template `DIREITO_FERIAS`) ao colaborador e ao seu responsável. Variáveis: `{nome}`, `{ano}`,
+`{direito}`, `{gozado}`, `{saldoRestante}` (acumulado).
+
+```json
+{ "funcionarioId": "01a11d16-…", "ano": 2026, "enviado": true, "destinatarios": ["Rui … <rui.rej@example.com>"] }
+```
+
+| Caso | Resposta |
+|---|---|
+| sem direito registado nesse ano | 404 *"O colaborador não tem direito de férias registado em 2025."* |
+| nem o colaborador nem o responsável têm email | 400 *"Nem o colaborador nem o seu responsável têm email registado: o direito de férias não foi enviado."* (antes respondia `enviado: true` sem enviar) |
+
+### Saldo anual com várias linhas de direito no ano
+
+`GET feria/saldo/{funcionarioId}?ano=` dava 500 quando o colaborador tem mais do que uma linha de
+direito no mesmo ano (Wilson 2026: 22 + 12). Passa a somar as linhas do ano (`direito: 34`), como a
+lista e o export.
+
+### Lista de Férias (pai/filho, commit 5b2bd2ec) — o que o ecrã deve usar
+
+- Pai = `content[]` (uma linha por colaborador e ano; `ano` novo; sem estado — retirar a coluna).
+- Filho = `content[].feriasGozadas[]` (`estado`/`estadoDesc`, `dataInicio`, `dataFim`, `numDias`, `observacao` = motivo da alteração, `tipoPedido`).
+- **"Editar" só quando `estado = 'A'` e `tipoPedido = 'FERIA'`**: o filho também traz os dias de falta deduzidos em férias (`tipoPedido = 'JUSTIFICACAO_FALTA'`), que não são pedidos de férias (`GET feria/{pedidoUuid}` dá 404).
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |

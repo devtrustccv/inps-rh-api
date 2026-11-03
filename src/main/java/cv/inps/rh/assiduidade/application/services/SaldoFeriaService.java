@@ -1,6 +1,5 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AnoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasEntityRepository;
@@ -68,9 +67,7 @@ public class SaldoFeriaService {
 
       // Calcula o saldo para o ano específico
       final var direitoAnual = feriasEntityRepository
-          .findByFunId_UuidAndAnoId(funcionario.getUuid(), anoEntity)
-          .map(FeriasEntity::getNumDia)
-          .orElse(0);
+          .sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(), anoEntity);
 
       final var gozadoAnual = feriasGozadasEntityRepository.sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(),
           anoEntity.getId());

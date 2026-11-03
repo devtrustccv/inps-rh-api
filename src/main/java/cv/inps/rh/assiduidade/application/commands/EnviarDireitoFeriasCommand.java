@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EnviarDireitoFeriasCommand implements Command {
 
-  @NotBlank(message = "The field <pedidoId> is required")
-  private String pedidoId;
+  @NotBlank(message = "The field <funcionarioId> is required")
+  private String funcionarioId;
+
+  /** Ano do direito; sem valor usa o ano corrente. */
+  private Integer ano;
 
 }
