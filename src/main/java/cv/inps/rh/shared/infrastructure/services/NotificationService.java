@@ -31,15 +31,15 @@ public class NotificationService {
     this.fromAddress = fromAddress;
   }
 
-  public void send(String recipient, String subject, String body) {
-    send(recipient, subject, body, false);
+  public boolean send(String recipient, String subject, String body) {
+    return send(recipient, subject, body, false);
   }
 
-  public void sendHtml(String recipient, String subject, String body) {
-    send(recipient, subject, body, true);
+  public boolean sendHtml(String recipient, String subject, String body) {
+    return send(recipient, subject, body, true);
   }
 
-  private void send(String recipient, String subject, String body, boolean html) {
+  private boolean send(String recipient, String subject, String body, boolean html) {
 
     Assert.hasText(recipient, "Notification recipient must not be empty");
     Assert.notNull(subject, "Notification subject must not be null");
@@ -60,8 +60,10 @@ public class NotificationService {
     try {
       mailSender.send(message);
       LOGGER.info("Notification email sent to {}", recipient);
+      return true;
     } catch (MailException exception) {
       LOGGER.error("Unable to send notification email to {}", recipient, exception);
     }
+    return false;
   }
 }
