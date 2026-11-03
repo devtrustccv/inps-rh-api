@@ -384,25 +384,25 @@ public class ProcessamentoSalarialWriteService {
       Function<ProcessamentoSalarialEntity, String> previousUserResolver,
       String action
   ) {
-    var processIdsByUser = new LinkedHashMap<String, List<Long>>();
+    var processesByUser = new LinkedHashMap<String, List<ProcessamentoSalarialEntity>>();
 
     for (var process : processes) {
       var previousUser = previousUserResolver.apply(process);
       if (StringUtils.hasText(previousUser)) {
-        processIdsByUser.computeIfAbsent(previousUser, ignored -> new ArrayList<>())
-            .add(process.getId());
+        processesByUser.computeIfAbsent(previousUser, _ -> new ArrayList<>())
+            .add(process);
       }
     }
 
-    if (processIdsByUser.isEmpty()) {
+    if (processesByUser.isEmpty()) {
       LOGGER.warn("No previous users found for salary processing notification: action={}", action);
       return;
     }
 
-    var profilesByUser = iamUserProfileService.resolverPerfis(processIdsByUser.keySet());
+    var profilesByUser = iamUserProfileService.resolverPerfis(processesByUser.keySet());
     var notifications = new ArrayList<NotificationEvent>();
 
-    processIdsByUser.forEach((userId, processIds) -> {
+    processesByUser.forEach((userId, userProcesses) -> {
       var profile = profilesByUser.get(userId);
       if (profile == null || !StringUtils.hasText(profile.getEmail())) {
         LOGGER.warn("No email found for salary processing notification: user={} action={}", userId, action);
@@ -413,10 +413,13 @@ public class ProcessamentoSalarialWriteService {
           ? profile.getFullName()
           : profile.getUsername();
       var subject = "Processamento salarial - " + action;
-      var body = "Olá %s,%n%nFoi executada a ação \"%s\" nos processamentos salariais %s."
-          .formatted(recipientName, action, processIds);
 
-      notifications.add(NotificationEvent.text(profile.getEmail(), subject, body));
+      userProcesses.forEach(process -> {
+        var body = "Olá %s,%n%nFoi executada a ação \"%s\" no processamento salarial %d."
+            .formatted(recipientName, action, process.getId());
+
+        notifications.add(NotificationEvent.text(profile.getEmail(), subject, body, process.getId(), null));
+      });
     });
 
     if (notifications.isEmpty())
