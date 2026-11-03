@@ -30,16 +30,4 @@ class FosUtilTest {
     assertEquals("abc", FosUtil.formatAmount("abc"));
     assertNull(FosUtil.formatAmount(null));
   }
-
-  @Test
-  void shouldTranslateOracleErrors() {
-    assertEquals("Mês sem processamento",
-        FosUtil.mensagemErroOracle("ORA-20001: Mês sem processamento\nORA-06512: at line 1"));
-    assertEquals(
-        "Não foi possível gerar a FOS: há colaboradores com o Nº de Segurado maior do que o permitido (10 caracteres).",
-        FosUtil.mensagemErroOracle(
-            "ORA-12899: value too large for column \"INPSRH\".\"RH_DET_XML_FOS\".\"NU_SEGURADO\" (actual: 12, maximum: 10)"));
-    assertEquals("Não foi possível gerar a FOS: erro na base de dados.",
-        FosUtil.mensagemErroOracle("ORA-00942: table or view does not exist"));
-  }
 }

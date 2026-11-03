@@ -5,7 +5,6 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.regex.Pattern;
 
 public final class FosUtil {
 
@@ -56,30 +55,6 @@ public final class FosUtil {
     } catch (NumberFormatException e) {
       return amount;
     }
-  }
-
-  /**
-   * Mensagem para o utilizador a partir do erro Oracle de um procedimento do FOS. A mensagem ORA crua
-   * fica só no log.
-   */
-  public static String mensagemErroOracle(String oraMessage) {
-    if (oraMessage == null)
-      return "Não foi possível gerar a FOS.";
-
-    // RAISE_APPLICATION_ERROR (ORA-20000..20999): a mensagem já é para o utilizador
-    var applicationError = Pattern.compile("ORA-20\\d{3}:\\s*([^\\n]*)").matcher(oraMessage);
-    if (applicationError.find())
-      return applicationError.group(1).trim();
-
-    if (oraMessage.contains("ORA-12899") || oraMessage.contains("ORA-06502"))
-      return oraMessage.contains("NU_SEGURADO")
-          ? "Não foi possível gerar a FOS: há colaboradores com o Nº de Segurado maior do que o permitido (10 caracteres)."
-          : "Não foi possível gerar a FOS: há valores maiores do que o permitido (verifique o Nº de Segurado dos colaboradores).";
-
-    if (oraMessage.contains("ORA-01400"))
-      return "Não foi possível gerar a FOS: há colaboradores sem dados obrigatórios (ex.: Nº de Segurado).";
-
-    return "Não foi possível gerar a FOS: erro na base de dados.";
   }
 
   public static String normalizeIdRow(Long detailId) {

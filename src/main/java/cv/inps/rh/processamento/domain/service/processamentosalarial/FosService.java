@@ -309,7 +309,7 @@ public class FosService {
           return super.execute(parameterSource);
         } catch (DataAccessException e) {
           LOGGER.error("Erro no procedimento RH_PK_GERA_XML_DB.{}", procedureName, e);
-          throw IgrpResponseStatusException.badRequest(FosUtil.mensagemErroOracle(e.getMostSpecificCause().getMessage()));
+          throw IgrpResponseStatusException.badRequest(e.getMessage());
         }
       }
     }

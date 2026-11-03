@@ -314,7 +314,6 @@ public class ProcessamentoSalarialWriteService {
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
-    // QA PS-033: com Data Fim anterior o procedimento processava na mesma o mês da Data Início.
     if (request.getDataInicio() != null && request.getDataFim() != null
         && request.getDataFim().isBefore(request.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
@@ -331,10 +330,6 @@ public class ProcessamentoSalarialWriteService {
 
     var direccaoIds = request.getDireccaoId() != null ? request.getDireccaoId() : List.<Long>of();
 
-    // Colaborador indicado SEM direção: a procedure PROCESSAR, com p_tiprel_id preenchido, procura o
-    // centro de custo da direção recebida e, com direção NULL, falha ("o serviço não está associado ao
-    // centro de custo"). Usa-se a direção da mobilidade do próprio tiprel (mesma ligação
-    // tiprel.mob_id -> mobilidade.instit_id que a procedure usa no processamento global).
     if (request.getRelacionamentoId() != null && direccaoIds.isEmpty()) {
       direccaoIds = tiposRelacionamentoEntityRepository
           .findDirecaoIdDaMobilidade(request.getRelacionamentoId())
