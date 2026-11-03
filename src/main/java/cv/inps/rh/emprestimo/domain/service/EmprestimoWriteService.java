@@ -185,7 +185,12 @@ public class EmprestimoWriteService {
     var defPagamentoEntity = new DefPagamentoEntity();
     defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(entity.getTmId()));
     defPagamentoEntity.setValor(entity.getValorPrestacao());
-    defPagamentoEntity.setDataInicio(entity.getDataInicio());
+    // EM-016: as prestações já pagas (Total Prestações Pagas) não voltam a ser descontadas — o
+    // desconto começa na 1.ª prestação por pagar.
+    var pagas = planoFinanceiroEntityRepository.findAllByEmprestimo(entity).stream()
+        .filter(p -> FinancialPlanHelper.FLG_PAGO.equals(p.getFlgPago()))
+        .count();
+    defPagamentoEntity.setDataInicio(entity.getDataInicio() != null ? entity.getDataInicio().plusMonths(pagas) : null);
     defPagamentoEntity.setDataFim(entity.getDataFim());
     defPagamentoEntity.setEstado(Estado.A);
     defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());

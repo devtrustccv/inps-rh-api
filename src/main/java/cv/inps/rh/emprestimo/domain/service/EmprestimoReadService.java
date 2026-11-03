@@ -26,9 +26,11 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,27 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 @Service
 public class EmprestimoReadService {
+
+  private static final Set<String> ENCERRADO_SEM_SUCESSO = Set.of(
+      StatusEmprestimo.NAO_AUTORIZADO.name(),
+      StatusEmprestimo.CANCELADO.name(),
+      StatusEmprestimo.DESISTENCIA.name());
+
+  private static final Set<String> CONCLUIDO = Set.of(
+      StatusEmprestimo.ATIVO.name(),
+      StatusEmprestimo.ARQUIVADO.name());
+
+  /**
+   * Encerrado sem sucesso, ou concluído (Ativo / Arquivado) sem um subprocesso em curso — com uma
+   * Amortização / Renegociação a decorrer, a etapa do pedido é a desse subprocesso.
+   */
+  private static boolean isProcessoFinalizado(EmprestimoListRowDTO dto) {
+    if (ENCERRADO_SEM_SUCESSO.contains(dto.getEstado())) {
+      return true;
+    }
+    return CONCLUIDO.contains(dto.getEstado())
+        && (dto.getEmprestimoIdEmCurso() == null || dto.getEmprestimoIdEmCurso().equals(dto.getEmprestimoId()));
+  }
 
   private final ParamEmprestimoEntityRepository paramEmprestimoEntityRepository;
   private final EmprestimoEntityRepository emprestimoEntityRepository;
@@ -301,7 +324,12 @@ public class EmprestimoReadService {
 
     pageData.getContent().forEach(dto -> {
       dto.setEstadoDesc(estadoMap.getOrDefault(dto.getEstado(), dto.getEstado()));
-      dto.setEtapaDesc(etapaMap.getOrDefault(dto.getEtapa(), dto.getEtapa()));
+      // Pontos 31 / 35: processo terminado já executou a etapa onde parou — a lista mostra
+      // "Finalizado" (como o último passo da barra), não a etapa como se estivesse por fazer.
+      // O código da etapa mantém-se para a navegação.
+      dto.setEtapaDesc(isProcessoFinalizado(dto)
+          ? "Finalizado"
+          : etapaMap.getOrDefault(dto.getEtapa(), dto.getEtapa()));
       dto.setTipoEmprestimoDesc(tipoEmprestimoMap.getOrDefault(dto.getTipoEmprestimo(), dto.getTipoEmprestimo()));
     });
 
@@ -345,6 +373,7 @@ public class EmprestimoReadService {
               obj.getValorJuros(),
               obj.getSaldoFinal()
           )).toList();
+      rows = comSubprocessos(loan, rows);
     }
     plan.setRows(rows);
 
@@ -370,6 +399,69 @@ public class EmprestimoReadService {
     plan.setPagamentoMensal(pagamentoMensal == null ? "" : formatter.format(pagamentoMensal));
 
     return plan;
+  }
+
+  /**
+   * Ponto 33: o plano de um subprocesso (Amortização / Renegociação) já traz as prestações pagas
+   * antes dele (copiadas do plano anterior); a seguir a essas entra uma linha que regista cada
+   * subprocesso da cadeia — ex.: "Amortizado Parcial", com o valor amortizado a abater ao principal —
+   * e depois vêm as prestações do plano refeito. Sem pagamentos, a linha fica logo em primeiro.
+   */
+  private List<PlanoFinanceiroRowDTO> comSubprocessos(EmprestimoEntity loan, List<PlanoFinanceiroRowDTO> rows) {
+    // nº de prestações pagas quando o subprocesso começou -> linhas desses subprocessos (mais antigo 1.º)
+    var linhasPorPosicao = new java.util.TreeMap<Long, List<PlanoFinanceiroRowDTO>>();
+    for (var versao = loan; versao.getEmprestimo() != null; versao = versao.getEmprestimo()) {
+      var pagas = planoFinanceiroEntityRepository.findAllByEmprestimo(versao.getEmprestimo()).stream()
+          .filter(p -> FinancialPlanHelper.FLG_PAGO.equals(p.getFlgPago()))
+          .count();
+      linhasPorPosicao.computeIfAbsent(pagas, k -> new ArrayList<>()).addFirst(linhaSubprocesso(versao));
+    }
+    if (linhasPorPosicao.isEmpty()) {
+      return rows;
+    }
+    var pendentes = new java.util.ArrayDeque<>(linhasPorPosicao.entrySet());
+    var resultado = new ArrayList<PlanoFinanceiroRowDTO>();
+    for (var row : rows) {
+      while (!pendentes.isEmpty() && row.numero() != null && pendentes.peek().getKey() < row.numero()) {
+        resultado.addAll(pendentes.poll().getValue());
+      }
+      resultado.add(row);
+    }
+    pendentes.forEach(e -> resultado.addAll(e.getValue()));
+    return resultado;
+  }
+
+  private static final Map<String, String> SUBPROCESSO_PLANO = Map.of(
+      "AMORTIZACAO_PARCIAL", "Amortizado Parcial",
+      "AMORTIZACAO_TOTAL", "Amortizado Total");
+
+  private static PlanoFinanceiroRowDTO linhaSubprocesso(EmprestimoEntity versao) {
+    var tipo = Objects.requireNonNullElse(versao.getTipoSituacao(), "");
+    var amortizacao = tipo.startsWith("AMORTIZACAO") || tipo.startsWith("ADIANTAMENTO");
+    // Variação do capital em dívida: a Amortização abate, o Reforço de capital acrescenta; as
+    // alterações ao nº de prestações não mexem no capital.
+    BigDecimal variacao = null;
+    if (amortizacao && versao.getValorAdiantado() != null) {
+      variacao = versao.getValorAdiantado().negate();
+    } else if (tipo.startsWith("REFORCO") && versao.getValorReforco() != null) {
+      variacao = versao.getValorReforco();
+    }
+    var saldoDepois = versao.getValorDivida();
+    var saldoAntes = saldoDepois != null && variacao != null ? saldoDepois.subtract(variacao) : saldoDepois;
+    var quando = versao.getLastModifiedDate() != null ? versao.getLastModifiedDate() : versao.getCreatedDate();
+    var data = quando != null ? quando.toLocalDate() : null;
+    return new PlanoFinanceiroRowDTO(
+        null,
+        "A",
+        amortizacao ? "AMORTIZADO" : "RENEGOCIADO",
+        data,
+        saldoAntes,
+        null,
+        variacao,
+        null,
+        saldoDepois,
+        data,
+        SUBPROCESSO_PLANO.getOrDefault(tipo, TIPO_SITUACAO_DESC.getOrDefault(tipo, tipo)));
   }
 
   private static final Map<String, String> TIPO_SITUACAO_DESC = Map.ofEntries(
@@ -419,7 +511,8 @@ public class EmprestimoReadService {
             v.getValorAdiantado(),
             v.getNrPrestacao(),
             planoFinanceiroEntityRepository.findAllByEmprestimo(v).stream()
-                .filter(p -> "A".equals(p.getEstado()) && FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
+                // pagas em qualquer estado do plano: pendente (à espera da Validação) ou já inativo
+                .filter(p -> FinancialPlanHelper.FLG_PAGO.equalsIgnoreCase(p.getFlgPago()))
                 .count(),
             v.getValorPrestacao(),
             v.getDataInicio(),

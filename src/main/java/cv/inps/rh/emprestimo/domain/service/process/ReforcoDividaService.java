@@ -128,7 +128,7 @@ public class ReforcoDividaService {
 
     if (request.getParecer() == ParecerProcesso.RETIFICACAO) {
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+      loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
     } else if (request.getAction().equals(ProcessStepAction.NEXT)) {
 
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
@@ -142,7 +142,7 @@ public class ReforcoDividaService {
         }
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+          loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
         }
       }
     }

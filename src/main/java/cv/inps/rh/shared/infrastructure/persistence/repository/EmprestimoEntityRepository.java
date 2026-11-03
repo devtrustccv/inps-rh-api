@@ -50,6 +50,11 @@ public interface EmprestimoEntityRepository extends
   // ou CABIMENTADO (Renegociação, após o Contrato; o mesmo estado final do Empréstimo Viatura). Um
   // subprocesso ainda em curso não substitui o empréstimo na lista — aparece na expansão
   // (GET /emprestimo/{id}/versoes); emprestimoIdEmCurso aponta para ele (cancelados não contam).
+  // Nº de prestações pagas: qualquer estado do plano — a Recuperação / Fundo Social à espera da
+  // Validação tem o plano pendente (P) e já traz prestações pagas (EM-016).
+  // Valor Pago: as prestações pagas passam para cada versão nova (Amortização / Renegociação), mas
+  // VALOR_PAGO não — soma-se o pago no plano da versão em vigor. Valor Amortizado: soma das
+  // Amortizações concluídas do pedido até essa versão (ponto 35).
   @Query("""
       SELECT new cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO(
           p.uuid,
@@ -70,11 +75,18 @@ public interface EmprestimoEntityRepository extends
              SELECT COUNT(pf)
              FROM PlanoFinanceiroEntity pf
              WHERE pf.emprestimo = e
-             AND pf.estado = 'A'
              AND pf.flgPago = 'SIM'
              AND pf.dataPagamento IS NOT NULL
            ),
-          e.valorPago,
+          COALESCE(
+            (
+              SELECT SUM(pago.valorPago)
+              FROM PlanoFinanceiroEntity pago
+              WHERE pago.emprestimo = e
+              AND pago.flgPago = 'SIM'
+            ),
+            e.valorPago
+          ),
           e.valorDivida,
           e.dataInicio,
           p.etapa,
@@ -98,7 +110,14 @@ public interface EmprestimoEntityRepository extends
           (
             SELECT COUNT(versao) FROM EmprestimoEntity versao WHERE versao.pedido.id = p.id
           ),
-          p.tipoPedido
+          p.tipoPedido,
+          (
+            SELECT SUM(amort.valorAdiantado) FROM EmprestimoEntity amort
+            WHERE amort.pedido.id = p.id
+            AND amort.id <= e.id
+            AND (amort.tipoSituacao LIKE 'AMORTIZACAO%' OR amort.tipoSituacao LIKE 'ADIANTAMENTO%')
+            AND amort.estado IN ('ATIVO', 'ARQUIVADO')
+          )
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id

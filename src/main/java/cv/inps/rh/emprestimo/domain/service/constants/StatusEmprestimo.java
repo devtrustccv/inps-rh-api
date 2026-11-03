@@ -17,6 +17,10 @@ public enum StatusEmprestimo {
   AUTORIZADO("Autorizado"),
   NAO_AUTORIZADO("Não Autorizado"),
   EM_CORRECAO("Em Correção"),
+  // EM-005 (melhoria 11/08): Retificação que devolve o processo ao Pedido — fica à espera do
+  // colaborador (documento / correção). As outras retificações e o "Corrigir" da validação do
+  // Fundo Social / Recuperação continuam Em Correção.
+  PENDENTE_COLABORADOR("Pendente Colaborador (aguarda documento)"),
   CABIMENTADO("Cabimentado"),
   AGUARDA_PAGAMENTO("Aguarda Pagamento"),
   ATIVO("Ativo"),

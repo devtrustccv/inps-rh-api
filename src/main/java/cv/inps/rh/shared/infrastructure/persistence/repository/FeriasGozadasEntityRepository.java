@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasGozadasEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +35,15 @@ public interface FeriasGozadasEntityRepository extends
      * geram férias gozadas (uma por dia) com o uuid do pedido da justificação; procurar só por
      * uuid dava NonUniqueResult (500) e abria no ecrã de férias um pedido que não é de férias.
      */
+    /** Férias gozadas (sem as eliminadas) dos funcionários e anos de uma página da Lista de Férias. */
+    @Query("SELECT fg FROM FeriasGozadasEntity fg JOIN FETCH fg.funId f JOIN FETCH fg.anoId a"
+        + " LEFT JOIN FETCH fg.pedidoId"
+        + " WHERE f.uuid IN :funcionarios AND a.ano IN :anos AND fg.estado <> :eliminado"
+        + " ORDER BY fg.dataInicio, fg.id")
+    List<FeriasGozadasEntity> findDaListaFerias(@Param("funcionarios") Collection<UUID> funcionarios,
+                                                @Param("anos") Collection<String> anos,
+                                                @Param("eliminado") Estado eliminado);
+
     default Optional<FeriasGozadasEntity> findPedidoFeria(UUID uuid) {
         return findFirstByPedidoId_UuidAndPedidoId_TipoPedidoOrderByIdAsc(uuid, "FERIA");
     }
