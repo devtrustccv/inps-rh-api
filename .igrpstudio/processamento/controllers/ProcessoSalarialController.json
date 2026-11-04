@@ -628,6 +628,109 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "alterarEstadoSubsidioNatal",
+      "path": "subsidio-natal/change-status",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioNatalIdsRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarSubsidioNatal",
+      "path": "subsidio-natal/validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioNatalIdsRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "editarSubsidioNatal",
+      "path": "subsidio-natal/{subsidioId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioNatalEditarRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "subsidioId",
+          "type": "long",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario-getResumoProcessamento-getResumoProcessamento-getDadosValidacao"
