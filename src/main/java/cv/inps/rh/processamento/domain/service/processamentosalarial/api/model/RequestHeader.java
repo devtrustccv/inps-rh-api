@@ -1,22 +1,11 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial.api.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class RequestHeader {
-
-  private Autorization Autorization;
-  private User User;
+public record RequestHeader(
+    Autorization Autorization,
+    User User
+) {
 
   public RequestHeader() {
-    this.Autorization = new Autorization(
-        "sips",
-        "sips@is",
-        "1001",
-        "sips"
-    );
-    this.User = new User(0);
+    this(new Autorization("sips", "sips@is", "1001", "sips"), new User(0));
   }
 }

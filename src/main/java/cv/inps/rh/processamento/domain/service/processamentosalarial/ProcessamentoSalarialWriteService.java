@@ -2,6 +2,8 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.processamento.application.constants.TipoValidacaoProcessamentoSalarial;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.api.model.OperationOutcomeResponse;
 import cv.inps.rh.shared.application.events.NotificationEvent;
 import cv.inps.rh.shared.application.services.IAMUserProfileService;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
@@ -16,10 +18,13 @@ import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -35,13 +40,17 @@ public class ProcessamentoSalarialWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
+  private static final DateTimeFormatter FORMATO_DATA_SERVICO_FINANCEIRO = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final DataSource dataSource;
   private final JdbcTemplate jdbcTemplate;
   private final ApplicationAuditorAware applicationAuditorAware;
   private final IAMUserProfileService iamUserProfileService;
+  private final ProcessarSalarioApi processarSalarioApi;
   private final EventPublisher eventPublisher;
+  private final TransactionTemplate transactionTemplate;
 
   @Transactional
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
@@ -236,27 +245,67 @@ public class ProcessamentoSalarialWriteService {
     );
   }
 
-  @Transactional
+  /**
+   * Cabimenta processo a processo, sem transação envolvente: o serviço financeiro recusa cabimentar
+   * duas vezes o mesmo processo, por isso cada cabimento aceite tem de ficar registado mesmo que um
+   * dos seguintes falhe.
+   */
   public void cabimentar(List<Long> ids) {
 
-    var processes = processamentoSalarialEntityRepository.findAllById(ids);
-    var username = applicationAuditorAware.getCurrentSubjectName();
-    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+    var processes = processamentoSalarialEntityRepository.findByIdInAndEstado(
         ids,
+        StatusProcessamento.VALIDADO_DEFINITIVO.name()
+    );
+    if (processes.size() != ids.size())
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
+
+    var username = applicationAuditorAware.getCurrentSubjectName();
+    var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
+
+    try {
+      for (var process : processes) {
+        cabimentarNoServicoFinanceiro(process);
+        transactionTemplate.executeWithoutResult(_ -> marcarComoCabimentado(process.getId(), username));
+        cabimentados.add(process);
+      }
+    } finally {
+      publicarNotificacoes(
+          cabimentados,
+          ProcessamentoSalarialEntity::getUserValidDef,
+          "Cabimento"
+      );
+    }
+  }
+
+  private void cabimentarNoServicoFinanceiro(ProcessamentoSalarialEntity process) {
+    var dataPagamento = process.getDataAte().format(FORMATO_DATA_SERVICO_FINANCEIRO);
+
+    OperationOutcomeResponse outcome;
+    try {
+      outcome = processarSalarioApi.processarCabimento(String.valueOf(process.getId()), dataPagamento);
+    } catch (RestClientException exception) {
+      LOGGER.error("Unable to reach the financial service to cabimentar process {}", process.getId(), exception);
+      throw IgrpResponseStatusException.of(
+          HttpStatus.BAD_GATEWAY,
+          "Não foi possível contactar o serviço financeiro para cabimentar o processamento %d".formatted(process.getId())
+      );
+    }
+
+    if (outcome == null || !outcome.isSuccess())
+      throw IgrpResponseStatusException.badRequest(
+          "O serviço financeiro recusou o cabimento do processamento %d: %s"
+              .formatted(process.getId(), outcome == null ? "sem resposta" : outcome.diagnostics()));
+  }
+
+  private void marcarComoCabimentado(Long id, String username) {
+    processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+        List.of(id),
         List.of(StatusProcessamento.VALIDADO_DEFINITIVO.name()),
         StatusProcessamento.CABIMENTADO.name(),
         null,
         null,
         username,
         null
-    );
-    if (updatedRows != ids.size())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
-
-    publicarNotificacoes(
-        processes,
-        ProcessamentoSalarialEntity::getUserValidDef,
-        "Cabimento"
     );
   }
 

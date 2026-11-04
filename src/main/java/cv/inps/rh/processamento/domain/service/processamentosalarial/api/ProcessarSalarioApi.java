@@ -27,6 +27,9 @@ public class ProcessarSalarioApi {
   @Value("${processamento-salarial.base.url}/trata_estorno_cabimento")
   private String extornarCabimentoUrl;
 
+  @Value("${processamento-salarial.token}")
+  private String token;
+
   public ProcessarSalarioApi(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
   }
@@ -40,13 +43,10 @@ public class ProcessarSalarioApi {
 
     LOGGER.debug("ProcessarCabimento Request: {}", request);
 
-    var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
     return restTemplate.exchange(
         processarCabimentoUrl,
         HttpMethod.POST,
-        new HttpEntity<>(request, headers),
+        new HttpEntity<>(request, jsonHeaders()),
         OperationOutcomeResponse.class
     ).getBody();
   }
@@ -67,17 +67,12 @@ public class ProcessarSalarioApi {
 
     LOGGER.debug("AutorizarSalario Request: {}", request);
 
-    var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    var response = restTemplate.exchange(
+    return restTemplate.exchange(
         autorizarUrl,
         HttpMethod.POST,
-        new HttpEntity<>(request, headers),
+        new HttpEntity<>(request, jsonHeaders()),
         OperationOutcomeResponse.class
-    );
-
-    return response.getBody();
+    ).getBody();
   }
 
   public OperationOutcomeResponse extornarCabimento(String codigo) {
@@ -89,16 +84,18 @@ public class ProcessarSalarioApi {
 
     LOGGER.debug("Extornar cabimento Request: {}", request);
 
-    var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    var response = restTemplate.exchange(
+    return restTemplate.exchange(
         extornarCabimentoUrl,
         HttpMethod.POST,
-        new HttpEntity<>(request, headers),
+        new HttpEntity<>(request, jsonHeaders()),
         OperationOutcomeResponse.class
-    );
+    ).getBody();
+  }
 
-    return response.getBody();
+  private HttpHeaders jsonHeaders() {
+    var headers = new HttpHeaders();
+    headers.setBearerAuth(token);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return headers;
   }
 }
