@@ -12,6 +12,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamen
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -35,13 +36,14 @@ class ProcessamentoSalarialWriteServiceCabimentarTest {
   private final ProcessamentoSalarialEntityRepository repository = mock(ProcessamentoSalarialEntityRepository.class);
   private final ApplicationAuditorAware auditorAware = mock(ApplicationAuditorAware.class);
   private final ProcessarSalarioApi api = mock(ProcessarSalarioApi.class);
+  private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 
   private ProcessamentoSalarialWriteService service;
 
   private static ProcessamentoSalarialEntity processo(Long id) {
     var processo = new ProcessamentoSalarialEntity();
     processo.setId(id);
-    processo.setDataAte(LocalDate.of(2025, 9, 30));
+    processo.setDataDe(LocalDate.of(2025, 9, 1));
     return processo;
   }
 
@@ -57,7 +59,7 @@ class ProcessamentoSalarialWriteServiceCabimentarTest {
         mock(TiposRelacionamentoEntityRepository.class),
         repository,
         mock(DataSource.class),
-        mock(JdbcTemplate.class),
+        jdbcTemplate,
         auditorAware,
         mock(IAMUserProfileService.class),
         api,
@@ -67,13 +69,28 @@ class ProcessamentoSalarialWriteServiceCabimentarTest {
   }
 
   @Test
-  void enviaFimDoPeriodoComoDataDePagamentoEMarcaCabimentado() {
+  void enviaADataDePagamentoDoProcedimentoEMarcaCabimentado() {
     givenProcessos(processo(1L));
-    when(api.processarCabimento("1", "30-09-2025")).thenReturn(outcome(200, "OK"));
+    when(api.processarCabimento("1", "28-09-2025")).thenReturn(outcome(200, "OK"));
 
     service.cabimentar(List.of(1L));
 
     verifyMarcado(1L, 1);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void naoChamaOServicoQuandoOProcedimentoDevolveMensagem() {
+    var mensagem = "O ano de orcamento nao corresponde ao ano de processamento. Favor verificar.";
+    givenProcessos(processo(1L));
+    when(jdbcTemplate.execute(any(ConnectionCallback.class))).thenReturn(mensagem);
+
+    assertThatThrownBy(() -> service.cabimentar(List.of(1L)))
+        .isInstanceOfSatisfying(IgrpResponseStatusException.class,
+            exception -> assertThat(exception.getBody().getTitle()).isEqualTo(mensagem));
+
+    verify(api, never()).processarCabimento(any(), any());
+    verifyMarcado(1L, 0);
   }
 
   @Test
@@ -89,8 +106,8 @@ class ProcessamentoSalarialWriteServiceCabimentarTest {
   @Test
   void mantemOsProcessosJaCabimentadosQuandoOSeguinteERecusado() {
     givenProcessos(processo(1L), processo(2L));
-    when(api.processarCabimento("1", "30-09-2025")).thenReturn(outcome(200, "OK"));
-    when(api.processarCabimento("2", "30-09-2025")).thenReturn(outcome(400, "Data invalida"));
+    when(api.processarCabimento("1", "28-09-2025")).thenReturn(outcome(200, "OK"));
+    when(api.processarCabimento("2", "28-09-2025")).thenReturn(outcome(400, "Data invalida"));
 
     assertThatThrownBy(() -> service.cabimentar(List.of(1L, 2L)))
         .isInstanceOf(IgrpResponseStatusException.class);
@@ -102,7 +119,7 @@ class ProcessamentoSalarialWriteServiceCabimentarTest {
   @Test
   void respondeBadGatewayQuandoOServicoEstaIndisponivel() {
     givenProcessos(processo(1L));
-    when(api.processarCabimento("1", "30-09-2025")).thenThrow(new ResourceAccessException("timeout"));
+    when(api.processarCabimento("1", "28-09-2025")).thenThrow(new ResourceAccessException("timeout"));
 
     assertThatThrownBy(() -> service.cabimentar(List.of(1L)))
         .isInstanceOfSatisfying(IgrpResponseStatusException.class,

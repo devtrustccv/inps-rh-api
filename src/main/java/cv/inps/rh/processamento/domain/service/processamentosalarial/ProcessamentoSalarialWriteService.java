@@ -30,7 +30,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Function;
 
@@ -260,6 +263,11 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
 
     var username = applicationAuditorAware.getCurrentSubjectName();
+
+    var mensagemProcedimento = executarCabimentarProcessamento(ids, username);
+    if (StringUtils.hasText(mensagemProcedimento))
+      throw IgrpResponseStatusException.badRequest(mensagemProcedimento);
+
     var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
 
     try {
@@ -277,8 +285,45 @@ public class ProcessamentoSalarialWriteService {
     }
   }
 
+  private String executarCabimentarProcessamento(List<Long> ids, String username) {
+    var processingIds = ids.stream()
+        .map(String::valueOf)
+        .toArray(String[]::new);
+
+    return jdbcTemplate.execute((Connection con) -> {
+
+      var oracleCon = con.unwrap(OracleConnection.class);
+
+      try (var stmt = (OracleCallableStatement) oracleCon.prepareCall(
+          "{ call RH_PROCESSAMENTO_SALARIAL_DB.CABIMENTAR_PROCESSAMENTO(?, ?, ?, ?) }")) {
+
+        stmt.setPlsqlIndexTable(
+            1,
+            processingIds,
+            processingIds.length,
+            processingIds.length,
+            OracleTypes.VARCHAR,
+            4000
+        );
+        stmt.setInt(2, Year.now(ZoneId.systemDefault()).getValue());
+        stmt.setString(3, username);
+        stmt.registerOutParameter(4, Types.VARCHAR);
+        stmt.execute();
+
+        return stmt.getString(4);
+      }
+    });
+  }
+
+  /**
+   * A data de pagamento segue a regra do procedimento CABIMENTAR_PROCESSAMENTO:
+   * dois dias antes do fim do mês do processamento.
+   */
   private void cabimentarNoServicoFinanceiro(ProcessamentoSalarialEntity process) {
-    var dataPagamento = process.getDataAte().format(FORMATO_DATA_SERVICO_FINANCEIRO);
+    var dataPagamento = process.getDataDe()
+        .with(TemporalAdjusters.lastDayOfMonth())
+        .minusDays(2)
+        .format(FORMATO_DATA_SERVICO_FINANCEIRO);
 
     OperationOutcomeResponse outcome;
     try {
