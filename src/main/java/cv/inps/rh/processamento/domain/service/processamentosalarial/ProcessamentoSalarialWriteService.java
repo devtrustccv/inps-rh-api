@@ -112,11 +112,6 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  @Transactional
-  public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
-    validar(ids, tipoValidacao, null, null);
-  }
-
   /**
    * Validação provisória (processamentos em PROCESSADO) ou definitiva (em VALIDADO_PROVISORIO).
    *
@@ -127,7 +122,7 @@ public class ProcessamentoSalarialWriteService {
    */
   @Transactional
   public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao,
-      String validar, String observacao) {
+                      String validar, String observacao) {
 
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
@@ -171,11 +166,11 @@ public class ProcessamentoSalarialWriteService {
    * PROCESSADO (etapa Validação Provisória) e notifica quem validou provisoriamente.
    */
   private void devolverAEtapaAnterior(List<Long> ids, boolean isDefinitivo,
-      StatusProcessamento statusPesquisa, String decisao, String observacao) {
+                                      StatusProcessamento statusPesquisa, String decisao, String observacao) {
 
     if (!"NAO".equals(decisao) && !"CORRIGIR".equals(decisao))
       throw IgrpResponseStatusException.badRequest("Decisão de validação inválida: " + decisao
-          + ". Valores aceites: SIM, NAO, CORRIGIR.");
+                                                   + ". Valores aceites: SIM, NAO, CORRIGIR.");
     if (!StringUtils.hasText(observacao))
       throw IgrpResponseStatusException.badRequest(
           "A Observação é obrigatória quando não valida: indique a justificação da retificação ou da não aprovação.");
@@ -197,9 +192,9 @@ public class ProcessamentoSalarialWriteService {
     }
 
     var acao = ("NAO".equals(decisao) ? "Não aprovação" : "Pedido de retificação")
-        + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
-        + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
-        + ". Motivo: " + observacao.trim();
+               + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
+               + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
+               + ". Motivo: " + observacao.trim();
     publicarNotificacoes(
         processes,
         isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
@@ -314,7 +309,6 @@ public class ProcessamentoSalarialWriteService {
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
-    // QA PS-033: com Data Fim anterior o procedimento processava na mesma o mês da Data Início.
     if (request.getDataInicio() != null && request.getDataFim() != null
         && request.getDataFim().isBefore(request.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
@@ -331,10 +325,6 @@ public class ProcessamentoSalarialWriteService {
 
     var direccaoIds = request.getDireccaoId() != null ? request.getDireccaoId() : List.<Long>of();
 
-    // Colaborador indicado SEM direção: a procedure PROCESSAR, com p_tiprel_id preenchido, procura o
-    // centro de custo da direção recebida e, com direção NULL, falha ("o serviço não está associado ao
-    // centro de custo"). Usa-se a direção da mobilidade do próprio tiprel (mesma ligação
-    // tiprel.mob_id -> mobilidade.instit_id que a procedure usa no processamento global).
     if (request.getRelacionamentoId() != null && direccaoIds.isEmpty()) {
       direccaoIds = tiposRelacionamentoEntityRepository
           .findDirecaoIdDaMobilidade(request.getRelacionamentoId())
@@ -351,15 +341,14 @@ public class ProcessamentoSalarialWriteService {
         .map(String::valueOf)
         .toArray(String[]::new);
 
-    if (ccIds.length == 0) {
+    if (ccIds.length == 0)
       ccIds = new String[]{null};
-    }
 
-    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?) }";
+    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
-    try (var connection = dataSource.getConnection()) {
+    try (var connection = dataSource.getConnection();
+         var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);) {
 
-      var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);
       stmt.setString(1, startDate);
       stmt.setString(2, endDate);
       stmt.setPlsqlIndexTable(
@@ -371,20 +360,16 @@ public class ProcessamentoSalarialWriteService {
           32767
       );
 
-      if (request.getRelacionamentoId() == null) {
+      if (request.getRelacionamentoId() == null)
         stmt.setNull(4, Types.NUMERIC);
-      } else {
+      else
         stmt.setLong(4, request.getRelacionamentoId());
-      }
 
       stmt.setString(5, request.getTipo());
-
       stmt.setString(6, applicationAuditorAware.getCurrentSubjectName());
-
       stmt.setInt(7, 0);
-
       stmt.registerOutParameter(8, Types.VARCHAR);
-
+      stmt.setString(9, request.getObservacao());
       stmt.execute();
 
       return stmt.getString(8);
@@ -399,25 +384,25 @@ public class ProcessamentoSalarialWriteService {
       Function<ProcessamentoSalarialEntity, String> previousUserResolver,
       String action
   ) {
-    var processIdsByUser = new LinkedHashMap<String, List<Long>>();
+    var processesByUser = new LinkedHashMap<String, List<ProcessamentoSalarialEntity>>();
 
     for (var process : processes) {
       var previousUser = previousUserResolver.apply(process);
       if (StringUtils.hasText(previousUser)) {
-        processIdsByUser.computeIfAbsent(previousUser, ignored -> new ArrayList<>())
-            .add(process.getId());
+        processesByUser.computeIfAbsent(previousUser, _ -> new ArrayList<>())
+            .add(process);
       }
     }
 
-    if (processIdsByUser.isEmpty()) {
+    if (processesByUser.isEmpty()) {
       LOGGER.warn("No previous users found for salary processing notification: action={}", action);
       return;
     }
 
-    var profilesByUser = iamUserProfileService.resolverPerfis(processIdsByUser.keySet());
+    var profilesByUser = iamUserProfileService.resolverPerfis(processesByUser.keySet());
     var notifications = new ArrayList<NotificationEvent>();
 
-    processIdsByUser.forEach((userId, processIds) -> {
+    processesByUser.forEach((userId, userProcesses) -> {
       var profile = profilesByUser.get(userId);
       if (profile == null || !StringUtils.hasText(profile.getEmail())) {
         LOGGER.warn("No email found for salary processing notification: user={} action={}", userId, action);
@@ -428,10 +413,13 @@ public class ProcessamentoSalarialWriteService {
           ? profile.getFullName()
           : profile.getUsername();
       var subject = "Processamento salarial - " + action;
-      var body = "Olá %s,%n%nFoi executada a ação \"%s\" nos processamentos salariais %s."
-          .formatted(recipientName, action, processIds);
 
-      notifications.add(NotificationEvent.text(profile.getEmail(), subject, body));
+      userProcesses.forEach(process -> {
+        var body = "Olá %s,%n%nFoi executada a ação \"%s\" no processamento salarial %d."
+            .formatted(recipientName, action, process.getId());
+
+        notifications.add(NotificationEvent.text(profile.getEmail(), subject, body, process.getId(), null));
+      });
     });
 
     if (notifications.isEmpty())

@@ -94,7 +94,7 @@ public class MissaoServicoServiceWrite {
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     aplicarIlhaConcelho(missao, pais, dto);
-    missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setDescricaoDestino(descricaoDestino(missao, dto));
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
@@ -148,7 +148,7 @@ public class MissaoServicoServiceWrite {
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     aplicarIlhaConcelho(missao, pais, dto);
-    missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setDescricaoDestino(descricaoDestino(missao, dto));
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
@@ -322,9 +322,6 @@ public class MissaoServicoServiceWrite {
     if (dto.getPaisDestinoId() == null) {
       throw IgrpResponseStatusException.badRequest("Indique o País de Destino.");
     }
-    if (!StringUtils.hasText(dto.getDescricaoDestino())) {
-      throw IgrpResponseStatusException.badRequest("Indique a Descrição do Destino.");
-    }
     // Obrigatório no ecrã "Registo de Missão" (Âmbito da Missão), e é o que justifica a deslocação.
     if (!StringUtils.hasText(dto.getAmbitoMissao())) {
       throw IgrpResponseStatusException.badRequest("Indique o Âmbito da Missão.");
@@ -490,6 +487,24 @@ public class MissaoServicoServiceWrite {
     }
     missao.setIlhaId(dto.getIlhaId() != null ? geografiaRepository.findByIdOrThrow(dto.getIlhaId()) : null);
     missao.setConcelhoId(dto.getConcelhoId() != null ? geografiaRepository.findByIdOrThrow(dto.getConcelhoId()) : null);
+  }
+
+  /**
+   * O Registo de Missão deixou de pedir a "Descrição do Destino": sem texto enviado, compõe-se do
+   * destino escolhido (concelho, ilha e país), que é o que a lista e as notificações ({destino}) mostram.
+   */
+  private String descricaoDestino(MissaoServicoEntity missao, MissaoSubmissaoRequestDTO dto) {
+    if (StringUtils.hasText(dto.getDescricaoDestino())) {
+      return dto.getDescricaoDestino().trim();
+    }
+    var partes = java.util.stream.Stream.of(missao.getConcelhoId(), missao.getIlhaId(), missao.getPaisDestinoId())
+        .filter(java.util.Objects::nonNull)
+        .map(GeografiaEntity::getNome)
+        .filter(StringUtils::hasText)
+        .distinct()
+        .toList();
+    var descricao = String.join(", ", partes);
+    return descricao.length() > 200 ? descricao.substring(0, 200) : descricao;
   }
 
   /**

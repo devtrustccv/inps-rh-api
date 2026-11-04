@@ -4,6 +4,9 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.dto.SubsidioFeriaDetalheFullDTO;
+import cv.inps.rh.processamento.application.dto.SubsidioNatalEditarRequestDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import org.springframework.util.StringUtils;
 import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
 import cv.inps.rh.processamento.domain.models.SubsidioNatalStatus;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -20,8 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.Year;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -79,7 +85,14 @@ public class SubsidioService {
           validacaoEntityRepository.save(validation);
         }
       }
-      case INATIVAR -> subsidioEntityRepository.updateEstadoById(subsidioId, status.getCode());
+      // Inativar é FLG_ATIVO_INACTIVO (o ESTADO é o de validação, P/A): com ESTADO = I o subsídio
+      // desaparecia da lista. Mantido por compatibilidade; o ecrã usa subsidio-natal/change-status.
+      case INATIVAR -> {
+        var subs = subsidioEntityRepository.findByIdOrThrow(subsidioId);
+        subs.setFlgAtivoInactivo(Estado.I.name());
+        marcarAlteracao(subs);
+        subsidioEntityRepository.save(subs);
+      }
     }
   }
 
@@ -90,7 +103,7 @@ public class SubsidioService {
   @Transactional(readOnly = true)
   public WrapperListDTO getDataSubsidioNatal(Long anoProcessamento, Long direcaoId, Long funId, Integer page, Integer size) {
 
-    var data = vsubsidioNatalEntityRepository.findSubsidioNatalByAno(
+    var data = subsidioEntityRepository.findSubsidioNatal(
         anoProcessamento != null ? anoProcessamento : Year.now(ZoneId.systemDefault()).getValue(),
         direcaoId,
         funId,
@@ -101,6 +114,120 @@ public class SubsidioService {
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent());
     return response;
+  }
+
+  /** Ativar/Inativar em lote: troca FLG_ATIVO_INACTIVO (A ↔ I) de cada subsídio selecionado. */
+  @Transactional
+  public int alterarEstadoSubsidioNatal(List<Long> subsidioIds) {
+    var subsidios = subsidiosNatalEmVigor(subsidioIds);
+    subsidios.forEach(s -> {
+      s.setFlgAtivoInactivo(Estado.A.name().equals(s.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
+      marcarAlteracao(s);
+    });
+    subsidioEntityRepository.saveAll(subsidios);
+    return subsidios.size();
+  }
+
+  /** Validar em lote: ESTADO P → A. Os já validados ficam como estão. */
+  @Transactional
+  public int validarSubsidioNatal(List<Long> subsidioIds) {
+    var pendentes = subsidiosNatalEmVigor(subsidioIds).stream()
+        .filter(s -> Estado.P.name().equals(s.getEstado()))
+        .toList();
+    if (pendentes.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Os subsídios selecionados já estão validados.");
+    pendentes.forEach(s -> {
+      s.setEstado(Estado.A.name());
+      marcarAlteracao(s);
+    });
+    subsidioEntityRepository.saveAll(pendentes);
+    return pendentes.size();
+  }
+
+  /**
+   * Editar o Valor Subsídio e/ou a Prenda de Natal (spec 3.2.11.1): o registo em vigor passa a E e
+   * cria-se um novo com os valores alterados, a Observação (motivo, obrigatório) e ESTADO P — volta
+   * a precisar de validação.
+   */
+  @Transactional
+  public Long editarSubsidioNatal(Long subsidioId, SubsidioNatalEditarRequestDTO dto) {
+    var anterior = subsidiosNatalEmVigor(List.of(subsidioId)).getFirst();
+
+    var novoValor = dto.getValorSubsidio() != null ? dto.getValorSubsidio() : anterior.getValorSubsidio();
+    var novaPrenda = dto.getValorPrendaNatal() != null ? dto.getValorPrendaNatal() : anterior.getValorPrendaNatal();
+    if (novoValor < 0 || (novaPrenda != null && novaPrenda < 0))
+      throw IgrpResponseStatusException.badRequest("Os valores do subsídio não podem ser negativos.");
+    if (Objects.equals(novoValor, anterior.getValorSubsidio())
+        && Objects.equals(novaPrenda, anterior.getValorPrendaNatal()))
+      throw IgrpResponseStatusException.badRequest(
+          "Não alterou o Valor Subsídio nem a Prenda de Natal: não há nada a gravar.");
+    if (!StringUtils.hasText(dto.getObservacao()))
+      throw IgrpResponseStatusException.badRequest("Indique o motivo da alteração.");
+    var motivo = dto.getObservacao().trim();
+    if (motivo.length() > 500)
+      throw IgrpResponseStatusException.badRequest("O motivo da alteração não pode ter mais de 500 caracteres.");
+
+    anterior.setEstado(Estado.E.name());
+    marcarAlteracao(anterior);
+    subsidioEntityRepository.saveAndFlush(anterior);
+
+    var novo = new SubsidioEntity();
+    novo.setTipoSubsidio(anterior.getTipoSubsidio());
+    novo.setFun(anterior.getFun());
+    novo.setAnoReferente(anterior.getAnoReferente());
+    novo.setEscalaoId(anterior.getEscalaoId());
+    novo.setMesTrab(anterior.getMesTrab());
+    novo.setDiasTrab(anterior.getDiasTrab());
+    novo.setDataInicio(anterior.getDataInicio());
+    novo.setDataFim(anterior.getDataFim());
+    novo.setValorMes(anterior.getValorMes());
+    novo.setValorDia(anterior.getValorDia());
+    novo.setSituacao(anterior.getSituacao());
+    novo.setFlgAtivoInactivo(anterior.getFlgAtivoInactivo());
+    novo.setValorSalarioBase(anterior.getValorSalarioBase());
+    novo.setPercSalario(anterior.getPercSalario());
+    novo.setFaltas(anterior.getFaltas());
+    novo.setPercFalta(anterior.getPercFalta());
+    novo.setValorChequeBrinde(anterior.getValorChequeBrinde());
+    novo.setReferenciaId(anterior.getId());
+    novo.setValorSubsidio(novoValor);
+    novo.setValorPrendaNatal(novaPrenda);
+    novo.setObservacao(motivo);
+    novo.setEstado(Estado.P.name());
+    novo.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    novo.setDataRegisto(LocalDate.now(ZoneId.systemDefault()));
+    // Sem id numérico do utilizador autenticado: mantém-se o do registo de origem (o cálculo usa 1).
+    novo.setUserRegistoId(anterior.getUserRegistoId());
+    novo.setUserRegistoName(utilizadorAtual());
+    return subsidioEntityRepository.save(novo).getId();
+  }
+
+  /** Subsídios de Natal em vigor (P/A) e ainda não processados no salário; recusa os restantes. */
+  private List<SubsidioEntity> subsidiosNatalEmVigor(List<Long> subsidioIds) {
+    if (subsidioIds == null || subsidioIds.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Selecione pelo menos um subsídio.");
+    var subsidios = subsidioEntityRepository.findNatalByIdIn(subsidioIds);
+    if (subsidios.size() != new java.util.HashSet<>(subsidioIds).size())
+      throw IgrpResponseStatusException.notFound("Subsídio de Natal não encontrado.");
+    for (var s : subsidios) {
+      if (Estado.E.name().equals(s.getEstado()))
+        throw IgrpResponseStatusException.badRequest(
+            "O subsídio de " + s.getFun().getNome() + " foi substituído por uma alteração: atualize a lista.");
+      if (s.getProcSalId() != null)
+        throw IgrpResponseStatusException.badRequest(
+            "O subsídio de " + s.getFun().getNome() + " já foi processado no salário e não pode ser alterado.");
+    }
+    return subsidios;
+  }
+
+  private void marcarAlteracao(SubsidioEntity s) {
+    s.setDataAlteracao(LocalDate.now(ZoneId.systemDefault()));
+    s.setUserAlteracaoName(utilizadorAtual());
+  }
+
+  private String utilizadorAtual() {
+    var nome = applicationAuditorAware.getCurrentSubjectName();
+    return StringUtils.hasText(nome) ? nome : "sistema";
   }
 
   @Transactional(readOnly = true)

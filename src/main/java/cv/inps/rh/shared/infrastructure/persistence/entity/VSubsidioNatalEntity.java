@@ -67,7 +67,7 @@ public class VSubsidioNatalEntity {
   private Long valorPrendaNatal;
 
   @Column(name = "OBSERVACAO")
-  private Long observacao;
+  private String observacao;
 
   @Size(max = 20)
   @NotNull

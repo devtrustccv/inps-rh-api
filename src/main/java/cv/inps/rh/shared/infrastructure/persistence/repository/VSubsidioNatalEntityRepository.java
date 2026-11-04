@@ -1,42 +1,15 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.processamento.application.dto.SubsidioNatalResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VSubsidioNatalEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * A view RH_V_SUBSIDIO_NATAL só mostra ESTADO A/I e exige vínculo activo; a Lista Subsídio de Natal
+ * passou a ler RH_T_SUBSIDIOS (SubsidioEntityRepository.findSubsidioNatal), onde o ESTADO é o de
+ * validação (P/A) e o activo/inactivo é FLG_ATIVO_INACTIVO, como no Subsídio de Férias.
+ */
 @Repository
 public interface VSubsidioNatalEntityRepository extends JpaRepository<VSubsidioNatalEntity, Long>, JpaSpecificationExecutor<VSubsidioNatalEntity> {
-
-  @Query("""
-      SELECT NEW cv.inps.rh.processamento.application.dto.SubsidioNatalResponseDTO(
-          sn.nome,
-          sn.salario,
-          sn.mesTrab,
-          sn.percSalario,
-          sn.faltas,
-          sn.percFalta,
-          sn.valorSubsidio,
-          sn.valorChequeBrinde,
-          sn.valorPrendaNatal,
-          sn.estado,
-          sn.id
-      )
-      FROM VSubsidioNatalEntity sn
-      WHERE sn.anoReferente = :ano
-            AND (:direcaoId IS NULL OR sn.institId = :direcaoId)
-            AND (:funId IS NULL OR sn.funId = :funId)
-      """)
-  Page<SubsidioNatalResponseDTO> findSubsidioNatalByAno(
-      @Param("ano") Long ano,
-      @Param("direcaoId") Long direcaoId,
-      @Param("funId") Long funId,
-      Pageable pageable
-  );
-
 }

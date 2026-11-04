@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @IgrpController
 @RestController
@@ -287,6 +288,64 @@ public class ProcessoSalarialController {
       @Valid @RequestBody AtivarInativarSubsidioNatalDTO ativarInactivarSubsidioNatalRequest
   ) {
     final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-natal/change-status")
+  @Operation(
+      summary = "Ativar inativar subsidios natal",
+      description = "Troca FLG_ATIVO_INACTIVO (A <-> I) dos subsídios de Natal selecionados.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> alterarEstadoSubsidioNatal(
+      @Valid @RequestBody SubsidioNatalIdsRequestDTO request
+  ) {
+    final var command = new AlterarEstadoSubsidioNatalCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-natal/validar")
+  @Operation(
+      summary = "Validar subsidios natal",
+      description = "Valida (ESTADO P -> A) os subsídios de Natal selecionados.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> validarSubsidioNatal(
+      @Valid @RequestBody SubsidioNatalIdsRequestDTO request
+  ) {
+    final var command = new ValidarSubsidioNatalCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PutMapping(value = "subsidio-natal/{subsidioId}")
+  @Operation(
+      summary = "Editar subsidio natal",
+      description = "Altera Valor Subsídio e/ou Prenda de Natal com motivo obrigatório: o registo passa a E e cria-se um novo em P.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> editarSubsidioNatal(
+      @PathVariable Long subsidioId,
+      @RequestBody SubsidioNatalEditarRequestDTO request
+  ) {
+    final var command = new EditarSubsidioNatalCommand(subsidioId, request);
 
     return commandBus.send(command);
   }
