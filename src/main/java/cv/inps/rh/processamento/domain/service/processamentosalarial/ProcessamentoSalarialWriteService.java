@@ -320,6 +320,7 @@ public class ProcessamentoSalarialWriteService {
    * dois dias antes do fim do mês do processamento.
    */
   private void cabimentarNoServicoFinanceiro(ProcessamentoSalarialEntity process) {
+
     var dataPagamento = process.getDataDe()
         .with(TemporalAdjusters.lastDayOfMonth())
         .minusDays(2)
@@ -332,7 +333,7 @@ public class ProcessamentoSalarialWriteService {
       LOGGER.error("Unable to reach the financial service to cabimentar process {}", process.getId(), exception);
       throw IgrpResponseStatusException.of(
           HttpStatus.BAD_GATEWAY,
-          "Não foi possível contactar o serviço financeiro para cabimentar o processamento %d".formatted(process.getId())
+          "Não foi possível contactar o serviço financeiro para efectuar a cabimentação"
       );
     }
 
