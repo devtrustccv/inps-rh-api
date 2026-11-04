@@ -268,17 +268,18 @@ public class ProcessamentoSalarialWriteService {
     if (StringUtils.hasText(mensagemProcedimento))
       throw IgrpResponseStatusException.badRequest(mensagemProcedimento);
 
-    var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
+    //var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
 
     try {
-      for (var process : processes) {
+    /*  for (var process : processes) {
         cabimentarNoServicoFinanceiro(process);
         transactionTemplate.executeWithoutResult(_ -> marcarComoCabimentado(process.getId(), username));
         cabimentados.add(process);
-      }
+      }*/
     } finally {
       publicarNotificacoes(
-          cabimentados,
+          //cabimentados,
+          processes,
           ProcessamentoSalarialEntity::getUserValidDef,
           "Cabimento"
       );
