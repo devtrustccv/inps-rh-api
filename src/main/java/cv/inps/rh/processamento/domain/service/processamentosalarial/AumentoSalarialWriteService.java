@@ -70,7 +70,7 @@ public class AumentoSalarialWriteService {
 
     var call = new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName("PKG_AUMENTO_SALARIAL")
+        .withCatalogName("RH_PK_AUMENTO_SALARIAL_DB")
         .withProcedureName("SIMULAR_AUMENTO")
         .declareParameters(
             new SqlParameter("P_AUMENTO_SAL_ID", Types.VARCHAR),

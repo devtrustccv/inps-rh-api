@@ -471,9 +471,14 @@ public class AlterarSituacaoLaboralWriteService {
     return param != null && ESTADO_CONTRATO_CESSADO.equalsIgnoreCase(param.getFlgEstadoContrato());
   }
 
-  /** Situação cujo estado de contrato (FLG_ESTADO_CONTRATO) é 'A' (Ativo) — (re)ativa o vínculo. */
+  /**
+   * Situação cujo estado de contrato (FLG_ESTADO_CONTRATO) é 'A' (Ativo) — (re)ativa o vínculo.
+   * Uma ausência (flg_ausencia=1, ex.: Licença S/Vencimento) também tem contrato ativo, mas não reativa:
+   * regista-se sobre um colaborador ativo e não pode reabrir as remunerações e descontos fechados.
+   */
   private boolean ativaContrato(ParamSituacaoEntity param) {
-    return param != null && ESTADO_CONTRATO_ATIVO.equalsIgnoreCase(param.getFlgEstadoContrato());
+    return param != null && ESTADO_CONTRATO_ATIVO.equalsIgnoreCase(param.getFlgEstadoContrato())
+        && !Integer.valueOf(1).equals(param.getFlgAusencia());
   }
 
   private boolean mudouSituacaoOuMotivo(SituacaoLaboralEntity situacaoAtual, AlterarSituacaoLaboralRequest dto) {

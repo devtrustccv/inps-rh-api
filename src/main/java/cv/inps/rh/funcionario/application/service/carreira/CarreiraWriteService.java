@@ -668,7 +668,7 @@ public class CarreiraWriteService {
   }
 
   /**
-   * Chama pkg_aumento_salarial.REGISTO_SALARIO(P_CARREIRA_ID_OLD, P_CARREIRA_ID_NEW,
+   * Chama rh_pk_aumento_salarial_db.REGISTO_SALARIO(P_CARREIRA_ID_OLD, P_CARREIRA_ID_NEW,
    * P_USER_REGISTO_ID, P_USER_REGISTO_NAME) na transação corrente.
    * TODO: P_USER_REGISTO_ID/NAME hardcoded — trocar pelo utilizador do login quando disponível.
    */
@@ -677,7 +677,7 @@ public class CarreiraWriteService {
     final String userRegistoName = "SYSTEM";
     entityManager.unwrap(org.hibernate.Session.class).doWork(conn -> {
       try (java.sql.CallableStatement cs =
-               conn.prepareCall("{call pkg_aumento_salarial.REGISTO_SALARIO(?,?,?,?)}")) {
+               conn.prepareCall("{call rh_pk_aumento_salarial_db.REGISTO_SALARIO(?,?,?,?)}")) {
         cs.setLong(1, carreiraIdOld);
         cs.setLong(2, carreiraIdNew);
         cs.setLong(3, userRegistoId);
@@ -685,9 +685,9 @@ public class CarreiraWriteService {
         cs.execute();
       } catch (java.sql.SQLException e) {
         // DIAGNÓSTICO (temporário — remover após correção do proc na BD): captura o stack Oracle
-        // completo (com o ORA-06512 "at PKG_AUMENTO_SALARIAL, line NNN") para enviar ao DBA. NÃO
+        // completo (com o ORA-06512 "at RH_PK_AUMENTO_SALARIAL_DB, line NNN") para enviar ao DBA. NÃO
         // altera o comportamento — o erro é RE-LANÇADO e a transação continua a fazer rollback.
-        LOGGER.error("[PROGRESSAO][REGISTO_SALARIO] FALHOU pkg_aumento_salarial.REGISTO_SALARIO "
+        LOGGER.error("[PROGRESSAO][REGISTO_SALARIO] FALHOU rh_pk_aumento_salarial_db.REGISTO_SALARIO "
             + "(P_CARREIRA_ID_OLD={}, P_CARREIRA_ID_NEW={}, P_USER_REGISTO_ID={}, P_USER_REGISTO_NAME={}) "
             + "| SQLState={} ErrorCode={} | Oracle: {}",
             carreiraIdOld, carreiraIdNew, userRegistoId, userRegistoName,

@@ -24,17 +24,23 @@ public interface AumentoSimulacaoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.ColaboradoresAumentoRowDTO(
-         a.fun.nome,
-         a.carreira.carrPccsId.nome,
+         f.nome,
+         p.nome,
          a.nivelEscalao,
          a.salarioAntes,
          a.salarioDepois
       )
       FROM AumentoSimulacaoEntity a
-      WHERE (:institutoId IS NULL OR a.institId = :institutoId)
+      LEFT JOIN a.fun f
+      LEFT JOIN a.carreira c
+      LEFT JOIN c.carrPccsId p
+      WHERE a.aumentoSalId = :aumentoSalId
+      AND (:institutoId IS NULL OR a.institId = :institutoId)
       AND (:seccaoId IS NULL OR a.secaoId = :seccaoId)
+      ORDER BY f.nome ASC, a.id ASC
       """)
   Page<ColaboradoresAumentoRowDTO> list(
+      @Param("aumentoSalId") Long aumentoSalId,
       @Param("institutoId") Long institutoId,
       @Param("seccaoId") Long seccaoId,
       Pageable pageable
