@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetColaboresAumentoSalarialQuery implements Query {
 
+  private String aumentoSalarialId;
+
   private Long direcaoId;
 
   private Long organicaId;

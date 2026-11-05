@@ -11,7 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @Entity
-@Table(name = "RH_T_AUMENTO_SIMULACAO")
+@Table(name = "RH_T_AUMENTO_SALARIAL_DET")
 public class AumentoSimulacaoEntity {
 
   @Id
