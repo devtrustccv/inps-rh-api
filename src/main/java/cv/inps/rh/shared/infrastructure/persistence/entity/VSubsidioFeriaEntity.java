@@ -50,10 +50,16 @@ public class VSubsidioFeriaEntity {
   @Column(name = "ESTADO", nullable = false, length = 3)
   private String estado;
 
+  @Column(name = "ESTADO_DESC")
+  private String estadoDesc;
+
   @Size(max = 20)
   @NotNull
   @Column(name = "FLG_ATIVO_INACTIVO", nullable = false, length = 20)
   private String flgAtivoInactivo;
+
+  @Column(name = "FLG_ATIVO_INACTIVO_DESC")
+  private String flgAtivoInactivoDesc;
 
   @Column(name = "SUMATORIA_DIAS_TOTAL")
   private Long sumatoriaDiasTotal;

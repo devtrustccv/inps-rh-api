@@ -2,6 +2,8 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.processamento.application.constants.TipoValidacaoProcessamentoSalarial;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.api.model.OperationOutcomeResponse;
 import cv.inps.rh.shared.application.events.NotificationEvent;
 import cv.inps.rh.shared.application.services.IAMUserProfileService;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
@@ -16,16 +18,22 @@ import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Function;
 
@@ -35,13 +43,17 @@ public class ProcessamentoSalarialWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
+  private static final DateTimeFormatter FORMATO_DATA_SERVICO_FINANCEIRO = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final DataSource dataSource;
   private final JdbcTemplate jdbcTemplate;
   private final ApplicationAuditorAware applicationAuditorAware;
   private final IAMUserProfileService iamUserProfileService;
+  private final ProcessarSalarioApi processarSalarioApi;
   private final EventPublisher eventPublisher;
+  private final TransactionTemplate transactionTemplate;
 
   @Transactional
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
@@ -112,11 +124,6 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  @Transactional
-  public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
-    validar(ids, tipoValidacao, null, null);
-  }
-
   /**
    * Validação provisória (processamentos em PROCESSADO) ou definitiva (em VALIDADO_PROVISORIO).
    *
@@ -127,7 +134,7 @@ public class ProcessamentoSalarialWriteService {
    */
   @Transactional
   public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao,
-      String validar, String observacao) {
+                      String validar, String observacao) {
 
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
@@ -171,11 +178,11 @@ public class ProcessamentoSalarialWriteService {
    * PROCESSADO (etapa Validação Provisória) e notifica quem validou provisoriamente.
    */
   private void devolverAEtapaAnterior(List<Long> ids, boolean isDefinitivo,
-      StatusProcessamento statusPesquisa, String decisao, String observacao) {
+                                      StatusProcessamento statusPesquisa, String decisao, String observacao) {
 
     if (!"NAO".equals(decisao) && !"CORRIGIR".equals(decisao))
       throw IgrpResponseStatusException.badRequest("Decisão de validação inválida: " + decisao
-          + ". Valores aceites: SIM, NAO, CORRIGIR.");
+                                                   + ". Valores aceites: SIM, NAO, CORRIGIR.");
     if (!StringUtils.hasText(observacao))
       throw IgrpResponseStatusException.badRequest(
           "A Observação é obrigatória quando não valida: indique a justificação da retificação ou da não aprovação.");
@@ -197,9 +204,9 @@ public class ProcessamentoSalarialWriteService {
     }
 
     var acao = ("NAO".equals(decisao) ? "Não aprovação" : "Pedido de retificação")
-        + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
-        + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
-        + ". Motivo: " + observacao.trim();
+               + (isDefinitivo ? " na validação definitiva" : " na validação provisória")
+               + " — devolvido à etapa " + (isDefinitivo ? "Validação Provisória" : "Processamento")
+               + ". Motivo: " + observacao.trim();
     publicarNotificacoes(
         processes,
         isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
@@ -241,27 +248,111 @@ public class ProcessamentoSalarialWriteService {
     );
   }
 
-  @Transactional
+  /**
+   * Cabimenta processo a processo, sem transação envolvente: o serviço financeiro recusa cabimentar
+   * duas vezes o mesmo processo, por isso cada cabimento aceite tem de ficar registado mesmo que um
+   * dos seguintes falhe.
+   */
   public void cabimentar(List<Long> ids) {
 
-    var processes = processamentoSalarialEntityRepository.findAllById(ids);
-    var username = applicationAuditorAware.getCurrentSubjectName();
-    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+    var processes = processamentoSalarialEntityRepository.findByIdInAndEstado(
         ids,
+        StatusProcessamento.VALIDADO_DEFINITIVO.name()
+    );
+    if (processes.size() != ids.size())
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
+
+    var username = applicationAuditorAware.getCurrentSubjectName();
+
+    var mensagemProcedimento = executarCabimentarProcessamento(ids, username);
+    if (StringUtils.hasText(mensagemProcedimento))
+      throw IgrpResponseStatusException.badRequest(mensagemProcedimento);
+
+    //var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
+
+    try {
+    /*  for (var process : processes) {
+        cabimentarNoServicoFinanceiro(process);
+        transactionTemplate.executeWithoutResult(_ -> marcarComoCabimentado(process.getId(), username));
+        cabimentados.add(process);
+      }*/
+    } finally {
+      publicarNotificacoes(
+          //cabimentados,
+          processes,
+          ProcessamentoSalarialEntity::getUserValidDef,
+          "Cabimento"
+      );
+    }
+  }
+
+  private String executarCabimentarProcessamento(List<Long> ids, String username) {
+    var processingIds = ids.stream()
+        .map(String::valueOf)
+        .toArray(String[]::new);
+
+    return jdbcTemplate.execute((Connection con) -> {
+
+      var oracleCon = con.unwrap(OracleConnection.class);
+
+      try (var stmt = (OracleCallableStatement) oracleCon.prepareCall(
+          "{ call RH_PROCESSAMENTO_SALARIAL_DB.CABIMENTAR_PROCESSAMENTO(?, ?, ?, ?) }")) {
+
+        stmt.setPlsqlIndexTable(
+            1,
+            processingIds,
+            processingIds.length,
+            processingIds.length,
+            OracleTypes.VARCHAR,
+            4000
+        );
+        stmt.setInt(2, Year.now(ZoneId.systemDefault()).getValue());
+        stmt.setString(3, username);
+        stmt.registerOutParameter(4, Types.VARCHAR);
+        stmt.execute();
+
+        return stmt.getString(4);
+      }
+    });
+  }
+
+  /**
+   * A data de pagamento segue a regra do procedimento CABIMENTAR_PROCESSAMENTO:
+   * dois dias antes do fim do mês do processamento.
+   */
+  private void cabimentarNoServicoFinanceiro(ProcessamentoSalarialEntity process) {
+
+    var dataPagamento = process.getDataDe()
+        .with(TemporalAdjusters.lastDayOfMonth())
+        .minusDays(2)
+        .format(FORMATO_DATA_SERVICO_FINANCEIRO);
+
+    OperationOutcomeResponse outcome;
+    try {
+      outcome = processarSalarioApi.processarCabimento(String.valueOf(process.getId()), dataPagamento);
+    } catch (RestClientException exception) {
+      LOGGER.error("Unable to reach the financial service to cabimentar process {}", process.getId(), exception);
+      throw IgrpResponseStatusException.of(
+          HttpStatus.BAD_GATEWAY,
+          "Não foi possível contactar o serviço financeiro para efectuar a cabimentação"
+      );
+    }
+
+    if (outcome == null || !outcome.isSuccess())
+      throw IgrpResponseStatusException.badRequest(
+          "O serviço financeiro recusou o cabimento do processamento %d: %s"
+              .formatted(process.getId(), outcome == null ? "sem resposta" : outcome.diagnostics()));
+  }
+
+  private void marcarComoCabimentado(Long id, String username) {
+    processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+        List.of(id),
         List.of(StatusProcessamento.VALIDADO_DEFINITIVO.name()),
         StatusProcessamento.CABIMENTADO.name(),
         null,
         null,
         username,
         null
-    );
-    if (updatedRows != ids.size())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
-
-    publicarNotificacoes(
-        processes,
-        ProcessamentoSalarialEntity::getUserValidDef,
-        "Cabimento"
     );
   }
 
@@ -314,7 +405,6 @@ public class ProcessamentoSalarialWriteService {
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
-    // QA PS-033: com Data Fim anterior o procedimento processava na mesma o mês da Data Início.
     if (request.getDataInicio() != null && request.getDataFim() != null
         && request.getDataFim().isBefore(request.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data Fim não pode ser anterior à Data Início.");
@@ -331,10 +421,6 @@ public class ProcessamentoSalarialWriteService {
 
     var direccaoIds = request.getDireccaoId() != null ? request.getDireccaoId() : List.<Long>of();
 
-    // Colaborador indicado SEM direção: a procedure PROCESSAR, com p_tiprel_id preenchido, procura o
-    // centro de custo da direção recebida e, com direção NULL, falha ("o serviço não está associado ao
-    // centro de custo"). Usa-se a direção da mobilidade do próprio tiprel (mesma ligação
-    // tiprel.mob_id -> mobilidade.instit_id que a procedure usa no processamento global).
     if (request.getRelacionamentoId() != null && direccaoIds.isEmpty()) {
       direccaoIds = tiposRelacionamentoEntityRepository
           .findDirecaoIdDaMobilidade(request.getRelacionamentoId())
@@ -351,15 +437,14 @@ public class ProcessamentoSalarialWriteService {
         .map(String::valueOf)
         .toArray(String[]::new);
 
-    if (ccIds.length == 0) {
+    if (ccIds.length == 0)
       ccIds = new String[]{null};
-    }
 
-    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?) }";
+    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?, ?) }";
 
-    try (var connection = dataSource.getConnection()) {
+    try (var connection = dataSource.getConnection();
+         var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);) {
 
-      var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);
       stmt.setString(1, startDate);
       stmt.setString(2, endDate);
       stmt.setPlsqlIndexTable(
@@ -371,20 +456,16 @@ public class ProcessamentoSalarialWriteService {
           32767
       );
 
-      if (request.getRelacionamentoId() == null) {
+      if (request.getRelacionamentoId() == null)
         stmt.setNull(4, Types.NUMERIC);
-      } else {
+      else
         stmt.setLong(4, request.getRelacionamentoId());
-      }
 
       stmt.setString(5, request.getTipo());
-
       stmt.setString(6, applicationAuditorAware.getCurrentSubjectName());
-
       stmt.setInt(7, 0);
-
       stmt.registerOutParameter(8, Types.VARCHAR);
-
+      stmt.setString(9, request.getObservacao());
       stmt.execute();
 
       return stmt.getString(8);
@@ -399,25 +480,25 @@ public class ProcessamentoSalarialWriteService {
       Function<ProcessamentoSalarialEntity, String> previousUserResolver,
       String action
   ) {
-    var processIdsByUser = new LinkedHashMap<String, List<Long>>();
+    var processesByUser = new LinkedHashMap<String, List<ProcessamentoSalarialEntity>>();
 
     for (var process : processes) {
       var previousUser = previousUserResolver.apply(process);
       if (StringUtils.hasText(previousUser)) {
-        processIdsByUser.computeIfAbsent(previousUser, ignored -> new ArrayList<>())
-            .add(process.getId());
+        processesByUser.computeIfAbsent(previousUser, _ -> new ArrayList<>())
+            .add(process);
       }
     }
 
-    if (processIdsByUser.isEmpty()) {
+    if (processesByUser.isEmpty()) {
       LOGGER.warn("No previous users found for salary processing notification: action={}", action);
       return;
     }
 
-    var profilesByUser = iamUserProfileService.resolverPerfis(processIdsByUser.keySet());
+    var profilesByUser = iamUserProfileService.resolverPerfis(processesByUser.keySet());
     var notifications = new ArrayList<NotificationEvent>();
 
-    processIdsByUser.forEach((userId, processIds) -> {
+    processesByUser.forEach((userId, userProcesses) -> {
       var profile = profilesByUser.get(userId);
       if (profile == null || !StringUtils.hasText(profile.getEmail())) {
         LOGGER.warn("No email found for salary processing notification: user={} action={}", userId, action);
@@ -428,10 +509,13 @@ public class ProcessamentoSalarialWriteService {
           ? profile.getFullName()
           : profile.getUsername();
       var subject = "Processamento salarial - " + action;
-      var body = "Olá %s,%n%nFoi executada a ação \"%s\" nos processamentos salariais %s."
-          .formatted(recipientName, action, processIds);
 
-      notifications.add(NotificationEvent.text(profile.getEmail(), subject, body));
+      userProcesses.forEach(process -> {
+        var body = "Olá %s,%n%nFoi executada a ação \"%s\" no processamento salarial %d."
+            .formatted(recipientName, action, process.getId());
+
+        notifications.add(NotificationEvent.text(profile.getEmail(), subject, body, process.getId(), null));
+      });
     });
 
     if (notifications.isEmpty())

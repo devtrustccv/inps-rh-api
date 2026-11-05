@@ -41,5 +41,7 @@ public interface ProcessamentoSalarialEntityRepository extends
           @Param("userCabimento") String userCabimento,
           @Param("userAutorizacao") String userAutorizacao
   );
+
+  List<ProcessamentoSalarialEntity> findByIdInAndEstado(List<Long> ids, String estado);
 }
 

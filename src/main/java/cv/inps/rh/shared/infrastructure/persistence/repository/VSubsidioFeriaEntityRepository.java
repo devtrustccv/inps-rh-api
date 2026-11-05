@@ -24,7 +24,9 @@ public interface VSubsidioFeriaEntityRepository extends JpaRepository<VSubsidioF
           sf.estado,
           sf.mesesTotal || '-' || sf.diasTotal,
           sf.diasSubsidio,
-          sf.valorSubsidio
+          sf.valorSubsidio,
+          sf.flgAtivoInactivoDesc,
+          sf.estadoDesc
       )
       FROM VSubsidioFeriaEntity sf
       WHERE sf.anoReferente = :ano

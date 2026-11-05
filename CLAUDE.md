@@ -45,7 +45,7 @@ Credenciais/URLs via env vars — nunca hardcoded:
 - **Oracle DB**: `ORACLE_HOST`, `ORACLE_PORT`, `ORACLE_SERVICE_NAME`, `ORACLE_USER`, `ORACLE_PASSWORD`
 - **Auth JWT (OAuth2 RS) + Acesso iGRP**: `IGRP_ACCESS_API_BASE_URL` (é também o issuer), `IGRP_ACCESS_M2M_CLIENT_ID`/`_SECRET`
 - **MinIO (storage)**: `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET_NAME`
-- **Processamento salarial**: `PROCESSAMENTO_SALARIAL_BASE_URL`
+- **Processamento salarial**: `PROCESSAMENTO_SALARIAL_BASE_URL`, `PROCESSAMENTO_SALARIAL_TOKEN` (Bearer)
 - **Serviços externos**: `EXTERNAL_NIF_URL`, `EXTERNAL_SNIAC_URL`, `EXTERNAL_BI_URL` (cada um com `_TOKEN` próprio)
 
 ## Workflow Git
