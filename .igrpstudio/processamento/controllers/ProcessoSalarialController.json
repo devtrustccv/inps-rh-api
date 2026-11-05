@@ -606,6 +606,11 @@
       },
       "requestParams": [
         {
+          "type": "string",
+          "name": "aumentoSalarialId",
+          "isRequired": true
+        },
+        {
           "type": "long",
           "name": "direcaoId",
           "isRequired": false

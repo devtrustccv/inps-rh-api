@@ -546,12 +546,13 @@ public class ProcessoSalarialController {
       }
   )
   public ResponseEntity<ColaboradorAumentoDTO> getColaboresAumentoSalarial(
+      @RequestParam(value = "aumentoSalarialId") String aumentoSalarialId,
       @RequestParam(value = "direcaoId", required = false) Long direcaoId,
       @RequestParam(value = "organicaId", required = false) Long organicaId,
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "20") Integer size
   ) {
-    final var query = new GetColaboresAumentoSalarialQuery(direcaoId, organicaId, page, size);
+    final var query = new GetColaboresAumentoSalarialQuery(aumentoSalarialId, direcaoId, organicaId, page, size);
 
     return queryBus.handle(query);
   }
