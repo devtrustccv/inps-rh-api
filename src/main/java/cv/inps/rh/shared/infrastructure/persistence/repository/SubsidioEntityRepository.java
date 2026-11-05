@@ -41,7 +41,9 @@ public interface SubsidioEntityRepository extends
   @Query(value = """
       SELECT NEW cv.inps.rh.processamento.application.dto.SubsidioNatalResponseDTO(
           s.id, f.id, f.nome, s.valorSalarioBase, s.mesTrab, s.percSalario, s.faltas, s.percFalta,
-          s.valorSubsidio, s.valorChequeBrinde, s.valorPrendaNatal, s.flgAtivoInactivo, s.estado, s.observacao
+          s.valorSubsidio, s.valorChequeBrinde, s.valorPrendaNatal, s.flgAtivoInactivo, s.estado, s.observacao,
+          CASE s.flgAtivoInactivo WHEN 'A' THEN 'Ativo' WHEN 'I' THEN 'Inativo' WHEN 'PR' THEN 'Processado' END,
+          CASE s.estado WHEN 'A' THEN 'Validado' WHEN 'P' THEN 'Pendente' END
       )
       FROM SubsidioEntity s JOIN s.fun f
       WHERE s.tipoSubsidio = 'NATAL'
