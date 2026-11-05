@@ -21,6 +21,12 @@ public record SubsidioFeriasResponseDTO(
 
     Long diasferias,
 
-    Long valorSubsidio
+    Long valorSubsidio,
+
+    /** FLG_ATIVO_INACTIVO_DESC: Ativo, Inativo ou Processado. */
+    String estadoDesc,
+
+    /** ESTADO_DESC: Validado ou Pendente. */
+    String estadoSubsidioDesc
 ) {
 }

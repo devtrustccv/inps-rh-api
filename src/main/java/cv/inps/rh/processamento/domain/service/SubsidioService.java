@@ -34,6 +34,9 @@ import java.util.UUID;
 @Service
 public class SubsidioService {
 
+  /** FLG_ATIVO_INACTIVO de um subsídio já processado: só pode ser consultado. */
+  private static final String FLG_PROCESSADO = "PR";
+
   private final SubsidioEntityRepository subsidioEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -51,6 +54,7 @@ public class SubsidioService {
 
         if (subsidioId != null) {
           subs = subsidioEntityRepository.findByIdOrThrow(subsidioId);
+          garantirNaoProcessado(subs);
         } else {
           var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
           subs = new SubsidioEntity();
@@ -89,6 +93,7 @@ public class SubsidioService {
       // desaparecia da lista. Mantido por compatibilidade; o ecrã usa subsidio-natal/change-status.
       case INATIVAR -> {
         var subs = subsidioEntityRepository.findByIdOrThrow(subsidioId);
+        garantirNaoProcessado(subs);
         subs.setFlgAtivoInactivo(Estado.I.name());
         marcarAlteracao(subs);
         subsidioEntityRepository.save(subs);
@@ -213,11 +218,17 @@ public class SubsidioService {
       if (Estado.E.name().equals(s.getEstado()))
         throw IgrpResponseStatusException.badRequest(
             "O subsídio de " + s.getFun().getNome() + " foi substituído por uma alteração: atualize a lista.");
+      garantirNaoProcessado(s);
       if (s.getProcSalId() != null)
         throw IgrpResponseStatusException.badRequest(
             "O subsídio de " + s.getFun().getNome() + " já foi processado no salário e não pode ser alterado.");
     }
     return subsidios;
+  }
+
+  private void garantirNaoProcessado(SubsidioEntity s) {
+    if (FLG_PROCESSADO.equals(s.getFlgAtivoInactivo()))
+      throw IgrpResponseStatusException.badRequest("Subsídio já processado: só pode ser consultado.");
   }
 
   private void marcarAlteracao(SubsidioEntity s) {
@@ -248,12 +259,14 @@ public class SubsidioService {
 
   public void alterarEstadoSubsisioferias(Long subsidioId) {
     var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
+    garantirNaoProcessado(subsidioFeria);
     subsidioFeria.setFlgAtivoInactivo(Estado.A.name().equals(subsidioFeria.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
     subsidioEntityRepository.save(subsidioFeria);
   }
 
   public void validarSubsidioFerias(Long subsidioId) {
     var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
+    garantirNaoProcessado(subsidioFeria);
     subsidioFeria.setEstado(Estado.A.name());
     subsidioEntityRepository.save(subsidioFeria);
   }
