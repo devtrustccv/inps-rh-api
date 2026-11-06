@@ -18,7 +18,7 @@ public class AvaliacaoEntity extends AuditEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avd")
-  @SequenceGenerator(name = "seq_avd", sequenceName = "RH_T_AVD_SEQ", allocationSize = 1)
+  @SequenceGenerator(name = "seq_avd", sequenceName = "SEQ_AVD", allocationSize = 1)
   @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
