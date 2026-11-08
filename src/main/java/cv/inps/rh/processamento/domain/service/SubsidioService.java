@@ -257,18 +257,61 @@ public class SubsidioService {
     return response;
   }
 
+  @Transactional
   public void alterarEstadoSubsisioferias(Long subsidioId) {
-    var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
-    garantirNaoProcessado(subsidioFeria);
-    subsidioFeria.setFlgAtivoInactivo(Estado.A.name().equals(subsidioFeria.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
-    subsidioEntityRepository.save(subsidioFeria);
+    alterarEstadoSubsidiosFerias(List.of(subsidioId));
   }
 
+  @Transactional
   public void validarSubsidioFerias(Long subsidioId) {
-    var subsidioFeria = subsidioEntityRepository.findById(subsidioId).orElseThrow();
-    garantirNaoProcessado(subsidioFeria);
-    subsidioFeria.setEstado(Estado.A.name());
-    subsidioEntityRepository.save(subsidioFeria);
+    validarSubsidiosFerias(List.of(subsidioId));
+  }
+
+  /** Ativar/Inativar em lote: troca FLG_ATIVO_INACTIVO (A ↔ I) de cada subsídio de férias selecionado. */
+  @Transactional
+  public int alterarEstadoSubsidiosFerias(List<Long> subsidioIds) {
+    var subsidios = subsidiosFeriasEmVigor(subsidioIds);
+    subsidios.forEach(s -> {
+      s.setFlgAtivoInactivo(Estado.A.name().equals(s.getFlgAtivoInactivo()) ? Estado.I.name() : Estado.A.name());
+      marcarAlteracao(s);
+    });
+    subsidioEntityRepository.saveAll(subsidios);
+    return subsidios.size();
+  }
+
+  /** Validar em lote: ESTADO P → A. Os já validados ficam como estão. */
+  @Transactional
+  public int validarSubsidiosFerias(List<Long> subsidioIds) {
+    var pendentes = subsidiosFeriasEmVigor(subsidioIds).stream()
+        .filter(s -> Estado.P.name().equals(s.getEstado()))
+        .toList();
+    if (pendentes.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Os subsídios selecionados já estão validados.");
+    pendentes.forEach(s -> {
+      s.setEstado(Estado.A.name());
+      marcarAlteracao(s);
+    });
+    subsidioEntityRepository.saveAll(pendentes);
+    return pendentes.size();
+  }
+
+  /** Subsídios de Férias em vigor e ainda não processados no salário; recusa os restantes. */
+  private List<SubsidioEntity> subsidiosFeriasEmVigor(List<Long> subsidioIds) {
+    if (subsidioIds == null || subsidioIds.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Selecione pelo menos um subsídio.");
+    var subsidios = subsidioEntityRepository.findFeriasByIdIn(subsidioIds);
+    if (subsidios.size() != new java.util.HashSet<>(subsidioIds).size())
+      throw IgrpResponseStatusException.notFound("Subsídio de Férias não encontrado.");
+    for (var s : subsidios) {
+      if (Estado.E.name().equals(s.getEstado()))
+        throw IgrpResponseStatusException.badRequest(
+            "O subsídio de " + s.getFun().getNome() + " foi substituído: atualize a lista.");
+      garantirNaoProcessado(s);
+      if (s.getProcSalId() != null)
+        throw IgrpResponseStatusException.badRequest(
+            "O subsídio de " + s.getFun().getNome() + " já foi processado no salário e não pode ser alterado.");
+    }
+    return subsidios;
   }
 
   public void calcularSubsidioferias(Integer ano) {
