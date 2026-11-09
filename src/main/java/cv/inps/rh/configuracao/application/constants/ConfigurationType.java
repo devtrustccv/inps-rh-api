@@ -30,7 +30,8 @@ public enum ConfigurationType implements IgrpEnum<String> {
     PARAM_CONFIGURACAO_GERAL("configuracao_geral_type", "PARAM_CONFIGURACAO_GERAL"),
     PARAM_DOMAIN("domain_type", "PARAM_DOMAIN"),
   PARAM_PCCS("pccs_type", "PARAM_PCCS"),
-  PARAM_ESTABELECIMENTO("estabelecimento_type", "ESTABELECIMENTO");
+  PARAM_ESTABELECIMENTO("estabelecimento_type", "ESTABELECIMENTO"),
+  PARAM_BANCO("banco_type", "PARAM_BANCO");
 
   private final String code;
   private final String description;

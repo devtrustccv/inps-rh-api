@@ -22,6 +22,10 @@ public interface DefPagamentoEntityRepository extends
     JpaRepository<DefPagamentoEntity, Long>,
     JpaSpecificationExecutor<DefPagamentoEntity> {
 
+  /** Há definições de pagamento neste banco (RH_T_DEF_PAGAMENTOS.RHB_ID)? */
+  boolean existsByRhbId_Id(Long bancoId);
+
+
   default DefPagamentoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DefPagamentoEntity not found for id: " + id));
