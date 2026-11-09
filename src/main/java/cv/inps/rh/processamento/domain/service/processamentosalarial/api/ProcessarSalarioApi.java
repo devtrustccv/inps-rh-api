@@ -1,6 +1,7 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial.api;
 
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.model.*;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,10 @@ public class ProcessarSalarioApi {
 
   @Value("${processamento-salarial.token}")
   private String token;
+
+  @Getter
+  @Value("${processamento-salarial.cabimentacao}")
+  private boolean enableCabimentation;
 
   public ProcessarSalarioApi(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
