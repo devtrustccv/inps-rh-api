@@ -9,6 +9,7 @@ import cv.inps.rh.shared.domain.service.ordemservico.OrdemServicoProvider;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,15 @@ import java.util.stream.Collectors;
 public class OrdemServicoService {
 
   private final ParamDocOutputEntityRepository repository;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository ordemServicoRepository;
+  private final OrdemServicoEntityRepository ordemServicoRepository;
   private final Map<OrdemServico, OrdemServicoProvider> providers;
   private final DocumentoSaidaRenderer renderer;
 
-  public OrdemServicoService(ParamDocOutputEntityRepository repository, List<OrdemServicoProvider> providerList,
-                             cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository ordemServicoRepository,
-                             DocumentoSaidaRenderer renderer) {
+  public OrdemServicoService(
+      ParamDocOutputEntityRepository repository, List<OrdemServicoProvider> providerList,
+      OrdemServicoEntityRepository ordemServicoRepository,
+      DocumentoSaidaRenderer renderer
+  ) {
 
     this.repository = repository;
     this.ordemServicoRepository = ordemServicoRepository;
