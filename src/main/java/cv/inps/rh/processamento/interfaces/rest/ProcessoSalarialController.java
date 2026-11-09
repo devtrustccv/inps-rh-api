@@ -350,6 +350,44 @@ public class ProcessoSalarialController {
     return commandBus.send(command);
   }
 
+  @PostMapping(value = "subsidio-feria/change-status")
+  @Operation(
+      summary = "Ativar inativar subsidios ferias",
+      description = "Troca FLG_ATIVO_INACTIVO (A <-> I) dos subsídios de Férias selecionados, numa só transação.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> alterarEstadoSubsidiosFerias(
+      @Valid @RequestBody SubsidioFeriasIdsRequestDTO request
+  ) {
+    final var command = new AlterarEstadoSubsidiosFeriasCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/validar")
+  @Operation(
+      summary = "Validar subsidios ferias",
+      description = "Valida (ESTADO P -> A) os subsídios de Férias selecionados, numa só transação.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> validarSubsidiosFerias(
+      @Valid @RequestBody SubsidioFeriasIdsRequestDTO request
+  ) {
+    final var command = new ValidarSubsidiosFeriasCommand(request);
+
+    return commandBus.send(command);
+  }
+
   @PostMapping(value = "subsidio-feria/change-status/{subsidioId}")
   @Operation(
       summary = "Ativar inactivar subsidio ferias",
