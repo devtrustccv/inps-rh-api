@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "t_iam_user_profile",
+@Table(name = "rh_t_iam_user_profile",
     // username e sub ja ficam indexados pelas constraints unique; so declaramos os restantes.
     // Nomes <= 30 chars por causa do limite de identificadores da Oracle legacy (xe).
     indexes = {
