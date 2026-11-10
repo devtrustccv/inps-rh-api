@@ -22,6 +22,10 @@ public interface EmprestimoEntityRepository extends
     JpaRepository<EmprestimoEntity, Long>,
     JpaSpecificationExecutor<EmprestimoEntity> {
 
+  /** Há empréstimos associados a este banco (RH_T_EMPRESTIMO.BANCO)? */
+  boolean existsByBanco_Id(Long bancoId);
+
+
   default EmprestimoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "EmprestimoEntity not found for id: " + id));

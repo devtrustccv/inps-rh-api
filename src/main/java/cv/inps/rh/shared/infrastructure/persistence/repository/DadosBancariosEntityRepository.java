@@ -19,6 +19,10 @@ public interface DadosBancariosEntityRepository extends
     JpaSpecificationExecutor<DadosBancariosEntity>
 {
 
+      /** Há dados bancários de funcionários neste banco (RH_T_DADOS_BANCARIOS.RHB_ID)? */
+      boolean existsByRhbId_Id(Long bancoId);
+
+
       default DadosBancariosEntity findByIdOrThrow(Long id) {
           return this.findById(id)
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"DadosBancariosEntity not found for id: " + id));
