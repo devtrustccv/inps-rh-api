@@ -1,22 +1,30 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.processamento.application.dto.AumentoSalarialRequestDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSalarialEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSimulacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AumentoSalarialWriteService {
 
   private final AumentoSalarialEntityRepository aumentoSalarialEntityRepository;
+  private final AumentoSimulacaoEntityRepository aumentoSimulacaoEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
   private final DataSource dataSource;
   private final ApplicationAuditorAware applicationAuditorAware;
 
@@ -55,9 +63,28 @@ public class AumentoSalarialWriteService {
     aumentoSalarialEntityRepository.save(salaryIncrease);
   }
 
+  /**
+   * Valida (A) ou rejeita (I) via RH_PK_AUMENTO_SALARIAL_DB.REGISTAR_AUMENTO. A procedure só atualiza a
+   * RH_T_VALIDACAO na rejeição; na validação o registo de validação é fechado aqui.
+   */
+  @Transactional
   public void validar(String salaryIncreaseId, String estadoValidacao) {
 
-    var salaryIncrease = aumentoSalarialEntityRepository.findByUuid(salaryIncreaseId).orElseThrow();
+    if (!Estado.A.name().equals(estadoValidacao) && !Estado.I.name().equals(estadoValidacao))
+      throw IgrpResponseStatusException.badRequest("O estado da validação tem de ser A (validar) ou I (rejeitar).");
+
+    var salaryIncrease = aumentoSalarialEntityRepository.findByUuid(salaryIncreaseId)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Aumento salarial não encontrado: " + salaryIncreaseId));
+
+    if (!Estado.P.name().equals(salaryIncrease.getEstado()))
+      throw IgrpResponseStatusException.badRequest("Só é possível validar ou rejeitar aumentos salariais pendentes.");
+
+    // Sem detalhe (RH_T_AUMENTO_SALARIAL_DET, gerado pelo SIMULAR_AUMENTO) o REGISTAR_AUMENTO com 'A'
+    // alteraria os escalões sem aplicar o novo salário a nenhum colaborador.
+    if (Estado.A.name().equals(estadoValidacao)
+        && !aumentoSimulacaoEntityRepository.existsByAumentoSalId(salaryIncrease.getId()))
+      throw IgrpResponseStatusException.badRequest(
+          "Este aumento salarial não tem colaboradores simulados; não pode ser validado.");
 
     var call = new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
@@ -76,6 +103,15 @@ public class AumentoSalarialWriteService {
         "P_USER_ID", "0", // TODO 17/05/2026 11:14 current user
         "P_USER_NAME", applicationAuditorAware.getCurrentSubjectName()
     ));
+
+    if (Estado.A.name().equals(estadoValidacao)) {
+      validacaoEntityRepository.findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(
+              UUID.fromString(salaryIncrease.getUuid()), Estado.P, "INSERT", "AUMENTO_SALARIAL")
+          .ifPresent(validacao -> {
+            validacao.setEstado(Estado.A);
+            validacaoEntityRepository.save(validacao);
+          });
+    }
   }
 
 }
