@@ -1,8 +1,8 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial.api;
 
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,10 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 public class ProcessarSalarioApi {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessarSalarioApi.class);
 
   private final RestTemplate restTemplate;
 
@@ -30,6 +29,10 @@ public class ProcessarSalarioApi {
   @Value("${processamento-salarial.token}")
   private String token;
 
+  @Getter
+  @Value("${processamento-salarial.cabimentacao}")
+  private boolean enableCabimentation;
+
   public ProcessarSalarioApi(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
   }
@@ -41,7 +44,7 @@ public class ProcessarSalarioApi {
     var operationRequest = new ProcessarCabimentoRequest.OperationRequest(new RequestHeader(), requestBody);
     var request = new ProcessarCabimentoRequest(operationRequest);
 
-    LOGGER.debug("ProcessarCabimento Request: {}", request);
+    log.debug("ProcessarCabimento Request: {}", request);
 
     return restTemplate.exchange(
         processarCabimentoUrl,
@@ -65,7 +68,7 @@ public class ProcessarSalarioApi {
     var operationRequest = new AutorizaSalarioRequest.OperationRequest(new RequestHeader(), requestBody);
     var request = new AutorizaSalarioRequest(operationRequest);
 
-    LOGGER.debug("AutorizarSalario Request: {}", request);
+    log.debug("AutorizarSalario Request: {}", request);
 
     return restTemplate.exchange(
         autorizarUrl,
@@ -82,7 +85,7 @@ public class ProcessarSalarioApi {
     var operationRequest = new EstornoCabimentoRequest.OperationRequest(new RequestHeader(), requestBody);
     var request = new EstornoCabimentoRequest(operationRequest);
 
-    LOGGER.debug("Extornar cabimento Request: {}", request);
+    log.debug("Extornar cabimento Request: {}", request);
 
     return restTemplate.exchange(
         extornarCabimentoUrl,

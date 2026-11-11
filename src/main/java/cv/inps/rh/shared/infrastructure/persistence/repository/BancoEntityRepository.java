@@ -14,6 +14,14 @@ public interface BancoEntityRepository extends
     JpaSpecificationExecutor<BancoEntity>
 {
 
+      boolean existsByCdBanco(String cdBanco);
+
+      boolean existsByCdBancoAndIdNot(String cdBanco, Long id);
+
+      boolean existsBySigla(String sigla);
+
+      boolean existsBySiglaAndIdNot(String sigla, Long id);
+
       default BancoEntity findByIdOrThrow(Long id) {
           return this.findById(id)
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"BancoEntity not found for id: " + id));

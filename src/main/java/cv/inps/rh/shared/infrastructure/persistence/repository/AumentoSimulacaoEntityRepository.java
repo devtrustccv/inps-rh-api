@@ -17,6 +17,9 @@ public interface AumentoSimulacaoEntityRepository extends
     JpaRepository<AumentoSimulacaoEntity, Long>,
     JpaSpecificationExecutor<AumentoSimulacaoEntity> {
 
+  /** Há detalhe (colaboradores simulados) para este aumento? Gerado pelo SIMULAR_AUMENTO. */
+  boolean existsByAumentoSalId(Long aumentoSalId);
+
   default AumentoSimulacaoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("AumentoSimulacaoEntity not found for id: " + id));

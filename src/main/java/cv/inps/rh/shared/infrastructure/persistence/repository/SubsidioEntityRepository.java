@@ -74,4 +74,7 @@ public interface SubsidioEntityRepository extends
   @Query("SELECT s FROM SubsidioEntity s WHERE s.id IN :ids AND s.tipoSubsidio = 'NATAL'")
   List<SubsidioEntity> findNatalByIdIn(@Param("ids") Collection<Long> ids);
 
+  @Query("SELECT s FROM SubsidioEntity s WHERE s.id IN :ids AND s.tipoSubsidio = 'FERIA'")
+  List<SubsidioEntity> findFeriasByIdIn(@Param("ids") Collection<Long> ids);
+
 }

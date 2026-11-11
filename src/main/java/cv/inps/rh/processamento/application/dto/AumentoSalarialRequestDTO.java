@@ -15,22 +15,20 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class AumentoSalarialRequestDTO  {
+public class AumentoSalarialRequestDTO {
 
   @NotBlank(message = "The field <designacao> is required")
+  private String designacao;
 
-  private String designacao ;
   @NotBlank(message = "The field <motivo> is required")
+  private String motivo;
 
-  private String motivo ;
   @NotNull(message = "The field <dataReferente> is required")
+  private LocalDate dataReferente;
 
-  private LocalDate dataReferente ;
   @NotNull(message = "The field <percentagem> is required")
 
-  private Long percentagem ;
+  private Long percentagem;
 
 }

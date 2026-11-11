@@ -58,9 +58,9 @@ dias_base AS (
            m.mes_ini,
            m.data_inicio_mes,
            m.data_fim_mes,
-           SUM(CASE WHEN RH_PROCESSAMENTO_SALARIAL_DB.IS_DIA_UTEL(m.data_inicio_mes + g.n - 1, NULL) = 'S'
+           SUM(CASE WHEN RH_PK_FUNCOES_PROC_GERAL_DB.IS_DIA_UTEL(m.data_inicio_mes + g.n - 1, NULL) = 'S'
                     THEN 1 ELSE 0 END) AS dias_uteis,
-           SUM(CASE WHEN RH_PROCESSAMENTO_SALARIAL_DB.IS_DIA_UTEL(m.data_inicio_mes + g.n - 1, NULL) = 'S'
+           SUM(CASE WHEN RH_PK_FUNCOES_PROC_GERAL_DB.IS_DIA_UTEL(m.data_inicio_mes + g.n - 1, NULL) = 'S'
                     THEN 0 ELSE 1 END) AS dias_nao_uteis
       FROM he_mes m
       JOIN gerador g

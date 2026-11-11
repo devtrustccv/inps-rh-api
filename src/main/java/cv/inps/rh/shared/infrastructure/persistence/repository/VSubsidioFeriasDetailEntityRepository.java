@@ -36,6 +36,7 @@ public interface VSubsidioFeriasDetailEntityRepository extends
       FROM VSubsidioFeriasDetailEntity sf
       WHERE sf.funId = :funId
       AND sf.anoReferente = :ano
+      ORDER BY sf.dataInicio
       """)
   List<SubsidioFeriasDetalheDTO> getDetails(
       @Param("funId") Long funId,

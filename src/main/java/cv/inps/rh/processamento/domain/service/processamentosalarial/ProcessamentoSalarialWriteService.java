@@ -13,11 +13,10 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoSalarial
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import oracle.jdbc.OracleCallableStatement;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OracleTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -37,11 +36,10 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProcessamentoSalarialWriteService {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
   private static final DateTimeFormatter FORMATO_DATA_SERVICO_FINANCEIRO = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -268,18 +266,19 @@ public class ProcessamentoSalarialWriteService {
     if (StringUtils.hasText(mensagemProcedimento))
       throw IgrpResponseStatusException.badRequest(mensagemProcedimento);
 
-    //var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
+    var cabimentados = new ArrayList<ProcessamentoSalarialEntity>();
 
     try {
-    /*  for (var process : processes) {
-        cabimentarNoServicoFinanceiro(process);
-        transactionTemplate.executeWithoutResult(_ -> marcarComoCabimentado(process.getId(), username));
-        cabimentados.add(process);
-      }*/
+      if (processarSalarioApi.isEnableCabimentation()) {
+        for (var process : processes) {
+          cabimentarNoServicoFinanceiro(process);
+          transactionTemplate.executeWithoutResult(_ -> marcarComoCabimentado(process.getId(), username));
+          cabimentados.add(process);
+        }
+      }
     } finally {
       publicarNotificacoes(
-          //cabimentados,
-          processes,
+          processarSalarioApi.isEnableCabimentation() ? cabimentados : processes,
           ProcessamentoSalarialEntity::getUserValidDef,
           "Cabimento"
       );
@@ -331,7 +330,7 @@ public class ProcessamentoSalarialWriteService {
     try {
       outcome = processarSalarioApi.processarCabimento(String.valueOf(process.getId()), dataPagamento);
     } catch (RestClientException exception) {
-      LOGGER.error("Unable to reach the financial service to cabimentar process {}", process.getId(), exception);
+      log.error("Unable to reach the financial service to cabimentar process {}", process.getId(), exception);
       throw IgrpResponseStatusException.of(
           HttpStatus.BAD_GATEWAY,
           "Não foi possível contactar o serviço financeiro para efectuar a cabimentação"
@@ -491,7 +490,7 @@ public class ProcessamentoSalarialWriteService {
     }
 
     if (processesByUser.isEmpty()) {
-      LOGGER.warn("No previous users found for salary processing notification: action={}", action);
+      log.warn("No previous users found for salary processing notification: action={}", action);
       return;
     }
 
@@ -501,7 +500,7 @@ public class ProcessamentoSalarialWriteService {
     processesByUser.forEach((userId, userProcesses) -> {
       var profile = profilesByUser.get(userId);
       if (profile == null || !StringUtils.hasText(profile.getEmail())) {
-        LOGGER.warn("No email found for salary processing notification: user={} action={}", userId, action);
+        log.warn("No email found for salary processing notification: user={} action={}", userId, action);
         return;
       }
 
@@ -525,7 +524,7 @@ public class ProcessamentoSalarialWriteService {
       try {
         eventPublisher.publish(notification);
       } catch (RuntimeException exception) {
-        LOGGER.error("Unable to publish salary processing notification to {}", notification.recipient(), exception);
+        log.error("Unable to publish salary processing notification to {}", notification.recipient(), exception);
       }
     });
   }

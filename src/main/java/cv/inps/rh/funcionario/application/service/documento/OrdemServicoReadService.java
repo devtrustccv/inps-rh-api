@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,13 +70,8 @@ public class OrdemServicoReadService {
         .toList();
 
     var wrapper = new WrapperListOrdemServicoDTO();
+    PageMapper.fillPagination(page, wrapper);
     wrapper.setContent(content);
-    wrapper.setPageNumber(page.getNumber());
-    wrapper.setPageSize(page.getSize());
-    wrapper.setTotalElements(page.getTotalElements());
-    wrapper.setTotalPages(page.getTotalPages());
-    wrapper.setFirst(page.isFirst());
-    wrapper.setLast(page.isLast());
 
     return wrapper;
   }

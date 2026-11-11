@@ -493,7 +493,7 @@
     },
     {
       "actionName": "validarAumentoSalarial",
-      "path": "aumento-salarial/{aumentoSalarialId}/validar",
+      "path": "aumento-salarial/{aumentoSalarialId}/validar/{estadoValidacao}",
       "method": "POST",
       "responses": {
         "200": {
@@ -512,6 +512,11 @@
       "pathVariables": [
         {
           "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "estadoValidacao",
           "type": "string",
           "isRequired": true
         }
@@ -736,6 +741,70 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "alterarEstadoSubsidiosFerias",
+      "path": "subsidio-feria/change-status",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioFeriasIdsRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarSubsidiosFerias",
+      "path": "subsidio-feria/validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioFeriasIdsRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario-getResumoProcessamento-getResumoProcessamento-getDadosValidacao"
