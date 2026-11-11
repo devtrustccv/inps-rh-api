@@ -80,8 +80,13 @@ public class FuncionarioEntity extends AuditEntity {
     private String estadoCivil;
 
 
+    // Texto da nacionalidade (GLB_T_GEOGRAFIA.NACIONALIDADE) — derivado de nacionId na gravação.
     @Column(name="nacionalidade")
     private String nacionalidade;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nacion_id", referencedColumnName = "id")
+    private GeografiaEntity nacionId;
 
 
     @Column(name="localidade", length=200)
