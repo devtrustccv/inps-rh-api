@@ -86,6 +86,8 @@ public class CarreiraMapper {
 
     ce.setSalario(dc.getSalario());
     ce.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
+    // Pendente nunca é a atual; passa a 1 na validação (registo / novo contrato / carreira).
+    ce.setEstActAdm(0);
     ce.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
     ce.setObs("CARREIRA");
     ce.setDataInicio(dc.getDataInicio());
@@ -111,6 +113,7 @@ public class CarreiraMapper {
 
     ce.setSalario(dc.getSalario());
     ce.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
+    ce.setEstActAdm(0);
     ce.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
     ce.setObs("CARREIRA");
     ce.setDataInicio(dc.getDataInicio());
