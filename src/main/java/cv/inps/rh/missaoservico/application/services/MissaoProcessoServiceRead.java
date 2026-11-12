@@ -418,6 +418,7 @@ public class MissaoProcessoServiceRead {
     response.setMissaoUuid(missao.getUuid());
     response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
     response.setProcesso(support.toProcessoDto(processo));
+    response.setEditavel(support.editavelNaEtapa(processo, EtapaProcesso.VALIDACAO_UGAL));
     response.setAutorizacao(documentos(TableName.RH_T_MISSAO_SERVICO.name(), List.of(missao.getUuid()), false));
     response.setRequisicoes(documentos(REF_DOC_REQUISICAO_PDF, requisicaoUuids, true));
     response.setFaturas(documentos(TableName.RH_T_MISSAO_LOGISTICA.name(), linhaUuids, false));
@@ -442,6 +443,7 @@ public class MissaoProcessoServiceRead {
     response.setMissaoUuid(missao.getUuid());
     response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
     response.setProcesso(support.toProcessoDto(processo));
+    response.setEditavel(support.editavelNaEtapa(processo, EtapaProcesso.APROVACAO_RH));
     response.setParecerCoordenador(parecerDoCiclo(coordenador));
     response.setParecerDirector(parecerDoCiclo(director));
     response.setParecerUgal(ugal.stream()
@@ -650,6 +652,9 @@ public class MissaoProcessoServiceRead {
     response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
     response.setEstadoMissao(missao.getEstado());
     response.setProcesso(support.toProcessoDto(processo));
+    var etapaEcra = EtapaProcesso.AUTORIZACAO.name().equalsIgnoreCase(query.getEtapa())
+        ? EtapaProcesso.AUTORIZACAO : EtapaProcesso.CABIMENTO;
+    response.setEditavel(support.editavelNaEtapa(processo, etapaEcra));
     response.setItens(itens);
     response.setValorTotal(total);
     linhas.stream()

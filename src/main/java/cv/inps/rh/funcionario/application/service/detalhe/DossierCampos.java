@@ -205,7 +205,7 @@ public class DossierCampos {
           .data(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.dataNascimento, "Data de nascimento")
           .campo(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.sexo, "Género")
           .campo(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.estadoCivil, "Estado civil")
-          .campo(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.nacionalidade, "Nacionalidade")
+          .referencia(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.nacionId, "Nacionalidade")
           .referencia(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.locNascId, "Naturalidade")
           .campo(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.localidade, "Localidade")
           .campo(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_.nmPai, "Nome do pai")

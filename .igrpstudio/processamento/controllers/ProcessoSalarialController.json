@@ -493,7 +493,7 @@
     },
     {
       "actionName": "validarAumentoSalarial",
-      "path": "aumento-salarial/{aumentoSalarialId}/validar",
+      "path": "aumento-salarial/{aumentoSalarialId}/validar/{estadoValidacao}",
       "method": "POST",
       "responses": {
         "200": {
@@ -512,6 +512,11 @@
       "pathVariables": [
         {
           "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "estadoValidacao",
           "type": "string",
           "isRequired": true
         }

@@ -508,7 +508,7 @@ public class ProcessoSalarialController {
     return commandBus.send(command);
   }
 
-  @PostMapping(value = "aumento-salarial/{aumentoSalarialId}/validar")
+  @PostMapping(value = "aumento-salarial/{aumentoSalarialId}/validar/{estadoValidacao}")
   @Operation(
       summary = "Validar aumento salarial",
       description = "Validar aumento salarial",
@@ -520,9 +520,10 @@ public class ProcessoSalarialController {
       }
   )
   public ResponseEntity<String> validarAumentoSalarial(
-      @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId
+      @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId,
+      @PathVariable(value = "estadoValidacao") String estadoValidacao
   ) {
-    final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId);
+    final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId, estadoValidacao);
 
     return commandBus.send(command);
   }

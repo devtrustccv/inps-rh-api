@@ -134,6 +134,18 @@ public class MissaoProcessoSupport {
     return action != null && ACTION_NEXT.equals(action.getCode());
   }
 
+  /**
+   * MS-025: o ecrã da etapa só é editável com a missão e o processo activos e o processo exactamente
+   * nessa etapa — as mesmas condições em que o parecer, o cabimento e a autorização se deixam emitir.
+   * Uma etapa já concluída abre em só consulta.
+   */
+  public boolean editavelNaEtapa(MissaoProcessoEntity processo, EtapaProcesso etapa) {
+    var missao = processo.getMissaoServId();
+    return ESTADO_ATIVO.equals(missao.getEstado())
+        && ESTADO_ATIVO.equals(processo.getEstado())
+        && etapa.name().equals(processo.getEtapa());
+  }
+
   public String nrMissaoFormatado(MissaoServicoEntity missao) {
     if (missao == null || missao.getNrMissao() == null)
       return null;
