@@ -1,6 +1,6 @@
 # Missão de Serviço — guia de implementação para o front-end
 
-**Última actualização:** 2026-09-16 · **Base de todos os endpoints:** `/api/v1/missao-servico`
+**Última actualização:** 2026-11-12 · **Base de todos os endpoints:** `/api/v1/missao-servico`
 
 
 Este documento substitui o changelog anterior. Está organizado **por ecrã**, pela ordem em que o
@@ -34,6 +34,22 @@ Cabimento enquanto a ajuda de custo ainda está na Logística.
 3. O ecrã a mostrar decide-se pela **etapa do processo**.
 4. `AUTORIZACAO` é agora uma **etapa própria**. Acabou o artifício de distinguir Cabimentação de
    Autorização pelo `estadoCabimento`.
+
+### Alterações de 2026-11-12 — reteste QA 1.2 (09/11) 🔴
+
+| Alteração | Impacto no front-end | Item |
+|---|---|---|
+| **`editavel`** (novo) em `GET /{uuid}/processos/{tipo}/validacao-ugal`, `.../aprovacao-rh`, `.../cabimento` e `.../autorizacao`: `true` só com a missão `A`, o processo `A` e o processo **exactamente nesta etapa** — as condições em que o parecer, o cabimento e a autorização se deixam emitir. No `cabimento` e na `autorizacao` vale para o ecrã pedido | `editavel = false` → abrir em só consulta: sem Gravar, o Seguinte só navega para a etapa seguinte sem `PUT`. Evita o 400 *"O parecer só pode ser emitido com o processo na etapa …"* ao voltar a uma etapa já concluída | MS-025 |
+| Tipos de documento da missão: `GET /api/v1/parametrizacao/tipo-documento/ativos?referencia=MISSAO_SERVICO` → **Convite, Agenda, Outro** (`scripts/missao_tipos_documento_missao_servico.sql`, aplicado em dev a 12/11; noutros ambientes correr antes) | Anexos da Submissão: chamar **com** `referencia=MISSAO_SERVICO` (sem o parâmetro vêm os 29 tipos de todos os módulos) | MS-022 |
+
+Só frontend, a API já devolve o necessário (confirmado no reteste): coluna Período = `dataInicio – dataFim`
+mesmo quando são iguais (MS-002); URL da parametrização com `/api/v1` (MS-021); `historico[].responsavelDesc`
+(MS-026); X fixo no diálogo (MS-030); "Autorizado por" pré-preenchido com
+`GET /submissao/valores-iniciais` — o 500 do report é da rota do próprio front
+`POST /gestaomissaoservico/submissaoeautorizacao`, não da API (MS-005); na ajuda de custo, ao escolher o
+colaborador, Dias = `numeroDiasMissao` e Base = `colaboradoresDisponiveis[].valorDiarioAjudaCusto` (só de
+leitura quando não é `null`: a parametrização prevalece sobre o valor do ecrã), e reidratar o colaborador
+por `funcionarioUuid` (MS-013).
 
 ### Alterações de 2026-10-22 — bug report QA (14/10) 🔴
 

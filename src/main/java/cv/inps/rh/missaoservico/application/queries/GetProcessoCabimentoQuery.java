@@ -16,5 +16,7 @@ public class GetProcessoCabimentoQuery implements Query {
   private String uuid;
   @NotBlank(message = "The field <tipoProcesso> is required")
   private String tipoProcesso;
+  /** Ecrã que pede: CABIMENTO ou AUTORIZACAO — decide o {@code editavel} da resposta (MS-025). */
+  private String etapa;
 
 }

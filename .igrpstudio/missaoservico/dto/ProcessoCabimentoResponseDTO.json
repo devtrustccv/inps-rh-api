@@ -10,6 +10,7 @@
     { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
     { "name": "estadoMissao", "type": "string", "objectType": "java", "required": false },
     { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
+    { "name": "editavel", "type": "boolean", "objectType": "java", "required": false },
     { "name": "itens", "type": "ProcessoCabimentoItemResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
     { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
     { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },

@@ -464,7 +464,7 @@ public class MissaoProcessoController {
     @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
-      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso);
+      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso, "CABIMENTO");
 
       return queryBus.handle(query);
 
@@ -525,7 +525,7 @@ public class MissaoProcessoController {
     @PathVariable(value = "tipoProcesso") String tipoProcesso)
   {
 
-      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso);
+      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso, "AUTORIZACAO");
 
       return queryBus.handle(query);
 

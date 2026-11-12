@@ -21,6 +21,7 @@ public class ProcessoValidacaoUgalResponseDTO {
   private UUID missaoUuid;
   private String nrMissaoFormatado;
   private MissaoProcessoResponseDTO processo;
+  private Boolean editavel;                   // MS-025: false = etapa concluída ou missão fechada → só consulta
   // "Documento do Processo" (spec): os três tipos de documento a validar
   private List<AnexoRespDTO> autorizacao;     // anexos do registo da missão
   private List<AnexoRespDTO> requisicoes;     // PDFs das requisições do processo

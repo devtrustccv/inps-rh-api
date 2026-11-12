@@ -24,6 +24,7 @@ public class ProcessoCabimentoResponseDTO {
   private String nrMissaoFormatado;
   private String estadoMissao;            // A | I | FINALIZADO
   private MissaoProcessoResponseDTO processo;
+  private Boolean editavel;               // MS-025: do ecrã pedido (Cabimento ou Autorização); false → só consulta
   private List<ProcessoCabimentoItemResponseDTO> itens;
   private BigDecimal valorTotal;          // soma das linhas
   private String executadoPor;
