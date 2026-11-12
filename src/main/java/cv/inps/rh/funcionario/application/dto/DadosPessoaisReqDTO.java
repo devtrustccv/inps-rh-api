@@ -62,7 +62,8 @@ public class DadosPessoaisReqDTO  {
   private String estadoCivil ;
 
 
-  private String nacionalidade ;
+  // Id da geografia (país), ex. 1238 — gravado em NACION_ID. Aceita também "1238" em string.
+  private Long nacionalidade ;
 
 
   private Long naturalidadeId ;

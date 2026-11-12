@@ -46,6 +46,9 @@ public class JustificarFaltaDTO  {
 
   private Long responsavelId ;
 
+  // Nome do responsável (o ecrã de validação mostrava só o id).
+  private String responsavelNome ;
+
 
   private String obsResponsavel ;
 

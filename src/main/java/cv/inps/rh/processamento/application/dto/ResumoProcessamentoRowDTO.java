@@ -27,6 +27,13 @@ public class ResumoProcessamentoRowDTO {
 
   private Long procId;
 
+  // número de colaboradores (RH_T_TIPOS_RELACIONAMENTO) no tipo de movimento
+  private Long quantidade;
+
   private Long total;
+
+  private String quantidadeFormatada;
+
+  private String totalFormatado;
 
 }

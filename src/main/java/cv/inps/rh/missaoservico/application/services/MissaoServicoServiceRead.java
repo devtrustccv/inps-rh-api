@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
@@ -9,6 +10,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.missaoservico.application.dto.NotificacaoMissaoResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -36,6 +38,7 @@ public class MissaoServicoServiceRead {
   private static final String ESTADO_INATIVO = "I";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
+  private final AuthenticatedUserHelper authenticatedUserHelper;
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
   private final DocumentoEntityRepository documentoRepository;
   private final DocumentoMapper documentoMapper;
@@ -63,6 +66,15 @@ public class MissaoServicoServiceRead {
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Valores por defeito do formulário de nova missão (spec, Autorização Prévia): "Autorizado por" = nome do
+   * utilizador do login (editável) e Data Autorização = hoje (QA MS-005).
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoValoresIniciaisDTO> valoresIniciaisSubmissao(GetValoresIniciaisSubmissaoQuery query) {
+    return ResponseEntity.ok(new MissaoValoresIniciaisDTO(authenticatedUserHelper.getNomeUtilizadorAtual(), LocalDate.now()));
   }
 
   @Transactional(readOnly = true)
@@ -149,6 +161,9 @@ public class MissaoServicoServiceRead {
     response.setAutorizadoPor(missao.getAutorizadoPor());
     response.setDataAutorizacao(missao.getDataAutorizacao());
     response.setEtapa(missao.getEtapa());
+    var etapaDetalhe = EtapaProcesso.fromCode(missao.getEtapa());
+    // MS-016: SUBMISSAO não é EtapaProcesso — o fallback devolvia o código cru ("SUBMISSAO").
+    response.setEtapaDesc(etapaDetalhe != null ? etapaDetalhe.getDescricao() : resolveEtapaDesc(missao.getEtapa()));
     response.setEstado(missao.getEstado());
     response.setMotivoCancelamento(missao.getMotivoCancelamento());
 
@@ -272,6 +287,8 @@ public class MissaoServicoServiceRead {
       dto.setDestino(m.getDescricaoDestino());
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
+      dto.setDataInicio(m.getDataInicio());
+      dto.setDataFim(m.getDataFim());
       // Etapa da missão = a do processo activo mais atrasado (a etapa da missão fica em SUBMISSAO)
       dto.setEtapa(etapaAtrasada);
       var etapaEnum = EtapaProcesso.fromCode(etapaAtrasada);
@@ -285,6 +302,9 @@ public class MissaoServicoServiceRead {
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
       dto.setValorSeguro(sums.get("SEGURO_VIAGEM"));
       dto.setProcessos(processosDaMissao.stream()
+          // Missão ativa: só os processos despoletados (os não escolhidos ficam inativos e não
+          // aparecem). Missão cancelada/finalizada: todos, como histórico.
+          .filter(p -> !ESTADO_ATIVO.equals(m.getEstado()) || ESTADO_ATIVO.equals(p.getEstado()))
           .sorted(Comparator.comparing(MissaoProcessoEntity::getId))
           .map(p -> {
             var pd = new MissaoProcessoResumoDTO();
@@ -586,6 +606,7 @@ public class MissaoServicoServiceRead {
     dto.setNomeReceptor(n.getNomeReceptor());
     dto.setDataEnvio(n.getDataEnvio());
     dto.setEstado(n.getEstado());
+    dto.setEstadoDescricao(EstadoNotificacao.descricaoDe(n.getEstado()));
     dto.setOrigem(origem);
     return dto;
   }

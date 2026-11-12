@@ -38,7 +38,12 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
    * {@code FALTA = 0} e continua a ser justificável.
    *
    * <p>Uma falta ELIMINADA não bloqueia o dia: depois de o pedido ser eliminado, o dia volta a
-   * estar por justificar e tem de reaparecer no painel.
+   * estar por justificar e tem de reaparecer no painel. O mesmo para uma REJEITADA ({@code I}):
+   * a escrita já deixava justificar de novo (existeFaltaVivaNoDia ignora I/E) e a mensagem do
+   * editar manda "registar uma nova justificação", mas o painel escondia o dia para sempre.
+   *
+   * <p>Um dia coberto por uma ausência activa ou pendente (licença, situação laboral) também
+   * sai: a ausência já justifica o dia (QA RG-003).
    *
    * <p>O filtro tem de viver aqui e não em memória: o relógio de ponto cria uma síntese por
    * cada dia trabalhado, logo trazer o mês inteiro para deitar quase tudo fora enchia o ecrã
@@ -53,7 +58,13 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
          AND NOT EXISTS (SELECT 1
                            FROM RH_T_FALTA f
                           WHERE f.SINTESE_DIARIO_ID = s.ID
-                            AND f.ESTADO <> 'E')
+                            AND f.ESTADO NOT IN ('E', 'I'))
+         AND NOT EXISTS (SELECT 1
+                           FROM RH_T_AUSENCIA a
+                          WHERE a.FUN_ID = s.FUNCIONARIO_ID
+                            AND a.ESTADO IN ('A', 'P')
+                            AND TRUNC(s.DATA) BETWEEN TRUNC(a.DATA_INICIO)
+                                                  AND TRUNC(NVL(a.DATA_FIM, a.DATA_INICIO)))
        ORDER BY s.DATA
       """, nativeQuery = true)
   List<AssiduidadeSinteseDiarioEntity> findAusenciasPorJustificar(

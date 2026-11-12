@@ -33,12 +33,14 @@ public class FimComissaoServicoProvider implements OrdemServicoProvider {
         fun.getUuid()
     );
 
-    return Map.of(
+    var vinculo = currentContract != null && currentContract.getVinculoId() != null
+        ? currentContract.getVinculoId().getNome() : null;
+    var inicio = currentContract != null ? currentContract.getDataInicio() : null;
+
+    return OrdemServicoDados.vars(
         "nomeColaborador", fun.getNome(),
-        "cargoColaborador", currentContract.getVinculoId().getNome(),
-        "dataEfeito", DateFormatter.EXTENDED_DATE_PT.format(
-            currentContract.getDataInicio()
-        )
+        "cargoColaborador", vinculo,
+        "dataEfeito", inicio != null ? DateFormatter.EXTENDED_DATE_PT.format(inicio) : null
     );
   }
 }

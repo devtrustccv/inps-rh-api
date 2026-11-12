@@ -27,5 +27,11 @@ public class ResumoProcPagamentoDTO {
 
   private Long procId;
 
+  private Long quantidade;
+
   private Long valor;
+
+  private String quantidadeFormatada;
+
+  private String valorFormatado;
 }

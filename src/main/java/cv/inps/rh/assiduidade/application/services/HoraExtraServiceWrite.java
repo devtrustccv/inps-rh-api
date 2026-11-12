@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarHoraExtraCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarHoraExtraCommand;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
+import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -26,6 +27,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -71,6 +73,9 @@ public class HoraExtraServiceWrite {
     pedido = pedidoRepository.saveAndFlush(pedido);
 
     Long firstHoraExtraId = null;
+    // Colaborador/vínculo associados à validação (o 1.º registo do pedido), como nos outros pedidos.
+    cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funValidacao = null;
+    cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tiprelValidacao = null;
     String pedidoUuid = pedido.getUuid().toString();
     int totalRegistos = 0;
 
@@ -87,6 +92,7 @@ public class HoraExtraServiceWrite {
 
       if (dto.getHorasDiaria() == null)
         throw IgrpResponseStatusException.badRequest("Horas diárias obrigatórias");
+      exigirHorasDiariasValidas(dto.getHorasDiaria());
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(dto.getColaborador());
 
@@ -114,10 +120,13 @@ public class HoraExtraServiceWrite {
       he.setUuid(UuidCreator.getTimeOrderedEpoch());
       he = horaExtraRepository.save(he);
 
-      if (firstHoraExtraId == null)
+      if (firstHoraExtraId == null) {
         firstHoraExtraId = he.getId();
+        funValidacao = funcionario;
+        tiprelValidacao = tipoRelAtual;
+      }
 
-      if (dto.getDocumento() != null) {
+      if (DocumentoMapper.anexoPreenchidoOuErro(dto.getDocumento())) {
         var doc = documentoMapper.toEntity(
             dto.getDocumento(),
             Estado.P,
@@ -136,6 +145,8 @@ public class HoraExtraServiceWrite {
         TipoAcao.INSERT.name(),
         Referencia.HORA_EXTRA.name(),
         Estado.P);
+    validacao.setFunId(funValidacao);
+    validacao.setTiprelId(tiprelValidacao);
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
     validacaoEntityRepository.save(validacao);
@@ -265,8 +276,8 @@ public class HoraExtraServiceWrite {
   public Map<String, ?> validarHoraExtra(ValidarHoraExtraCommand command) {
 
     var req = command.getHoraextrareq();
-    if (req == null || req.getValidar() == null)
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados da hora extra ausentes");
 
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
@@ -274,6 +285,21 @@ public class HoraExtraServiceWrite {
     var pedidoUuid = UUID.fromString(command.getPedidoId());
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Pedido não encontrado"));
+
+    // Ciclo CORRIGIR, padrão do dossiê ("edita-no-validar", mesmo endpoint):
+    //   CORRIGIR      checker devolve: pedido, linhas e validação P -> C, sem aplicar o payload;
+    //   validar=null  maker reenvia: aplica os ajustes e reabre C -> P;
+    //   SIM/NAO       só sobre um pedido pendente — em C tem de ser reenviado primeiro.
+    if (req.getValidar() == EstadoValidacao.CORRIGIR)
+      return devolverParaCorrecao(pedido);
+    if (req.getValidar() == null) {
+      if (!Estado.C.name().equals(pedido.getEstado()))
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      return reenviarCorrecao(pedido, req);
+    }
+    if (Estado.C.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido em correção: não pode ser validado. Corrija e reenvie primeiro.");
 
     var horasExtra = horaExtraRepository.findAllByPedidoId_UuidAndEstado(pedidoUuid, Estado.P);
     if (horasExtra.isEmpty())
@@ -292,68 +318,15 @@ public class HoraExtraServiceWrite {
       }
     }
 
-    Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
-    if (req.getHoraExtra() != null) {
-      for (HoraExtraDTO dto : req.getHoraExtra()) {
-        if (dto.getDataInicio() != null)
-          ajustes.put(dto.getDataInicio(), dto);
-      }
-    }
+    var ajustes = ajustesPorData(req);
 
     for (var he : horasExtra) {
       he.setEstado(estado);
       horaExtraRepository.save(he);
 
       var ajuste = ajustes.get(he.getDataInicio());
-
-      if (ajuste != null) {
-        if (ajuste.getHorasDiaria() != null)
-          he.setHorasDiarias(ajuste.getHorasDiaria());
-        if (ajuste.getPercentagemReferente() != null)
-          he.setPercentagemReferente(ajuste.getPercentagemReferente());
-
-        // Recalcula valor se houve ajuste de horas ou percentagem
-        if (ajuste.getHorasDiaria() != null || ajuste.getPercentagemReferente() != null) {
-          BigDecimal novoValor = calcularValorHoraExtra(
-              he.getTiprelId().getId(), he.getDataInicio(), he.getDataFim(),
-              he.getPercentagemReferente(), he.getHorasDiarias());
-          he.setValorDiario(novoValor);
-        }
-
-        if (ajuste.getDocumento() != null) {
-            var docsHe = documentoEntityRepository
-                .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
-
-            var fun = he.getTiprelId() != null ? he.getTiprelId().getFunId() : null;
-
-            if (docsHe != null && !docsHe.isEmpty()) {
-              var existing = docsHe.getFirst();
-              var mapped = documentoMapper.toEntity(
-                  ajuste.getDocumento(),
-                  estado,
-                  TableName.RH_T_HORA_EXTRA.name(),
-                  he.getId(),
-                  he.getUuid(),
-                  1L,
-                  fun);
-              existing.setTpDocumentoId(mapped.getTpDocumentoId());
-              existing.setUrl(mapped.getUrl());
-              existing.setEstado(estado);
-              documentoEntityRepository.save(existing);
-            } else {
-              var novo = documentoMapper.toEntity(
-                  ajuste.getDocumento(),
-                  estado,
-                  TableName.RH_T_HORA_EXTRA.name(),
-                  he.getId(),
-                  he.getUuid(),
-                  1L,
-                  fun);
-              novo.setUuid(UuidCreator.getTimeOrderedEpoch());
-              documentoEntityRepository.save(novo);
-            }
-          }
-      }
+      if (ajuste != null)
+        aplicarAjuste(he, ajuste, estado);
 
       // Validado ⇒ o procedimento do processamento salarial apanha-a (ESTADO='A', DEF_REM_ID nulo),
       // cria a RH_T_DEF_REMUNERACOES com o VALOR_DIARIO e preenche o DEF_REM_ID — já não é o Java
@@ -385,6 +358,131 @@ public class HoraExtraServiceWrite {
     resp.put("estado", pedido.getEstado());
     resp.put("totalRegistos", horasExtra.size());
 
+    return resp;
+  }
+
+  /** Ajustes do formulário de validação, por dia — os mesmos no despacho e no reenvio. */
+  private Map<LocalDate, HoraExtraDTO> ajustesPorData(HoraExtraReqDTO req) {
+    Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
+    if (req.getHoraExtra() != null) {
+      for (HoraExtraDTO dto : req.getHoraExtra()) {
+        if (dto.getDataInicio() != null)
+          ajustes.put(dto.getDataInicio(), dto);
+      }
+    }
+    return ajustes;
+  }
+
+  /** Hora extra de 0 (ou negativa, ou mais de um dia) não tem valor a pagar — gravava-se na mesma. */
+  private static void exigirHorasDiariasValidas(Long horasDiaria) {
+    if (horasDiaria <= 0 || horasDiaria > 24)
+      throw IgrpResponseStatusException.badRequest(
+          "As horas diárias da hora extra têm de estar entre 1 e 24 (recebido: " + horasDiaria + ").");
+  }
+
+  /**
+   * Ajuste de uma linha (horas, percentagem, anexo) vindo do formulário de validação. O anexo
+   * fica no estado indicado: o da decisão no despacho, P no reenvio.
+   */
+  private void aplicarAjuste(HoraExtraEntity he, HoraExtraDTO ajuste, Estado estado) {
+    if (ajuste.getHorasDiaria() != null) {
+      exigirHorasDiariasValidas(ajuste.getHorasDiaria());
+      he.setHorasDiarias(ajuste.getHorasDiaria());
+    }
+    if (ajuste.getPercentagemReferente() != null)
+      he.setPercentagemReferente(ajuste.getPercentagemReferente());
+
+    // Recalcula valor se houve ajuste de horas ou percentagem
+    if (ajuste.getHorasDiaria() != null || ajuste.getPercentagemReferente() != null) {
+      BigDecimal novoValor = calcularValorHoraExtra(
+          he.getTiprelId().getId(), he.getDataInicio(), he.getDataFim(),
+          he.getPercentagemReferente(), he.getHorasDiarias());
+      he.setValorDiario(novoValor);
+    }
+
+    if (DocumentoMapper.anexoPreenchidoOuErro(ajuste.getDocumento())) {
+        var docsHe = documentoEntityRepository
+            .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
+
+        var fun = he.getTiprelId() != null ? he.getTiprelId().getFunId() : null;
+
+        if (docsHe != null && !docsHe.isEmpty()) {
+          var existing = docsHe.getFirst();
+          var mapped = documentoMapper.toEntity(
+              ajuste.getDocumento(),
+              estado,
+              TableName.RH_T_HORA_EXTRA.name(),
+              he.getId(),
+              he.getUuid(),
+              1L,
+              fun);
+          existing.setTpDocumentoId(mapped.getTpDocumentoId());
+          existing.setUrl(mapped.getUrl());
+          existing.setEstado(estado);
+          documentoEntityRepository.save(existing);
+        } else {
+          var novo = documentoMapper.toEntity(
+              ajuste.getDocumento(),
+              estado,
+              TableName.RH_T_HORA_EXTRA.name(),
+              he.getId(),
+              he.getUuid(),
+              1L,
+              fun);
+          novo.setUuid(UuidCreator.getTimeOrderedEpoch());
+          documentoEntityRepository.save(novo);
+        }
+      }
+  }
+
+  /**
+   * CORRIGIR (checker): pedido, linhas pendentes e validação P -> C, sem aplicar o payload.
+   */
+  private Map<String, ?> devolverParaCorrecao(PedidoEntity pedido) {
+    var horasExtra = horaExtraRepository.findAllByPedidoId_UuidAndEstado(pedido.getUuid(), Estado.P);
+    if (!Estado.P.name().equals(pedido.getEstado()) || horasExtra.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um pedido de hora extra pendente de validação.");
+    var validacao = funcionarioRules.devolverParaCorrecao(pedido.getUuid(), Estado.P, Referencia.HORA_EXTRA);
+    validacaoEntityRepository.save(validacao);
+
+    horasExtra.forEach(he -> he.setEstado(Estado.C));
+    horaExtraRepository.saveAll(horasExtra);
+    pedido.setEstado(Estado.C.name());
+    pedidoRepository.save(pedido);
+
+    return respostaCorrecao(pedido, horasExtra.size(), "Pedido de hora extra devolvido para correção.");
+  }
+
+  /**
+   * Reenvio (maker): aplica os ajustes do formulário e volta a pôr pedido, linhas e validação em P.
+   */
+  private Map<String, ?> reenviarCorrecao(PedidoEntity pedido, HoraExtraReqDTO req) {
+    var horasExtra = horaExtraRepository.findAllByPedidoId_UuidAndEstado(pedido.getUuid(), Estado.C);
+    var ajustes = ajustesPorData(req);
+    for (var he : horasExtra) {
+      var ajuste = ajustes.get(he.getDataInicio());
+      if (ajuste != null)
+        aplicarAjuste(he, ajuste, Estado.P);
+      he.setEstado(Estado.P);
+    }
+    horaExtraRepository.saveAll(horasExtra);
+
+    pedido.setEstado(Estado.P.name());
+    pedidoRepository.save(pedido);
+    validacaoEntityRepository.save(funcionarioRules.reabrirParaValidacao(pedido.getUuid(), Referencia.HORA_EXTRA));
+
+    return respostaCorrecao(pedido, horasExtra.size(),
+        "Pedido de hora extra corrigido e reenviado para validação.");
+  }
+
+  private Map<String, ?> respostaCorrecao(PedidoEntity pedido, int totalRegistos, String mensagem) {
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("totalRegistos", totalRegistos);
+    resp.put("mensagem", mensagem);
     return resp;
   }
 

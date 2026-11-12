@@ -16,5 +16,6 @@ public class NovoSeguradoCommand implements Command {
   private Integer ano;
   @NotNull(message = "The field <mes> is required")
   private Integer mes;
+  private boolean substituir;
 
 }

@@ -210,7 +210,7 @@ public class ColaboradorValidationRules {
     if (!StringUtils.hasText(dp.getNomePai())) {
       throw IgrpResponseStatusException.badRequest("Nome do Pai é obrigatório.");
     }
-    if (!StringUtils.hasText(dp.getNacionalidade())) {
+    if (dp.getNacionalidade() == null) {
       throw IgrpResponseStatusException.badRequest("Nacionalidade é obrigatória.");
     }
     if (dp.getNaturalidadeId() == null) {
@@ -220,6 +220,9 @@ public class ColaboradorValidationRules {
     if (dp.getTipoDocumentoId() != null
         && entityManager.find(TipoDocumentoEntity.class, dp.getTipoDocumentoId()) == null) {
       throw IgrpResponseStatusException.badRequest("Tipo de documento inválido: o valor indicado não existe.");
+    }
+    if (entityManager.find(GeografiaEntity.class, dp.getNacionalidade()) == null) {
+      throw IgrpResponseStatusException.badRequest("Nacionalidade inválida: o valor indicado não existe.");
     }
     if (entityManager.find(GeografiaEntity.class, dp.getNaturalidadeId()) == null) {
       throw IgrpResponseStatusException.badRequest("Naturalidade inválida: o valor indicado não existe.");
@@ -385,6 +388,13 @@ public class ColaboradorValidationRules {
     tr.setEscalaoId(escalao);
     if (escalao.getValor() != null) tr.setSalario(escalao.getValor());
     return escalao;
+  }
+
+  /** O vínculo tem carreira (RH_T_PARAM_VINCULO.FLG_CARREIRA = 1)? */
+  public boolean vinculoTemCarreira(Long tipoVinculoId) {
+    if (tipoVinculoId == null) return false;
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
+    return paramVinculo != null && java.util.Objects.equals(1, paramVinculo.getFlgCarreira());
   }
 
   /** Overload que resolve o vínculo pelo id (para callers que só têm o id do tipo de vínculo). */

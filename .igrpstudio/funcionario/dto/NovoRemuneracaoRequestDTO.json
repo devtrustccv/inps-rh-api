@@ -88,6 +88,11 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "bloqueado",
+      "type": "boolean",
+      "required": false
     }
   ],
   "id": "x0dy389pal"

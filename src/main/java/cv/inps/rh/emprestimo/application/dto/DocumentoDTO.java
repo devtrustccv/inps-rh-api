@@ -4,8 +4,6 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,13 +19,13 @@ public class DocumentoDTO {
 
   private String id;
 
-  @NotNull(message = "The field <tipo> is required")
+  // Tipo e ficheiro validados em EmprestimoDocumentService (ignora as linhas vazias dos
+  // formulários e dá mensagens que o utilizador entende).
   private Long tipoDocumentoId;
 
   private String tipoDocumentoDesc;
 
   private String referenciaTipoDocumento;
 
-  @NotBlank(message = "The field <url> is required")
   private String url;
 }

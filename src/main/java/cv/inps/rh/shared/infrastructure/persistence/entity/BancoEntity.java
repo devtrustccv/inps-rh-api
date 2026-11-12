@@ -22,12 +22,14 @@ import lombok.Setter;
 public class BancoEntity  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // Oracle 11g: o id vem da SEQ_RH_T_BANCO (o trigger TRG_RH_T_BANCO_BI só a usa quando o id vem nulo).
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_rh_t_banco")
+    @SequenceGenerator(name = "seq_rh_t_banco", sequenceName = "SEQ_RH_T_BANCO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
 
-    @NotBlank(message = "cdBanco is mRandatory")
+    @NotBlank(message = "cdBanco is mandatory")
     @Column(name="cd_banco", nullable = false)
     private String cdBanco;
 

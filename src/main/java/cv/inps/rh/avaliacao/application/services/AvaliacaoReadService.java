@@ -12,13 +12,16 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoAtitudeP
 import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoCompetenciaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoObjectivoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,18 +50,21 @@ public class AvaliacaoReadService {
   private final AvaliacaoCompetenciaEntityRepository competenciaRepository;
   private final AvaliacaoAtitudePessoalEntityRepository atitudeRepository;
   private final AvaliacaoPeriodoService periodoService;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
 
   public AvaliacaoReadService(
       AvaliacaoEntityRepository avaliacaoRepository,
       AvaliacaoObjectivoEntityRepository objectivoRepository,
       AvaliacaoCompetenciaEntityRepository competenciaRepository,
       AvaliacaoAtitudePessoalEntityRepository atitudeRepository,
-      AvaliacaoPeriodoService periodoService) {
+      AvaliacaoPeriodoService periodoService,
+      TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
     this.avaliacaoRepository = avaliacaoRepository;
     this.objectivoRepository = objectivoRepository;
     this.competenciaRepository = competenciaRepository;
     this.atitudeRepository = atitudeRepository;
     this.periodoService = periodoService;
+    this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
   }
 
   /** Componentes com as medições do período. Sem período, vêm sem notas. */
@@ -105,11 +111,12 @@ public class AvaliacaoReadService {
     var medicoes = periodo != null
         ? periodoService.medicoesDoPeriodo(avaliacao.getId(), periodo)
         : Map.<String, AvaliacaoPeriodicidadeEntity>of();
+    var comuns = medicoesDosComuns(avaliacao, periodo);
 
     dto.setObjectivos(objectivoRepository.findAllByAvaliacaoObj_Uuid(id).stream()
         .sorted(Comparator.comparing(AvaliacaoObjectivoEntity::getNumeroOrdem,
             Comparator.nullsLast(Comparator.naturalOrder())))
-        .map(e -> toObjectivo(e, medicoes))
+        .map(e -> toObjectivo(e, medicoes, comuns))
         .toList());
 
     var competencias = competenciaRepository.findAllByAvaliacao_Uuid(id).stream()
@@ -236,8 +243,34 @@ public class AvaliacaoReadService {
     });
   }
 
+  /**
+   * Medições dos objectivos comuns do ano no período (INPS e a DIREÇÃO do colaborador), por paramId. Na avaliação
+   * individual, uma linha INPS/DIREÇÃO sem medição própria mostra o que foi avaliado nos comuns (QA AV-23).
+   */
+  private Map<Long, AvaliacaoPeriodicidadeEntity> medicoesDosComuns(AvaliacaoEntity avaliacao, String periodo) {
+    if (avaliacao.getFuncionario() == null || !StringUtils.hasText(periodo))
+      return Map.of();
+    var comuns = new ArrayList<>(avaliacaoRepository.findComuns(avaliacao.getAno(), "INPS", null));
+    var direcao = avaliacao.getInstitId() != null ? avaliacao.getInstitId().getId()
+        : tiposRelacionamentoRepository.findAtualByFuncionarioUuid(avaliacao.getFuncionario().getUuid())
+            .map(tr -> tr.getMobId() != null && tr.getMobId().getInstidId() != null ? tr.getMobId().getInstidId().getId() : null)
+            .orElse(null);
+    if (direcao != null)
+      comuns.addAll(avaliacaoRepository.findComuns(avaliacao.getAno(), "DIRECAO", direcao));
+    var out = new HashMap<Long, AvaliacaoPeriodicidadeEntity>();
+    for (var comum : comuns) {
+      var medicoes = periodoService.medicoesDoPeriodo(comum.getId(), periodo);
+      for (var o : objectivoRepository.findAllByAvaliacaoObj_Uuid(comum.getUuid())) {
+        var m = medicoes.get(chave(ComponenteAvaliacaoRef.OBJECTIVO, o.getId()));
+        if (m != null && o.getParamObjetivo() != null)
+          out.putIfAbsent(o.getParamObjetivo().getId(), m);
+      }
+    }
+    return out;
+  }
+
   private ObjectivoAvaliacaoDTO toObjectivo(AvaliacaoObjectivoEntity e,
-      Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
+      Map<String, AvaliacaoPeriodicidadeEntity> medicoes, Map<Long, AvaliacaoPeriodicidadeEntity> comuns) {
     var dto = new ObjectivoAvaliacaoDTO();
     dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumero(e.getNumeroOrdem());
@@ -256,12 +289,22 @@ public class AvaliacaoReadService {
       dto.setResultado(escala2(aplicarPercentagem(m.getAvaliacaoValor(), e.getPonderacao())));
       dto.setAutoResultado(escala2(aplicarPercentagem(m.getAutoAvaliacao(), e.getPonderacao())));
     }
+    var semAvaliacaoPropria = m == null || (m.getRealizado() == null && m.getAvaliacaoValor() == null);
+    var comum = e.getParamObjetivo() != null && !"INDIVIDUAL".equalsIgnoreCase(e.getAbrangencia())
+        ? comuns.get(e.getParamObjetivo().getId()) : null;
+    if (semAvaliacaoPropria && comum != null) {
+      dto.setRealizado(comum.getRealizado());
+      dto.setAvaliacao(comum.getAvaliacaoValor());
+      dto.setResultado(escala2(aplicarPercentagem(comum.getAvaliacaoValor(), e.getPonderacao())));
+    }
     return dto;
   }
 
   private CompetenciaComportAvaliacaoDTO toCompetenciaComportamental(AvaliacaoCompetenciaEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new CompetenciaComportAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
@@ -275,6 +318,8 @@ public class AvaliacaoReadService {
   private CompetenciaTecAvaliacaoDTO toCompetenciaTecnica(AvaliacaoCompetenciaEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new CompetenciaTecAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
@@ -288,6 +333,8 @@ public class AvaliacaoReadService {
   private AtitudePessoalAvaliacaoDTO toAtitude(AvaliacaoAtitudePessoalEntity e,
       Map<String, AvaliacaoPeriodicidadeEntity> medicoes) {
     var dto = new AtitudePessoalAvaliacaoDTO();
+    // paramId: liga a linha à do componente (a edição da definição grava por ele).
+    dto.setParamId(e.getParamObjetivo() != null ? e.getParamObjetivo().getId() : null);
     // Ler do próprio registo; fallback ao paramObjetivo para dados migrados antes do V3
     dto.setNumeroOrdem(e.getNumeroOrdem() != null
         ? e.getNumeroOrdem()

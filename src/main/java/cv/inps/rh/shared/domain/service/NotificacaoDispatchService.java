@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.domain.service;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -87,7 +88,10 @@ public class NotificacaoDispatchService {
       LOGGER.warn("Template de notificação não encontrado para tipo '{}' — registo gravado sem conteúdo", tipoNotificacao);
     }
 
-    String assunto = paramOpt.map(p -> substituir(p.getAssunto(), vars)).orElse(null);
+    // Sem template: assunto = o tipo por extenso, para o email e a lista não ficarem sem assunto.
+    String assunto = paramOpt.map(p -> substituir(p.getAssunto(), vars))
+        .filter(StringUtils::hasText)
+        .orElseGet(() -> assuntoPorTipo(tipoNotificacao));
     String corpo = StringUtils.hasText(mensagemCustom)
         ? substituir(mensagemCustom, vars)
         : paramOpt.map(p -> substituir(p.getCorpo(), vars)).orElse(null);
@@ -95,19 +99,25 @@ public class NotificacaoDispatchService {
     return new Conteudo(assunto, corpo);
   }
 
+  private static String assuntoPorTipo(String tipo) {
+    if (!StringUtils.hasText(tipo)) return null;
+    var t = tipo.trim().replace('_', ' ').toLowerCase();
+    return Character.toUpperCase(t.charAt(0)) + t.substring(1);
+  }
+
   private void gravarEEnviar(String tipoNotificacao, String emailDestino, String nomeReceptor,
                              String destinatario, Long referenciaId, String referenciaName,
                              UUID referenciaUuid, FuncionarioEntity funId,
                              String assunto, String corpo) {
 
-    String estado = "Pendente";
+    String estado = EstadoNotificacao.POR_ENVIAR.name();
     if (StringUtils.hasText(emailDestino)) {
       try {
         emailService.sendEmail(emailDestino, assunto != null ? assunto : "", corpo != null ? corpo : "");
-        estado = "Enviado";
+        estado = EstadoNotificacao.ENVIADO.name();
       } catch (Exception e) {
         LOGGER.error("Erro ao enviar email notificação {} para {}: {}", tipoNotificacao, emailDestino, e.getMessage());
-        estado = "Erro";
+        estado = EstadoNotificacao.ERRO.name();
       }
     }
 

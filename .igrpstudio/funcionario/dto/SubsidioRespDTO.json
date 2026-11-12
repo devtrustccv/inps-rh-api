@@ -76,6 +76,11 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "bloqueado",
+      "type": "boolean",
+      "required": false
     }
   ],
   "id": "b908abjqzk_copy"

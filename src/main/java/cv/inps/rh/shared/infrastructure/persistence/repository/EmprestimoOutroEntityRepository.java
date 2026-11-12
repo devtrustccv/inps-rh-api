@@ -30,4 +30,6 @@ public interface EmprestimoOutroEntityRepository extends
   }
 
   List<EmprestimoOutroEntity> findByReferenciaOrigemAndFunAndEstado(PedidoEntity referenciaOrigem, FuncionarioEntity fun, String estado);
+
+  List<EmprestimoOutroEntity> findByFunAndEstado(FuncionarioEntity fun, String estado);
 }

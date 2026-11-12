@@ -38,7 +38,8 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
     }
 
     switch (action) {
-      case VALIDAR -> service.validar(ids, command.getProcessamentoactionrequest().tipoValidacao());
+      case VALIDAR -> service.validar(ids, command.getProcessamentoactionrequest().tipoValidacao(),
+          command.getProcessamentoactionrequest().validar(), command.getProcessamentoactionrequest().observacao());
       case CABIMENTAR -> service.cabimentar(ids);
       case ELIMINAR_CABIMENTO -> service.eliminarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);

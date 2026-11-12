@@ -67,4 +67,19 @@ public class EmprestimoListRowDTO  {
   private String etapa ;
   private String etapaDesc;
 
+  // Versão mais recente do pedido (pode ser um subprocesso ainda em curso) — é a que a etapa
+  // do pedido descreve; o ▷ da lista abre esta. Igual a emprestimoId quando não há subprocesso.
+  private String emprestimoIdEmCurso;
+
+  private String tipoSituacaoEmCurso;
+
+  // Nº de versões do pedido (empréstimo inicial + subprocessos); > 1 => linha expansível.
+  private Long numeroVersoes;
+  // Tipo do pedido (AQUISICAO_VIATURA, FUNDO_SOCIAL, RECUPERACAO): a Recuperação grava em
+  // tipoEmprestimo o tipo recuperado, por isso só o pedido a distingue do Fundo Social / Viatura.
+  private String tipoPedido;
+  // Total das Amortizações concluídas do pedido até à versão em vigor (ponto 35): o valor de cada
+  // Amortização fica só na sua versão e desaparecia da lista depois de um Reforço.
+  private BigDecimal valorAmortizado;
+
 }

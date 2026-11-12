@@ -160,6 +160,12 @@ public class AvaliacaoPeriodoService {
     return avdIds.isEmpty() ? List.of() : detalheRepository.findAllByAvaliacao_IdIn(avdIds);
   }
 
+  /** As medições (todas as componentes e períodos) de várias avaliações. */
+  @Transactional(readOnly = true)
+  public List<AvaliacaoPeriodicidadeEntity> medicoesDe(List<Long> avdIds) {
+    return avdIds.isEmpty() ? List.of() : periodicidadeRepository.findAllByAvaliacao_IdIn(avdIds);
+  }
+
   // --------------------------------------------------------------- medições
 
   /** A medição de uma componente num período, criando-a se ainda não existir. */
@@ -216,33 +222,16 @@ public class AvaliacaoPeriodoService {
   // -------------------------------------------------------------- validação
 
   /**
-   * Valida uma nota contra os níveis de avaliação do domínio {@link Domains#NIVEIS_AVD}.
-   *
-   * <p>Sem isto, uma nota fora da escala entra no cálculo e produz um resultado que não
-   * cai em nenhum escalão — a avaliação fica com nota e sem classificação qualitativa.</p>
-   *
-   * <p>Enquanto o domínio estiver por preencher (uma linha de exemplo), não se valida,
-   * para não bloquear ambientes ainda por parametrizar.</p>
+   * Valida o valor de uma avaliação. A avaliação é um valor livre (não um nível do domínio
+   * NIVEIS_AVD) — só se recusa um valor negativo. Um valor que deixe a nota final fora da
+   * escala configurada continua a ser aceite: quem grava recebe um alerta.
    */
-  @Transactional(readOnly = true)
   public void validarNota(BigDecimal nota, String ondeOcorreu) {
-    if (nota == null) {
-      return;
-    }
-    var niveis = niveisPermitidos();
-    if (niveis.isEmpty()) {
-      return;
-    }
-    if (!niveis.contains(nota.stripTrailingZeros().toPlainString())) {
+    if (nota != null && nota.signum() < 0) {
       throw IgrpResponseStatusException.badRequest(
           "Avaliação inválida em " + ondeOcorreu + ": " + nota.toPlainString()
-              + ". Níveis aceites: " + niveis + " (domínio " + Domains.NIVEIS_AVD.getCode() + ").");
+              + ". O valor não pode ser negativo.");
     }
-  }
-
-  private java.util.Set<String> niveisPermitidos() {
-    var valores = dominioService.getDominioMap(Domains.NIVEIS_AVD.getCode()).keySet();
-    return valores.size() <= 1 ? java.util.Set.of() : valores;
   }
 
   // ------------------------------------------------------------------ util

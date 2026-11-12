@@ -64,7 +64,12 @@ public class DefPagamentoMapper {
           if (java.util.Objects.equals(e.getId(), dto.getId())) { found = e; break; }
         }
       }
-      if (found != null) {
+      if (found != null && cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(found)) {
+        // Melhoria 25: IUR/INPS/valor líquido PCCS ou já processado — só Data Fim e OBS mudam.
+        ValidationUtil.validateIntervaloData(found.getDataInicio(), dto.getDataFim());
+        found.setDataFim(dto.getDataFim());
+        if (dto.getObservacoes() != null) found.setObs(dto.getObservacoes());
+      } else if (found != null) {
         ValidationUtil.validateValorNaoNegativo(dto.getValor());
         ValidationUtil.validateIntervaloData(dto.getDataInicio(), dto.getDataFim());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));

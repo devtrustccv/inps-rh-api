@@ -17,7 +17,7 @@ import java.util.List;
 public class PrestadorServicoRequestDTO {
 
   private Long entId;                     // INPSSIGOF.ENTIDADES.ID — obrigatório
-  private String nome;                    // omitido: nome da entidade
+  private String nome;                    // IGNORADO desde 22/10 (MS-029): o nome é sempre o da entidade
   private String nif;
   private String email;                   // email principal — obrigatório
   private String telefone;

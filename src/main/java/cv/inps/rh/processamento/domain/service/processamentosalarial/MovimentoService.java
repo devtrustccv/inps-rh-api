@@ -14,6 +14,8 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
@@ -25,9 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Transactional
@@ -46,9 +52,39 @@ public class MovimentoService {
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
+  private static BigDecimal parseNumero(Cell cell, DataFormatter formatter, String campo, List<String> erros) {
+    if (cell == null || cell.getCellType() == CellType.BLANK)
+      return null;
+    if (cell.getCellType() == CellType.NUMERIC || cell.getCellType() == CellType.FORMULA) {
+      try {
+        return BigDecimal.valueOf(cell.getNumericCellValue());
+      } catch (IllegalStateException e) {
+        // fórmula que não devolve número: cai na leitura como texto
+      }
+    }
+    var texto = formatter.formatCellValue(cell).trim().replace(",", ".");
+    try {
+      return new BigDecimal(texto);
+    } catch (NumberFormatException e) {
+      erros.add(campo + " inválido (" + texto + ")");
+      return null;
+    }
+  }
+
+  private static LocalDate parseData(String valor, String campo, List<String> erros) {
+    if (!StringUtils.hasText(valor))
+      return null;
+    var data = DateFormatter.stringToLocalDate(valor.trim());
+    if (data == null)
+      erros.add(campo + " inválida (" + valor.trim() + ")");
+    return data;
+  }
+
   public void uploadMovement(MultipartFile file) {
 
     var fileName = file.getOriginalFilename();
+    var movimentos = new ArrayList<ImportacaoMovimentoEntity>();
+    var erros = new ArrayList<String>();
 
     try (var workbook = WorkbookFactory.create(file.getInputStream())) {
 
@@ -58,27 +94,65 @@ public class MovimentoService {
       for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 
         var row = sheet.getRow(i);
-        if (row == null) continue;
+        if (row == null || formatter.formatCellValue(row.getCell(0)).isBlank()) continue;
 
-        var uuid = formatter.formatCellValue(row.getCell(0)).trim();
+        // linha como o utilizador a vê no Excel (cabeçalho = linha 1)
+        var linha = i + 1;
+        var errosLinha = new ArrayList<String>();
+
+        var funcionario = parseFuncionario(formatter.formatCellValue(row.getCell(0)).trim(), errosLinha);
+        var percentagem = parseNumero(row.getCell(4), formatter, "Percentagem", errosLinha);
+        var valor = parseNumero(row.getCell(5), formatter, "Valor", errosLinha);
+        var dataInicio = parseData(formatter.formatCellValue(row.getCell(6)), "Data Início", errosLinha);
+        var dataFim = parseData(formatter.formatCellValue(row.getCell(7)), "Data Fim", errosLinha);
+        if (dataInicio != null && dataFim != null && dataFim.isBefore(dataInicio))
+          errosLinha.add("Data Fim anterior à Data Início");
+
+        if (!errosLinha.isEmpty()) {
+          erros.add("Linha %d: %s".formatted(linha, String.join("; ", errosLinha)));
+          continue;
+        }
+
         var mov = new ImportacaoMovimentoEntity();
         mov.setUuid(UuidCreator.getTimeOrderedEpoch());
-        mov.setFuncionario(funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(uuid)));
+        mov.setFuncionario(funcionario);
         mov.setTpMovRetencao(formatter.formatCellValue(row.getCell(2)));
         mov.setTpMovRem(formatter.formatCellValue(row.getCell(3)));
-        mov.setPercentagem(BigDecimal.valueOf(row.getCell(4).getNumericCellValue()));
-        mov.setValor(BigDecimal.valueOf(row.getCell(5).getNumericCellValue()));
-        mov.setDataInicio(DateFormatter.stringToLocalDate(formatter.formatCellValue(row.getCell(6))));
-        mov.setDataFim(DateFormatter.stringToLocalDate(formatter.formatCellValue(row.getCell(7))));
+        mov.setPercentagem(percentagem);
+        mov.setValor(valor);
+        mov.setDataInicio(dataInicio);
+        mov.setDataFim(dataFim);
         mov.setSituacao(formatter.formatCellValue(row.getCell(8)));
         mov.setNomeFicheiro(fileName);
         mov.setEstado(Estado.A.name());
-        importacaoMovimentoEntityRepository.save(mov);
+        movimentos.add(mov);
       }
 
-    } catch (Exception e) {
+    } catch (IOException | RuntimeException e) {
+      // ficheiro que o POI não consegue abrir (não é Excel, corrompido, ...)
       LOGGER.error(e.getMessage(), e);
-      throw IgrpResponseStatusException.internalServerError("Erro ao processar arquivo");
+      throw IgrpResponseStatusException.badRequest("Ficheiro inválido: deve ser um Excel (.xls/.xlsx) no formato do modelo");
+    }
+
+    // tudo ou nada: com erros não se grava nenhuma linha
+    if (!erros.isEmpty())
+      throw IgrpResponseStatusException.badRequest("O ficheiro tem linhas inválidas", erros);
+
+    if (movimentos.isEmpty())
+      throw IgrpResponseStatusException.badRequest("O ficheiro não tem movimentos para importar");
+
+    importacaoMovimentoEntityRepository.saveAll(movimentos);
+  }
+
+  private FuncionarioEntity parseFuncionario(String uuid, List<String> erros) {
+    try {
+      var funcionario = funcionarioEntityRepository.findByUuid(UUID.fromString(uuid));
+      if (funcionario.isEmpty())
+        erros.add("colaborador não encontrado (" + uuid + ")");
+      return funcionario.orElse(null);
+    } catch (IllegalArgumentException e) {
+      erros.add("identificador do colaborador inválido (" + uuid + ")");
+      return null;
     }
   }
 

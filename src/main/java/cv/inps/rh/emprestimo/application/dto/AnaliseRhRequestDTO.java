@@ -7,13 +7,13 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +41,8 @@ public class AnaliseRhRequestDTO {
 
   private String observacao;
 
+  private LocalDate data;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
   @NotNull(message = "The field <action> is required")
@@ -58,8 +60,11 @@ public class AnaliseRhRequestDTO {
       @NotNull(message = "O parecer do responsável é obrigatório")
       ParecerProcesso parecer,
 
-      @NotBlank(message = "A observação do responsável é obrigatória")
-      String observacao
+      // Obrigatória só para Não Conforme / Retificação (changelog v2 §2) — validado no
+      // formulário; com @NotBlank um "Conforme" sem observação dava 400.
+      String observacao,
+
+      LocalDate data
 
   ) {
   }

@@ -24,7 +24,7 @@ Estrutura **hexagonal / Clean Architecture** por módulo de negócio. Cada módu
 
 Módulos de negócio: `assiduidade`, `avaliacao`, `configuracao`, `emprestimo`, `funcionario`, `missaoservico`, `parametrizacao`, `processamento`, `progressaopromocao`, `transversal`. Código compartilhado em `shared/` (config, security, util).
 
-Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio (ex.: `assiduidade_regras.md`, `avaliacao_desempenho.md`, `dossier_regras.md`, `EspecificacaoTecnicaFuncional-MISSAOSERVICO.md`).
+Documentação funcional do domínio em [docs/](docs/) — consultar antes de implementar regras de negócio: as specs `Especificação Tecnica Funcional - <MÓDULO>_<data>.md` (a mais recente de cada módulo prevalece) e os contratos de API para o frontend `frontend_changes_<modulo>.md`. Scripts SQL (DDL/DML aplicados à mão, sem Flyway) em [docs/sql/](docs/sql/) e [scripts/](scripts/).
 
 ## Convenções
 
@@ -33,7 +33,7 @@ Documentação funcional do domínio em [docs/](docs/) — consultar antes de im
 - **IDs de funcionário**: o refactor recente padronizou `funcionarioDeId` / `funcionarioParaId` (antes `tiprelDeId`/`tiprelParaId`) em DTOs de substituição. Seguir esse padrão em novos DTOs que envolvam relação entre funcionários.
 - **Open-in-view desligado** (`spring.jpa.open-in-view=false`) — carregar associações explicitamente no service layer; não confiar em lazy loading no controller.
 - **Batch inserts** configurados (batch_size=50, order_inserts/updates) — em operações bulk, usar `saveAll` e liberar a sessão periodicamente.
-- **Dialecto Oracle** — evitar SQL ANSI-only; atenção a `LIMIT` (usar `FETCH FIRST n ROWS ONLY` ou `Pageable`).
+- **Dialecto Oracle** — evitar SQL ANSI-only; sem `LIMIT`: usar `Pageable` (ou `ROWNUM` em SQL nativo). A BD de dev é **Oracle 11g XE**, onde `FETCH FIRST n ROWS ONLY` dá ORA-00933.
 - **Flyway desligado por padrão** (`spring.flyway.enabled=false`); migrations em `classpath:db/migration` quando habilitado.
 - **Swagger UI** em `/swagger-ui.html` (controlado por `ENABLE_SWAGGER`).
 - **Enum exposer do IGRP** expõe enums automaticamente em `api/v1/enums` (controlado por `igrp.enum.exposer.enabled`).
@@ -45,7 +45,7 @@ Credenciais/URLs via env vars — nunca hardcoded:
 - **Oracle DB**: `ORACLE_HOST`, `ORACLE_PORT`, `ORACLE_SERVICE_NAME`, `ORACLE_USER`, `ORACLE_PASSWORD`
 - **Auth JWT (OAuth2 RS) + Acesso iGRP**: `IGRP_ACCESS_API_BASE_URL` (é também o issuer), `IGRP_ACCESS_M2M_CLIENT_ID`/`_SECRET`
 - **MinIO (storage)**: `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET_NAME`
-- **Processamento salarial**: `PROCESSAMENTO_SALARIAL_BASE_URL`
+- **Processamento salarial**: `PROCESSAMENTO_SALARIAL_BASE_URL`, `PROCESSAMENTO_SALARIAL_TOKEN` (Bearer)
 - **Serviços externos**: `EXTERNAL_NIF_URL`, `EXTERNAL_SNIAC_URL`, `EXTERNAL_BI_URL` (cada um com `_TOKEN` próprio)
 
 ## Workflow Git
@@ -82,6 +82,13 @@ detalheAlteracoes.congelar(validacao, DossierCampos.T_<TABELA>, campos, antes,
 - Reenvio de correção: o `congelar()` funde com o que já está congelado e mantém o valor anterior **aprovado**.
 - FKs: `.referencia(...)` lê o id sem inicializar o proxy e resolve o nome por PK
   (`ReferenciaNomeResolver`); se o nome sair como `"XEntity #id"`, falta o getter em `GETTERS_CANDIDATOS`.
+
+## Documentos de Saída (texto com marcadores)
+
+O texto dos Documentos de Saída (`RH_T_PARAM_DOC_OUTPUT`) usa marcadores `${nome}`. Para gerar um documento:
+`DocumentoSaidaRenderer.render(tipoDocumento, Map valores)` (em `shared/domain/service/documento/`) — os valores vêm de onde
+o programador quiser. Ordens de Serviço (providers) e Declarações já passam pelo motor. Guia completo:
+[docs/guia_documentos_saida_marcadores.html](docs/guia_documentos_saida_marcadores.html).
 
 ## Armadilhas comuns
 

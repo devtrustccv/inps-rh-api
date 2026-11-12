@@ -4,17 +4,30 @@ import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class DocOutputMapper {
 
+    /** Domínio do Tipo de Documento (spec Transversal, Documentos Output). */
+    public static final String DOMINIO_TIPO = "ORDEM_SERVICO_DECLARACAO";
+
+    private final DomainEntityRepository domainEntityRepository;
+
     public DocOutputResponseDTO toResponseDto(ParamDocOutputEntity entity) {
+        return toResponseDto(entity, domainEntityRepository.getActiveDomainByCode(DOMINIO_TIPO));
+    }
+
+    private DocOutputResponseDTO toResponseDto(ParamDocOutputEntity entity, Map<String, String> tipos) {
         if (entity == null) {
             return null;
         }
@@ -23,13 +36,16 @@ public class DocOutputMapper {
         dto.setId(entity.getId());
         dto.setUuid(entity.getUuid());
         dto.setTipoDocumento(entity.getTipoDocumento());
+        // QA TR-01: a lista mostrava o código do domínio.
+        dto.setTipoDocumentoDesc(tipos.getOrDefault(entity.getTipoDocumento(), entity.getTipoDocumento()));
         dto.setTitulo(entity.getTitulo());
         dto.setCorpo(entity.getCorpo());
         dto.setAssinadoPor(entity.getAssinadoPor());
         dto.setEstado(entity.getEstado());
 
         if (entity.getResponsavel() != null) {
-            dto.setResponsavelId(entity.getResponsavel().getFunId().getUuid().toString());
+            dto.setResponsavelId(entity.getResponsavel().getId());
+            dto.setFuncionarioId(entity.getResponsavel().getFunId().getUuid());
             dto.setResponsavelNome(entity.getResponsavel().getFunId().getNome());
         }
 
@@ -37,7 +53,8 @@ public class DocOutputMapper {
     }
 
     public List<DocOutputResponseDTO> toResponseDtoList(List<ParamDocOutputEntity> entities) {
-        return entities.stream().map(this::toResponseDto).collect(Collectors.toList());
+        var tipos = domainEntityRepository.getActiveDomainByCode(DOMINIO_TIPO);
+        return entities.stream().map(e -> toResponseDto(e, tipos)).collect(Collectors.toList());
     }
 
     public ParamDocOutputEntity toEntity(DocOutputRequestDTO dto) {

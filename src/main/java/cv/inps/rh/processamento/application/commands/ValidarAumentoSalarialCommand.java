@@ -13,4 +13,7 @@ public class ValidarAumentoSalarialCommand implements Command {
 
   @NotBlank(message = "The field <aumentoSalarialId> is required")
   private String aumentoSalarialId;
+
+  @NotBlank(message = "The field <estadoValidacao> is required")
+  private String estadoValidacao;
 }

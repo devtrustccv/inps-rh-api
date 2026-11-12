@@ -6,6 +6,7 @@ import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDT
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +31,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -47,6 +48,7 @@ public class ProgressaoPromocaoWriteService {
   private final PdfGenerator pdfGenerator;
   private final StorageService storageService;
   private final DataSource dataSource;
+  private final ApplicationAuditorAware applicationAuditorAware;
 
   public void anexarOrdemServico(AnexarOrdemServicoRequestDTO request) {
 
@@ -138,16 +140,20 @@ public class ProgressaoPromocaoWriteService {
 
     var call = new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
+        .withCatalogName("RH_PK_AUMENTO_SALARIAL_DB")
         .withProcedureName("CONFIRMAR_PROGRESSAO_PROMO")
         .declareParameters(
             new SqlParameter("P_val_evol_carr_ID", Types.NUMERIC),
-            new SqlParameter("P_ORDEM_SERVICO_ID", Types.NUMERIC)
+            new SqlParameter("P_ORDEM_SERVICO_ID", Types.NUMERIC),
+            new SqlParameter("P_USER_ID", Types.NUMERIC),
+            new SqlParameter("P_USER_NAME", Types.VARCHAR)
         );
 
-    call.execute(Map.of(
-        "P_val_evol_carr_ID", id,
-        "P_ORDEM_SERVICO_ID", ev.getOrdemServicoId()
-    ));
+    call.execute(new MapSqlParameterSource()
+        .addValue("P_val_evol_carr_ID", id)
+        .addValue("P_ORDEM_SERVICO_ID", ev.getOrdemServicoId())
+        .addValue("P_USER_ID", 0L) // TODO: id do utilizador do login (igual ao SIMULAR_AUMENTO)
+        .addValue("P_USER_NAME", applicationAuditorAware.getCurrentSubjectName()));
   }
 
   public void sendToHistory(List<Long> ids) {

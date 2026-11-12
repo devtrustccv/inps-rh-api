@@ -44,10 +44,9 @@ public class ComponenteAvaliacaoMapper {
     entity.setDescricao(ValidationUtil.trimToNull(dto.getDescricao()));
     entity.setKpi(ValidationUtil.trimToNull(dto.getKpi()));
 
-    if (StringUtils.hasText(dto.getAbrangencia()) && "DIRECAO".equalsIgnoreCase(dto.getAbrangencia())) {
-      if (dto.getInstitId() == null) {
-        throw IgrpResponseStatusException.badRequest("institId é obrigatório quando abrangencia = DIRECAO");
-      }
+    // Aplicar a todos = todos os colaboradores (sem direção). Caso contrário a direção é opcional:
+    // o objetivo pode ser restringido por carreira/cargo e/ou direção, mas nenhum é obrigatório.
+    if (!Boolean.TRUE.equals(dto.getAplicarATodos()) && dto.getInstitId() != null) {
       entity.setInstitId(instituicaoRepository.findByIdOrThrow(dto.getInstitId()));
     }
 
@@ -102,22 +101,18 @@ public class ComponenteAvaliacaoMapper {
       aplicarATodos = Boolean.FALSE;
     }
 
-    if (Boolean.TRUE.equals(aplicarATodos)) {
+    // Aplicar a todos = todos os colaboradores: não se guarda cargo nem carreira.
+    // Sem "aplicar a todos", a carreira/cargo é opcional (a regra do cargo obrigatório foi retirada).
+    if (!Boolean.TRUE.equals(aplicarATodos)) {
       if (cargoId != null) {
-        throw IgrpResponseStatusException.badRequest("cargoId deve ser null quando aplicarATodos = true");
+        var cargo = cargoRepository.findById(cargoId)
+            .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+                "ParamCargoEntity not found for id: " + cargoId));
+        entity.setCargo(cargo);
       }
-    } else {
-      if (cargoId == null) {
-        throw IgrpResponseStatusException.badRequest("cargoId é obrigatório quando aplicarATodos = false");
+      if (carrPccsId != null) {
+        entity.setCarreira(carreiraRepository.findByIdOrThrow(carrPccsId));
       }
-      var cargo = cargoRepository.findById(cargoId)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-              "ParamCargoEntity not found for id: " + cargoId));
-      entity.setCargo(cargo);
-    }
-
-    if (carrPccsId != null) {
-      entity.setCarreira(carreiraRepository.findByIdOrThrow(carrPccsId));
     }
 
     entity.setPonderacao(ponderacao);

@@ -22,6 +22,7 @@ public class PedidoDeclaracaoRowDTO  {
   private Long id;
   private UUID uuid;
   private String tipoDeclaracao;
+  private String tipoDeclaracaoDesc;
   private String efeito;
   private LocalDate dataPedido;
   private String nomeColaborador;
@@ -30,6 +31,7 @@ public class PedidoDeclaracaoRowDTO  {
   private String seccao;
   private String vinculo;
   private String estadoPedido;
+  private String estadoPedidoDesc;
   private String etapa;
 
 }

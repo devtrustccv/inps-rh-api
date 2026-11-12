@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetListaFosQuery implements Query {
 
-  @NotBlank(message = "The field <dataInicio> is required")
   private String dataInicio;
-  @NotBlank(message = "The field <dataFim> is required")
   private String dataFim;
   @NotBlank(message = "The field <page> is required")
   private String page;
   @NotBlank(message = "The field <size> is required")
   private String size;
+  /** Filtro opcional Mês Referência (AAAAMM). */
+  private String mesReferencia;
 
 }

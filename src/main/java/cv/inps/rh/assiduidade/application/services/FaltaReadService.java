@@ -88,7 +88,12 @@ public class FaltaReadService {
         }
       }
       if (query.getIlha() != null) {
-        predicates.add(cb.equal(root.get("idIlha"), query.getIlha()));
+        // ID_ILHA da vista é o id do LOCAL DE TRABALHO (RH_T_PARAM_LOCAL_TRAB), não da ilha: filtra-se
+        // pelos locais de trabalho cuja ilha (ILHA_ID) é a escolhida no filtro (id da geografia).
+        var locaisDaIlha = cq.subquery(Long.class);
+        var lt = locaisDaIlha.from(cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity.class);
+        locaisDaIlha.select(lt.get("id")).where(cb.equal(lt.get("ilhaId").get("id"), query.getIlha()));
+        predicates.add(root.get("idIlha").in(locaisDaIlha));
       }
       if (query.getDirecao() != null) {
         predicates.add(cb.equal(root.get("idDirecao"), query.getDirecao()));
@@ -117,16 +122,32 @@ public class FaltaReadService {
     dto.setNomeColaborador(e.getNomeFuncionario());
     dto.setDirecao(e.getNomeDirecao());
     dto.setCategoria(e.getNomeCargo());
-    dto.setDataInicio(e.getDataInicio() != null ? e.getDataInicio().toString() : null);
-    dto.setDataFim(e.getDataFim() != null ? e.getDataFim().toString() : null);
+    dto.setDataInicio(e.getDataInicio() != null ? DateFormatter.localDateToString(e.getDataInicio()) : null);
+    dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
     dto.setTotalHorasAusente(e.getTotHorAus() != null ? formatarHoras(e.getTotHorAus()) : null);
     dto.setNumFalta(e.getTotFaltas());
     dto.setValorADescontar(e.getTotValDesc());
     dto.setDescontoRenumeracao(Objects.equals("S", e.getFlgDescSal()));
     dto.setEstadoProcessamento(e.getEstProc());
+    dto.setEstadoProcessamentoDesc(estadoProcessamentoDesc(e));
+    // AS-016: tipos de falta do mês (spec: Motivo = tipo da falta).
+    dto.setMotivo(e.getMotivo());
     dto.setEstado(e.getEstMensal());
-    dto.setEstadoDesc(e.getEstMensal());
+    // AS-007: descrição legível ("Justificada"/"Injustificada") em vez do código da view.
+    var est = e.getEstMensal();
+    dto.setEstadoDesc(est == null || est.isEmpty() ? null : est.charAt(0) + est.substring(1).toLowerCase());
     return dto;
+  }
+
+  /**
+   * AS-017: descrição do estado de processamento em vez do código da view (PEND/PROC). Spec 20/10:
+   * "verifica se existe um registo em RH_REMUNERACOES" — sem desconto no salário não há o que
+   * processar, por isso não se aplica.
+   */
+  private static String estadoProcessamentoDesc(VfaltaMensalEntity e) {
+    if (!Objects.equals("S", e.getFlgDescSal()))
+      return "Não aplicável";
+    return "PROC".equals(e.getEstProc()) ? "Processado" : "Pendente";
   }
 
   private String formatarHoras(BigDecimal horas) {

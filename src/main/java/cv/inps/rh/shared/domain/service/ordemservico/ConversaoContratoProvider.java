@@ -28,7 +28,7 @@ public class ConversaoContratoProvider implements OrdemServicoProvider {
         UUID.fromString(funcionarioId)
     );
 
-    return Map.of(
+    return OrdemServicoDados.vars(
         "nomeColaborador", fun.getNome(),
         "dataConversaoContrato", formatNow(),
         "dataReuniao", formatNow()

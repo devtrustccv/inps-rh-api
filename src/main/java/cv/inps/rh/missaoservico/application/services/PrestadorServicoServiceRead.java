@@ -37,6 +37,7 @@ public class PrestadorServicoServiceRead {
   private final ParamPrestadorEntityRepository paramPrestadorRepository;
   private final ParamPrestadorDetEntityRepository paramPrestadorDetRepository;
   private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
+  private final MissaoProcessoSupport support;
 
   @Transactional(readOnly = true)
   public ResponseEntity<WrapperListPrestadorServicoDTO> listar(GetListaPrestadorServicoQuery query) {
@@ -54,8 +55,11 @@ public class PrestadorServicoServiceRead {
       if (ilhaId != null) {
         predicates.add(cb.equal(root.get("ilhaId").get("id"), ilhaId));
       }
-      if (StringUtils.hasText(estado)) {
-        predicates.add(cb.equal(root.get("estado"), estado.trim()));
+      // QA MS-029: por defeito só os ativos (a etapa Prestadores Serviço recusa os inativos, e o combo
+      // oferecia-os); os inativos só pelo filtro (estado=I), todos com estado=TODOS.
+      var filtroEstado = StringUtils.hasText(estado) ? estado.trim() : ESTADO_ATIVO;
+      if (!"TODOS".equalsIgnoreCase(filtroEstado)) {
+        predicates.add(cb.equal(root.get("estado"), filtroEstado));
       }
       return cb.and(predicates.toArray(Predicate[]::new));
     };
@@ -101,7 +105,8 @@ public class PrestadorServicoServiceRead {
 
     var avaliacoes = missaoPrestadorAvalRepository
         .findAllByMissaoPrestId_ParamPrestId_IdAndEstadoOrderByIdDesc(prestador.getId(), ESTADO_ATIVO);
-    return ResponseEntity.ok(avaliacoes.stream().map(this::toAvaliacaoDto).toList());
+    var designacoes = support.dominioAvaliacaoFornecedor("DESIGNACAO");
+    return ResponseEntity.ok(avaliacoes.stream().map(a -> toAvaliacaoDto(a, designacoes)).toList());
   }
 
   private PrestadorServicoResponseDTO toDto(ParamPrestadorEntity p, List<ParamPrestadorDetEntity> emails) {
@@ -133,7 +138,8 @@ public class PrestadorServicoServiceRead {
     return dto;
   }
 
-  private PrestadorAvaliacaoResponseDTO toAvaliacaoDto(MissaoPrestadorAvalEntity a) {
+  private PrestadorAvaliacaoResponseDTO toAvaliacaoDto(MissaoPrestadorAvalEntity a,
+                                                       java.util.Map<String, String> designacoes) {
     var dto = new PrestadorAvaliacaoResponseDTO();
     dto.setUuid(a.getUuid());
     var missaoPrestador = a.getMissaoPrestId();
@@ -155,6 +161,7 @@ public class PrestadorServicoServiceRead {
     dto.setPreco(a.getPreco());
     dto.setTotal(a.getTotal());
     dto.setDesignacao(a.getDesignacao());
+    dto.setDesignacaoDesc(a.getDesignacao() != null ? designacoes.getOrDefault(a.getDesignacao(), a.getDesignacao()) : null);
     dto.setDataRegisto(toLocalDate(a.getCreatedDate()));
     return dto;
   }

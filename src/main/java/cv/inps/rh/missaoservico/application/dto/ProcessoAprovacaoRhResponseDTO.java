@@ -20,6 +20,7 @@ public class ProcessoAprovacaoRhResponseDTO {
   private UUID missaoUuid;
   private String nrMissaoFormatado;
   private MissaoProcessoResponseDTO processo;
+  private Boolean editavel;                       // MS-025: false = etapa concluída ou missão fechada → só consulta
   private ParecerResponseDTO parecerCoordenador;  // ciclo actual (rascunho ou emitido)
   private ParecerResponseDTO parecerDirector;     // ciclo actual (rascunho ou emitido)
   private ParecerResponseDTO parecerUgal;         // parecer UGAL que abriu esta aprovação (consulta)

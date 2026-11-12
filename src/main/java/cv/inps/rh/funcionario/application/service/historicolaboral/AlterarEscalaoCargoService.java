@@ -35,7 +35,7 @@ import java.util.UUID;
  * <p>É a "progressão sem carreira": ao alterar o ESCALÃO, cria-se um tiprel pendente e, na validação,
  * fecha-se o vencimento anterior (por DATA_FIM, mantendo 'A') e abre-se um novo RH_T_DEF_REMUNERACOES
  * com o valor do novo escalão, re-associando os restantes RH_T_TIPREL_REM_PAG (subsídios/descontos) ao
- * novo tiprel. O dinheiro é escrito pelo Java (a PKG_AUMENTO_SALARIAL filtra por CARREIRA_ID e não se
+ * novo tiprel. O dinheiro é escrito pelo Java (a RH_PK_AUMENTO_SALARIAL_DB filtra por CARREIRA_ID e não se
  * aplica a vínculos sem carreira). Alterar só o CARGO é imediato (não vai a validação).</p>
  */
 @Service
@@ -58,6 +58,7 @@ public class AlterarEscalaoCargoService {
   private final EntityManager entityManager;
   private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
   private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
+  private final cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules movimentoBloqueioRules;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
   public SuccessResponseDTO alterar(String funcionarioId, AlterarEscalaoCargoDTO dto) {
@@ -231,6 +232,9 @@ public class AlterarEscalaoCargoService {
         salarioNovo.setUuid(UuidCreator.getTimeOrderedEpoch());
         if (salarioTmId != null)
           salarioNovo.setTmId(entityManager.find(TipoMovimentoEntity.class, salarioTmId));
+        var vinculoEscalao = atual.getContrVinculoId() != null && atual.getContrVinculoId().getVinculoId() != null
+            ? atual.getContrVinculoId().getVinculoId().getId() : null;
+        movimentoBloqueioRules.marcar(salarioNovo, vinculoEscalao);
         definicaoRemuneracaoEntityRepository.save(salarioNovo);
         novasRem.add(salarioNovo);
       }

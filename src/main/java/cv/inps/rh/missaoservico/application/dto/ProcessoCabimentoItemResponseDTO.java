@@ -24,6 +24,7 @@ public class ProcessoCabimentoItemResponseDTO {
   private String nome;                    // prestador, seguradora ou — na ajuda de custo — colaborador
   private BigDecimal valorTotal;
   private String moeda;
+  private String referenciaDesc;          // MS-015: descrição do tipo de serviço (ex.: "Bilhete de Passagem")
   private Long cabId;                     // nº de cabimento (null enquanto o SGAL não estiver integrado)
   private String estadoCabimento;         // null | CABIMENTADO | AUTORIZADO
   private List<MissaoLogisticaDetResponseDTO> colaboradores;

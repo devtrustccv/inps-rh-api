@@ -6,6 +6,7 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.*;
 import cv.inps.rh.processamento.application.dto.*;
 import cv.inps.rh.processamento.application.queries.*;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @IgrpController
 @RestController
@@ -188,9 +190,10 @@ public class ProcessoSalarialController {
   public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
       @RequestParam(value = "tipoMovimento") String tipoMovimento,
       @RequestParam(value = "procSalId") String procSalId,
-      @RequestParam(value = "tipoDetalhe") String tipoDetalhe
+      @RequestParam(value = "tipoDetalhe") String tipoDetalhe,
+      @RequestParam(value = "idItemActo") Long idItemActo
   ) {
-    final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe);
+    final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe, idItemActo);
 
     return queryBus.handle(query);
   }
@@ -227,18 +230,19 @@ public class ProcessoSalarialController {
               responseCode = "200",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = SubsidioResponseNatalDTO.class)
+                  schema = @Schema(implementation = SubsidioNatalResponseDTO.class)
               )
           ),
       }
   )
-  public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
+  public ResponseEntity<WrapperListDTO> getSubsidioNatal(
       @RequestParam(value = "direcaoId", required = false) Long direcaoId,
-      @RequestParam(value = "funcionarioId") Long funcionarioId,
-      @RequestParam(value = "valorBrinde", required = false) Long valorBrinde,
-      @RequestParam(value = "anoProcessamento") Long anoProcessamento
+      @RequestParam(value = "funcionarioId", required = false) Long funcionarioId,
+      @RequestParam(value = "anoProcessamento", required = false) Long anoProcessamento,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size
   ) {
-    final var query = new GetSubsidioNatalQuery(direcaoId, funcionarioId, valorBrinde, anoProcessamento);
+    final var query = new GetSubsidioNatalQuery(direcaoId, funcionarioId, anoProcessamento, page, size);
 
     return queryBus.handle(query);
   }
@@ -284,6 +288,102 @@ public class ProcessoSalarialController {
       @Valid @RequestBody AtivarInativarSubsidioNatalDTO ativarInactivarSubsidioNatalRequest
   ) {
     final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-natal/change-status")
+  @Operation(
+      summary = "Ativar inativar subsidios natal",
+      description = "Troca FLG_ATIVO_INACTIVO (A <-> I) dos subsídios de Natal selecionados.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> alterarEstadoSubsidioNatal(
+      @Valid @RequestBody SubsidioNatalIdsRequestDTO request
+  ) {
+    final var command = new AlterarEstadoSubsidioNatalCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-natal/validar")
+  @Operation(
+      summary = "Validar subsidios natal",
+      description = "Valida (ESTADO P -> A) os subsídios de Natal selecionados.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> validarSubsidioNatal(
+      @Valid @RequestBody SubsidioNatalIdsRequestDTO request
+  ) {
+    final var command = new ValidarSubsidioNatalCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PutMapping(value = "subsidio-natal/{subsidioId}")
+  @Operation(
+      summary = "Editar subsidio natal",
+      description = "Altera Valor Subsídio e/ou Prenda de Natal com motivo obrigatório: o registo passa a E e cria-se um novo em P.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> editarSubsidioNatal(
+      @PathVariable Long subsidioId,
+      @RequestBody SubsidioNatalEditarRequestDTO request
+  ) {
+    final var command = new EditarSubsidioNatalCommand(subsidioId, request);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/change-status")
+  @Operation(
+      summary = "Ativar inativar subsidios ferias",
+      description = "Troca FLG_ATIVO_INACTIVO (A <-> I) dos subsídios de Férias selecionados, numa só transação.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> alterarEstadoSubsidiosFerias(
+      @Valid @RequestBody SubsidioFeriasIdsRequestDTO request
+  ) {
+    final var command = new AlterarEstadoSubsidiosFeriasCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/validar")
+  @Operation(
+      summary = "Validar subsidios ferias",
+      description = "Valida (ESTADO P -> A) os subsídios de Férias selecionados, numa só transação.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+          ),
+      }
+  )
+  public ResponseEntity<Map<String, Object>> validarSubsidiosFerias(
+      @Valid @RequestBody SubsidioFeriasIdsRequestDTO request
+  ) {
+    final var command = new ValidarSubsidiosFeriasCommand(request);
 
     return commandBus.send(command);
   }
@@ -408,7 +508,7 @@ public class ProcessoSalarialController {
     return commandBus.send(command);
   }
 
-  @PostMapping(value = "aumento-salarial/{aumentoSalarialId}/validar")
+  @PostMapping(value = "aumento-salarial/{aumentoSalarialId}/validar/{estadoValidacao}")
   @Operation(
       summary = "Validar aumento salarial",
       description = "Validar aumento salarial",
@@ -420,9 +520,10 @@ public class ProcessoSalarialController {
       }
   )
   public ResponseEntity<String> validarAumentoSalarial(
-      @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId
+      @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId,
+      @PathVariable(value = "estadoValidacao") String estadoValidacao
   ) {
-    final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId);
+    final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId, estadoValidacao);
 
     return commandBus.send(command);
   }
@@ -484,12 +585,13 @@ public class ProcessoSalarialController {
       }
   )
   public ResponseEntity<ColaboradorAumentoDTO> getColaboresAumentoSalarial(
+      @RequestParam(value = "aumentoSalarialId") String aumentoSalarialId,
       @RequestParam(value = "direcaoId", required = false) Long direcaoId,
       @RequestParam(value = "organicaId", required = false) Long organicaId,
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "20") Integer size
   ) {
-    final var query = new GetColaboresAumentoSalarialQuery(direcaoId, organicaId, page, size);
+    final var query = new GetColaboresAumentoSalarialQuery(aumentoSalarialId, direcaoId, organicaId, page, size);
 
     return queryBus.handle(query);
   }

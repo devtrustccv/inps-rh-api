@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import cv.inps.rh.missaoservico.application.dto.AvaliacaoPrestadorGravadaResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.ProcessoEtapaGravadaResponseDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -65,6 +66,7 @@ public class MissaoProcessoServiceWrite {
   private static final String TIPO_DOC_REQUISICAO = "EMISSAO_REQUISICAO";
 
   private final MissaoProcessoSupport support;
+  private final ParamAjudaCustoService paramAjudaCustoService;
   private final ProcessoEtapaGuard guard;
   private final RequisicaoPdfService requisicaoPdfService;
   private final MissaoProcessoEntityRepository missaoProcessoRepository;
@@ -647,8 +649,9 @@ public class MissaoProcessoServiceWrite {
       if (!"SIM".equals(alimentacao) && !"NAO".equals(alimentacao)) {
         throw IgrpResponseStatusException.badRequest("alojamentos: flgAlimentacao é obrigatório (SIM ou NAO)");
       }
-      if (item.getValorDiario() == null) {
-        throw IgrpResponseStatusException.badRequest("alojamentos: valorDiario é obrigatório");
+      // Valor 0 era aceite e a linha gravava-se a 0 (alojamento sem custo, MS-013b).
+      if (item.getValorDiario() == null || item.getValorDiario().signum() <= 0) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: valorDiario é obrigatório e tem de ser maior que 0");
       }
       var inicio = item.getDataInicio() != null ? item.getDataInicio() : missao.getDataInicio();
       var fim = item.getDataFim() != null ? item.getDataFim() : missao.getDataFim();
@@ -670,7 +673,8 @@ public class MissaoProcessoServiceWrite {
       log.setLugarHospedagem(item.getLugarHospedagem().trim());
       log.setFlgAlimentacao(alimentacao);
       log.setValorDiario(item.getValorDiario());
-      log.setValorTotal(item.getValorTotal() != null
+      // MS-017: total vazio ou 0 (o ecrã enviava 0) = valor diário × nº de dias.
+      log.setValorTotal(item.getValorTotal() != null && item.getValorTotal().signum() > 0
           ? item.getValorTotal()
           : item.getValorDiario().multiply(BigDecimal.valueOf(nrDias)));
       log.setMoeda(StringUtils.hasText(item.getMoeda()) ? item.getMoeda().trim().toUpperCase() : "CVE");
@@ -684,7 +688,7 @@ public class MissaoProcessoServiceWrite {
 
   private List<LinhaLogistica> linhasAjudaCusto(MissaoServicoEntity missao, MissaoProcessoEntity processo,
                                                 List<AjudaCustoRequestDTO> itens) {
-    var alimentacaoPorColab = alimentacaoPorColaborador(missao.getUuid());
+    var alimentacaoPorColab = support.alimentacaoPorColaborador(missao.getUuid());
     var out = new ArrayList<LinhaLogistica>();
     for (var item : itens) {
       if (item == null)
@@ -698,17 +702,34 @@ public class MissaoProcessoServiceWrite {
       if (item.getNumeroDiasAlojamento() == null || item.getNumeroDiasAlojamento() < 0) {
         throw IgrpResponseStatusException.badRequest("ajudasCusto: numeroDiasAlojamento é obrigatório e não pode ser negativo");
       }
-      if (item.getValorDiario() == null) {
-        throw IgrpResponseStatusException.badRequest("ajudasCusto: valorDiario é obrigatório");
+      var diasMissao = missao.getNrDias();
+      if (diasMissao != null && item.getNumeroDiasAlojamento() > diasMissao) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: o número de dias de alojamento ("
+            + item.getNumeroDiasAlojamento() + ") não pode ser superior aos dias da missão (" + diasMissao + ")");
       }
       var colab = colaboradoresDaLinha(missao.getUuid(), List.of(item.getColaboradorId()), "ajudasCusto").getFirst();
-      var diario = calcularValorDiarioAjudaCusto(item.getValorDiario(), item.getFlgAlojamento(), alimentacaoPorColab.get(colab.getId()));
+      // D2: valor diário base parametrizado (RH_T_PARAM_AJUDA_CUSTO) da carreira DESTE colaborador,
+      // nacional/estrangeiro conforme o destino. Sem parametrização usa-se o do ecrã.
+      var baseParametrizada = paramAjudaCustoService.valorDiarioBaseDoColaborador(missao, colab);
+      var base = baseParametrizada != null ? baseParametrizada : item.getValorDiario();
+      if (base == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Não há valor de ajuda de custo parametrizado para a carreira de " + nomeDe(colab)
+                + ": indique o valor diário ou configure-o em Outras Configurações → Missão.");
+      }
+      // Valor 0 era aceite e a ajuda gravava-se a 0 (missão 19/2026, MS-013b).
+      if (base.signum() <= 0) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: o valor diário tem de ser maior que 0");
+      }
+      var diario = calcularValorDiarioAjudaCusto(base, item.getFlgAlojamento(), alimentacaoPorColab.get(colab.getId()));
 
       var log = novaLinha(missao, processo);
       log.setFlgAlojamento(item.getFlgAlojamento() ? "SIM" : "NAO");
+      // Spec: NR_DIAS = "Número Dias Alojamento"; Valor Total = valor diário × nº de dias DE MISSÃO
+      // (antes multiplicava pelos dias de alojamento — ex.: missão de 11 dias paga só 8).
       log.setNrDias(item.getNumeroDiasAlojamento());
       log.setValorDiario(diario);
-      log.setValorTotal(diario.multiply(BigDecimal.valueOf(item.getNumeroDiasAlojamento())));
+      log.setValorTotal(diario.multiply(BigDecimal.valueOf(diasMissao != null ? diasMissao : item.getNumeroDiasAlojamento())));
       log.setMoeda("CVE");
       out.add(new LinhaLogistica(log, List.of(colab), null));
     }
@@ -719,8 +740,8 @@ public class MissaoProcessoServiceWrite {
    * Fração do valor diário base da ajuda de custo (spec): 100% com alojamento próprio ou em casa de
    * família, ⅔ se a instituição paga alojamento sem alimentação, ⅓ se paga alojamento com alimentação.
    *
-   * <p>O valor base vem do cliente — a tabela de preços da ajuda de custo (por função e missão
-   * nacional/internacional) não está especificada.
+   * <p>O valor base vem da parametrização da carreira do colaborador (RH_T_PARAM_AJUDA_CUSTO); só sem
+   * parametrização se usa o do ecrã.
    */
   private BigDecimal calcularValorDiarioAjudaCusto(BigDecimal base, boolean incluiAlojamento, String flgAlimentacao) {
     if (!incluiAlojamento)
@@ -729,22 +750,8 @@ public class MissaoProcessoServiceWrite {
     return base.multiply(BigDecimal.valueOf(fracao)).divide(BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
   }
 
-  /** Alimentação incluída no alojamento de cada colaborador (linhas activas do processo ALOJAMENTO). */
-  private Map<Long, String> alimentacaoPorColaborador(UUID missaoUuid) {
-    var linhas = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid).stream()
-        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()) && TipoProcesso.ALOJAMENTO.name().equals(l.getReferencia()))
-        .toList();
-    var out = new HashMap<Long, String>();
-    if (linhas.isEmpty())
-      return out;
-    var porId = new HashMap<Long, MissaoLogisticaEntity>();
-    linhas.forEach(l -> porId.put(l.getId(), l));
-    for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(new ArrayList<>(porId.keySet()))) {
-      if (ESTADO_ATIVO.equals(det.getEstado())) {
-        out.putIfAbsent(det.getMissaoColabId().getId(), porId.get(det.getMissaoLogistId().getId()).getFlgAlimentacao());
-      }
-    }
-    return out;
+  private static String nomeDe(MissaoColaboradorEntity c) {
+    return c.getFunId() != null && c.getFunId().getNome() != null ? c.getFunId().getNome() : "o colaborador";
   }
 
   private MissaoLogisticaEntity novaLinha(MissaoServicoEntity missao, MissaoProcessoEntity processo) {
@@ -1101,7 +1108,7 @@ public class MissaoProcessoServiceWrite {
       throw IgrpResponseStatusException.badRequest("Payload inválido");
     }
 
-    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true, true);
     var prestador = support.prestadorDoProcesso(processo, command.getMissaoPrestUuid());
 
     var avaliacao = gravarAvaliacao(prestador, dto);
@@ -1239,11 +1246,17 @@ public class MissaoProcessoServiceWrite {
       if (linha == null) {
         throw IgrpResponseStatusException.badRequest("A linha " + item.getLogisticaUuid() + " não pertence a este processo");
       }
-      if (item.getCabId() != null && !Objects.equals(item.getCabId(), linha.getCabId())) {
+      // MS-014: o ecrã manda 0 quando o nº de cabimento não é preenchido e gravava-se 0 — um
+      // "cabimento sem número" que parecia gerado. 0/negativo = não indicado; e um 0 antigo limpa-se.
+      var cabId = item.getCabId() != null && item.getCabId() > 0 ? item.getCabId() : null;
+      if (linha.getCabId() != null && linha.getCabId() <= 0) {
+        linha.setCabId(null);
+      }
+      if (cabId != null && !Objects.equals(cabId, linha.getCabId())) {
         if (ESTADO_AUTORIZADO.equals(linha.getEstadoCabimento())) {
           throw IgrpResponseStatusException.badRequest("A linha " + linha.getUuid() + " já foi autorizada e o nº de cabimento não pode mudar");
         }
-        linha.setCabId(item.getCabId());
+        linha.setCabId(cabId);
       }
       if (avancar && Boolean.TRUE.equals(item.getSelecionado()) && linha.getEstadoCabimento() == null) {
         if (linha.getCabId() == null) {
@@ -1367,12 +1380,12 @@ public class MissaoProcessoServiceWrite {
     var nome = param != null ? param.getNome() : prestador.getNome();
 
     for (var email : destinos) {
-      var estado = "Enviado";
+      var estado = EstadoNotificacao.ENVIADO.name();
       try {
         emailService.sendEmail(email, conteudo.assunto(), MissaoProcessoSupport.corpoHtml(conteudo.corpo()));
       } catch (Exception ex) {
         LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, ex.getMessage());
-        estado = "Erro";
+        estado = EstadoNotificacao.ERRO.name();
       }
 
       var n = new NotificacaoEntity();

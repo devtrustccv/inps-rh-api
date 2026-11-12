@@ -62,7 +62,8 @@ public class EscalaAvaliacaoService {
       if (row.getQuantitativaDe() != null
           && row.getQuantitativaAte() != null
           && row.getQuantitativaDe().compareTo(row.getQuantitativaAte()) > 0) {
-        throw IgrpResponseStatusException.badRequest("quantitativaDe não pode ser maior que quantitativaAte");
+        throw IgrpResponseStatusException.badRequest("No nível " + row.getNivel() + ", a pontuação «De» (" + row.getQuantitativaDe()
+            + ") não pode ser maior que a pontuação «Até» (" + row.getQuantitativaAte() + ").");
       }
 
       var entity = row.getId() != null
@@ -170,7 +171,8 @@ public class EscalaAvaliacaoService {
     if (dto.getQuantitativaDe() != null
         && dto.getQuantitativaAte() != null
         && dto.getQuantitativaDe().compareTo(dto.getQuantitativaAte()) > 0) {
-      throw IgrpResponseStatusException.badRequest("quantitativaDe não pode ser maior que quantitativaAte");
+      throw IgrpResponseStatusException.badRequest("No nível " + dto.getNivel() + ", a pontuação «De» (" + dto.getQuantitativaDe()
+            + ") não pode ser maior que a pontuação «Até» (" + dto.getQuantitativaAte() + ").");
     }
 
     var entity = repository.findByUuidOrThrow(uuid);
@@ -206,9 +208,9 @@ public class EscalaAvaliacaoService {
    * os valores.</p>
    */
   private void validarDominios(java.util.List<cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO> rows) {
-    validarContraDominio(rows, "NIVEIS_AVD", "nível",
+    validarContraDominio(rows, "NIVEIS_AVD", "O nível",
         r -> r.getNivel() != null ? String.valueOf(r.getNivel()) : null);
-    validarContraDominio(rows, "CLASSIFICACAO_QUALIT_AVD", "classificação qualitativa",
+    validarContraDominio(rows, "CLASSIFICACAO_QUALIT_AVD", "A classificação qualitativa",
         cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO::getQualitativa);
   }
 
@@ -226,8 +228,8 @@ public class EscalaAvaliacaoService {
       var valor = extrator.apply(r);
       if (valor != null && !permitidos.contains(valor.trim())) {
         throw IgrpResponseStatusException.badRequest(
-            "O " + rotulo + " '" + valor + "' não existe no domínio " + dominio
-                + ". Valores aceites: " + permitidos + ".");
+            rotulo + " «" + valor + "» não é válid" + (rotulo.startsWith("A ") ? "a" : "o")
+                + ". Valores aceites: " + String.join(", ", permitidos) + ".");
       }
     }
   }

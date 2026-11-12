@@ -138,11 +138,10 @@ public class DadosContratuaisMapper {
       }
     }
 
-    dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCarrPccsId().getId() : null);
-
-    dcr.setCarreiraDesc(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
+    // Carreira sem CARR_PCCS_ID (dados antigos) não pode impedir o formulário de abrir.
+    var carrPccs = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId().getCarrPccsId() : null;
+    dcr.setCarreiraId(carrPccs != null ? carrPccs.getId() : null);
+    dcr.setCarreiraDesc(carrPccs != null ? carrPccs.getNome() : null);
 
     dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getCategoriaId() != null ?
@@ -202,6 +201,7 @@ public class DadosContratuaisMapper {
         sr.setObservacoes(s.getObs());
         sr.setEstado(s.getEstado() != null ? s.getEstado().getCode() : null);
         sr.setEstadoDesc(s.getEstado() != null ? s.getEstado().getDescription() : null);
+        sr.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(s));
         return sr;
       }).toList();
 
@@ -222,6 +222,7 @@ public class DadosContratuaisMapper {
         er.setObservacoes(e.getObs());
         er.setEstado(e.getEstado() != null ? e.getEstado().getCode() : null);
         er.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
+        er.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(e));
         return er;
       }).toList();
 

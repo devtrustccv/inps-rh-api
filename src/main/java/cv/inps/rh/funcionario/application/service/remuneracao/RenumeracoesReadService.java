@@ -150,6 +150,7 @@ public class RenumeracoesReadService {
     response.setDataFim(renumeracao.getDataFim()!=null ? DateFormatter.localDateToString(renumeracao.getDataFim()) : null);
     response.setObservacao(renumeracao.getObs());
     response.setEstado(renumeracao.getEstado() != null ? renumeracao.getEstado().name() : null);
+    response.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(renumeracao));
 
     return response;
 
@@ -181,6 +182,7 @@ public class RenumeracoesReadService {
     response.setEntidade(pagamento.getEntId());
     response.setBanco(pagamento.getRhbId()!=null ? pagamento.getRhbId().getId(): null);
     response.setEstado(pagamento.getEstado() != null ? pagamento.getEstado().name() : null);
+    response.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(pagamento));
 
     return response;
 

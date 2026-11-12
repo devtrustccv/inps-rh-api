@@ -27,6 +27,20 @@ public interface OrdemServicoEntityRepository extends
 
       Optional<OrdemServicoEntity> findByUuid(UUID uuid);
 
+      @org.springframework.data.jpa.repository.Query("SELECT o.nuOrdem FROM OrdemServicoEntity o WHERE o.createdDate >= :inicio AND o.createdDate < :fim")
+      List<String> findNumerosNoPeriodo(@org.springframework.data.repository.query.Param("inicio") java.time.LocalDateTime inicio,
+                                        @org.springframework.data.repository.query.Param("fim") java.time.LocalDateTime fim);
+
+      /** Próximo nº de ordem de serviço do ano corrente (sequencial, reinicia a 1 em cada ano). */
+      default String proximoNumero() {
+        var ano = java.time.Year.now();
+        var max = findNumerosNoPeriodo(ano.atDay(1).atStartOfDay(), ano.plusYears(1).atDay(1).atStartOfDay()).stream()
+            .filter(n -> n != null && !n.isBlank() && n.trim().chars().allMatch(Character::isDigit))
+            .mapToInt(n -> Integer.parseInt(n.trim()))
+            .max().orElse(0);
+        return String.valueOf(max + 1);
+      }
+
       default OrdemServicoEntity findByUuidOrThrow(UUID uuid) {
           return this.findByUuid(uuid)
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "OrdemServicoEntity not found for uuid: " + uuid));

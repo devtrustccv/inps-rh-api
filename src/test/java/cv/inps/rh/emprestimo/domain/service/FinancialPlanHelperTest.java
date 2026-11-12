@@ -42,6 +42,21 @@ class FinancialPlanHelperTest {
   }
 
   @Test
+  void shouldSplitEquallyWithoutInterestWhenRateIsZero() {
+    // Taxa 0%: a fórmula da anuidade dividia por zero (ArithmeticException).
+    var plan = FinancialPlanHelper.generateFinancialPlan(
+        BigDecimal.valueOf(1_200),
+        BigDecimal.ZERO,
+        12,
+        LocalDate.of(2026, 1, 1)
+    );
+
+    assertEquals(12, plan.size());
+    assertEquals(0, plan.getFirst().pagamento().compareTo(BigDecimal.valueOf(100)));
+    assertEquals(0, plan.getLast().saldoFinal().compareTo(BigDecimal.ZERO));
+  }
+
+  @Test
   void shouldMarkExactlyTheInstallmentsAlreadyPaidInRecuperacao() {
     var request = new FundoSocialRequestDTO();
     request.setDataInicio(LocalDate.of(2026, 1, 1));

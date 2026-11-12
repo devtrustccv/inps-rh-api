@@ -22,4 +22,7 @@ public class VerificarAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
   private ProcessStepAction action ;
 
+  // Comprovativo de depósito/transferência (antes na etapa Anexar Comprovativo)
+  private java.util.List<DocumentoDTO> documentos ;
+
 }

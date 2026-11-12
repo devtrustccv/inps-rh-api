@@ -93,6 +93,10 @@ public class DefPagamentoEntity extends AuditEntity {
   @Column(name = "data_ultimo_proc")
   private LocalDate dataUltimoProc;
 
+  /** 1 = movimento fixo do vínculo PCCS: só Data Fim e OBS são editáveis (melhoria 25). */
+  @Column(name = "flg_bloquear", nullable = false)
+  private Integer flgBloquear = 0;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "fun_id")
   private FuncionarioEntity funId;

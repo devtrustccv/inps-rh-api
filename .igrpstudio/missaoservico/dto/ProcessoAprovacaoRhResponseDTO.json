@@ -26,6 +26,12 @@
       "module": "missaoservico"
     },
     {
+      "name": "editavel",
+      "type": "boolean",
+      "objectType": "java",
+      "required": false
+    },
+    {
       "name": "parecerCoordenador",
       "type": "ParecerResponse",
       "objectType": "dto",

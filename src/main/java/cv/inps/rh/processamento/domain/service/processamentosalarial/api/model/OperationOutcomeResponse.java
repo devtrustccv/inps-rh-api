@@ -4,6 +4,16 @@ public record OperationOutcomeResponse(
     Content content
 ) {
 
+  private static final int CODE_SUCCESS = 200;
+
+  public boolean isSuccess() {
+    return content != null && content.issue() != null && content.issue().code() == CODE_SUCCESS;
+  }
+
+  public String diagnostics() {
+    return content != null && content.issue() != null ? content.issue().diagnostics() : null;
+  }
+
   public record Content(
       String resourceType,
       Issue issue

@@ -39,3 +39,6 @@ build/
 /tools/db/
 /scratchpad/
 *.log
+
+# Handoffs entre sessões do Claude (referência local, como o scratchpad)
+/.claude/resume/

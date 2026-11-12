@@ -18,7 +18,7 @@ public class ManualFuncaoRequestDTO {
 
   private Long seccaoId;
 
-  @NotNull
+  // Opcional: o manual deixou de ter Cargo — "Carreira / Cargo" é o carrPccsId.
   private Long cargoId;
 
   private Long carrPccsId;

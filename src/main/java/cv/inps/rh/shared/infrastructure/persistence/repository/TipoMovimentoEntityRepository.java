@@ -49,4 +49,14 @@ public interface TipoMovimentoEntityRepository extends
 
   Optional<TipoMovimentoEntity> findByShortDescAndAmbAplId(String shortDesc, Long ambApplId);
 
+  /** Tipos de movimento cujo SHORT_DESC é um valor ativo do domínio indicado (RH_T_DOMAINS). */
+  @Query("""
+      SELECT tm FROM TipoMovimentoEntity tm
+      WHERE tm.shortDesc IN (
+        SELECT d.valor FROM DomainEntity d WHERE d.dominio = :dominio AND d.estado = cv.inps.rh.shared.application.constants.Estado.A
+      )
+      ORDER BY tm.descricao
+      """)
+  List<TipoMovimentoEntity> findAllByShortDescNoDominio(@Param("dominio") String dominio);
+
 }

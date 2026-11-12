@@ -31,12 +31,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import cv.inps.rh.shared.util.ValidationUtil;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -67,6 +69,7 @@ public class FeriaWriteService {
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final NotificacaoDestinatarioResolver destinatarioResolver;
   private final SaldoLockService saldoLockService;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.FeriasEntityRepository feriasEntityRepository;
 
 
   @Transactional
@@ -94,8 +97,11 @@ public class FeriaWriteService {
     if (temSubstituicao && tipoRelAtual.getCargoId() == null)
       throw IgrpResponseStatusException.badRequest("Substituição não aplicável: colaborador não ocupa nenhum cargo");
 
+    exigirSemFeriasNoIntervalo(funcionario.getId(), req.getDataInicio(), req.getDataFim());
+
     TiposRelacionamentoEntity tipoRelAtualFuncSubstituto = null;
     if (temSubstituicao) {
+      exigirSubstitutoDiferente(req.getColaborador(), req.getSubstituidoPor());
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
       tipoRelAtualFuncSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
       var s = new SubstituicaoEntity();
@@ -167,14 +173,32 @@ public class FeriaWriteService {
   @Transactional
   public Map<String, ?> validarFeria(ValidarPedidoFeriaCommand command) {
     var req = command.getPedidoferiareq();
-    if (req == null || !StringUtils.hasText(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de férias ausentes");
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+    var ferias = feriasGozadasRepository.findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
+
+    // Ciclo CORRIGIR, padrão do dossiê ("edita-no-validar", mesmo endpoint):
+    //   CORRIGIR      checker devolve: férias, pedido e validação P -> C, sem aplicar o payload;
+    //   validar vazio maker reenvia: aplica as correcções e reabre C -> P;
+    //   SIM/NAO       só sobre férias pendentes — em C têm de ser reenviadas primeiro.
+    if (ValidationUtil.isCorrigir(req.getValidar()))
+      return devolverParaCorrecao(ferias);
+    if (!StringUtils.hasText(req.getValidar())) {
+      if (ferias.getEstado() != Estado.C)
+        throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+      return reenviarCorrecao(ferias, req);
+    }
+    if (ferias.getEstado() == Estado.C)
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido de férias em correção: não pode ser validado. Corrija e reenvie primeiro.");
+    if (ferias.getEstado() != Estado.P)
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível validar um pedido de férias pendente de validação.");
 
     var funcionario = ferias.getFunId();
 
@@ -239,6 +263,88 @@ public class FeriaWriteService {
     return resp;
   }
 
+  /**
+   * CORRIGIR (checker): férias, pedido e validação P -> C, sem aplicar o payload. Só existe para as
+   * férias que foram a validação (as com substituição); as outras ficam logo activas.
+   */
+  private Map<String, ?> devolverParaCorrecao(FeriasGozadasEntity ferias) {
+    var pedido = ferias.getPedidoId();
+    if (ferias.getEstado() != Estado.P || pedido == null || !Estado.P.name().equals(pedido.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um pedido de férias pendente de validação.");
+    // INSERT (registo) ou UPDATE (alteração de férias) — o helper procura os dois.
+    var validacao = funcionarioRules.devolverParaCorrecao(pedido.getUuid(), Estado.P, Referencia.FERIA);
+    validacaoEntityRepository.save(validacao);
+
+    ferias.setEstado(Estado.C);
+    feriasGozadasRepository.save(ferias);
+    pedido.setEstado(Estado.C.name());
+    pedidoRepository.save(pedido);
+
+    return respostaCorrecao(ferias, "Pedido de férias devolvido para correção.");
+  }
+
+  /**
+   * Reenvio (maker): aplica as correcções do formulário (datas, parecer, responsável, observações,
+   * anexos) e volta a pôr férias, pedido e validação em P. O saldo é verificado no SIM, como hoje.
+   *
+   * <p>O substituto não se troca aqui: a substituição é gravada à parte no registo e não há ligação
+   * que permita actualizá-la com segurança. Para trocar de substituto, rejeitar e registar de novo.
+   */
+  private Map<String, ?> reenviarCorrecao(FeriasGozadasEntity ferias, PedidoFeriaReqDTO req) {
+    var pedido = ferias.getPedidoId();
+
+    if (req.getSubstituidoPor() != null) {
+      var substituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
+      var tiprelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(substituto.getUuid());
+      if (tiprelSubstituto == null || !Objects.equals(tiprelSubstituto.getId(), ferias.getTiprelIdSubstituido()))
+        throw IgrpResponseStatusException.badRequest(
+            "O substituto não se altera na correção. Para trocar de substituto, rejeite o pedido e registe um novo.");
+    }
+
+    var dataInicio = req.getDataInicio() != null ? req.getDataInicio() : ferias.getDataInicio();
+    var dataFim = req.getDataFim() != null ? req.getDataFim() : ferias.getDataFim();
+    if (dataFim.isBefore(dataInicio))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
+    ferias.setDataInicio(dataInicio);
+    ferias.setDataFim(dataFim);
+    ferias.setNumDia(diffDays(dataInicio, dataFim));
+    ferias.setAnoId(resolveAno(dataInicio));
+
+    if (req.getObsConvinienciaServico() != null)
+      ferias.setObsInfoConveniencia(req.getObsConvinienciaServico());
+    if (req.getParecer() != null)
+      ferias.setDecisaoResponsavel(req.getParecer());
+    if (req.getObsParecer() != null)
+      ferias.setObsResponsavel(req.getObsParecer());
+    if (req.getResponsavel() != null) {
+      var responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () -> IgrpResponseStatusException.notFound(
+              "Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      ferias.setResponsavelId(responsavel.getId());
+    }
+
+    ferias.setEstado(Estado.P);
+    feriasGozadasRepository.save(ferias);
+
+    saveDocuments(req.getDocumentos(), ferias.getFunId(), pedido);
+
+    pedido.setEstado(Estado.P.name());
+    pedidoRepository.save(pedido);
+    validacaoEntityRepository.save(funcionarioRules.reabrirParaValidacao(pedido.getUuid(), Referencia.FERIA));
+
+    return respostaCorrecao(ferias, "Pedido de férias corrigido e reenviado para validação.");
+  }
+
+  private Map<String, ?> respostaCorrecao(FeriasGozadasEntity ferias, String mensagem) {
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", ferias.getId());
+    resp.put("uuid", ferias.getUuid());
+    resp.put("estado", ferias.getEstado().name());
+    resp.put("mensagem", mensagem);
+    return resp;
+  }
+
   @Transactional
   public Map<String, ?> alterarPedidoFeria(AlterarPedidoFeriaCommand command) {
 
@@ -251,9 +357,13 @@ public class FeriaWriteService {
 
     // 1. Buscar férias existentes PELO MESMO PEDIDO
     var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .findPedidoFeria(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido de férias não encontrado"));
+
+    if (ferias.getEstado() == Estado.C)
+      throw IgrpResponseStatusException.badRequest(
+          "Pedido de férias devolvido para correção: corrija e reenvie-o pelo formulário de validação.");
 
     var funcionario = ferias.getFunId();
 
@@ -275,6 +385,8 @@ public class FeriaWriteService {
 
     if (dataInicio == null || dataFim == null)
       throw IgrpResponseStatusException.badRequest("Data início e fim são obrigatórias");
+    if (dataFim.isBefore(dataInicio))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
 
     // 2. Inactivar registo antigo (spec: inativa e cria novo)
     ferias.setEstado(Estado.I);
@@ -330,6 +442,8 @@ public class FeriaWriteService {
       novasFerias.setResponsavelId(responsavel.getId());
     }
 
+    // O pedido antigo já está em I, por isso não conta contra si próprio.
+    exigirSemFeriasNoIntervalo(funcionario.getId(), dataInicio, dataFim);
     novasFerias = feriasGozadasRepository.save(novasFerias);
 
     // Spec, "Alteração": ponto 3 — gravar RH_T_SUBSTITUICAO caso haja substituto.
@@ -339,6 +453,7 @@ public class FeriaWriteService {
         throw IgrpResponseStatusException.badRequest(
             "Substituição não aplicável: colaborador não ocupa nenhum cargo");
 
+      exigirSubstitutoDiferente(funcionario.getUuid(), base.getSubstituidoPor());
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(base.getSubstituidoPor());
       var tipoRelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
 
@@ -372,52 +487,52 @@ public class FeriaWriteService {
   }
 
 
+  /**
+   * "Enviar direito" da Lista de Férias: a linha é o direito do colaborador num ano (já não um
+   * pedido), por isso o envio é por colaborador + ano. Vai para o colaborador e para o seu
+   * responsável (o mesmo resolver das outras notificações, sem duplicados).
+   *
+   * <p>Variáveis do template DIREITO_FERIAS: nome, ano, direito (do ano), gozado (do ano) e
+   * saldoRestante (acumulado, como antes).</p>
+   */
   @Transactional
   public Map<String, ?> enviarDireitoFerias(EnviarDireitoFeriasCommand command) {
-    var ferias = feriasGozadasRepository
-        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de férias não encontrado"));
+    var uuid = cv.inps.rh.shared.util.ValidationUtil.parseUuid(command.getFuncionarioId(), "Identificador do colaborador");
+    var funcionario = funcionarioRepository.findByUuidOrThrow(uuid);
+    int ano = command.getAno() != null ? command.getAno() : LocalDate.now().getYear();
 
-    var funcionario = ferias.getFunId();
-    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
+    var direitos = feriasEntityRepository.findAllByFunId_UuidAndAnoId_AnoOrderByIdAsc(uuid, String.valueOf(ano));
+    if (direitos.isEmpty())
+      throw IgrpResponseStatusException.notFound(
+          "O colaborador não tem direito de férias registado em " + ano + ".");
 
+    var anual = saldoFeriaService.detalhe(uuid, ano, null);
     var vars = Map.of(
         "nome", funcionario.getNome() != null ? funcionario.getNome() : "",
-        "dataInicio", ferias.getDataInicio() != null ? ferias.getDataInicio().toString() : "",
-        "dataFim", ferias.getDataFim() != null ? ferias.getDataFim().toString() : "",
-        "numDias", ferias.getNumDia() != null ? ferias.getNumDia().toString() : "0",
-        "saldoRestante", String.valueOf(saldo)
+        "ano", String.valueOf(ano),
+        "direito", String.valueOf(anual.direito()),
+        "gozado", String.valueOf(anual.gozado()),
+        "saldoRestante", String.valueOf(saldoFeriaService.getSaldo(uuid))
     );
 
-    funcionario.getContactos().stream()
-        .filter(c -> "EMAIL".equalsIgnoreCase(c.getTipoContacto()))
-        .map(ContactoEntity::getContacto)
-        .findFirst()
-        .ifPresentOrElse(
-            email -> notificacaoDispatchService.enviar(
-                "DIREITO_FERIAS", email, funcionario.getNome(),
-                ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars),
-            () -> LOGGER.warn("Funcionário {} sem email para envio de direito de férias", funcionario.getUuid())
-        );
+    var destinatarios = destinatarioResolver.resolver(funcionario, List.of(
+        cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao.COLABORADOR,
+        cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao.RESPONSAVEL_COLABORADOR));
+    if (destinatarios.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Nem o colaborador nem o seu responsável têm email registado: o direito de férias não foi enviado.");
 
-    // O email do responsável sai dos contactos do funcionário que ocupa o lugar (ver
-    // NotificacaoDestinatarioResolver): a coluna RH_T_RESPONSAVEL.EMAIL, que aqui se lia
-    // directamente, está nula em todas as linhas porque nenhum fluxo da aplicação a escreve — a
-    // chefia nunca era notificada.
-    if (ferias.getResponsavelId() != null) {
-      responsavelEntityRepository.findById(ferias.getResponsavelId())
-          .flatMap(destinatarioResolver::resolverResponsavel)
-          .ifPresentOrElse(
-              destinatario -> notificacaoDispatchService.enviar(
-                  "DIREITO_FERIAS", destinatario.email(), destinatario.nome(),
-                  ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(),
-                  destinatario.funcionario(), vars),
-              () -> LOGGER.warn("Responsável {} sem email para envio de direito de férias",
-                  ferias.getResponsavelId())
-          );
-    }
+    var direito = direitos.getFirst();
+    destinatarios.forEach(d -> notificacaoDispatchService.enviar(
+        "DIREITO_FERIAS", d.email(), d.nome(),
+        direito.getId(), "RH_T_FERIAS", direito.getUuid(), d.funcionario(), vars));
 
-    return Map.of("pedidoId", command.getPedidoId(), "enviado", true);
+    var resp = new java.util.LinkedHashMap<String, Object>();
+    resp.put("funcionarioId", uuid);
+    resp.put("ano", ano);
+    resp.put("enviado", true);
+    resp.put("destinatarios", destinatarios.stream().map(d -> d.nome() + " <" + d.email() + ">").toList());
+    return resp;
   }
 
   private void enviarNotificacaoValidacaoFerias(FeriasGozadasEntity ferias, FuncionarioEntity funcionario) {
@@ -442,6 +557,19 @@ public class FeriaWriteService {
         ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars);
   }
 
+  /** Dois pedidos de férias nos mesmos dias gozavam (e descontavam) os dias duas vezes. */
+  private void exigirSemFeriasNoIntervalo(Long funId, LocalDate inicio, LocalDate fim) {
+    if (feriasGozadasRepository.countFeriasVivasNoIntervalo(funId, inicio, fim) > 0)
+      throw IgrpResponseStatusException.badRequest(
+          "O colaborador já tem férias marcadas entre " + cv.inps.rh.shared.util.DateFormatter.localDateToString(inicio)
+              + " e " + cv.inps.rh.shared.util.DateFormatter.localDateToString(fim) + ".");
+  }
+
+  private static void exigirSubstitutoDiferente(java.util.UUID colaborador, java.util.UUID substituto) {
+    if (Objects.equals(colaborador, substituto))
+      throw IgrpResponseStatusException.badRequest("O substituto não pode ser o próprio colaborador.");
+  }
+
   private void validatePedido(PedidoFeriaReqDTO req) {
 
     if (req.getColaborador() == null)
@@ -450,6 +578,9 @@ public class FeriaWriteService {
       throw IgrpResponseStatusException.badRequest("Data de início obrigatória");
     if (req.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Data de fim obrigatória");
+    // Sem isto o pedido gravava NUM_DIA negativo (calculado das datas) e o saldo subia.
+    if (req.getDataFim().isBefore(req.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("Data de fim não pode ser anterior à data de início");
     if (req.getNumDias() == null)
       throw IgrpResponseStatusException.badRequest("Número de dias obrigatório");
 
@@ -533,6 +664,7 @@ public class FeriaWriteService {
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FERIAS_GOZADAS.name(), pedido.getUuid());
 
+    DocumentoMapper.validarAnexos(documentos);
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
         documentos,

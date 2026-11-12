@@ -29,4 +29,12 @@ public class NumberUtils {
         .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
+
+  public static Long safeValueOf(String v) {
+    try {
+      return Long.valueOf(v);
+    } catch (NullPointerException | NumberFormatException _) {
+      return null;
+    }
+  }
 }

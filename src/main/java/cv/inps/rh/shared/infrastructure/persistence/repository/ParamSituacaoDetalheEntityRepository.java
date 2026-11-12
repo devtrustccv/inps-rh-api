@@ -25,6 +25,8 @@ public interface ParamSituacaoDetalheEntityRepository extends
 
   List<ParamSituacaoDetalheEntity> findAllBySituacaoId_IdAndEstado(Long situacaoLaboralIdId, Estado estado);
 
+  boolean existsBySituacaoId_IdAndEstado(Long situacaoLaboralId, Estado estado);
+
   Optional<ParamSituacaoDetalheEntity> findByUuid(UUID uuid);
 
   default ParamSituacaoDetalheEntity findByUuidOrThrow(UUID uuid) {

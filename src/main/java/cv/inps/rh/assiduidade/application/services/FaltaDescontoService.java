@@ -94,6 +94,40 @@ public class FaltaDescontoService {
   }
 
   /**
+   * Aviso (não bloqueia) quando "Deduzir em Férias" não é coberto pelo saldo (QA RG-006).
+   *
+   * <p>Decidido com o negócio a 10/09 que o saldo cobre o que consegue e o resto vai ao
+   * vencimento, por isso não há 400; mas o utilizador escolheu deduzir em férias e tem de saber
+   * que não há (ou não chega) saldo. Chamar ANTES do {@link #aplicar}, que consome o saldo.
+   *
+   * @return a mensagem para o ecrã, ou {@code null} se o saldo cobre tudo ou não há dedução em férias
+   */
+  public String alertaDeducaoFerias(List<FaltaEntity> faltas, PedidoEntity pedido) {
+    var comFerias = faltas.stream()
+        .filter(f -> TipoDescontoFalta.fromCode(f.getFlgDescontoFalta()).orElse(null) == TipoDescontoFalta.FERIAS)
+        .filter(f -> f.getDataInicio() != null && f.getDataFim() != null)
+        .toList();
+    int dias = comFerias.stream()
+        .mapToInt(f -> (int) (f.getDataFim().toLocalDate().toEpochDay()
+            - f.getDataInicio().toLocalDate().toEpochDay()) + 1)
+        .sum();
+    if (dias == 0)
+      return null;
+
+    int saldo = Math.max(0, saldoFeriaService.getSaldo(pedido.getFunId().getUuid(), null, pedido.getId()));
+    if (saldo >= dias)
+      return null;
+
+    int porCobrir = dias - saldo;
+    var destino = comFerias.stream().anyMatch(this::descontaSalario)
+        ? " serão descontados no vencimento."
+        : " ficam sem dedução (o tipo de falta não desconta no vencimento).";
+    return saldo == 0
+        ? "O colaborador não tem férias por gozar. Os " + dias + " dia(s) a deduzir em férias" + destino
+        : "O saldo de férias só cobre " + saldo + " de " + dias + " dia(s). Os restantes " + porCobrir + destino;
+  }
+
+  /**
    * Desfaz tudo o que o {@link #aplicar} criou para esta falta. Simétrico dele, e partilhado
    * pelo Eliminar e pelo Editar — o editar não faz update dos efeitos, reverte-os e volta a
    * aplicá-los a partir do estado novo, senão trocar "Deduzir em" de FERIAS para DISPENSA

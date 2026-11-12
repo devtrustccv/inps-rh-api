@@ -163,3 +163,34 @@ Passa pelo **mesmo** endpoint, escolhendo a situação de ausência (ex.: `LIC_S
 - Regista automaticamente a **ausência** (período `dataInicio`–`dataFim`).
 - Na **aprovação** gera a **Ordem de Serviço** de Licença S/Vencimento (enviar `tipoOrdemServico`).
 - `dataFim` é **obrigatória** (ver secção 7).
+
+## 10. Combo "Situação Laboral" — só associações ativas (23/10/2026)
+
+`GET api/v1/parametrizacao/vinculos/situacoes-laborais/ativos?vinculoId=…` passa a devolver **só** as
+situações cuja associação ao vínculo está **ativa** (`ESTADO = 'A'`). As **inativas** (`I`) deixam de
+aparecer no combo (antes só eram excluídas as removidas, `E`). Ex.: vínculo 10 (Comissão de Serviço)
+devolve só `ATIVO`; a "Situação do Teste" inativa saiu. Sem `vinculoId` nada muda.
+
+O ecrã **Parametrização → Vínculo** (`GET configuracao/vinculo/{uuid}/situacoes-laborais`) continua a
+listar as inativas, para as poder gerir.
+
+**Ação front:** nenhuma — o contrato é o mesmo; só muda o conjunto devolvido.
+
+## 11. Nacionalidade — id gravado em `NACION_ID` + `nacionalidadeDesc` (11/11/2026)
+
+O id da nacionalidade passa a ser gravado em `RH_T_FUNCIONARIOS.NACION_ID` (indicação do analista); antes ia
+parar à coluna de texto `NACIONALIDADE`. **Sem breaking change:** o campo continua a chamar-se `nacionalidade`.
+
+| Onde | Antes | Agora |
+|---|---|---|
+| Request `dadosPessoais` (registo `POST api/v1/funcionarios`, validar `PUT api/v1/funcionarios/{id}`, editar `PUT .../{id}/dados-pessoais`) | `nacionalidade: "1238"` (String) | `nacionalidade: 1238` (`Long`, id de `SIPSGLOBAL.GLB_T_GEOGRAFIA` — país). `"1238"` em string continua a ser aceite. |
+| Response `dadosPessoais` (`GET api/v1/funcionarios/{id}`) | `nacionalidade: "1238"` | `nacionalidade: 1238` (`Long`) + **novo** `nacionalidadeDesc: "CABOVERDIANO"` |
+
+- Em falta → 400 `Nacionalidade é obrigatória.`; id inexistente → 400 `Nacionalidade inválida: o valor indicado não existe.`;
+  texto não numérico (ex. `"CABOVERDIANA"`) → 400 de pedido inválido.
+- O backend preenche `NACIONALIDADE` com o texto da geografia (ex. `CABOVERDIANO`); o front não o envia.
+- Detalhe de alterações: a linha "Nacionalidade" passa a mostrar o nome do país.
+
+**Ação front:** só o tipo — tratar `nacionalidade` como **número** no modelo e no combo (o GET já não
+devolve string; uma comparação `=== "1238"` deixa de bater). O nome do campo e o envio não mudam.
+Usar `nacionalidadeDesc` para mostrar o texto.

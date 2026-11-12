@@ -33,6 +33,7 @@ public class ReconciliacaoMovimentoVinculoService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules movimentoBloqueioRules;
 
   /**
    * @param contrato contrato a validar; o vinculo NOVO vem de {@code contrato.getVinculoId()} e o
@@ -89,11 +90,14 @@ public class ReconciliacaoMovimentoVinculoService {
             && Objects.equals(remTm.getId(), r.getTmId().getId()))
         .toList();
     boolean jaTemValorCerto = existentes.stream().anyMatch(r -> Objects.equals(r.getValor(), salario));
+    // Melhoria 25: vencimento de vínculo PCCS fica bloqueado (só Data Fim/OBS editáveis).
+    existentes.forEach(r -> movimentoBloqueioRules.marcar(r, vinculoNovoId));
     if (!jaTemValorCerto) {
       existentes.forEach(r -> r.setEstado(Estado.I));
       var nova = definicaoRemuneracaoMapper.createRenumeracao(salario, remTm, dataInicio, dataFim, funcionario, moeda);
       nova.setEstado(Estado.A); // reconciliar so corre em validacao positiva → fixo fica logo activo
       if (obs != null) nova.setObs(obs);
+      movimentoBloqueioRules.marcar(nova, vinculoNovoId);
       funcionario.getDefinicoesRenumeracoes().add(nova);
     }
   }
@@ -131,6 +135,10 @@ public class ReconciliacaoMovimentoVinculoService {
         funcionario.getDefinicoesPagamentos().add(novo);
       }
     });
+    // Melhoria 25: IUR/INPS/valor líquido de vínculo PCCS ficam bloqueados (só Data Fim/OBS editáveis).
+    funcionario.getDefinicoesPagamentos().stream()
+        .filter(p -> ativoOuPendente(p.getEstado()) && p.getTmId() != null && novosPagTms.contains(p.getTmId().getId()))
+        .forEach(p -> movimentoBloqueioRules.marcar(p, vinculoNovoId));
   }
 
   private boolean ativoOuPendente(Estado estado) {

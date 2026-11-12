@@ -25,7 +25,7 @@ public class AnexarComprovativoPagamentoCommandHandler implements CommandHandler
 
     LOGGER.debug("AnexarComprovativoPagamentoCommand : {}", command);
 
-    service.anexarComprovativo(command.getEmprestimoId(), command.getDocumento());
+    service.anexarComprovativo(command.getEmprestimoId(), command.getDocumento(), command.getAction());
 
     return ResponseEntity.ok().build();
   }

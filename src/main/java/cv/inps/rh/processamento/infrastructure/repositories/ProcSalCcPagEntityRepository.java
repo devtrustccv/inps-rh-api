@@ -24,7 +24,10 @@ public interface ProcSalCcPagEntityRepository extends
               e.shortDesc,
               e.tipo,
               e.procSalId,
-              sum(e.valor)
+              COUNT(DISTINCT e.tiprelId),
+              sum(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcPagEntity e
           WHERE e.procSalId IN (:procId)
@@ -39,7 +42,10 @@ public interface ProcSalCcPagEntityRepository extends
               e.shortDesc,
               e.tipo,
               null,
-              sum(e.valor)
+              COUNT(DISTINCT e.tiprelId),
+              sum(e.valor),
+              null,
+              null
           )
           FROM ProcSalCcPagEntity e
           WHERE e.procSalId IN (:procId)
@@ -54,14 +60,18 @@ public interface ProcSalCcPagEntityRepository extends
               e.cargo,
               e.relacao,
               e.valor,
-              e.descricao
+              e.descricao,
+              null
           )
           FROM ProcSalCcPagEntity e
-          WHERE e.tipo = :tipoMovimento AND e.procSalId = :procId
+          WHERE e.tipo = :tipoMovimento
+                AND e.procSalId = :procId
+                AND (:idItemAto IS NULL OR e.itemActo = :idItemAto)
       """)
   List<DetalhesProcessamentoRowDTO> getDetalhesPagamento(
       @Param("tipoMovimento") String tipoMovimento,
-      @Param("procId") Long procSalId
+      @Param("procId") Long procSalId,
+      @Param("idItemAto") Long idItemAto
   );
 
   List<ProcSalCcPagEntity> findByProcSalId(Long procFuncId);

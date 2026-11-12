@@ -61,7 +61,10 @@ public class DefinicaoRemuneracaoMapper {
           if (java.util.Objects.equals(e.getId(), dto.getId())) { found = e; break; }
         }
       }
-      if (found != null) {
+      if (found != null && cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(found)) {
+        // Melhoria 25: vencimento PCCS ou já processado — nas linhas do formulário só a OBS muda.
+        if (dto.getObservacoes() != null) found.setObs(dto.getObservacoes());
+      } else if (found != null) {
         ValidationUtil.validateValorNaoNegativo(dto.getValor());
         ValidationUtil.validatePercentagem(dto.getPercentagem());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));

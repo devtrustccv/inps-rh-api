@@ -28,5 +28,6 @@ public class NotificacaoMissaoResponseDTO {
   private String nomeReceptor;
   private LocalDate dataEnvio;
   private String estado;
+  private String estadoDescricao;
   private String origem;                  // a que entidade da missão está referenciada
 }

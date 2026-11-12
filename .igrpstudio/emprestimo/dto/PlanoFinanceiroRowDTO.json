@@ -30,6 +30,18 @@
       "primaryKey": false
     },
     {
+      "name": "flagPago",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "dataPagamento",
       "objectType": "java",
       "type": "date",
@@ -93,6 +105,30 @@
       "name": "saldoFinal",
       "objectType": "java",
       "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataEstado",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "renegociacao",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

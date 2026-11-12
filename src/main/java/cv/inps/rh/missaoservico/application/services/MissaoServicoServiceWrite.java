@@ -1,5 +1,6 @@
 package cv.inps.rh.missaoservico.application.services;
 
+import cv.inps.rh.shared.application.constants.EstadoNotificacao;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.*;
@@ -8,6 +9,7 @@ import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -68,7 +70,9 @@ public class MissaoServicoServiceWrite {
   private final DocumentoMapper documentoMapper;
   private final EmailService emailService;
   private final MissaoProcessoSupport support;
+  private final PercursoProcessoMissao percurso;
   private final MissaoNotificacaoColaborador notificacaoColaborador;
+  private final AuthenticatedUserHelper authenticatedUserHelper;
 
   @Transactional
   public ResponseEntity<MissaoSubmissaoGravadaResponseDTO> submeter(SubmeterMissaoServicoCommand command) {
@@ -90,7 +94,7 @@ public class MissaoServicoServiceWrite {
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     aplicarIlhaConcelho(missao, pais, dto);
-    missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setDescricaoDestino(descricaoDestino(missao, dto));
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
@@ -98,10 +102,12 @@ public class MissaoServicoServiceWrite {
     missao.setAutorizadoPor(dto.getAutorizadoPor());
     missao.setDataAutorizacao(dto.getDataAutorizacao());
     missao.setEtapa(ETAPA_1);
-    missao.setEstado(StringUtils.hasText(dto.getEstado()) ? dto.getEstado() : ESTADO_ATIVO);
+    // MS-019: a missão nasce sempre activa. O estado só muda pelo cancelamento ou pela autorização,
+    // nunca pelo corpo do pedido (dava para pôr uma missão em I sem a cascata do cancelamento).
+    missao.setEstado(ESTADO_ATIVO);
 
     missao = missaoServicoRepository.save(missao);
-    sincronizarProcessos(missao, dto.getAlojamento());
+    sincronizarProcessos(missao, dto.getAlojamento(), dto.getProcessos());
 
     var colaboradores = persistirColaboradores(dto.getColaboradores(), missao);
     if (!colaboradores.isEmpty()) {
@@ -123,9 +129,15 @@ public class MissaoServicoServiceWrite {
       throw IgrpResponseStatusException.badRequest("Payload inválido");
     }
 
-    validarSubmissao(dto);
-
     var missao = missaoServicoRepository.findByUuidOrThrow(uuid);
+    // MS-019: missão finalizada ou cancelada é só de consulta. Antes da validação do payload, para
+    // quem abre uma missão fechada ver este motivo e não um campo em falta.
+    if ("FINALIZADO".equals(missao.getEstado()) || ESTADO_INATIVO.equals(missao.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("A missão " + support.nrMissaoFormatado(missao)
+          + " está finalizada ou cancelada e não pode ser alterada.");
+    }
+
+    validarSubmissao(dto);
     var pais = geografiaRepository.findByIdOrThrow(dto.getPaisDestinoId());
     var antes = DadosAviso.de(missao);
     var colabsAtivosAntes = missaoColaboradorRepository.findAllByMissaoServId_Uuid(uuid).stream()
@@ -136,21 +148,19 @@ public class MissaoServicoServiceWrite {
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     aplicarIlhaConcelho(missao, pais, dto);
-    missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setDescricaoDestino(descricaoDestino(missao, dto));
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
     missao.setNrDias(calcularNrDias(dto.getDataInicio(), dto.getDataFim()));
     missao.setAutorizadoPor(dto.getAutorizadoPor());
     missao.setDataAutorizacao(dto.getDataAutorizacao());
-    if (StringUtils.hasText(dto.getEstado())) {
-      missao.setEstado(dto.getEstado());
-    }
+    // MS-019: dto.estado é ignorado — ver submeter().
     if (isNext(dto.getProcessoEtapaAction())) {
       avancarEtapa(missao, ETAPA_2);
     }
     missao = missaoServicoRepository.save(missao);
-    sincronizarProcessos(missao, dto.getAlojamento());
+    sincronizarProcessos(missao, dto.getAlojamento(), dto.getProcessos());
 
     var colaboradores = syncColaboradores(missao, dto.getColaboradores());
     if (!colaboradores.isEmpty()) {
@@ -310,32 +320,34 @@ public class MissaoServicoServiceWrite {
 
   private void validarSubmissao(MissaoSubmissaoRequestDTO dto) {
     if (dto.getPaisDestinoId() == null) {
-      throw IgrpResponseStatusException.badRequest("paisDestinoId é obrigatório");
-    }
-    if (!StringUtils.hasText(dto.getDescricaoDestino())) {
-      throw IgrpResponseStatusException.badRequest("descricaoDestino é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique o País de Destino.");
     }
     // Obrigatório no ecrã "Registo de Missão" (Âmbito da Missão), e é o que justifica a deslocação.
     if (!StringUtils.hasText(dto.getAmbitoMissao())) {
-      throw IgrpResponseStatusException.badRequest("ambitoMissao é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique o Âmbito da Missão.");
     }
     if (dto.getDataInicio() == null) {
-      throw IgrpResponseStatusException.badRequest("dataInicio é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Data Início da missão.");
     }
     if (dto.getDataFim() == null) {
-      throw IgrpResponseStatusException.badRequest("dataFim é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique a Data Fim da missão.");
     }
     if (dto.getDataFim().isBefore(dto.getDataInicio())) {
-      throw IgrpResponseStatusException.badRequest("dataFim não pode ser anterior a dataInicio");
+      throw IgrpResponseStatusException.badRequest("A Data Fim da missão não pode ser anterior à Data Início.");
+    }
+    // Spec (Autorização Prévia): "Autorizado por" vem preenchido com o utilizador que submete (editável) e a
+    // Data Autorização com a data corrente. Em falta no pedido, aplica-se esse valor por defeito (QA MS-005).
+    if (!StringUtils.hasText(dto.getAutorizadoPor())) {
+      dto.setAutorizadoPor(authenticatedUserHelper.getNomeUtilizadorAtual());
     }
     if (!StringUtils.hasText(dto.getAutorizadoPor())) {
-      throw IgrpResponseStatusException.badRequest("autorizadoPor é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Indique quem autorizou a missão (Autorizado por).");
     }
     if (dto.getDataAutorizacao() == null) {
-      throw IgrpResponseStatusException.badRequest("dataAutorizacao é obrigatório");
+      dto.setDataAutorizacao(LocalDate.now());
     }
     if (CollectionUtils.isEmpty(dto.getColaboradores())) {
-      throw IgrpResponseStatusException.badRequest("colaboradores é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Adicione pelo menos um colaborador à missão.");
     }
   }
 
@@ -365,15 +377,20 @@ public class MissaoServicoServiceWrite {
   }
 
   /**
-   * Garante os quatro processos da missão — a spec manda registar por defeito 4 linhas em
-   * RH_T_MISSAO_PROCESSO ao gravar a submissão — e aplica o campo Alojamento ao estado do processo
-   * ALOJAMENTO. Idempotente: só cria os que faltam. {@code alojamento} null não mexe (na criação,
-   * o processo fica activo).
+   * Garante os processos escolhidos no registo da missão ({@code processos}, valores de
+   * TIPO_PROCESSO_MISSAO): só esses são criados em RH_T_MISSAO_PROCESSO; um já existente que deixe
+   * de estar escolhido fica inativo, e um inativo que volte a ser escolhido é reativado. Sem
+   * {@code processos} (pedidos antigos) garantem-se os quatro e o ALOJAMENTO segue o campo
+   * {@code alojamento} (null não mexe; na criação fica activo). Idempotente.
    *
-   * <p>Retirar o alojamento só é permitido enquanto o processo não saiu da primeira etapa — depois
-   * disso já há prestadores, requisição ou logística associados a ele.
+   * <p>Retirar um processo só é permitido enquanto não saiu da primeira etapa — depois disso já há
+   * prestadores, requisição ou logística associados a ele.
    */
-  private void sincronizarProcessos(MissaoServicoEntity missao, Boolean alojamento) {
+  private void sincronizarProcessos(MissaoServicoEntity missao, Boolean alojamento, List<String> processos) {
+    if (processos != null) {
+      sincronizarProcessosEscolhidos(missao, processos);
+      return;
+    }
     var porTipo = new HashMap<String, MissaoProcessoEntity>();
     missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid())
         .forEach(p -> porTipo.put(p.getTipoProcesso(), p));
@@ -388,7 +405,7 @@ public class MissaoServicoServiceWrite {
         processo.setUuid(UuidCreator.getTimeOrderedEpoch());
         processo.setMissaoServId(missao);
         processo.setTipoProcesso(tipo.name());
-        processo.setEtapa(tipo.primeiraEtapa().name());
+        processo.setEtapa(percurso.etapaInicial(tipo).name());
         processo.setEstado(ehAlojamento && Boolean.FALSE.equals(alojamento) ? ESTADO_INATIVO : ESTADO_ATIVO);
         toSave.add(processo);
         continue;
@@ -398,13 +415,62 @@ public class MissaoServicoServiceWrite {
         var estado = alojamento ? ESTADO_ATIVO : ESTADO_INATIVO;
         if (estado.equals(processo.getEstado()))
           continue;
-        if (!alojamento && !tipo.primeiraEtapa().name().equals(processo.getEtapa())) {
+        if (!alojamento && !percurso.primeiraEtapa(processo).name().equals(processo.getEtapa())) {
           throw IgrpResponseStatusException.badRequest(
               "Não é possível retirar o alojamento: o processo ALOJAMENTO já está na etapa " + processo.getEtapa());
         }
         processo.setEstado(estado);
         toSave.add(processo);
       }
+    }
+
+    if (!toSave.isEmpty()) {
+      missaoProcessoRepository.saveAll(toSave);
+    }
+  }
+
+  private void sincronizarProcessosEscolhidos(MissaoServicoEntity missao, List<String> processos) {
+    var escolhidos = new java.util.HashSet<TipoProcesso>();
+    for (var p : processos) {
+      if (!StringUtils.hasText(p)) continue;
+      escolhidos.add(Arrays.stream(TipoProcesso.values())
+          .filter(t -> t.name().equalsIgnoreCase(p.trim()))
+          .findFirst()
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Processo da missão desconhecido: " + p)));
+    }
+    if (escolhidos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Escolha pelo menos um processo a despoletar na missão.");
+    }
+
+    var porTipo = new HashMap<String, MissaoProcessoEntity>();
+    missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid())
+        .forEach(p -> porTipo.put(p.getTipoProcesso(), p));
+
+    var toSave = new ArrayList<MissaoProcessoEntity>();
+    for (var tipo : TipoProcesso.values()) {
+      var processo = porTipo.get(tipo.name());
+      var escolhido = escolhidos.contains(tipo);
+
+      if (processo == null) {
+        if (!escolhido) continue;
+        processo = new MissaoProcessoEntity();
+        processo.setUuid(UuidCreator.getTimeOrderedEpoch());
+        processo.setMissaoServId(missao);
+        processo.setTipoProcesso(tipo.name());
+        processo.setEtapa(percurso.etapaInicial(tipo).name());
+        processo.setEstado(ESTADO_ATIVO);
+        toSave.add(processo);
+        continue;
+      }
+
+      var estado = escolhido ? ESTADO_ATIVO : ESTADO_INATIVO;
+      if (estado.equals(processo.getEstado())) continue;
+      if (!escolhido && !percurso.primeiraEtapa(processo).name().equals(processo.getEtapa())) {
+        throw IgrpResponseStatusException.badRequest("Não é possível retirar o processo "
+            + tipo.getDescricao() + ": já está na etapa " + processo.getEtapa() + ".");
+      }
+      processo.setEstado(estado);
+      toSave.add(processo);
     }
 
     if (!toSave.isEmpty()) {
@@ -421,6 +487,24 @@ public class MissaoServicoServiceWrite {
     }
     missao.setIlhaId(dto.getIlhaId() != null ? geografiaRepository.findByIdOrThrow(dto.getIlhaId()) : null);
     missao.setConcelhoId(dto.getConcelhoId() != null ? geografiaRepository.findByIdOrThrow(dto.getConcelhoId()) : null);
+  }
+
+  /**
+   * O Registo de Missão deixou de pedir a "Descrição do Destino": sem texto enviado, compõe-se do
+   * destino escolhido (concelho, ilha e país), que é o que a lista e as notificações ({destino}) mostram.
+   */
+  private String descricaoDestino(MissaoServicoEntity missao, MissaoSubmissaoRequestDTO dto) {
+    if (StringUtils.hasText(dto.getDescricaoDestino())) {
+      return dto.getDescricaoDestino().trim();
+    }
+    var partes = java.util.stream.Stream.of(missao.getConcelhoId(), missao.getIlhaId(), missao.getPaisDestinoId())
+        .filter(java.util.Objects::nonNull)
+        .map(GeografiaEntity::getNome)
+        .filter(StringUtils::hasText)
+        .distinct()
+        .toList();
+    var descricao = String.join(", ", partes);
+    return descricao.length() > 200 ? descricao.substring(0, 200) : descricao;
   }
 
   /**
@@ -537,7 +621,7 @@ public class MissaoServicoServiceWrite {
     var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid());
     if (!processos.isEmpty()) {
       return processos.stream().anyMatch(p ->
-          !TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).primeiraEtapa().name().equals(p.getEtapa()));
+          !percurso.primeiraEtapa(p).name().equals(p.getEtapa()));
     }
     if (!StringUtils.hasText(missao.getEtapa()))
       return false;
@@ -607,12 +691,12 @@ public class MissaoServicoServiceWrite {
   /** Envia um email a um destinatário externo e devolve o registo (com referência à missão) por gravar. */
   private NotificacaoEntity notificacaoExterna(MissaoServicoEntity missao, String tipoNotificacao,
                                                String email, String nome, String assunto, String message) {
-    String estado = "Enviado";
+    String estado = EstadoNotificacao.ENVIADO.name();
     try {
       emailService.sendEmail(email, assunto, MissaoProcessoSupport.corpoHtml(message));
     } catch (Exception e) {
       LOGGER.warn("Erro ao enviar notificação {} para {}: {}", tipoNotificacao, email, e.getMessage());
-      estado = "Erro";
+      estado = EstadoNotificacao.ERRO.name();
     }
 
     var n = new NotificacaoEntity();
@@ -665,7 +749,8 @@ public class MissaoServicoServiceWrite {
       var linha = linhaPorId.get(det.getMissaoLogistId().getId());
       var vars = support.varsMissao(missao);
       vars.put("valorDiario", valorOuVazio(linha.getValorDiario()));
-      vars.put("nrDiasAjuda", linha.getNrDias() != null ? String.valueOf(linha.getNrDias()) : "");
+      // A ajuda de custo paga-se pelos dias da missão (NR_DIAS da linha são os dias de alojamento).
+      vars.put("nrDiasAjuda", missao.getNrDias() != null ? String.valueOf(missao.getNrDias()) : "");
       vars.put("valorTotal", valorOuVazio(linha.getValorTotal()));
       vars.put("referenciaPagamento", missao.getReferenciaPagamento());
       vars.put("dataPagamento", missao.getDataPagamento() != null ? missao.getDataPagamento().toString() : "");

@@ -6,6 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 
 import java.sql.SQLException;
+import java.util.Set;
+
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.transaction.TransactionSystemException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,5 +52,59 @@ class GlobalExceptionHandlerTest {
     assertThat(traduzir("ORA-02292: integrity constraint (INPSRH.FK_X) violated - child record found").getDetail())
         .isEqualTo("Não é possível concluir a operação: o registo está a ser utilizado noutros dados.");
     assertThat(traduzir("ORA-99999: algo inesperado").getDetail()).doesNotContain("ORA-");
+  }
+
+  @Test
+  void violacaoDeValidacaoNoCommitDa400EmVezDe500() {
+    // MS-010: a validação da entidade falha no commit e chega embrulhada (TransactionSystemException).
+    var cve = new ConstraintViolationException("tpDocumentoId is mandatory", Set.of());
+    var ex = new TransactionSystemException("Could not commit JPA transaction",
+        new RuntimeException("rollback", cve));
+    assertThat(handler.handleErroBaseDadosEmbrulhado(ex).getStatus())
+        .isEqualTo(HttpStatus.BAD_REQUEST.value());
+  }
+
+  @Test
+  void mensagemDeCampoDizSempreQualEOCampo() {
+    // DTO gerado
+    assertThat(GlobalExceptionHandler.mensagemCampo("dataInicio", "The field <dataInicio> is required"))
+        .isEqualTo("O campo «dataInicio» é obrigatório.");
+    // defeito do Bean Validation, que antes chegava ao ecrã só como "não deve ser nulo" (QA AV-20)
+    assertThat(GlobalExceptionHandler.mensagemCampo("institId", "não deve ser nulo"))
+        .isEqualTo("O campo «institId» é obrigatório.");
+    assertThat(GlobalExceptionHandler.mensagemCampo("itens[0].descricao", "não deve estar em branco"))
+        .isEqualTo("O campo «descricao» é obrigatório.");
+    assertThat(GlobalExceptionHandler.mensagemCampo("ponderacao", "deve ser maior que 0"))
+        .isEqualTo("O campo «ponderacao» deve ser maior que 0.");
+    // mensagem própria fica como está
+    assertThat(GlobalExceptionHandler.mensagemCampo("x", "Indique a Data Início da missão."))
+        .isEqualTo("Indique a Data Início da missão.");
+  }
+
+  @Test
+  void naoEncontradoSemNomesDeClasses() {
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("AvaliacaoEntity not found for id: abc-1"))
+        .isEqualTo("A avaliação indicada não existe (id abc-1).");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("ParamCargoEntity not found for id: 9"))
+        .isEqualTo("O cargo indicado não existe (id 9).");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("DirecaoEntity not found"))
+        .isEqualTo("A direção indicada não existe.");
+    // entidade sem nome conhecido: sai do nome da classe
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("ParamTipoDocumentoEntity not found for codigo: X"))
+        .isEqualTo("O registo de tipo documento indicado não existe (codigo X).");
+    // títulos que já são frases ficam como estão
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado("Já existe parametrização para o ano: 2031"))
+        .isEqualTo("Já existe parametrização para o ano: 2031");
+    assertThat(GlobalExceptionHandler.mensagemNaoEncontrado(null)).isNull();
+  }
+
+  @Test
+  void formatoInvalidoDizCampoEFormato() {
+    assertThat(GlobalExceptionHandler.mensagemFormato("dataInicio", java.time.LocalDate.class, "30/03/2031"))
+        .isEqualTo("O campo «dataInicio» tem de ser uma data no formato AAAA-MM-DD (recebido: «30/03/2031»).");
+    assertThat(GlobalExceptionHandler.mensagemFormato("instituicao[0].id", java.util.UUID.class, "9"))
+        .isEqualTo("O campo «instituicao[0].id» tem de ser um identificador (UUID) válido (recebido: «9»).");
+    assertThat(GlobalExceptionHandler.mensagemFormato("ano", Integer.class, null))
+        .isEqualTo("O campo «ano» tem de ser um número.");
   }
 }

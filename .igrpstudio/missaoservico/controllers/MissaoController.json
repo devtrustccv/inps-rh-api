@@ -157,6 +157,27 @@
       ]
     },
     {
+      "actionName": "getValoresIniciaisSubmissao",
+      "path": "submissao/valores-iniciais",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoValoresIniciais",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "actionName": "getSubmissaoServicoProcess",
       "path": "{uuid}/submissao",
       "method": "GET",

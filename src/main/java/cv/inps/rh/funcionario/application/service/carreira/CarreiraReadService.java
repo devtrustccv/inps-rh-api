@@ -240,6 +240,7 @@ public class CarreiraReadService {
       row.setDataInicio(obj.getDataInicio());
       row.setDataFim(obj.getDataFim());
       row.setObservacoes(obj.getObs());
+      row.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(obj));
       encargos.add(row);
     });
     dto.setEncargosDescontos(encargos);
@@ -257,6 +258,7 @@ public class CarreiraReadService {
       row.setValor(obj.getValor());
       row.setPercentagem(obj.getPercentagem());
       row.setObservacoes(obj.getObs());
+      row.setBloqueado(cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules.soDataFimEObs(obj));
       subsidios.add(row);
     });
     dto.setSubsidios(subsidios);

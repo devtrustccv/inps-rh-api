@@ -4,9 +4,12 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -61,5 +64,8 @@ public class FeriasListDTO  {
 
 
   private String estadoDesc ;
+
+  @Valid
+  private List<FeriasGozadaItemDTO> feriasGozadas = new ArrayList<>();
 
 }

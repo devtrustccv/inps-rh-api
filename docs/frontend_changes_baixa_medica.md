@@ -19,7 +19,7 @@ A funcionalidade de **Baixa Médica / Licença** permite registar, calcular e va
 ### 2.1 Preview do cálculo (sem gravar)
 
 ```
-GET /colaborador/baixa-medica/calculo
+GET /colaborador/baixa-medica/calculo   ⚠️ REMOVIDO a 22/08 (83e04efb) — o cálculo vem no GET por id (campo `calculo`)
 ```
 
 Calcular os dados da licença antes de gravar. Usar para preencher a secção "Informações Definidas no Regulamento" no formulário (campos desactivados/read-only).
@@ -115,7 +115,7 @@ Content-Type: application/json
 ### 2.3 Detalhe de uma baixa médica (para editar/validar)
 
 ```
-GET /colaborador/baixa-medica/{pedidoId}
+GET /colaborador/baixa-medica/{abonoUuid}
 ```
 
 Retorna os dados de um pedido existente para preencher o formulário de edição/validação.
@@ -150,7 +150,7 @@ Retorna os dados de um pedido existente para preencher o formulário de edição
 ### 2.4 Validar / Desvalidar
 
 ```
-POST /colaborador/baixa-medica/{pedidoId}?validar=SIM|NAO
+POST /colaborador/baixa-medica/{abonoUuid}?validar=SIM|NAO
 Content-Type: application/json  (body opcional)
 ```
 
@@ -212,8 +212,8 @@ Exemplos actuais na BD:
 6. Guardar pedidoUuid para posterior validação
 
 Para validar:
-7. GET /baixa-medica/{pedidoUuid} → preencher formulário de validação
-8. POST /baixa-medica/{pedidoUuid}?validar=SIM com body opcional de ajustes
+7. GET /baixa-medica/{abonoUuid} → preencher formulário de validação
+8. POST /baixa-medica/{abonoUuid}?validar=SIM com body opcional de ajustes
 ```
 
 ---
@@ -260,3 +260,37 @@ Para validar:
 | Falta Mensal — Dias (read-only) | `p_dias_falta[]` do procedure |
 | Falta Mensal — Salário Base (read-only) | `p_valor_salario[]` do procedure |
 | Falta Mensal — Valor Descontado (read-only) | `p_valor_desc[]` / `RH_T_FALTA.VALOR` |
+
+---
+
+## 8. Correcções do bug report QA (AS-010, 23/10/2026)
+
+O registo de licença não gravava (QA: *"pedidoId is mandatory"* e 500 com datas vazias). Contrato igual; muda o seguinte:
+
+**Registo — `POST /colaborador/baixa-medica` passa a responder 400 (nada é gravado):**
+
+| Caso | `title` |
+|---|---|
+| `tipoLicenca` em falta | *"Indique o Tipo Licença."* |
+| `dataInicio`/`dataFim` em falta ou `""` | *"Data Início e Data Fim da licença são obrigatórias."* |
+| `dataFim` < `dataInicio` | *"Data Fim não pode ser anterior à Data Início."* |
+| `periodos` vazio | *"Indique pelo menos um período de licença."* |
+
+Linhas de documento vazias (sem tipo nem ficheiro) são ignoradas.
+
+**Validação — `POST /colaborador/baixa-medica/{abonoUuid}?validar=SIM|NAO`:**
+- O path é o **uuid do abono** (o `abonoIdUuid` devolvido no registo / `id` do GET). Antes a rota declarava
+  `{pedidoId}` e lia `abonoId` → 500 em todas as validações.
+- `SIM`/`NAO` passam **todas** as tabelas a `A`/`I`: abono, períodos, ausência, faltas, documentos e validação
+  (antes ficavam em `P`).
+- `validar=CORRIGIR` → 400 *"A opção 'Corrigir' ainda não está disponível…"*; validar uma licença que já não está
+  pendente → 400 *"Só é possível validar uma licença pendente de validação."*
+- `periodos` no body é opcional; se vier, reenviar cada período **com o seu `id`**.
+
+**Leitura:** `GET /colaborador/baixa-medica/{abonoUuid}` e a lista deixavam de fora (404 / lista vazia) os
+colaboradores sem cargo ou sem secção — corrigido.
+
+**BD:** `RH_T_FALTA.ABONO_BENEF_ID` = id do **período** (`RH_T_ABONOS_BENEFICIOS_DET`, spec 20/10), não do abono;
+`RH_T_FALTA.PEDIDO_ID` fica null. A validação grava `FUN_ID`/`TIPREL_ID` (a licença aparecia sem nome na lista de validações).
+
+**Ação front:** usar o `abonoIdUuid` no path da validação; mostrar o `title` dos 400.

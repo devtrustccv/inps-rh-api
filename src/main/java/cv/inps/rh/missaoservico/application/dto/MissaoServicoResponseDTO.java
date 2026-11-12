@@ -37,6 +37,7 @@ public class MissaoServicoResponseDTO  {
   private String autorizadoPor;
   private LocalDate dataAutorizacao;
   private String etapa;
+  private String etapaDesc;
   private String estado;
   private String motivoCancelamento;
   // audit

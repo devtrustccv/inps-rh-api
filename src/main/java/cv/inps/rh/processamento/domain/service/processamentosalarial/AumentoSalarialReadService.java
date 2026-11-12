@@ -5,6 +5,7 @@ import cv.inps.rh.processamento.application.dto.AumentoSalarialResponseDTO;
 import cv.inps.rh.processamento.application.dto.ColaboradorAumentoDTO;
 import cv.inps.rh.processamento.application.queries.GetColaboresAumentoSalarialQuery;
 import cv.inps.rh.processamento.application.queries.GetListaAumentoSalarialQuery;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSimulacaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
@@ -64,9 +65,14 @@ public class AumentoSalarialReadService {
 
   public ColaboradorAumentoDTO getColaboradores(GetColaboresAumentoSalarialQuery query) {
 
+    var aumento = aumentoSalarialEntityRepository.findByUuid(query.getAumentoSalarialId())
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Aumento salarial não encontrado: " + query.getAumentoSalarialId()));
+
     var pageRequest = PageRequest.of(query.getPage(), query.getSize());
 
     var page = aumentoSimulacaoEntityRepository.list(
+        aumento.getId(),
         query.getDirecaoId(),
         query.getOrganicaId(),
         pageRequest

@@ -1,7 +1,6 @@
 package cv.inps.rh.shared.domain.service.ordemservico;
 
 import cv.inps.rh.shared.domain.service.model.OrdemServico;
-import cv.inps.rh.shared.infrastructure.persistence.repository.RhVRelacaoLaboralEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MobilidadeInternaProvider implements OrdemServicoProvider {
 
-  private final RhVRelacaoLaboralEntityRepository repository;
+  private final OrdemServicoDados dados;
 
   @Override
   public OrdemServico getTipo() {
@@ -21,9 +20,9 @@ public class MobilidadeInternaProvider implements OrdemServicoProvider {
   @Override
   public Map<String, Object> buildVariables(String funcionarioId) {
 
-    var fun = repository.findByIdOrThrow(funcionarioId);
+    var fun = dados.relacaoLaboral(funcionarioId);
 
-    return Map.of(
+    return OrdemServicoDados.vars(
         "nomeColaborador", fun.getNomeColaborador(),
         "cargo", fun.getCargoDesc(),
         "escalao", fun.getEscalaoDesc(),

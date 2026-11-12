@@ -27,6 +27,9 @@ public class AjudaCustoResponseDTO  {
   private Integer numeroDiasAlojamento;
   private BigDecimal valorDiario;         // calculado pelo service
   private BigDecimal valorTotal;          // calculado: valorDiario × numeroDiasAlojamento
+  private BigDecimal valorDiarioBase;     // MS-013: base antes da fracção (repõe o "Valor Diário (base)" do ecrã)
+  private String fracaoAplicada;          // MS-013: "1", "2/3" ou "1/3"
+  private String flgAlimentacao;          // MS-013: SIM/NAO do alojamento do colaborador (decide 2/3 vs 1/3); null sem alojamento
   private String estado;
   // referencia = 'AJUDA_CUSTO' (interno)
   // sem moeda, sem documento

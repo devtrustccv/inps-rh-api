@@ -70,7 +70,10 @@ public class DadosPessoaisRespDTO  {
   private String estadoCivil ;
 
 
-  private String nacionalidade ;
+  private Long nacionalidade ;        // id da geografia (NACION_ID) — o mesmo que o front envia
+
+
+  private String nacionalidadeDesc ;  // texto, ex. "CABOVERDIANO"
 
 
   private Long naturalidadeId ;

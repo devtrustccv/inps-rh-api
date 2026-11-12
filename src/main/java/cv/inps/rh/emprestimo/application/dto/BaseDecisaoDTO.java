@@ -29,13 +29,17 @@ public class BaseDecisaoDTO {
 
   private String executadoPor;
 
+  // Data/hora em que a etapa foi gravada ("Data Execução"); "data" é a data do parecer.
+  private LocalDate dataExecucao;
+
   private Responsavel responsavel;
 
   public record Responsavel(
       String parecer,
       String observacao,
       LocalDateTime data,
-      String nome
+      String nome,
+      LocalDate dataParecer
   ) {
   }
 

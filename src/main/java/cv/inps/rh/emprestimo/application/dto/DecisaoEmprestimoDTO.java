@@ -48,4 +48,15 @@ public class DecisaoEmprestimoDTO {
   @Valid
   private BaseDecisaoDTO autorizacaoComissaoExecutivaRenegociacao;
 
+  // Etapas sem parecer: só executadoPor / dataExecucao (ver EmprestimoHelper.registarExecucaoEtapa).
+  @Valid
+  private BaseDecisaoDTO elaboracaoContratoPedido;
+
+  @Valid
+  private BaseDecisaoDTO elaboracaoContratoRenegociacao;
+
+  // Confirmação do pagamento: data (do pagamento), observação, executadoPor / dataExecucao.
+  @Valid
+  private BaseDecisaoDTO pagamento;
+
 }

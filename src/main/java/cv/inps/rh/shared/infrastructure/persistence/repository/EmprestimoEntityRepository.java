@@ -22,6 +22,10 @@ public interface EmprestimoEntityRepository extends
     JpaRepository<EmprestimoEntity, Long>,
     JpaSpecificationExecutor<EmprestimoEntity> {
 
+  /** Há empréstimos associados a este banco (RH_T_EMPRESTIMO.BANCO)? */
+  boolean existsByBanco_Id(Long bancoId);
+
+
   default EmprestimoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "EmprestimoEntity not found for id: " + id));
@@ -39,6 +43,22 @@ public interface EmprestimoEntityRepository extends
 
   List<EmprestimoEntity> findByUuidNotAndTiprel_FunId(String uuid, FuncionarioEntity funcionarioEntity);
 
+  List<EmprestimoEntity> findByTiprel_FunIdAndEstado(FuncionarioEntity funcionarioEntity, String estado);
+
+  // Versões do mesmo pedido: o empréstimo inicial e os subprocessos (Amortização / Renegociação),
+  // que reutilizam o pedido do inicial (AdiantamentoService / ReforcoDividaService).
+  List<EmprestimoEntity> findAllByPedido_IdOrderByVersaoAscIdAsc(Long pedidoId);
+
+  // Uma linha por pedido, na versão em vigor: a mais recente que seja o empréstimo inicial ou um
+  // subprocesso (Amortização / Renegociação) já concluído — ATIVO (Amortização, após a Verificação)
+  // ou CABIMENTADO (Renegociação, após o Contrato; o mesmo estado final do Empréstimo Viatura). Um
+  // subprocesso ainda em curso não substitui o empréstimo na lista — aparece na expansão
+  // (GET /emprestimo/{id}/versoes); emprestimoIdEmCurso aponta para ele (cancelados não contam).
+  // Nº de prestações pagas: qualquer estado do plano — a Recuperação / Fundo Social à espera da
+  // Validação tem o plano pendente (P) e já traz prestações pagas (EM-016).
+  // Valor Pago: as prestações pagas passam para cada versão nova (Amortização / Renegociação), mas
+  // VALOR_PAGO não — soma-se o pago no plano da versão em vigor. Valor Amortizado: soma das
+  // Amortizações concluídas do pedido até essa versão (ponto 35).
   @Query("""
       SELECT new cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO(
           p.uuid,
@@ -59,15 +79,49 @@ public interface EmprestimoEntityRepository extends
              SELECT COUNT(pf)
              FROM PlanoFinanceiroEntity pf
              WHERE pf.emprestimo = e
-             AND pf.estado = 'A'
-             AND pf.flgPago = 'PAGO'
+             AND pf.flgPago = 'SIM'
              AND pf.dataPagamento IS NOT NULL
            ),
-          e.valorPago,
+          COALESCE(
+            (
+              SELECT SUM(pago.valorPago)
+              FROM PlanoFinanceiroEntity pago
+              WHERE pago.emprestimo = e
+              AND pago.flgPago = 'SIM'
+            ),
+            e.valorPago
+          ),
           e.valorDivida,
           e.dataInicio,
           p.etapa,
-          ''
+          '',
+          (
+            SELECT emCurso.uuid
+            FROM EmprestimoEntity emCurso
+            WHERE emCurso.id = (
+              SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
+            )
+          ),
+          (
+            SELECT emCurso.tipoSituacao
+            FROM EmprestimoEntity emCurso
+            WHERE emCurso.id = (
+              SELECT MAX(ultima.id) FROM EmprestimoEntity ultima
+              WHERE ultima.pedido.id = p.id AND ultima.estado NOT IN ('CANCELADO', 'DESISTENCIA', 'NAO_AUTORIZADO')
+            )
+          ),
+          (
+            SELECT COUNT(versao) FROM EmprestimoEntity versao WHERE versao.pedido.id = p.id
+          ),
+          p.tipoPedido,
+          (
+            SELECT SUM(amort.valorAdiantado) FROM EmprestimoEntity amort
+            WHERE amort.pedido.id = p.id
+            AND amort.id <= e.id
+            AND (amort.tipoSituacao LIKE 'AMORTIZACAO%' OR amort.tipoSituacao LIKE 'ADIANTAMENTO%')
+            AND amort.estado IN ('ATIVO', 'ARQUIVADO')
+          )
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id
@@ -75,8 +129,8 @@ public interface EmprestimoEntityRepository extends
             SELECT MAX(latestLoan.id)
             FROM EmprestimoEntity latestLoan
             WHERE latestLoan.pedido.id = p.id
+            AND (latestLoan.emprestimo IS NULL OR latestLoan.estado IN ('ATIVO', 'CABIMENTADO'))
       )
-      AND e.estado <> 'CANCELADO'
       AND e.tiprel.id = tr.id
       AND tr.estActAdm = 1
       AND tr.funId.id = f.id

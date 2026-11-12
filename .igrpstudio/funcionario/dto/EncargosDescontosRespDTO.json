@@ -100,6 +100,11 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "bloqueado",
+      "type": "boolean",
+      "required": false
     }
   ],
   "id": "w4c2zd8crx_copy"

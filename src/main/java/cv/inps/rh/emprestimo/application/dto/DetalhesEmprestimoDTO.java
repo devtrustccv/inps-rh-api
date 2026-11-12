@@ -33,6 +33,11 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
   private BigDecimal valorPrestacao;
 
+  // Recuperação: Principal e Juro mensal da prestação (1.ª linha do plano) — EM-016.
+  private BigDecimal valorPrincipalMensal;
+
+  private BigDecimal valorJuroMensal;
+
 
   private String cabimentacaoOrcamental;
 
@@ -41,6 +46,9 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
 
   private BigDecimal valorAdiantamento;
+
+
+  private BigDecimal valorReforco;
 
 
   private String tipoSituacao;
@@ -79,8 +87,17 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
 
+  // Outros empréstimos do colaborador registados noutros pedidos (RH_T_EMPRESTIMO_OUTROS), ainda
+  // em curso — só de leitura na Análise RH; os deste pedido continuam em outrosEmprestimos.
+  private List<OutrosEmprestimosDTO> outrosEmprestimosAnteriores = new ArrayList<>();
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
+
+  // Última mudança de estado (cancelamento/desistência): observação e anexos, só de leitura.
+  private String observacaoEstado;
+
+  private List<DocumentoDTO> documentosEstado = new ArrayList<>();
 
   @Valid
   private DecisaoEmprestimoDTO decisao;

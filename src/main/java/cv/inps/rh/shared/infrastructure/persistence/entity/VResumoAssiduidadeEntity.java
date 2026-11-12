@@ -92,14 +92,22 @@ public class VResumoAssiduidadeEntity  {
     private Integer totalFaltas;
 
 
-    /** Faltas já registadas mas ainda por validar. */
+    /** Faltas registadas à espera de despacho (P) ou devolvidas para correção (C). */
     @Column(name="total_faltas_pendentes")
     private Integer totalFaltasPendentes;
 
 
-    /** Faltas registadas e validadas. */
+    /** Faltas aprovadas com justificativo (RH_T_FALTA A + FLG_JUSTIFICATIVO = 'SIM'). */
     @Column(name="total_faltas_justificadas")
     private Integer totalFaltasJustificadas;
+
+
+    /**
+     * Faltas injustificadas: dia sem falta viva registada (nunca justificado, ou rejeitado) ou
+     * falta aprovada "Com Justificativo? = NÃO". Decisão A, 21/10/2026.
+     */
+    @Column(name="total_faltas_injustificadas")
+    private Integer totalFaltasInjustificadas;
 
 
     @Column(name="horas_trabalhadas")
@@ -120,6 +128,11 @@ public class VResumoAssiduidadeEntity  {
 
     @Column(name="estado")
     private String estado;
+
+
+    /** Tipos de falta do mês com n.º de dias, ex.: "Doença (2d), Luto (1d)". */
+    @Column(name="motivo_ausencia")
+    private String motivoAusencia;
 
 
 }

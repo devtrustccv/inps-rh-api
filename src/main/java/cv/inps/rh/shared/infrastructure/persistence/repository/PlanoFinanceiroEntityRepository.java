@@ -19,6 +19,14 @@ public interface PlanoFinanceiroEntityRepository extends
 
   List<PlanoFinanceiroEntity> findAllByEmprestimo(EmprestimoEntity emprestimo);
 
+  // Regenerar o plano no Contrato (Gravar e Seguinte chamam-no): apagar o anterior primeiro —
+  // ainda não há pagamentos nesta fase; inativá-lo deixaria linhas 'I' que reativarPlanos
+  // voltaria a ligar ao cancelar um subprocesso.
+  @Transactional
+  @Modifying
+  @Query("DELETE FROM PlanoFinanceiroEntity p WHERE p.emprestimo.id = :emprestimoId")
+  void apagarPlanos(@Param("emprestimoId") Long emprestimoId);
+
   @Transactional
   @Modifying
   @Query("""
@@ -39,4 +47,18 @@ public interface PlanoFinanceiroEntityRepository extends
              AND p.estado = 'P'
       """)
   void ativarPlanosPendentes(@Param("emprestimoId") Long emprestimoId);
+
+  // Cancelar um subprocesso (Amortização / Renegociação) depois do NEXT do pedido: o
+  // EmprestimoHelper.saveByTipoSituacao tinha inativado o plano do empréstimo anterior.
+  @Transactional
+  @Modifying
+  @Query("""
+          UPDATE PlanoFinanceiroEntity p
+             SET p.estado = 'A'
+           WHERE p.emprestimo.id = :emprestimoId
+             AND p.estado = 'I'
+      """)
+  void reativarPlanos(@Param("emprestimoId") Long emprestimoId);
+
+  long countByEmprestimo_IdAndEstado(Long emprestimoId, String estado);
 }

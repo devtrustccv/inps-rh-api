@@ -22,5 +22,9 @@ public class PeriodoResumoDTO {
   private BigDecimal avaliacaoFinal;
   private String avaliacaoQualitativa;
   private String estado;
+  /** Há avaliação do avaliador gravada neste período (alguma nota ou realizado). */
+  private Boolean temAvaliacao;
+  /** Há autoavaliação gravada neste período. */
+  private Boolean temAutoAvaliacao;
 
 }

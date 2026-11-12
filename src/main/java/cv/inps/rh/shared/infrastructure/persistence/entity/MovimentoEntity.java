@@ -23,7 +23,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "VW_RH_MOVIMENTOS_PICAGEM")
+@Table(name = "RH_V_MOVIMENTOS_PICAGEM")
 public class MovimentoEntity {
 
   @Id

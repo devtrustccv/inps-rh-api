@@ -17,7 +17,12 @@ import java.time.LocalDate;
 @Table(name = "RH_V_RELACAO_LABORAL")
 public class RhVRelacaoLaboralEntity {
 
+  // Uma linha por vínculo (tiprel): o funcionário pode ter várias (actual + pendente). Com o
+  // FUNCIONARIO_UUID como @Id o Hibernate juntava-as todas numa só entidade.
   @Id
+  @Column(name = "TIPREL_ID")
+  private Long tiprelId;
+
   @Size(max = 36)
   @Column(name = "FUNCIONARIO_UUID", length = 36)
   private String funcionarioUuid;

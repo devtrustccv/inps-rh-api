@@ -25,10 +25,12 @@ public class PedidoDeclaracaoResponseDTO{
   private Long id;
   private UUID uuid;
   private String tipoDeclaracao;
+  private String tipoDeclaracaoDesc;
   private String efeito;
   private LocalDate dataPedido;
   private String etapa;
   private String estadoPedido;
+  private String estadoPedidoDesc;
 
   // Colaborador
   private Long funId;
@@ -40,6 +42,7 @@ public class PedidoDeclaracaoResponseDTO{
 
   // Declaração
   private String finalidade;
+  private String finalidadeDesc;
   private String entidadeDestinado;
   private String obs;
 

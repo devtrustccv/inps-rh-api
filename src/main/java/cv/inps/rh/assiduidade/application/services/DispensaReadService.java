@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class DispensaReadService {
   private final DispensaEntityRepository dispensaRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final ResponsavelEntityRepository responsavelEntityRepository;
+  private final DispensaHorasService dispensaHorasService;
 
   @Transactional(readOnly = true)
   public WrapperListaDispensaDTO getListaDispensa(GetListaDispensaQuery query) {
@@ -118,6 +120,22 @@ public class DispensaReadService {
     };
   }
 
+  /**
+   * Hora Direito (spec 20/10, Lista Pedido Dispensa): SUM(RH_T_DISPENSA.TOTAL_HORA). A spec não diz
+   * o período; conta-se o mês da dispensa, que é o período do direito, e só as dispensas vivas
+   * (pendentes e aprovadas) — rejeitadas e eliminadas não contam. Decidido a 21/10/2026 (AS-009).
+   */
+  private String horasDireitoNoMes(DispensaEntity e) {
+    var fun = e.getTiprelId() != null ? e.getTiprelId().getFunId() : null;
+    if (fun == null || e.getDataInicio() == null)
+      return null;
+    var inicioMes = e.getDataInicio().withDayOfMonth(1);
+    var fimMes = e.getDataInicio().withDayOfMonth(e.getDataInicio().lengthOfMonth());
+    var minutos = dispensaRepository.somarTotalHoraNoPeriodo(
+        fun.getId(), inicioMes, fimMes, List.of(Estado.P, Estado.A));
+    return TimeUtils.formatMinutesToHHmm(minutos != null ? minutos.intValue() : 0);
+  }
+
   private DispensaListDTO toDTO(DispensaEntity e) {
     var dto = new DispensaListDTO();
     dto.setId(e.getId());
@@ -127,6 +145,8 @@ public class DispensaReadService {
     var mob = e.getTiprelId() != null ? e.getTiprelId().getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
     dto.setDirecao(inst != null ? inst.getNome() : null);
+    var fun = e.getTiprelId() != null ? e.getTiprelId().getFunId() : null;
+    dto.setNomeColaborador(fun != null ? fun.getNome() : null);
     dto.setDirecaoId(inst != null ? inst.getId() : null);
     var contr = e.getTiprelId() != null ? e.getTiprelId().getContrVinculoId() : null;
     var vinculo = contr != null ? contr.getVinculoId() : null;
@@ -142,12 +162,16 @@ public class DispensaReadService {
     dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
     var hi = e.getHoraInicio();
     var hf = e.getHoraFim();
+    // As horas estão gravadas como INTERVAL ("0 4:0:0.0"): mostram-se em HH:mm.
+    var hiFmt = StringUtils.hasText(hi) ? TimeUtils.intervalFormatToHHmm(hi) : "";
+    var hfFmt = StringUtils.hasText(hf) ? TimeUtils.intervalFormatToHHmm(hf) : "";
     dto.setIntervaloHoras(
-        (StringUtils.hasText(hi) ? hi : "") +
-            (StringUtils.hasText(hi) || StringUtils.hasText(hf) ? " / " : "") +
-            (StringUtils.hasText(hf) ? hf : ""));
-    dto.setTotalHorasDireito(null);
-    dto.setTotalHorasSolicitadas(TimeUtils.diffMinutes(hi, hf));
+        hiFmt + (StringUtils.hasText(hiFmt) || StringUtils.hasText(hfFmt) ? " / " : "") + hfFmt);
+    dto.setTotalHorasDireito(horasDireitoNoMes(e));
+    // Spec 20/10: Total Horas solicitada = RH_T_DISPENSA.TOTAL_HORA, gravado em minutos — sai em
+    // HH:mm como o intervalo (o QA via "240" para um pedido de 4h, AS-009).
+    dto.setTotalHorasSolicitadas(TimeUtils.formatMinutesToHHmm(
+        e.getTotalHora() != null ? e.getTotalHora() : TimeUtils.diffMinutes(hi, hf)));
     dto.setMotivoDispensa(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : e.getTipoDispensa());
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
@@ -208,6 +232,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      dto.setHorasDisponiveis(dispensaHorasService
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository
@@ -280,6 +308,10 @@ public class DispensaReadService {
         totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+      // "Horas disponíveis" da spec = T_DISPENSA menos as horas usadas no mês, ou seja o
+      // horasRestantes do GET dispensa/saldo, sem contar a própria dispensa (QA RG-008).
+      dto.setHorasDisponiveis(dispensaHorasService
+          .getHorasStatus(dto.getColaborador(), dto.getDataInicio(), e.getId()).getHorasRestantes());
     }
 
     var documentos = documentoEntityRepository

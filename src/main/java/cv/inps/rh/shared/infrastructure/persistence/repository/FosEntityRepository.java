@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, JpaSpecificationExecutor<XmlFosEntity> {
@@ -39,8 +40,9 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
               f.numDc
           )
           FROM XmlFosEntity f
-          WHERE (:startDate IS NULL OR f.createdDate >= :startDate)
-            AND (:endDate IS NULL OR f.createdDate <= :endDate)
+          WHERE (:ano IS NULL OR (CAST(f.ano AS Integer) = :ano AND CAST(f.mes AS Integer) = :mes))
+            AND (:startDate IS NULL OR f.createdDate >= :startDate)
+            AND (:endDate IS NULL OR f.createdDate < :endDate)
             AND (
                   f.tpEntrega <> 'PRIME'
                   OR NOT EXISTS (
@@ -51,11 +53,25 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
                         AND f2.tpEntrega = 'SUBST'
                   )
             )
-          ORDER BY f.ano ASC, f.mes ASC
+          ORDER BY CAST(f.ano AS Integer) DESC, CAST(f.mes AS Integer) DESC, f.id DESC
       """)
   Page<FosRowDTO> getFos(
+      @Param("ano") Integer ano,
+      @Param("mes") Integer mes,
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate,
       Pageable pageable
   );
+
+  /**
+   * FOS mais recente de um mês de referência (o MES pode estar gravado com ou sem zero à esquerda).
+   */
+  @Query("""
+          SELECT f
+          FROM XmlFosEntity f
+          WHERE CAST(f.ano AS Integer) = :ano
+            AND CAST(f.mes AS Integer) = :mes
+          ORDER BY f.id DESC
+      """)
+  List<XmlFosEntity> findByMesReferencia(@Param("ano") Integer ano, @Param("mes") Integer mes);
 }

@@ -34,12 +34,20 @@ public class FaltaEntity extends AuditEntity {
     private Long id;
 
 
-    @NotNull(message = "pedidoId is mandatory")
-
-
+    // Sem @NotNull: a falta da licença/baixa médica não tem pedido (liga-se ao abono), e a
+    // coluna PEDIDO_ID aceita null — o @NotNull rebentava o registo da licença (QA AS-010).
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "pedido_id", referencedColumnName = "id")
     private PedidoEntity pedidoId;
+
+
+  /**
+   * Período da licença/baixa médica que originou a falta (RH_T_FALTA.ABONO_BENEF_ID → FK para
+   * RH_T_ABONOS_BENEFICIOS_DET, spec 20/10); null nas outras faltas.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "abono_benef_id", referencedColumnName = "id")
+    private AbonosBeneficiosDetalheEntity abonoBenefId;
 
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })

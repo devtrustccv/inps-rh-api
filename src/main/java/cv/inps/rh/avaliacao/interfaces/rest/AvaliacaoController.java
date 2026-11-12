@@ -420,6 +420,95 @@ public class AvaliacaoController {
   }
 
    @GetMapping(
+   value = "direcoes-com-colaboradores"
+  )
+  @Operation(
+    summary = "Get direcoes com colaboradores",
+    description = "Direções com colaboradores activos (destino dos objectivos comuns de Direção)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DirecaoResumoDTO.class,
+                  type = "array")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<java.util.List<DirecaoResumoDTO>> getDirecoesComColaboradores()
+  {
+
+      final var query = new GetDirecoesComColaboradoresQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "carreiras-com-colaboradores"
+  )
+  @Operation(
+    summary = "Get carreiras com colaboradores",
+    description = "Carreiras/Cargo com colaboradores activos, opcionalmente só os da direção indicada (combo Carreira / Cargo da definição de objectivos)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResumoDTO.class,
+                  type = "array")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<java.util.List<CarreiraResumoDTO>> getCarreirasComColaboradores(
+    @RequestParam(value = "institId", required = false) Long institId)
+  {
+
+      final var query = new GetCarreirasComColaboradoresQuery(institId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "colaboradores/{funUuid}/carreira"
+  )
+  @Operation(
+    summary = "Get carreira do colaborador",
+    description = "Carreira/Cargo atual do colaborador (mesma regra da validação da definição de objectivos individual); id e nome nulos se não houver",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResumoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CarreiraResumoDTO> getCarreiraDoColaborador(
+    @PathVariable(value = "funUuid") java.util.UUID funUuid)
+  {
+
+      final var query = new GetCarreiraDoColaboradorQuery(funUuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "objectivos-comuns/{ano}"
   )
   @Operation(

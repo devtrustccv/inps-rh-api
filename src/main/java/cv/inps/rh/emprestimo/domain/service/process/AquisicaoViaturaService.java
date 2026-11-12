@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.emprestimo.domain.service.EmprestimoNotificacaoService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
@@ -16,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoOutroEntity
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,8 +43,10 @@ public class AquisicaoViaturaService {
   private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoNotificacaoService emprestimoNotificacaoService;
   private final EmprestimoWriteService emprestimoWriteService;
   private final ApplicationAuditorAware auditorAware;
+  private final EmprestimoHelper emprestimoHelper;
 
   public IdDTO saveUpdatePedidoEmprestimo(String emprestimoId, PedidoEmprestimoRequestDTO request) {
 
@@ -65,8 +69,20 @@ public class AquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
-    entity.setNomeFornecedor(request.getNomeFornecedor());
-    entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
+    if (isLoanUpdate) {
+      EmprestimoHelper.validarEtapaAtual(entity, EtapaEmprestimo.PEDIDO);
+    }
+
+    // Nome do fornecedor vem do NIF escolhido no pedido e é obrigatório.
+    if (!StringUtils.hasText(request.getNomeFornecedor())) {
+      throw IgrpResponseStatusException.badRequest("O nome do fornecedor é obrigatório (seleccione o NIF do fornecedor).");
+    }
+    entity.setNomeFornecedor(request.getNomeFornecedor().trim());
+    emprestimoHelper.validarLimitesEmprestimo(currentRelation, request.getValorEmprestimo(), request.getNumeroPrestacoes());
+    entity.setBanco(Objects.nonNull(request.getBancoId()) && request.getBancoId() > 0
+        ? bancoEntityRepository.findById(request.getBancoId())
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("O banco selecionado não existe."))
+        : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());
@@ -77,8 +93,13 @@ public class AquisicaoViaturaService {
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
-    entity.setJuro(request.getJuros());
-    entity.setNib(request.getNib());
+    // A taxa de juro é definida na Análise RH; o ecrã do Pedido não a envia. Sem esta guarda, voltar a
+    // gravar o Pedido (ex.: após retificação) apagava a taxa já introduzida.
+    if (request.getJuros() != null) {
+      entity.setJuro(request.getJuros());
+    }
+    // Só validado se preenchido (21 dígitos), como no resto do sistema — antes era gravado sem validação.
+    entity.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     entity.setNif(request.getNif());
 
     PedidoEntity order;
@@ -93,13 +114,14 @@ public class AquisicaoViaturaService {
       order.setEstado(Estado.A.name());
 
     } else {
-
       order = entity.getPedido();
+    }
 
-      if (request.getAction().equals(ProcessStepAction.NEXT)) {
-        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
-      }
+    // Seguinte submete o pedido também quando é criado já com Seguinte (antes só ao actualizar: o
+    // pedido ficava POR_SUBMETER na etapa PEDIDO e a Análise RH é que forçava a etapa).
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+      order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+      entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
     }
 
     order = pedidoEntityRepository.save(order);
@@ -121,8 +143,13 @@ public class AquisicaoViaturaService {
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_RH_PEDIDO);
+    emprestimoHelper.validarLimitesEmprestimo(loan.getTiprel(), request.getValorEmprestimo(), request.getNumeroPrestacao());
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
+    // EM-009: o valor alterado pelo RH passa a ser também o valor em dívida (Saldo em Dívida da
+    // lista) — antes ficava o do pedido até à Validação Responsável.
+    loan.setValorDivida(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
 
     var order = loan.getPedido();
@@ -135,7 +162,7 @@ public class AquisicaoViaturaService {
       // depende do responsável nem de action=NEXT (Gravar ou Seguinte têm
       // o mesmo efeito aqui).
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-      loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+      loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
     } else if (isNextDecision) {
 
       var responsavelParecer = Optional.ofNullable(request.getResponsavel())
@@ -152,7 +179,7 @@ public class AquisicaoViaturaService {
         }
         case RETIFICACAO -> {
           order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+          loan.setEstado(StatusEmprestimo.PENDENTE_COLABORADOR.name());
         }
       }
     }
@@ -165,31 +192,31 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          Optional.ofNullable(request.getResponsavel())
-              .ifPresent(resp -> {
-                obj.setParecerResponsavel(resp.parecer().name());
-                obj.setObservacaoResponsavel(resp.observacao());
-                obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
-                obj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
-              });
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setPedido(order);
+    newObj.setReferenciaId(loan.getId());
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setDataParecer(request.getData());
+    newObj.setObs(request.getObservacao());
+    Optional.ofNullable(request.getResponsavel())
+        .ifPresent(resp -> {
+          newObj.setParecerResponsavel(resp.parecer().name());
+          newObj.setObservacaoResponsavel(resp.observacao());
+          newObj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+          newObj.setDataObservacaoResponsavel(LocalDateTime.now(ZoneId.systemDefault()));
+          newObj.setDataParecerResponsavel(resp.data());
+        });
+    newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     var fun = order.getFunId();
 
@@ -241,6 +268,8 @@ public class AquisicaoViaturaService {
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO);
+    EmprestimoHelper.exigirObservacao(request.getParecer(), request.getObservacao());
     loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
 
@@ -248,10 +277,10 @@ public class AquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
-        // Conforme avança de facto para a próxima etapa — estava a
-        // definir-se para si própria (bug pré-existente), nunca avançava.
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
@@ -275,26 +304,24 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setCreatedDate(request.getData().atStartOfDay());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newObj.setCreatedDate(request.getData().atStartOfDay());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newObj.setCreatedDate(request.getData().atStartOfDay());
+    pedidoDecisaoEntityRepository.save(newObj);
 
     emprestimoEntityRepository.save(loan);
   }
@@ -302,23 +329,23 @@ public class AquisicaoViaturaService {
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO);
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    // Retificar devolve já à etapa anterior (Gravar ou Seguinte), como na Análise RH; antes só
+    // com Seguinte, e com Gravar o processo ficava parado na etapa com o parecer Retificação.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
         }
-        case DESFAVORAVEL -> {
-          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
-        }
+        // Não Autorizado termina o processo (fica na Autorização, Não Autorizado e só de
+        // consulta) — antes voltava à Análise RH.
+        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
         case RETIFICACAO -> {
-          // Retificação devolve à etapa imediatamente anterior a esta
-          // (Análise Financeira), não à Análise RH.
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
@@ -332,26 +359,30 @@ public class AquisicaoViaturaService {
         EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         Estado.A.name()
     );
-
-    decisionOP.ifPresentOrElse(
+    decisionOP.ifPresent(
         obj -> {
-          obj.setDecisao(request.getParecer().name());
-          obj.setObs(request.getObservacao());
-          obj.setCreatedDate(request.getData().atStartOfDay());
+          obj.setEstado(Estado.I.name());
           pedidoDecisaoEntityRepository.save(obj);
-        },
-        () -> {
-          var newObj = new PedidoDecisaoEntity();
-          newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer().name());
-          newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
-          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
-          newObj.setEstado(Estado.A.name());
-          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newObj.setCreatedDate(request.getData().atStartOfDay());
-          pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    var newObj = new PedidoDecisaoEntity();
+    newObj.setReferenciaId(loan.getId());
+    newObj.setPedido(order);
+    newObj.setDecisao(request.getParecer().name());
+    newObj.setObs(request.getObservacao());
+    newObj.setDataParecer(request.getData());
+    newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
+    newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+    newObj.setEstado(Estado.A.name());
+    newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newObj.setCreatedDate(request.getData().atStartOfDay());
+    pedidoDecisaoEntityRepository.save(newObj);
+
+    // Decisão da Comissão Executiva: notifica quem fez a Validação Responsável na Análise RH.
+    if (request.getAction().equals(ProcessStepAction.NEXT) || request.getParecer() == ParecerProcesso.RETIFICACAO) {
+      emprestimoNotificacaoService.notificarDecisaoAutorizacao(
+          loan, EtapaEmprestimo.ANALISE_RH_PEDIDO, request.getParecer(), request.getObservacao());
+    }
   }
 
   @Transactional
@@ -360,6 +391,7 @@ public class AquisicaoViaturaService {
     var isNext = request.getAction().equals(ProcessStepAction.NEXT);
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    EmprestimoHelper.validarEtapaAtual(loan, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
     if (Objects.nonNull(request.getDataInicioEmprestimo())) {
       loan.setDataInicio(request.getDataInicioEmprestimo());
       emprestimoEntityRepository.save(loan);
@@ -383,5 +415,6 @@ public class AquisicaoViaturaService {
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
+    emprestimoHelper.registarExecucaoEtapa(loan, EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO);
   }
 }

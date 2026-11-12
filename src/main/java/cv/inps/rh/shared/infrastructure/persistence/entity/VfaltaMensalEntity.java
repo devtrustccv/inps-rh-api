@@ -126,4 +126,9 @@ public class VfaltaMensalEntity  {
     private String flgDescSal;
 
 
+  /** Tipos de falta do mês, ex. "Motivo Pessoal (5d)" (script assiduidade_bug_report_AS_2.sql). */
+  @Column(name="motivo")
+    private String motivo;
+
+
 }

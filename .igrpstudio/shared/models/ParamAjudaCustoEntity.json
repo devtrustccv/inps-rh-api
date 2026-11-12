@@ -1,0 +1,94 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "ParamAjudaCustoEntity",
+  "tableName": "RH_T_PARAM_AJUDA_CUSTO",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "carrPccs",
+      "type": "ParamCarreiraEntity",
+      "relation": "ManyToOne",
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "model"
+    },
+    {
+      "name": "valorNacional",
+      "type": "bigdecimal",
+      "length": 15,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "valorEstrangeiro",
+      "type": "bigdecimal",
+      "length": 15,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "dataInicio",
+      "type": "localdate",
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "dataFim",
+      "type": "localdate",
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "length": 1,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "uuid",
+      "type": "string",
+      "length": 100,
+      "nullable": false,
+      "unique": true,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "msvmdl01paramajudacusto",
+  "uniqueConstraints": [],
+  "indexes": []
+}

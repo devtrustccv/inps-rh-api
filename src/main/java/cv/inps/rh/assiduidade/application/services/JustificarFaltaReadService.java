@@ -52,12 +52,14 @@ public class JustificarFaltaReadService {
    */
   private static final String ESTADO_POR_JUSTIFICAR = "Por justificar";
 
-  private static String descreverEstadoFalta(Estado estado) {
+  private static String descreverEstadoFalta(Estado estado, String flgJustificativo) {
     if (estado == null)
       return ESTADO_POR_JUSTIFICAR;
     return switch (estado) {
       case P -> "Pendente";
-      case A -> "Justificada";
+      // Decisão A (21/10/2026): aprovada não é o mesmo que justificada — uma falta aprovada
+      // "Com Justificativo? = NÃO" é injustificada, como nas listas de faltas.
+      case A -> "NAO".equals(flgJustificativo) ? "Injustificada" : "Justificada";
       case I -> "Rejeitada";
       default -> estado.getDescription();
     };
@@ -131,7 +133,9 @@ public class JustificarFaltaReadService {
         .collect(Collectors.toMap(
             f -> f.getSinteseDiarioId().getId(),
             Function.identity(),
-            (a, b) -> a,
+            // Um dia rejeitado e justificado de novo tem duas faltas na mesma síntese: fica a
+            // viva, senão o pedido novo perdia o dia para o rejeitado.
+            (a, b) -> Estado.I.equals(a.getEstado()) ? b : a,
             LinkedHashMap::new));
 
     // Os dias JÁ justificados não vêm soltos: vão agrupados no pedido a que pertencem
@@ -238,7 +242,7 @@ public class JustificarFaltaReadService {
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
       item.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
-      item.setEstadoDesc(descreverEstadoFalta(f.getEstado()));
+      item.setEstadoDesc(descreverEstadoFalta(f.getEstado(), f.getFlgJustificativo()));
       // Anexos não são por dia: vêm em dto.documentos, do pedido (ver anexosDoPedido).
       return item;
     }).toList();
@@ -264,6 +268,8 @@ public class JustificarFaltaReadService {
       var primeira = faltas.getFirst();
       dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
       dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
+      var respFun = primeira.getResponsavelId() != null ? primeira.getResponsavelId().getFunId() : null;
+      dto.setResponsavelNome(respFun != null ? respFun.getNome() : null);
       dto.setObsResponsavel(primeira.getObsResponsavel());
       dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
       dto.setMotivo(primeira.getDescricaoMotivo());
