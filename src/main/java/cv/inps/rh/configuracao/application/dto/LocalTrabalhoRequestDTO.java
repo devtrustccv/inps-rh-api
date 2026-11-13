@@ -27,8 +27,7 @@ public class LocalTrabalhoRequestDTO  {
 
 
   private String ilha ;
-  @NotBlank(message = "The field <ups> is required")
-
+  // UPS opcional (pedido do utilizador, 12/11/2026) — RH_T_PARAM_LOCAL_TRAB.UPS_ID aceita null.
   private String ups ;
 
 
