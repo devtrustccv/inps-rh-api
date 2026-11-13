@@ -104,7 +104,6 @@ public interface ContratoEntityRepository extends
       JOIN FETCH c.tpContratoId tp
       JOIN FETCH c.funId f
       WHERE c.estado = :estado
-        AND c.contratoId IS NULL
         AND c.dataInicio BETWEEN :dataInicioMin AND :dataInicioMax
       """)
   List<ContratoEntity> findParaConversao(
