@@ -61,6 +61,7 @@ public class AlterarSituacaoLaboralWriteService {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final AusenciaEntityRepository ausenciaEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final ValidacaoDetalheEntityRepository validacaoDetalheEntityRepository;
 
   @Transactional
   public SuccessResponseDTO execute(AlterarSituacaoLaboralCommand command) {
@@ -124,7 +125,10 @@ public class AlterarSituacaoLaboralWriteService {
     }
 
     var situacaoAtual = tiprelAtual.getSituacLaboralId();
-    if (!mudouSituacaoOuMotivo(situacaoAtual, dto)) {
+    // DC-016: uma situação rejeitada (I) não é a "atual" para efeitos de comparação — um novo pedido
+    // igual ao rejeitado tem de voltar a ir a validação, nunca responder "sem alterações".
+    boolean situacaoRejeitada = situacaoAtual != null && situacaoAtual.getEstado() == Estado.I;
+    if (!situacaoRejeitada && !mudouSituacaoOuMotivo(situacaoAtual, dto)) {
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral sem alterações.", List.of());
     }
 
@@ -172,19 +176,29 @@ public class AlterarSituacaoLaboralWriteService {
     // garantirEditavel activo, bloqueava todo o dossie por causa de um simples NAO do checker.
     tiprelAtual.setEstado(estado == Estado.I && !tiprelEraPendente ? Estado.A : estado);
 
-    var situacao = tiprelAtual.getSituacLaboralId();
-    situacao.setEstado(estado);
-    situacao.setMotivoSitLabId(motivo);
-    situacao.setSituacaoLaboralId(param);
-    situacao.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-    situacaoLaboralEntityRepository.save(situacao);
-
-    funcionario.getValidacoes().stream()
+    var validacaoPendente = funcionario.getValidacoes().stream()
         .filter(v -> v.getEstado() == Estado.P)
         .filter(v -> Referencia.ESTADO_COLABORADOR.name().equals(v.getReferenciaName())
             && TipoAcao.UPDATE.name().equals(v.getTipoAccao()))
         .findFirst()
-        .ifPresent(v -> v.setEstado(estado));
+        .orElse(null);
+
+    var situacao = tiprelAtual.getSituacLaboralId();
+    if (estado == Estado.I && !tiprelEraPendente && validacaoPendente != null
+        && reporSituacaoAnterior(situacao, validacaoPendente)) {
+      // DC-016: ramo "não processado" — o registo editou IN PLACE a situação em vigor. Rejeitar tem de
+      // a repor como estava (valores "antes" congelados no detalhe da validação) e mantê-la activa;
+      // antes ficava com a situação pedida (estado I) e o pedido seguinte dava "sem alterações".
+      situacao.setEstado(Estado.A);
+    } else {
+      situacao.setEstado(estado);
+      situacao.setMotivoSitLabId(motivo);
+      situacao.setSituacaoLaboralId(param);
+      situacao.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    }
+    situacaoLaboralEntityRepository.save(situacao);
+
+    if (validacaoPendente != null) validacaoPendente.setEstado(estado);
 
     // O ciclo de validação fechou (aprovado OU rejeitado): o registo do colaborador volta a estar
     // validado. Rejeitar a ALTERAÇÃO não invalida o REGISTO — por isso 'A' nos dois ramos, e nunca 'I'.
@@ -479,6 +493,36 @@ public class AlterarSituacaoLaboralWriteService {
   private boolean ativaContrato(ParamSituacaoEntity param) {
     return param != null && ESTADO_CONTRATO_ATIVO.equalsIgnoreCase(param.getFlgEstadoContrato())
         && !Integer.valueOf(1).equals(param.getFlgAusencia());
+  }
+
+  /**
+   * Repõe na situação (editada in place pelo registo) os valores "antes" congelados em
+   * RH_T_VALIDACAO_DETALHE. Só há linhas para os campos alterados; os restantes já estão iguais.
+   */
+  private boolean reporSituacaoAnterior(SituacaoLaboralEntity situacao, ValidacaoEntity validacao) {
+    if (situacao == null || validacao == null || validacao.getUuid() == null) return false;
+    var detalhes = validacaoDetalheEntityRepository.findByValidacaoId_UuidIn(List.of(validacao.getUuid()));
+    // Sem "antes" congelado (validações anteriores ao detalhe) não há como repor: mantém-se o
+    // comportamento antigo (situação pedida fica I) — nunca activar a situação rejeitada.
+    if (detalhes.isEmpty()) return false;
+    for (var d : detalhes) {
+      if (d.getCampo() == null) continue;
+      switch (d.getCampo()) {
+        case "situacaoLaboralId" -> situacao.setSituacaoLaboralId(d.getValorAnteriorId() == null ? null
+            : paramSitLaboralEntityRepository.getReferenceById(d.getValorAnteriorId()));
+        case "motivoSitLabId" -> situacao.setMotivoSitLabId(d.getValorAnteriorId() == null ? null
+            : paramSituacaoDetalheEntityRepository.getReferenceById(d.getValorAnteriorId()));
+        case "dataInicio" -> {
+          var data = DateFormatter.stringToLocalDate(ValidationUtil.trimToNull(d.getValorAnterior()));
+          if (data != null) situacao.setDataInicio(data);
+        }
+        case "dataFim" -> situacao.setDataFim(
+            DateFormatter.stringToLocalDate(ValidationUtil.trimToNull(d.getValorAnterior())));
+        case "obs" -> situacao.setObs(ValidationUtil.trimToNull(d.getValorAnterior()));
+        default -> { }
+      }
+    }
+    return true;
   }
 
   private boolean mudouSituacaoOuMotivo(SituacaoLaboralEntity situacaoAtual, AlterarSituacaoLaboralRequest dto) {
