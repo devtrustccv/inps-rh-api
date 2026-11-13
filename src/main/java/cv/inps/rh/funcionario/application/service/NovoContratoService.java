@@ -142,12 +142,9 @@ public class NovoContratoService {
     // Contrato NÃO-primeiro: TIPO_SITUACAO = NOVO_CONTRATO (o 1º usa INICIO, em primeiroContrato()).
     contratoNovo.setTipoSituacao(TIPO_NOVO_CONTRATO);
     // Regra (analista): a VERSAO do CONTRATO_VINCULO e SEMPRE 1 num novo contrato.
-    // A renovacao NAO incrementa aqui — o incremento de versao vive no HISTORICO
-    // (RH_T_CONTRATO_HISTORICO). Como versao=1, a constraint CK_CONTRATO_VERSAO_CONTRATO
-    // (VERSAO=1 AND CONTRATO_ID IS NULL) exige CONTRATO_ID nulo: o novo contrato inicia
-    // uma nova cadeia, sem contrato pai. A ligacao ao vinculo anterior fica no tiprel.
+    // A renovacao NAO incrementa aqui — o incremento de versao (e a cadeia de contratos) vive no
+    // HISTORICO (RH_T_CONTRATO_HISTORICO). A ligacao ao vinculo anterior fica no tiprel.
     contratoNovo.setVersao(1);
-    contratoNovo.setContratoId(null);
     funcionario.getContratos().add(contratoNovo);
 
     //**************** INI verifica se mudou carreira e tambem se foi escolhido carreira***********/
@@ -372,7 +369,6 @@ public class NovoContratoService {
     funcionario.getContratos().add(contrato);
     contrato.setTipoSituacao(tipoSituacao);
     contrato.setVersao(1);
-    contrato.setContratoId(null);
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {

@@ -36,9 +36,7 @@ public class ReconciliacaoMovimentoVinculoService {
   private final cv.inps.rh.funcionario.application.rules.MovimentoBloqueioRules movimentoBloqueioRules;
 
   /**
-   * @param contrato contrato a validar; o vinculo NOVO vem de {@code contrato.getVinculoId()} e o
-   *                 vinculo ANTERIOR (para inactivar PAG obsoletos) de {@code contrato.getContratoId()}
-   *                 (contrato-pai; null no primeiro contrato).
+   * @param contrato contrato a validar; o vinculo vem de {@code contrato.getVinculoId()}.
    */
   public void reconciliar(FuncionarioEntity funcionario, ContratoEntity contrato,
                           BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim) {
@@ -53,14 +51,12 @@ public class ReconciliacaoMovimentoVinculoService {
       return;
     }
     var vinculoNovoId = contrato.getVinculoId().getId();
-    Long vinculoAntigoId = (contrato.getContratoId() != null && contrato.getContratoId().getVinculoId() != null)
-        ? contrato.getContratoId().getVinculoId().getId() : null;
 
-    reconciliarRemuneracao(funcionario, vinculoNovoId, vinculoAntigoId, salario, moeda, dataInicio, dataFim, obs);
-    reconciliarPagamentos(funcionario, vinculoNovoId, vinculoAntigoId, dataInicio, dataFim, obs);
+    reconciliarRemuneracao(funcionario, vinculoNovoId, salario, moeda, dataInicio, dataFim, obs);
+    reconciliarPagamentos(funcionario, vinculoNovoId, dataInicio, dataFim, obs);
   }
 
-  private void reconciliarRemuneracao(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
+  private void reconciliarRemuneracao(FuncionarioEntity funcionario, Long vinculoNovoId,
                                       BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim,
                                       String obs) {
     var remMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "REM", Estado.A);
@@ -70,20 +66,6 @@ public class ReconciliacaoMovimentoVinculoService {
     var remTm = remMovs.getFirst().getTmId();
     if (funcionario.getDefinicoesRenumeracoes() == null) {
       funcionario.setDefinicoesRenumeracoes(new ArrayList<>());
-    }
-    // mudanca de vinculo: se a REM-base do vinculo ANTIGO usa um tm diferente, inactiva-la
-    // (senao ficariam dois salarios-base activos)
-    if (vinculoAntigoId != null && !Objects.equals(vinculoAntigoId, vinculoNovoId)) {
-      var antigoRemMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoAntigoId, "REM", Estado.A);
-      if (!CollectionUtils.isEmpty(antigoRemMovs) && antigoRemMovs.getFirst().getTmId() != null) {
-        Long antigoRemTmId = antigoRemMovs.getFirst().getTmId().getId();
-        if (!Objects.equals(antigoRemTmId, remTm.getId())) {
-          funcionario.getDefinicoesRenumeracoes().stream()
-              .filter(r -> ativoOuPendente(r.getEstado()) && r.getTmId() != null
-                  && Objects.equals(antigoRemTmId, r.getTmId().getId()))
-              .forEach(r -> r.setEstado(Estado.I));
-        }
-      }
     }
     var existentes = funcionario.getDefinicoesRenumeracoes().stream()
         .filter(r -> ativoOuPendente(r.getEstado()) && r.getTmId() != null
@@ -102,24 +84,15 @@ public class ReconciliacaoMovimentoVinculoService {
     }
   }
 
-  private void reconciliarPagamentos(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
+  private void reconciliarPagamentos(FuncionarioEntity funcionario, Long vinculoNovoId,
                                      LocalDate dataInicio, LocalDate dataFim, String obs) {
     var novosPagMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "PAG", Estado.A);
     Set<Long> novosPagTms = novosPagMovs.stream()
         .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
 
-    Set<Long> antigosPagTms = vinculoAntigoId == null ? Set.of()
-        : paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoAntigoId, "PAG", Estado.A).stream()
-            .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
-
     if (funcionario.getDefinicoesPagamentos() == null) {
       funcionario.setDefinicoesPagamentos(new ArrayList<>());
     }
-    // inactivar os do vinculo antigo que nao estao no novo
-    funcionario.getDefinicoesPagamentos().stream()
-        .filter(p -> ativoOuPendente(p.getEstado()) && p.getTmId() != null
-            && antigosPagTms.contains(p.getTmId().getId()) && !novosPagTms.contains(p.getTmId().getId()))
-        .forEach(p -> p.setEstado(Estado.I));
     // criar os do novo vinculo que ainda nao existem (activo/pendente)
     Set<Long> existentesPagTms = funcionario.getDefinicoesPagamentos().stream()
         .filter(p -> ativoOuPendente(p.getEstado()) && p.getTmId() != null)
