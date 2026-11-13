@@ -248,6 +248,39 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "eliminarMobilidade",
+      "path": "{idFuncionario}/mobilidades/{mobilidadeId}",
+      "method": "DELETE",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SuccessResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "mobilidadeId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "tunlfcyaeu-getListMobilidades-saveMobilidade-saveMobilidade-validarMobilidade"

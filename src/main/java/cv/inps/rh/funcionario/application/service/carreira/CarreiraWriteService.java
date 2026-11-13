@@ -163,6 +163,11 @@ public class CarreiraWriteService {
     if (emVigor.size() >= 2)
       throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
 
+    // DC-011: a carreira do mesmo tipo em vigor é encerrada em (início da nova - 1) na validação.
+    boolean novoCargoNuloRegisto = dto.getCargoPosicaoId() == null;
+    garantirInicioPosterior(dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now(),
+        emVigor.stream().filter(c -> (c.getCargoId() == null) == novoCargoNuloRegisto).findFirst().orElse(null));
+
     criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, null);
 
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Carreira registada.", List.of());
@@ -414,6 +419,19 @@ public class CarreiraWriteService {
   /** Uma carreira pertence ao mesmo contrato (contr_vinculo) dado. Usado para escopar as "carreiras
    *  em vigor" ao contrato atual — evita que carreiras de contratos anteriores (encerrados, mas com
    *  data_fim ainda futuro) sejam consideradas na progressão/limite. */
+  /**
+   * DC-011: a carreira anterior fecha em (data efetiva da nova - 1). Se a nova começar no mesmo dia ou
+   * antes da anterior, esta ficaria com Data Fim anterior à Data Início — rejeita-se.
+   */
+  private static void garantirInicioPosterior(java.time.LocalDate dataEfetiva, CarreiraEntity anterior) {
+    if (dataEfetiva == null || anterior == null || anterior.getDataInicio() == null) return;
+    if (!dataEfetiva.isAfter(anterior.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest(
+          "A Data de Início da carreira tem de ser posterior a "
+              + cv.inps.rh.shared.util.DateFormatter.localDateToString(anterior.getDataInicio())
+              + " (início da carreira atual, que é encerrada no dia anterior à nova).");
+  }
+
   private boolean mesmoContrato(CarreiraEntity c, ContratoEntity contrato) {
     return c != null && c.getContrVinculoId() != null && contrato != null
         && Objects.equals(c.getContrVinculoId().getId(), contrato.getId());
@@ -527,6 +545,7 @@ public class CarreiraWriteService {
     // a estrutura antiga só se fecha DEPOIS de o proc a ler (mais abaixo) — o proc precisa do tiprel
     // antigo ainda est_act_adm=1 para copiar os subsídios/descontos dele.
     boolean progressao = carreiraMesmoTipo != null && ehProgressaoPromocao(carreira);
+    garantirInicioPosterior(dataEfetiva, carreiraMesmoTipo);
 
     // CARREIRA NOVA do mesmo tipo em vigor (NÃO progressão): substitui o track e o Java é dono do
     // dinheiro. Doc 29/07: SÓ o VENCIMENTO é substituído (novo salário do escalão) → fecha-se; os

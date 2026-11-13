@@ -60,6 +60,34 @@ public class MobilidadeWriteService {
         && processamentoFuncionarioRepository.existsByTiprel_MobId_Id(mobilidade.getId());
   }
 
+  /**
+   * DC-011: ao validar, o vínculo atual e a mobilidade em vigor fecham em (início da nova - 1). Se a
+   * nova começar no mesmo dia (ou antes) do que está em vigor, o registo anterior ficaria com Data Fim
+   * anterior à Data Início. Exige-se por isso que a nova comece DEPOIS do início do vínculo atual e
+   * da mobilidade em vigor. {@code propria} = a mobilidade que está a ser registada/validada (ignorada
+   * na comparação, para registos antigos em que o tiprel atual já aponta para ela).
+   */
+  private void garantirInicioPosteriorAoAtual(java.time.LocalDate dataInicio,
+      cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tiprelAtual,
+      MobilidadeEntity propria) {
+    if (dataInicio == null || tiprelAtual == null) return;
+    java.time.LocalDate limite = tiprelAtual.getDataInicio();
+    var mobAtual = tiprelAtual.getMobId();
+    boolean mobAtualEhPropria = mobAtual != null && propria != null
+        && java.util.Objects.equals(mobAtual.getId(), propria.getId());
+    if (mobAtualEhPropria) return;
+    if (mobAtual != null && mobAtual.getDataInicio() != null
+        && (limite == null || mobAtual.getDataInicio().isAfter(limite))) {
+      limite = mobAtual.getDataInicio();
+    }
+    if (limite != null && !dataInicio.isAfter(limite)) {
+      throw IgrpResponseStatusException.badRequest(
+          "A Data de Início da mobilidade tem de ser posterior a "
+              + cv.inps.rh.shared.util.DateFormatter.localDateToString(limite)
+              + " (início da situação atual, que é encerrada no dia anterior à nova mobilidade).");
+    }
+  }
+
   @Transactional
   public SuccessResponseDTO save(SaveMobilidadeCommand command) {
 
@@ -74,6 +102,7 @@ public class MobilidadeWriteService {
     }
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    garantirInicioPosteriorAoAtual(mobilidadeDto.getDataInicio(), tipoRelacionamentoAtual, null);
 
     // A mobilidade em vigor no momento do registo é o "antes" desta. Guardamo-la já aqui, em
     // RH_T_MOBILIDADE.MOB_ID, porque no registo ainda não existe tipo_relacionamento novo — sem isto
@@ -307,6 +336,7 @@ public class MobilidadeWriteService {
         // Consolidação: é AQUI (e só aqui) que o tipo_relacionamento é criado/trocado — a mesma
         // mecânica que antes estava no save(), agora executada apenas quando a mobilidade é aprovada.
         var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+        garantirInicioPosteriorAoAtual(mobilidade.getDataInicio(), tipoRelacionamentoAtual, mobilidade);
         var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
         // Backfill para registos gravados antes de MOB_ID existir: o "antes" é a mobilidade do
@@ -388,6 +418,36 @@ public class MobilidadeWriteService {
    * uso diz "registo e alteração passa por validação", mas pressupõe que houve alteração; não prevê
    * o gravar-sem-mudar, que de outro modo enviaria ao checker um pedido vazio.
    */
+  /**
+   * DC-008 (spec DOSSIÊ, Mobilidade: "Eliminar — somente deixa cancelar caso o registo ainda não foi
+   * validado (ESTADO = 'P')"). Só um REGISTO novo pendente (validação INSERT em P) pode ser eliminado:
+   * o registo não cria tiprel (só a mobilidade P + a validação), por isso basta passar ambos a E.
+   * Uma EDIÇÃO pendente (validação UPDATE) não se elimina — a mobilidade já estava em vigor.
+   */
+  @Transactional
+  public SuccessResponseDTO eliminar(String idFuncionario, String mobilidadeId) {
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(idFuncionario).valor());
+    var mobilidade = mobilidadeEntityRepository.findByUuid(IdentificadorUnico.from(mobilidadeId).valor())
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
+
+    if (mobilidade.getFunId() == null || !mobilidade.getFunId().getId().equals(funcionario.getId()))
+      throw IgrpResponseStatusException.badRequest("Mobilidade não pertence a este funcionário.");
+    if (mobilidade.getEstado() != Estado.P)
+      throw IgrpResponseStatusException.badRequest("Só é possível eliminar uma mobilidade pendente (ainda não validada).");
+
+    var validacao = funcionarioRules
+        .getValidacaoPendenteByReferenciaUuid(mobilidade.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Só é possível eliminar o registo de uma mobilidade nova ainda não validada."));
+
+    mobilidade.setEstado(Estado.E);
+    validacao.setEstado(Estado.E);
+    mobilidadeEntityRepository.save(mobilidade);
+    validacaoEntityRepository.save(validacao);
+
+    return new SuccessResponseDTO(true, mobilidade.getUuid().toString(), "Mobilidade eliminada.", java.util.List.of());
+  }
+
   @Transactional
   public SuccessResponseDTO editar(EditarMobilidadeCommand command) {
 
@@ -433,6 +493,11 @@ public class MobilidadeWriteService {
     aplicarCamposMobilidade(mobilidade, mobilidadeDto,
         tiposSelecionadosParaEdicao(mobilidadeDto.getTipoMobilidade()), mobilidade);
     aplicarTipoEDatas(mobilidade, mobilidadeDto);
+    // Registo ainda não validado (P/C): a nova data de início também tem de ser posterior à atual.
+    if (mobilidade.getEstado() == Estado.P || mobilidade.getEstado() == Estado.C) {
+      garantirInicioPosteriorAoAtual(mobilidade.getDataInicio(),
+          funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid()), mobilidade);
+    }
 
     var mobUuid = mobilidade.getUuid();
     // Houve movimento? Só direção/unidade/local contam. Alterar apenas datas (ou o tipo) não é um
