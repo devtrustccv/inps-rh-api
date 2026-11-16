@@ -229,9 +229,13 @@ public class ValidarContratoService {
       if (estado == Estado.A) {
         // Só agora o novo contrato passa a ÚLTIMO VÍNCULO (EST_ACT_ADM=1) e o anterior deixa de o ser.
         var ultimoAnterior = funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
-        if (ultimoAnterior != null && !java.util.Objects.equals(ultimoAnterior.getId(), tiposRelacionamento.getId()))
+        if (ultimoAnterior != null && !java.util.Objects.equals(ultimoAnterior.getId(), tiposRelacionamento.getId())) {
           ultimoAnterior.setEstActAdm(0);
+          // A carreira do vínculo anterior também deixa de ser a atual (senão fica I com EST_ACT_ADM=1).
+          if (ultimoAnterior.getCarreiraId() != null) ultimoAnterior.getCarreiraId().setEstActAdm(0);
+        }
         tiposRelacionamento.setEstActAdm(1);
+        if (tiposRelacionamento.getCarreiraId() != null) tiposRelacionamento.getCarreiraId().setEstActAdm(1);
         // Os def do contrato ANTERIOR já foram encerrados (DATA_FIM, mantendo 'A') e retirados da
         // coleção de trabalho acima (encerrarEExcluirDefsContratoAnterior). Por isso o reconciliar
         // cria fixos FRESCOS para o novo contrato (não vê os antigos) e o associarNovos só associa os

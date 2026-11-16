@@ -22,6 +22,7 @@ public interface RhVMobilidadeEntityRepository extends
       SELECT * FROM RH_V_MOBILIDADE
       WHERE FUN_UUID = :funUuid
         AND ESTADO IN (:estados)
+        AND NOT EXISTS (SELECT 1 FROM RH_T_MOBILIDADE M WHERE M.ID = MOB_ID AND M.ESTADO = 'E')
         AND (:tipoSituacao IS NULL OR TIPO_SITUACAO = :tipoSituacao)
         AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
         AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)
@@ -30,6 +31,7 @@ public interface RhVMobilidadeEntityRepository extends
       SELECT COUNT(*) FROM RH_V_MOBILIDADE
       WHERE FUN_UUID = :funUuid
         AND ESTADO IN (:estados)
+        AND NOT EXISTS (SELECT 1 FROM RH_T_MOBILIDADE M WHERE M.ID = MOB_ID AND M.ESTADO = 'E')
         AND (:tipoSituacao IS NULL OR TIPO_SITUACAO = :tipoSituacao)
         AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
         AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)

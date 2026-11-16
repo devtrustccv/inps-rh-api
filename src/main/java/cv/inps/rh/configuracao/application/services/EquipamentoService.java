@@ -3,6 +3,7 @@ package cv.inps.rh.configuracao.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.EquipamentoListRequestDTO;
 import cv.inps.rh.configuracao.application.dto.EquipamentoRequestDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EquipamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EquipamentoEntityRepository;
@@ -28,6 +29,9 @@ public class EquipamentoService {
   public void save(String localId, EquipamentoListRequestDTO dto) {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
+    // Os equipamentos ficam associados à UPS do local; com a UPS opcional, um local sem UPS não os aceita.
+    if (local.getUpsId() == null)
+      throw IgrpResponseStatusException.badRequest("O local de trabalho não tem UPS: indique a UPS antes de associar equipamentos.");
 
     var data = new ArrayList<EquipamentoEntity>();
 
@@ -59,9 +63,11 @@ public class EquipamentoService {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
 
-    var data = equipamentoEntityRepository.findAllByIdUps_idAndEstado(local.getUpsId().getId(), Estado.A);
-
     var response = new ArrayList<EquipamentoRequestDTO>();
+    // Local sem UPS (opcional) → sem equipamentos.
+    var data = local.getUpsId() == null
+        ? java.util.List.<EquipamentoEntity>of()
+        : equipamentoEntityRepository.findAllByIdUps_idAndEstado(local.getUpsId().getId(), Estado.A);
 
     for (var obj : data) {
       var equipment = new EquipamentoRequestDTO();

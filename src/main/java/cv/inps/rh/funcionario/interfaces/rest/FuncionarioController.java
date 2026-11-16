@@ -194,10 +194,11 @@ public class FuncionarioController {
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "local", required = false) Long local,
     @RequestParam(value = "cargo", required = false) Long cargo,
-    @RequestParam(value = "carreira", required = false) Long carreira)
+    @RequestParam(value = "carreira", required = false) Long carreira,
+    @RequestParam(value = "numColaborador", required = false) Long numColaborador)
   {
 
-      final var query = new GetListFuncionariosQuery(pageNumber, pageSize, nome, direccao, seccao, tipoVinculoLaboral, dataInicio, dataFim, estado, local, cargo, carreira);
+      final var query = new GetListFuncionariosQuery(pageNumber, pageSize, nome, direccao, seccao, tipoVinculoLaboral, dataInicio, dataFim, estado, local, cargo, carreira, numColaborador);
 
       return queryBus.handle(query);
 

@@ -7,6 +7,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.EditarMobilidadeCommand;
+import cv.inps.rh.funcionario.application.commands.EliminarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
@@ -223,6 +224,37 @@ public class MobilidadeController {
   {
 
       final var command = new ValidarMobilidadeCommand(validarMobilidadeRequest, idFuncionario, mobilidadeId);
+
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @DeleteMapping(
+   value = "{idFuncionario}/mobilidades/{mobilidadeId}"
+  )
+  @Operation(
+    summary = "Eliminar mobilidade",
+    description = "Eliminar (cancelar) uma mobilidade pendente de validação",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<SuccessResponseDTO> eliminarMobilidade(
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
+  {
+
+      final var command = new EliminarMobilidadeCommand(idFuncionario, mobilidadeId);
 
        ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 

@@ -29,7 +29,7 @@ public class ParamLocalTrabMapper {
         entity.getNome(),
         geografiaMapper.toDomain(entity.getPaisId()),
         geografiaMapper.toDomain(entity.getIlhaId()),
-        entity.getUpsId().getId(),
+        entity.getUpsId() != null ? entity.getUpsId().getId() : null,
         entity.getEstado()
     );
   }
