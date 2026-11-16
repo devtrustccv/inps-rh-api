@@ -62,6 +62,10 @@ public class FuncionarioReadService {
       if (query.getCarreira() != null)
         predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
 
+      // DC-022: filtro "Nº Colaborador" (RH_V_DOSSIE.ID_COLABORADOR).
+      if (query.getNumColaborador() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.idColaborador), query.getNumColaborador()));
+
       // Por defeito lista activos, pendentes, em correção e inactivos (A, P, C, I) — o maker precisa
       // de ver os registos devolvidos para correção (C) sem ter de filtrar explicitamente.
       // Se for enviado um estado específico, filtra por esse.

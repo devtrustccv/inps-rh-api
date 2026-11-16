@@ -421,8 +421,11 @@ public class ValidarRegistoColaboradorService {
         mob.setEstado(estado);
 
       var carreira = tr.getCarreiraId();
-      if (carreira != null)
+      if (carreira != null) {
         carreira.setEstado(estado);
+        // A carreira do registo é a atual quando o registo é aprovado (como o PKG_IMPORTAR_DADOS: atual=1).
+        carreira.setEstActAdm(estado == Estado.A ? 1 : 0);
+      }
 
       var regime = tr.getRegimeId();
       if (regime != null)

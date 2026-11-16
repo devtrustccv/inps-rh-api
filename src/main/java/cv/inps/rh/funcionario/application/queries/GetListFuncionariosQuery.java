@@ -37,5 +37,7 @@ public class GetListFuncionariosQuery implements Query {
   private Long cargo;
   @NotNull(message = "The field <carreira> is required")
   private Long carreira;
+  @NotNull(message = "The field <numColaborador> is required")
+  private Long numColaborador;
 
 }
