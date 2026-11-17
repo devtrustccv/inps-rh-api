@@ -65,7 +65,8 @@ public class DocumentoPessoalEntity extends AuditEntity {
 
 
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
+    // N por funcionário: histórico do documento (ver FuncionarioEntity.documentosPessoais).
+    @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
 }

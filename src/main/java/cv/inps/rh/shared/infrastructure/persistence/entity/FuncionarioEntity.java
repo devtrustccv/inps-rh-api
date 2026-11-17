@@ -15,7 +15,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -188,8 +190,43 @@ private List<OrdemServicoEntity> ordemServicos = new ArrayList<>();
   @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   private EnderecoEntity endereco;
 
-  @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  private DocumentoPessoalEntity documentoPessoal;
+  /**
+   * Histórico do documento de identificação. Mudar o tipo ou o número inativa (I) o atual e cria/reativa
+   * outro (A); as restantes alterações atualizam a linha atual. O atual também está em
+   * {@link #tipoDocumentoId}/{@link #numDocumento}. EAGER + SELECT como o antigo @OneToOne inverso
+   * (sempre carregado, sem join).
+   */
+  @OneToMany(mappedBy = "funId", fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SELECT)
+  private List<DocumentoPessoalEntity> documentosPessoais = new ArrayList<>();
+
+  /**
+   * Documento ATUAL: o não eliminado que coincide com o tipo/número do funcionário (o mais recente);
+   * senão o mais recente não inativo; senão o mais recente. Tolera mais de uma linha por funcionário
+   * (o import cria BI + passaporte).
+   */
+  public DocumentoPessoalEntity getDocumentoPessoal() {
+    if (documentosPessoais == null || documentosPessoais.isEmpty()) return null;
+    Long tipo = tipoDocumentoId != null ? tipoDocumentoId.getId() : null;
+    Comparator<DocumentoPessoalEntity> porId =
+        Comparator.comparing(DocumentoPessoalEntity::getId, Comparator.nullsLast(Comparator.naturalOrder()));
+    var vivos = documentosPessoais.stream().filter(d -> d != null && d.getEstado() != Estado.E).toList();
+    return vivos.stream()
+        .filter(d -> Objects.equals(d.getNumDocumento(), numDocumento)
+            && d.getTipoDocumentoId() != null && Objects.equals(d.getTipoDocumentoId().getId(), tipo))
+        .max(porId)
+        .or(() -> vivos.stream().filter(d -> d.getEstado() != Estado.I).max(porId))
+        .or(() -> vivos.stream().max(porId))
+        .orElse(null);
+  }
+
+  /** Junta o documento ao histórico (se ainda não estiver) e liga-o a este funcionário. */
+  public void setDocumentoPessoal(DocumentoPessoalEntity documento) {
+    if (documento == null) return;
+    documento.setFunId(this);
+    if (documentosPessoais == null) documentosPessoais = new ArrayList<>();
+    if (documentosPessoais.stream().noneMatch(d -> d == documento)) documentosPessoais.add(documento);
+  }
 
 
 }

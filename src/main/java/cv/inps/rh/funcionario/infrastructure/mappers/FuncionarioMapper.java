@@ -190,6 +190,8 @@ public class FuncionarioMapper {
     if (funParam == null) return null;
 
     var tipoDocumento = ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
+    // Documento atual ANTES de mudar o tipo/número do funcionário (é por eles que se escolhe o atual).
+    var docAtual = funParam.getDocumentoPessoal();
 
     funParam.setIdColaborador(dadosPessoais.getIdColaborador());
     funParam.setNumDocumento(ValidationUtil.trimToNull(dadosPessoais.getNumDocumento()));
@@ -212,17 +214,43 @@ public class FuncionarioMapper {
     funParam.setNif(dadosPessoais.getNif());
     funParam.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
 
-    DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
+    var novoTipoId = dadosPessoais.getTipoDocumentoId();
+    var novoNum = dadosPessoais.getNumDocumento();
+    boolean mudouDocumento = docAtual == null || !mesmoDocumento(docAtual, novoTipoId, novoNum);
+
+    DocumentoPessoalEntity docPessoal;
     // Emissão/validade/local only come from the document search: keep the stored
     // values when the same document is resubmitted without them, reset when the
     // document itself changed.
-    boolean mesmoDocumento = docPessoal.getId() != null
-        && Objects.equals(docPessoal.getNumDocumento(), dadosPessoais.getNumDocumento())
-        && docPessoal.getTipoDocumentoId() != null
-        && Objects.equals(docPessoal.getTipoDocumentoId().getId(), dadosPessoais.getTipoDocumentoId());
+    boolean mesmoDocumento;
+    if (docAtual != null && docAtual.getEstado() == Estado.A && mudouDocumento) {
+      // Histórico: mudou o tipo ou o número de um documento em vigor -> o atual passa a I e o novo
+      // fica A. Se o funcionário volta a um documento que já teve, reativa essa linha em vez de
+      // duplicar (mantém tipo+número únicos por funcionário; a RH_V_SOAT lê por eles).
+      docAtual.setEstado(Estado.I);
+      docPessoal = funParam.getDocumentosPessoais().stream()
+          .filter(d -> d != docAtual && d.getEstado() == Estado.I && mesmoDocumento(d, novoTipoId, novoNum))
+          .max(java.util.Comparator.comparing(DocumentoPessoalEntity::getId,
+              java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
+          .orElse(null);
+      mesmoDocumento = docPessoal != null;
+      if (docPessoal == null) {
+        docPessoal = new DocumentoPessoalEntity();
+        docPessoal.setUuid(IdentificadorUnico.create().valor());
+      }
+      docPessoal.setEstado(Estado.A);
+    } else {
+      // Mesmo documento, ou registo ainda por validar (P/C): atualiza a linha atual, sem histórico.
+      docPessoal = docAtual != null ? docAtual : new DocumentoPessoalEntity();
+      mesmoDocumento = docAtual != null && docAtual.getId() != null && !mudouDocumento;
+      if (docAtual == null) {
+        docPessoal.setUuid(IdentificadorUnico.create().valor());
+        docPessoal.setEstado(Estado.P);
+      }
+    }
     docPessoal.setFunId(funParam);
     docPessoal.setTipoDocumentoId(tipoDocumento);
-    docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    docPessoal.setNumDocumento(novoNum);
     if (!mesmoDocumento || dadosPessoais.getDataEmissaoDocumento() != null) {
       docPessoal.setDataEmissao(dadosPessoais.getDataEmissaoDocumento());
     }
@@ -232,8 +260,6 @@ public class FuncionarioMapper {
     if (!mesmoDocumento || dadosPessoais.getLocalEmissaoDocumentoId() != null) {
       docPessoal.setLocEmissId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getLocalEmissaoDocumentoId()));
     }
-    docPessoal.setUuid(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().valor());
-    docPessoal.setEstado(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getEstado() : Estado.P);
     funParam.setDocumentoPessoal(docPessoal);
 
 
@@ -258,5 +284,11 @@ public class FuncionarioMapper {
     fun.setNacionId(geo);
     fun.setNacionalidade(geo == null ? null
         : ValidationUtil.trimToNull(geo.getNacionalidade()) != null ? geo.getNacionalidade().trim() : geo.getNome());
+  }
+
+  /** Mesmo documento = mesmo tipo e mesmo número. */
+  private static boolean mesmoDocumento(DocumentoPessoalEntity d, Long tipoId, String num) {
+    return d != null && Objects.equals(d.getNumDocumento(), num)
+        && d.getTipoDocumentoId() != null && Objects.equals(d.getTipoDocumentoId().getId(), tipoId);
   }
 }
