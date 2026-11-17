@@ -93,7 +93,7 @@ public class NovoContratoService {
     // Só o ESTADO conta (questão das datas fica em aberto): bloqueia se existir um contrato Ativo.
     if (contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A)) {
       throw IgrpResponseStatusException.badRequest(
-          "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
+          "O funcionário já possui um contrato ativo. Desative o contrato atual (ou use a Renovação de Contrato, num contrato a termo) antes de registar um novo.");
     }
 
     // Conversão via "Processar" (JOB Alerta): quando o Novo Contrato é aberto a partir de um alerta de
