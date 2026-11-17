@@ -174,7 +174,9 @@ public class CarreiraReadService {
     var car = tr.getCarreiraId();
     var contrato = tr.getContrVinculoId();
     var fun = tr.getFunId();
-    var vinc = contrato.getVinculoId();
+    // Dados importados podem ter relações/colunas a NULL: tudo null-safe (antes dava 500 e o
+    // formulário de editar/progressão abria vazio no primeiro registo — carreira importada).
+    var vinc = contrato != null ? contrato.getVinculoId() : null;
     var carrPcc = car != null ? car.getCarrPccsId() : null;
     var esc = car != null ? car.getEscalaoId() : null;
     // Ponto 20: a categoria vem de car.getCategoriaId() (antes usava o escalão -> categoriaId==escalaoId).
@@ -185,17 +187,19 @@ public class CarreiraReadService {
     dto.setMoeda(tr.getMoeda());
     dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
     dto.setTipoCarreira(car!=null ? car.getTipoSituacao() : null);
-    dto.setTipoContratoId(contrato.getTpContratoId().getId());
+    dto.setTipoContratoId(contrato != null && contrato.getTpContratoId() != null ? contrato.getTpContratoId().getId() : null);
     dto.setCargoId(cargo != null ? cargo.getId() : null);
     dto.setCargoDesc(cargo != null ? cargo.getNome() : null);
     dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
     dto.setCarreiraDesc(carrPcc != null ? carrPcc.getNome() : null);
     dto.setEscalaoId(esc != null ? esc.getId() : null);
     dto.setEscalaoDesc(esc != null ? (esc.getNivelReferencia() != null ? esc.getNivelReferencia() : "") + esc.getEscalao() : null);
-    dto.setSalario(car!=null ? car.getSalario().toString() : null);
+    dto.setSalario(car != null && car.getSalario() != null ? car.getSalario().toString() : null);
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
     dto.setTipoVinculoLaboralId(vinc != null ? vinc.getId() : null);
-    dto.setSituacaoLaboralId(tr.getSituacLaboralId().getSituacaoLaboralId().getId());
+    var situac = tr.getSituacLaboralId();
+    dto.setSituacaoLaboralId(situac != null && situac.getSituacaoLaboralId() != null
+        ? situac.getSituacaoLaboralId().getId() : null);
 
     // Datas da PRÓPRIA carreira (como a lista via RH_V_CARREIRA), não do tiprel: o tiprel ativo tem
     // DATA_FIM = null (só é preenchida quando a relação laboral é encerrada/substituída), o que fazia
@@ -203,14 +207,14 @@ public class CarreiraReadService {
     // tiprel se a carreira não existir (defensivo).
     dto.setDataInicio(DateFormatter.localDateToString(car != null ? car.getDataInicio() : tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(car != null ? car.getDataFim() : tr.getDataFim()));
-    dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
+    dto.setProcessaSalarioNestaCarreira(Integer.valueOf(1).equals(tr.getFlgProcessa()) ? "SIM" : "NAO");
     dto.setFlgProcessa(tr.getFlgProcessa());
     // PROCESSAMENTO (vista RH_V_CARREIRA): true se a carreira ja foi processada em folha
     dto.setProcessamento(car != null && processamentoFuncionarioRepository.existsByTiprel_CarreiraId_Id(car.getId()));
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
     dto.setCategoriaDesc(categoria != null ? categoria.getNome() : null);
 
-    if (car != null) {
+    if (car != null && car.getEstado() != null) {
       dto.setEstado(car.getEstado().getCode());
       dto.setEstadoDesc(car.getEstado().getDescription());
     }
@@ -227,7 +231,7 @@ public class CarreiraReadService {
     var data = funcionarioRules.getPagamentosDescontosAssociados(tr.getId())
         .stream()
         .filter(obj -> obj.getEstado() == estadoAlvo)
-        .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
+        .filter(obj -> obj.getTmId() == null || !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
         .toList();
 
     data.forEach(obj -> {
