@@ -18,6 +18,9 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PageMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -208,12 +211,17 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
         ? Estado.valueOf(filters.get(ParamVinculoEntity_.ESTADO))
         : Estado.A;
 
-    Specification<ParamVinculoEntity> spec = (root, _, cb) -> {
+    Specification<ParamVinculoEntity> spec = (root, query, cb) -> {
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get(ParamVinculoEntity_.estado), status));
       if (StringUtils.hasText(nome)) {
         var normalizedVal = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(nome) + "%";
         predicates.add(cb.like(root.get(ParamVinculoEntity_.nomeNormalizado), normalizedVal));
+      }
+      // Ordena pelo código em ordem natural (1.1, 2.1, 5.1, 6.1, 6.1.1, 6.1.2, 44.1, ...);
+      // não se aplica à query de contagem da paginação.
+      if (query != null && !Long.class.equals(query.getResultType())) {
+        query.orderBy(ordemNaturalCodigo(root.get(ParamVinculoEntity_.codigo), cb));
       }
       return cb.and(predicates.toArray(new Predicate[0]));
     };
@@ -228,6 +236,24 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
         .map(e -> buildResponse(e, domain, salarioDomain))
             .toList());
     return response;
+  }
+
+  /**
+   * Ordem natural de códigos do tipo "6.1.2": compara cada segmento numérico como número
+   * (LPAD com zeros), para que 5.1 venha antes de 44.1 e 6.1 antes de 6.1.1.
+   * Códigos sem parte numérica (ex.: "REQ") ficam no fim, ordenados alfabeticamente.
+   */
+  private static List<Order> ordemNaturalCodigo(Expression<String> codigo, CriteriaBuilder cb) {
+    var orders = new ArrayList<Order>();
+    for (int n = 1; n <= 3; n++) {
+      var segmento = cb.function("REGEXP_SUBSTR", String.class, codigo,
+          cb.literal("[0-9]+"), cb.literal(1), cb.literal(n));
+      var segmentoPad = cb.function("LPAD", String.class, segmento, cb.literal(6), cb.literal("0"));
+      // 1.º segmento em falta (código não numérico) -> fim; restantes em falta -> antes dos filhos
+      orders.add(cb.asc(cb.coalesce(segmentoPad, cb.literal(n == 1 ? "999999" : "000000"))));
+    }
+    orders.add(cb.asc(codigo));
+    return orders;
   }
 
   @Override
