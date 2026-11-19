@@ -91,22 +91,29 @@ public class ParametrizacaoService {
   }
 
   /**
-   * Entidades do SIGOF. Sem {@code nome} devolve todas (comportamento de sempre). Com {@code nome}:
-   * cada termo tem de aparecer no nome, ignorando maiúsculas e acentos; as que começam pelo primeiro
-   * termo vêm primeiro, depois por ordem alfabética; no máximo {@code limite} resultados.
+   * Entidades do SIGOF, sempre limitadas a {@code limite} resultados (1–200, por omissão 50). Sem
+   * {@code nome}: as primeiras por ordem alfabética (antes devolvia as ~12 000, ~1 MB, ~5 s, e um ecrã
+   * que as pedia por engano bloqueava os combobox). Com {@code nome}: cada termo tem de aparecer no
+   * nome, ignorando maiúsculas e acentos; as que começam pelo primeiro termo vêm primeiro, depois por
+   * ordem alfabética.
    */
   @Transactional(readOnly = true)
   public List<ParametrizacaoDTO> getEntidades(String nome, Integer limite) {
+    var max = limite == null ? LIMITE_PESQUISA_DEFAULT : Math.clamp(limite, 1, LIMITE_PESQUISA_MAX);
     var termos = PesquisaTexto.termos(nome);
     if (termos.isEmpty()) {
-      return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
+      Specification<EntidadeEntity> todas = (root, query, cb) -> {
+        query.orderBy(cb.asc(root.get(EntidadeEntity_.nome)), cb.asc(root.get(EntidadeEntity_.id)));
+        return cb.conjunction();
+      };
+      return entidadeEntityRepository.findBy(todas, q -> q.limit(max).all())
+          .stream().map(entidadeMapper::toParametrizacaoDto).toList();
     }
     if (nome.trim().length() > NOME_PESQUISA_MAX) {
       throw IgrpResponseStatusException.badRequest(
           "O nome a pesquisar não pode ter mais de " + NOME_PESQUISA_MAX + " caracteres.");
     }
 
-    var max = limite == null ? LIMITE_PESQUISA_DEFAULT : Math.clamp(limite, 1, LIMITE_PESQUISA_MAX);
     Specification<EntidadeEntity> spec = (root, query, cb) -> {
       var nomeNormalizado = PesquisaTexto.normalizar(cb, root.get(EntidadeEntity_.nome));
       var comecaPor = cb.like(nomeNormalizado, PesquisaTexto.comecaPor(termos.getFirst()), PesquisaTexto.ESCAPE);
