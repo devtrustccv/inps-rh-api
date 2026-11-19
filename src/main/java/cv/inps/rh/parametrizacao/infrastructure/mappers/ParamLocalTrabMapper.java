@@ -74,10 +74,15 @@ public class ParamLocalTrabMapper {
     var dto = new LocalTrabalhoDTO();
     dto.setLabel(domain.getNome());
     dto.setValue(domain.getId());
-    dto.setPaisId(domain.getPais().id());
-    dto.setPaisDesc(domain.getPais().nome());
-    dto.setIlhaId(domain.getIlha().id());
-    dto.setIlhaDesc(domain.getIlha().nome());
+    // País e ilha são opcionais (há locais sem ilha em produção) — não rebentar a lista inteira.
+    if (domain.getPais() != null) {
+      dto.setPaisId(domain.getPais().id());
+      dto.setPaisDesc(domain.getPais().nome());
+    }
+    if (domain.getIlha() != null) {
+      dto.setIlhaId(domain.getIlha().id());
+      dto.setIlhaDesc(domain.getIlha().nome());
+    }
     return dto;
   }
 

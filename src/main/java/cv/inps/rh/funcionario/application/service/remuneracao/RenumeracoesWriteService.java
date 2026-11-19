@@ -106,6 +106,9 @@ public class RenumeracoesWriteService {
     var pagamento = new DefPagamentoEntity();
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
+    // Moeda opcional (como no rendimento): sem valor no pedido assume-se CVE.
+    pagamento.setMoeda(
+        request.getMoeda() != null && !request.getMoeda().isBlank() ? request.getMoeda() : "CVE");
     pagamento.setEstado(Estado.P);
     // OBS = exatamente a observação do formulário.
     pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
@@ -187,6 +190,7 @@ public class RenumeracoesWriteService {
     if (!soDataFimObs) {
       remuneracao.setValor(request.getValor());
       remuneracao.setPercentagem(request.getPercentagem());
+      if (request.getMoeda() != null && !request.getMoeda().isBlank()) remuneracao.setMoeda(request.getMoeda());
       remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
       remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     }
@@ -268,6 +272,7 @@ public class RenumeracoesWriteService {
     if (!soDataFimObs) {
       pagamento.setPercentagem(request.getPercentagem());
       pagamento.setValor(request.getValor());
+      if (request.getMoeda() != null && !request.getMoeda().isBlank()) pagamento.setMoeda(request.getMoeda());
       pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
       pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
       pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));

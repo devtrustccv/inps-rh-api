@@ -144,6 +144,7 @@ public class DossierCampos {
           .referencia(DefPagamentoEntity_.tmId, "Tipo de movimento")
           .montante(DefPagamentoEntity_.valor, "Valor")
           .montante(DefPagamentoEntity_.percentagem, "Percentagem")
+          .campo(DefPagamentoEntity_.moeda, "Moeda")
           .campo(DefPagamentoEntity_.nib, "NIB")
           .campo(DefPagamentoEntity_.nif, "NIF")
           .data(DefPagamentoEntity_.dataInicio, "Data início")
