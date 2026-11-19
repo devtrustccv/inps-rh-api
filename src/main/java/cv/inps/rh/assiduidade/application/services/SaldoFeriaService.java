@@ -62,15 +62,17 @@ public class SaldoFeriaService {
     int direito;
     int gozado;
     if (ano != null) {
-      final var anoEntity = anoEntityRepository.findByAno(String.valueOf(ano))
-          .orElseThrow(() -> new RuntimeException("Ano não encontrado"));
+      // Ano ainda não aberto em RH_T_ANO (ex.: ambiente sem o ano corrente): não pode haver direito
+      // nem gozo associados a um ano inexistente, logo o saldo desse ano é 0 — antes era um 500
+      // ("Ano não encontrado") que partia o ecrã de férias e quem dependesse do saldo.
+      final var anoEntity = anoEntityRepository.findByAno(String.valueOf(ano)).orElse(null);
 
       // Calcula o saldo para o ano específico
-      final var direitoAnual = feriasEntityRepository
+      final int direitoAnual = anoEntity == null ? 0 : feriasEntityRepository
           .sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(), anoEntity);
 
-      final var gozadoAnual = feriasGozadasEntityRepository.sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(),
-          anoEntity.getId());
+      final int gozadoAnual = anoEntity == null ? 0 : feriasGozadasEntityRepository
+          .sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(), anoEntity.getId());
 
       direito = direitoAnual;
       gozado = gozadoAnual;

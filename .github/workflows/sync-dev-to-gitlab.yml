@@ -36,8 +36,8 @@ jobs:
       - name: Definir variáveis do GitLab (host/namespace/repo)
         run: |
           echo "GL_HOST=${GITLAB_HOST:-git.nosi.cv}"            >> $GITHUB_ENV
-          echo "GL_NAMESPACE=${GITLAB_NAMESPACE:-simple-territorio}" >> $GITHUB_ENV
-          echo "GL_REPO=${GITLAB_REPO:-simple-land-api}"       >> $GITHUB_ENV
+          echo "GL_NAMESPACE=${GITLAB_NAMESPACE:-inps-rh-igrp30}" >> $GITHUB_ENV
+          echo "GL_REPO=${GITLAB_REPO:-inps-rh-api}"       >> $GITHUB_ENV
 
       - name: Adicionar remoto GitLab
         env:

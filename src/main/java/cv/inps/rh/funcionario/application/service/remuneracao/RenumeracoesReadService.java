@@ -173,6 +173,8 @@ public class RenumeracoesReadService {
     var response = new NovoPagamentoRequestDTO();
     response.setPercentagem(pagamento.getPercentagem());
     response.setValor(pagamento.getValor());
+    // Registos antigos/importados sem MOEDA: o desconto é sempre registado em CVE por defeito.
+    response.setMoeda(pagamento.getMoeda() != null ? pagamento.getMoeda() : "CVE");
     response.setMovimentoId(pagamento.getTmId().getId());
     response.setDataInicio(pagamento.getDataInicio()!=null ? DateFormatter.localDateToString(pagamento.getDataInicio()) : null);
     response.setDataFim(pagamento.getDataFim()!=null ? DateFormatter.localDateToString(pagamento.getDataFim()) : null);
