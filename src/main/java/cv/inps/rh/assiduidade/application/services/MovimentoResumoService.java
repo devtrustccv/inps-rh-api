@@ -3,7 +3,9 @@ package cv.inps.rh.assiduidade.application.services;
 import cv.inps.rh.assiduidade.application.dto.AssiduidadeListDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaMovimentosResumidosQuery;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VResumoAssiduidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VResumoAssiduidadeEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +20,16 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MovimentoResumoService {
 
   private final VResumoAssiduidadeEntityRepository vResumoAssiduidadeEntityRepository;
+  private final DirecaoEntityRepository direcaoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaAssiduidadadeDTO getListaMovimentosResumidos(GetListaMovimentosResumidosQuery query) {
@@ -38,13 +44,21 @@ public class MovimentoResumoService {
 
     WrapperListaAssiduidadadeDTO wrapper = new WrapperListaAssiduidadadeDTO();
 
+    // Coluna Direção mostra a sigla (GSI, DARH), como na Lista dos Colaboradores; o nome completo
+    // partia a coluna em várias linhas. Uma só consulta para as direções da página.
+    var idsDirecao = page.stream().map(VResumoAssiduidadeEntity::getIdDirecao)
+        .filter(Objects::nonNull).collect(Collectors.toSet());
+    Map<Long, String> siglaPorDirecao = direcaoEntityRepository.findAllById(idsDirecao).stream()
+        .filter(d -> StringUtils.hasText(d.getSiga()))
+        .collect(Collectors.toMap(DirecaoEntity::getId, DirecaoEntity::getSiga, (a, b) -> a));
+
     page.forEach(entity -> {
       AssiduidadeListDTO dto = new AssiduidadeListDTO();
       dto.setId(entity.getId());
       dto.setUuid(entity.getFuncionarioUuid());
       dto.setUuidFuncionario(entity.getFuncionarioUuid());
       dto.setNomeColaborador(entity.getNomeFuncionario());
-      dto.setDirecao(entity.getNomeDirecao());
+      dto.setDirecao(siglaPorDirecao.getOrDefault(entity.getIdDirecao(), entity.getNomeDirecao()));
       dto.setTotalDias(entity.getTotalDias());
       // A vista ja separa os tres, mas so o primeiro chegava ao ecra: com as faltas todas
       // registadas o totalFalta da 0 e o utilizador ficava sem saber que ha 4 justificadas.
