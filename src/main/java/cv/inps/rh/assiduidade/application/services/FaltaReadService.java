@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.services.DirecaoSiglaService;
 import cv.inps.rh.assiduidade.application.dto.FaltaListDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
@@ -49,6 +50,7 @@ public class FaltaReadService {
   private final DocumentoEntityRepository documentoEntityRepository;
 
   private final VfaltaMensalEntityRepository vfaltaMensalRepository;
+  private final DirecaoSiglaService direcaoSiglaService;
 
   @Transactional(readOnly = true)
   public WrapperListaFaltaDTO faltaReadService(GetListaFaltaQuery query) {
@@ -61,8 +63,14 @@ public class FaltaReadService {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<VfaltaMensalEntity> page = vfaltaMensalRepository.findAll(spec, pageable);
 
+    // Coluna Direção com a sigla (GSI, DARH), como na Lista dos Colaboradores.
+    var siglas = direcaoSiglaService.siglaPorId();
     List<FaltaListDTO> content = page.getContent().stream()
-        .map(this::toDTO)
+        .map(e -> {
+          var dto = toDTO(e);
+          dto.setDirecao(DirecaoSiglaService.sigla(siglas, e.getIdDirecao(), dto.getDirecao()));
+          return dto;
+        })
         .toList();
 
     var wrapper = new WrapperListaFaltaDTO();

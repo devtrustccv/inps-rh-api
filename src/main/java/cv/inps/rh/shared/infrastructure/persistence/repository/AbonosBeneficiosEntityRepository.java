@@ -34,7 +34,7 @@ public interface AbonosBeneficiosEntityRepository extends
       SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO(
           null,
           t.estado,
-          dir.nome,
+          COALESCE(dir.siga, dir.nome),
           sec.nome,
           f.nome,
           vin.nome,
