@@ -29,7 +29,9 @@ public class ProcessoDisciplinarReadService {
 
     var estados = validacao
         ? List.of(Estado.P.name())
-        : List.of(Estado.A.name(), Estado.I.name());
+        // DC-013: o registo novo fica P (a aguardar validação) e não aparecia na lista do dossiê;
+        // C (devolvido para correção) também tem de aparecer para o maker o corrigir.
+        : List.of(Estado.A.name(), Estado.I.name(), Estado.P.name(), Estado.C.name());
     var processes = processoDisciplinarEntityRepository.findByFunId_UuidAndEstadoIn(UUID.fromString(funcionarioId), estados);
     if (processes.isEmpty())
       return List.of();
