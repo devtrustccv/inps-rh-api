@@ -25,6 +25,8 @@ import static java.util.Optional.ofNullable;
 @Service
 public class ProgressaoPromocaoReadService {
 
+  private static final String ESTADO_CONFIRMADO = "PR";
+
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
 
@@ -37,7 +39,8 @@ public class ProgressaoPromocaoReadService {
             .map(obj -> "%".concat(obj).concat("%").toLowerCase(Locale.ROOT))
             .orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
-        "S",
+        null,
+        ESTADO_CONFIRMADO,
         buildPageable(query.getPage(), query.getSize())
     );
   }
@@ -65,6 +68,7 @@ public class ProgressaoPromocaoReadService {
             .map(obj -> "%".concat(obj).concat("%").toLowerCase(Locale.ROOT))
             .orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
+        null,
         null,
         buildPageable(query.getPage(), query.getSize())
     );

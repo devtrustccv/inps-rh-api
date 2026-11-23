@@ -11,12 +11,14 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValEvolucaoCarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -26,21 +28,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 
 import javax.sql.DataSource;
+import java.sql.Date;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @Transactional
 @AllArgsConstructor
 @Service
 public class ProgressaoPromocaoWriteService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProgressaoPromocaoWriteService.class);
+  private static final String PACKAGE_PROMO_PROGRESSAO = "RH_PK_PROMO_PROGRESSAO_DB";
+  private static final String ORIGEM_MANUAL = "MANUAL";
 
-  private final EvolucaoCarreiraEntityRepository evolucaoCarreiraEntityRepository;
   private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final OrdemServicoEntityRepository ordemServicoEntityRepository;
@@ -50,13 +55,33 @@ public class ProgressaoPromocaoWriteService {
   private final DataSource dataSource;
   private final ApplicationAuditorAware applicationAuditorAware;
 
+  public void simular() {
+
+    var call = new SimpleJdbcCall(dataSource)
+        .withoutProcedureColumnMetaDataAccess()
+        .withCatalogName(PACKAGE_PROMO_PROGRESSAO)
+        .withProcedureName("PR_SIMULAR")
+        .declareParameters(
+            new SqlParameter("P_DATA_REFERENCIA", Types.DATE),
+            new SqlParameter("P_USER_ID", Types.NUMERIC),
+            new SqlParameter("P_USER_NAME", Types.VARCHAR),
+            new SqlParameter("P_ORIGEM", Types.VARCHAR)
+        );
+
+    call.execute(new MapSqlParameterSource()
+        .addValue("P_DATA_REFERENCIA", Date.valueOf(LocalDate.now(ZoneId.systemDefault())))
+        .addValue("P_USER_ID", 0L)
+        .addValue("P_USER_NAME", applicationAuditorAware.getCurrentSubjectName())
+        .addValue("P_ORIGEM", ORIGEM_MANUAL));
+  }
+
   public void anexarOrdemServico(AnexarOrdemServicoRequestDTO request) {
 
-    var ev = evolucaoCarreiraEntityRepository.findByUuidOrThrow(request.getEvolucaoCarreiraUuid());
+    var ev = valEvolucaoCarreiraEntityRepository.findByUuidOrThrow(request.getEvolucaoCarreiraUuid());
     var funId = ev.getTiprel().getFunId();
 
     documentoEntityRepository.findByReferenciaNameAndReferenciaUuidAndReferenciaIdAndFunIdAndEstado(
-        TableName.RH_T_EVOLUCAO_CARREIRA.name(),
+        TableName.RH_T_VAL_EVOLUCAO_CARREIRA.name(),
         UUID.fromString(ev.getUuid()),
         ev.getId().toString(),
         funId,
@@ -68,7 +93,7 @@ public class ProgressaoPromocaoWriteService {
         () -> {
           var document = new DocumentoEntity();
           document.setUuid(UuidCreator.getTimeOrderedEpoch());
-          document.setReferenciaName(TableName.RH_T_EVOLUCAO_CARREIRA.name());
+          document.setReferenciaName(TableName.RH_T_VAL_EVOLUCAO_CARREIRA.name());
           document.setReferenciaId(ev.getId().toString());
           document.setReferenciaUuid(UUID.fromString(ev.getUuid()));
           document.setEstado(Estado.A);
@@ -84,10 +109,8 @@ public class ProgressaoPromocaoWriteService {
     os.setEstado(Estado.A);
     os.setUuid(UuidCreator.getTimeOrderedEpoch());
     os.setFunId(funId);
-    var id = ordemServicoEntityRepository.save(os).getId().toString();
-
-    ev.setOrdemServicoId(id);
-    evolucaoCarreiraEntityRepository.save(ev);
+    ev.setOrdemServicoId(ordemServicoEntityRepository.save(os).getId());
+    valEvolucaoCarreiraEntityRepository.save(ev);
   }
 
   public void editarSimulacao(Long id, String elegivel, EstadoValidacao validacao, String observacao) {
@@ -136,23 +159,22 @@ public class ProgressaoPromocaoWriteService {
 
   public void confirmar(Long id) {
 
-    var ev = evolucaoCarreiraEntityRepository.findById(id).orElseThrow();
+    if (!valEvolucaoCarreiraEntityRepository.existsById(id))
+      throw IgrpResponseStatusException.notFound("Validação de progressão/promoção não encontrada: " + id);
 
     var call = new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName("RH_PK_AUMENTO_SALARIAL_DB")
+        .withCatalogName(PACKAGE_PROMO_PROGRESSAO)
         .withProcedureName("CONFIRMAR_PROGRESSAO_PROMO")
         .declareParameters(
-            new SqlParameter("P_val_evol_carr_ID", Types.NUMERIC),
-            new SqlParameter("P_ORDEM_SERVICO_ID", Types.NUMERIC),
+            new SqlParameter("P_VAL_EVOL_CARR_ID", Types.NUMERIC),
             new SqlParameter("P_USER_ID", Types.NUMERIC),
             new SqlParameter("P_USER_NAME", Types.VARCHAR)
         );
 
     call.execute(new MapSqlParameterSource()
-        .addValue("P_val_evol_carr_ID", id)
-        .addValue("P_ORDEM_SERVICO_ID", ev.getOrdemServicoId())
-        .addValue("P_USER_ID", 0L) // TODO: id do utilizador do login (igual ao SIMULAR_AUMENTO)
+        .addValue("P_VAL_EVOL_CARR_ID", id)
+        .addValue("P_USER_ID", 0L)
         .addValue("P_USER_NAME", applicationAuditorAware.getCurrentSubjectName()));
   }
 
@@ -160,7 +182,7 @@ public class ProgressaoPromocaoWriteService {
 
     var numberOfRows = valEvolucaoCarreiraEntityRepository.marcarComoHistorico(ids);
 
-    LOGGER.debug("Number of rows sent to History: {}", numberOfRows);
+    log.debug("Number of rows sent to History: {}", numberOfRows);
   }
 
   @SneakyThrows
@@ -175,11 +197,11 @@ public class ProgressaoPromocaoWriteService {
 
     var collaborators = valEvolucaoCarreiraEntityRepository.getInformacaoColaboradores(ids);
 
-    var now = LocalDate.now();
+    var now = LocalDate.now(ZoneId.systemDefault());
 
     var context = new Context();
     context.setVariable("nomePresidente", "Mário Rui Lopes Fernandes");
-    context.setVariable("numeroOrdem", "123456789"); //todo fix this
+    context.setVariable("numeroOrdem", UuidCreator.getTimeOrderedEpoch().toString());
     context.setVariable("ano", String.valueOf(now.getYear()));
     context.setVariable("dataEmissao", formatter.format(now));
     context.setVariable("colaboradores", collaborators);
@@ -188,7 +210,8 @@ public class ProgressaoPromocaoWriteService {
     storageService.uploadFile(bytes, uniqueFilename, MediaType.APPLICATION_PDF.toString());
 
     var numberOfRows = valEvolucaoCarreiraEntityRepository.setFileIdToRows(ids, uniqueFilename);
-    LOGGER.debug("Number of rows updated with file Id {}: {}", numberOfRows, uniqueFilename);
+
+    log.debug("Number of rows updated with file Id {}: {}", numberOfRows, uniqueFilename);
 
     return bytes;
   }
