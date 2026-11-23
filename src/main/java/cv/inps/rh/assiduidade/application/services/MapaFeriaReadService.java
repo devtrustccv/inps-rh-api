@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.services.DirecaoSiglaService;
 import cv.inps.rh.assiduidade.application.dto.*;
 import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.ListaMapaFeriaQuery;
@@ -32,6 +33,7 @@ public class MapaFeriaReadService {
   private final VMapaFeriasDetalheEntityRepository vMapaFeriasDetalheEntityRepository;
   private final VMapaFeriaEntityRepository vMapaFeriaEntityRepository;
   private final VFeriasDetalheColaboradorEntityRepository vFeriasDetalheColaboradorEntityRepository;
+  private final DirecaoSiglaService direcaoSiglaService;
 
   @Transactional(readOnly = true)
   public VerMapaDTO verMapa(VerMapaQuery query) {
@@ -126,10 +128,12 @@ public class MapaFeriaReadService {
     Page<VMapaFeriaEntity> page = vMapaFeriaEntityRepository.findAll(spec, pageable);
 
     // Mapear para DTO
+    // Coluna Direção com a sigla (GSI, DARH), como na Lista dos Colaboradores.
+    var siglas = direcaoSiglaService.siglaPorId();
     List<MapaFeriaListDTO> content = page.getContent().stream()
         .map(e -> {
           var dto = new MapaFeriaListDTO();
-          dto.setDirecao(e.getDirecao());
+          dto.setDirecao(DirecaoSiglaService.sigla(siglas, e.getDirecaoId(), e.getDirecao()));
           dto.setDirecaoId(e.getDirecaoId());
           dto.setAnoReferente(e.getAnoReferente());
           dto.setTotalColaborador(e.getTotalColaborador());

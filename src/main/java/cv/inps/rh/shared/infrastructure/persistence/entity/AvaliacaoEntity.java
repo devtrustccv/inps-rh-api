@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,41 +61,9 @@ public class AvaliacaoEntity extends AuditEntity {
   @Column(name = "PESO_TECNICA")
   private BigDecimal pesoTecnica;
 
-  @Column(name = "AVALIACAO_OBJECTIVO")
-  private BigDecimal avaliacaoObjectivo;
-
-  @Column(name = "AVALIACAO_COMPETENCIA")
-  private BigDecimal avaliacaoCompetencia;
-
-  @Column(name = "AVALIACAO_ATITUDE_PESS")
-  private BigDecimal avaliacaoAtitudePess;
-
-  @Column(name = "AVALIACAO_QUALITATIVA", length = 100)
-  private String avaliacaoQualitativa;
-
-  @Column(name = "OBSERVACAO_GERAL", length = 500)
-  private String observacaoGeral;
-
-  @Column(name = "DESCRICAO_PLANO", length = 500)
-  private String descricaoPlano;
-
-  @Column(name = "DATA_INICIO_ENTREVISTA")
-  private LocalDate dataInicioEntrevista;
-
-  @Column(name = "HORA_INICIO_ENTREVISTA", length = 5)
-  private String horaInicioEntrevista;         // formato HH:MM
-
-  @Column(name = "HORA_FIM_ENTREVISTA", length = 5)
-  private String horaFimEntrevista;            // formato HH:MM
-
-  @Column(name = "PARECER_COLABORADOR", length = 500)
-  private String parecerColaborador;
-
-  @Column(name = "JUSTIFICACAO_MOTIVO", length = 200)
-  private String justificacaoMotivo;
-
-  @Column(name = "OBS_COMISSAO_EXEC", length = 500)
-  private String obsComissaoExec;
+  // Resultados, entrevista e pareceres vivem por período em RH_T_AVD_DETALHE (AvaliacaoDetalheEntity):
+  // as colunas AVALIACAO_OBJECTIVO ... OBS_COMISSAO_EXEC foram removidas de RH_T_AVD (spec BD 21/09/2026)
+  // e mapeá-las aqui fazia qualquer leitura da avaliação falhar com ORA-00904 (listas a 500).
 
   @Column(name = "UUID")
   private UUID uuid;
