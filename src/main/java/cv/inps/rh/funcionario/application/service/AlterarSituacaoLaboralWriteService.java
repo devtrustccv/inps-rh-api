@@ -215,6 +215,12 @@ public class AlterarSituacaoLaboralWriteService {
       rollbackRejeicao(funcionario, tiprelAtual, tiprelEraPendente);
     }
 
+    // Colaborador inativo (cessação aprovada ou rejeição que repõe uma situação cessada): o
+    // "Estado do Registo" acompanha e fica também inativo; reativado volta a 'A' (definido acima).
+    if (funcionario.getEstado() == Estado.I) {
+      funcionario.setEstadoValidacao(Estado.I.name());
+    }
+
     funcionarioEntityRepository.save(funcionario);
     var mensagem = EstadoValidacao.SIM.equals(dto.getValidar()) ? "Situação laboral validada." : "Situação laboral rejeitada.";
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());

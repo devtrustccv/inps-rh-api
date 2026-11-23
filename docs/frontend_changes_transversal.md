@@ -184,3 +184,20 @@ Só acréscimos (os endpoints existentes não mudam). Mesmo caminho `configuraca
 
 No texto: `${nome}`, `${nome:-valor por defeito}`, `$${nome}` (literal); marcador sem valor sai "—".
 As declarações (PDF) passam a substituir os marcadores. Guia para programadores: `docs/guia_documentos_saida_marcadores.html`.
+
+## 10. Entidades SIGOF — `api/v1/parametrizacao/entidades/ativos` sempre limitado (19/11/2026)
+
+**Breaking (só para quem chamava sem `nome`).** O endpoint passa a devolver **no máximo `limite`** entidades
+também quando não vem `nome`:
+
+| Pedido | Antes | Agora |
+|---|---|---|
+| `GET …/entidades/ativos` (sem `nome`) | as **11 981** entidades (~1 MB, ~5 s) | as primeiras **50** por ordem alfabética |
+| `GET …/entidades/ativos?limite=200` (sem `nome`) | as 11 981 | as primeiras 200 |
+| `GET …/entidades/ativos?nome=banco&limite=20` | pesquisa, até 20 | **igual** |
+
+- `limite`: 1–200, por omissão 50 (agora vale com ou sem `nome`). Resposta igual: `[{ label, value, nif }]`.
+- **Para escolher uma entidade, pesquisar por nome** (o `SearchEntidade` / `GET /api/pesquisa/entidade?nome=` já o faz).
+  Não há forma de obter a lista completa — não é para carregar num combobox.
+- Motivo: o Registar Colaborador pedia a lista completa sem a usar e os combobox só eram preenchidos
+  quando ela chegava (~6 s). O frontend deixou de a pedir (`useFuncionarioParametrizacao`).

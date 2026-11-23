@@ -240,8 +240,8 @@ devolvem `{ "label": "...", "value": 123 }`; o `value` é o que segue no payload
 Os *selects* de domínio (parecer, etapa, tipo de processo, avaliação) **vêm na resposta do próprio
 ecrã** — ver cada capítulo.
 
-> `entidades/ativos` devolve **11 981 registos** de uma vez, sem filtro nem paginação. Para a caixa
-> "Pesquisar prestador de serviços…" é preciso filtrar no cliente ou pedir um endpoint de pesquisa.
+> `entidades/ativos` pesquisa por `nome` e devolve no máximo `limite` (1–200, por omissão 50) — também
+> sem `nome` (desde 19/11/2026; antes devolvia as 11 981). Ver `frontend_changes_transversal.md` §10.
 
 ---
 
@@ -887,7 +887,7 @@ das requisições — com o nº da missão e o motivo. Os colaboradores que **es
 |---|---|
 | `cabId` (SGAL) | Não gerado — integração por definir (sem endpoint nem contrato). As linhas ficam `CABIMENTADO` com `cabId: null` |
 | `valorDiario` | A base vem do cliente, sem validação. A tabela de preços da ajuda de custo nunca foi especificada |
-| Pesquisa de entidades | `entidades/ativos` devolve 11 981 registos sem filtro nem paginação |
+| Pesquisa de entidades | `entidades/ativos?nome=&limite=` (máx. 200; sem `nome` só as primeiras 50) — ver transversal §10 |
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
 | **"Ver Alerta"** (Lista Missão) | O analista retirou os alertas da missão do âmbito actual: `GET /api/v1/funcionarios/alertas` não devolve nada da missão. O botão pode ficar escondido |

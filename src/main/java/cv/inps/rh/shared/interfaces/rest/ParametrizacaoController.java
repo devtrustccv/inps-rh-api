@@ -80,13 +80,13 @@ public class ParametrizacaoController {
 
   @GetMapping("/entidades/ativos")
   @Operation(summary = "Lista entidades (SIGOF), com pesquisa opcional por nome",
-      description = "Sem `nome` devolve todas. Com `nome`: cada palavra tem de aparecer no nome da entidade, "
-          + "ignorando maiúsculas e acentos; as que começam pela primeira palavra vêm primeiro, depois por "
-          + "ordem alfabética.")
+      description = "Devolve no máximo `limite` entidades. Sem `nome`: as primeiras por ordem alfabética. "
+          + "Com `nome`: cada palavra tem de aparecer no nome da entidade, ignorando maiúsculas e acentos; "
+          + "as que começam pela primeira palavra vêm primeiro, depois por ordem alfabética.")
   public ResponseEntity<List<ParametrizacaoDTO>> getEntidadesAtivas(
       @Parameter(description = "Texto a pesquisar no nome (máx. 150 caracteres)", example = "emprestimo")
       @RequestParam(required = false) String nome,
-      @Parameter(description = "Máximo de resultados quando há `nome` (1–200, por omissão 50)")
+      @Parameter(description = "Máximo de resultados (1–200, por omissão 50)")
       @RequestParam(required = false) Integer limite
   ) {
     return ResponseEntity.ok(parametrizacaoService.getEntidades(nome, limite));

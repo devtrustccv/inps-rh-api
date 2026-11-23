@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.queries.GetValicoesUtilizadoresQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ValidacaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.services.IAMUserProfileService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
@@ -29,6 +30,7 @@ public class ValidacoesReadService {
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ValidacaoMapper validacaoMapper;
+  private final IAMUserProfileService iamUserProfileService;
 
   @Transactional(readOnly = true)
   public WrapperListaValidacoesDTO listaValidacoes(GetValicoesUtilizadoresQuery query) {
@@ -72,8 +74,18 @@ public class ValidacoesReadService {
         Sort.by(Sort.Order.desc("createdDate"), Sort.Order.desc("id")));
     Page<ValidacaoEntity> page = validacaoEntityRepository.findAll(spec, pageable);
 
+    // createdBy guarda o sub do JWT (UUID); mostra-se o nome do perfil IAM. Sem perfil fica o valor
+    // gravado. Uma só resolução para a página inteira.
+    var nomes = iamUserProfileService.resolverNomes(
+        page.getContent().stream().map(ValidacaoEntity::getCreatedBy).toList());
+
     var content = page.getContent().stream()
-        .map(validacaoMapper::toDto)
+        .map(v -> {
+          var dto = validacaoMapper.toDto(v);
+          if (dto.getUtilizador() != null)
+            dto.setUtilizador(nomes.getOrDefault(dto.getUtilizador(), dto.getUtilizador()));
+          return dto;
+        })
         .toList();
 
     var wrapper = new WrapperListaValidacoesDTO();
