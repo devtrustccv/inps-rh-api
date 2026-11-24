@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.shared.application.services.IAMUserProfileService;
 import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.dto.*;
@@ -70,6 +71,7 @@ public class EmprestimoReadService {
   private final EmprestimoOutroEntityRepository emprestimoOutroEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
+  private final IAMUserProfileService iamUserProfileService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.listAll();
@@ -201,7 +203,6 @@ public class EmprestimoReadService {
     final var allDecisions = new DecisaoEmprestimoDTO();
 
     var pedidoExecucao = new BaseDecisaoDTO();
-    pedidoExecucao.setExecutadoPor(entity.getCreatedBy());
     ofNullable(entity.getCreatedDate()).ifPresent(d -> pedidoExecucao.setData(d.toLocalDate()));
     allDecisions.setPedido(pedidoExecucao);
 
@@ -230,10 +231,19 @@ public class EmprestimoReadService {
         .forEach(d -> porEtapa.put(d.getEtapa(), d));
     pedidoDecisaoEntityRepository.findByPedidoAndReferenciaIdAndEtapaInOrderByIdAsc(order, entity.getId(), steps)
         .forEach(d -> porEtapa.put(d.getEtapa(), d));
+    // "Executado Por": a auditoria grava o sub do token (UUID) ou "anonymousUser" sem IAM — mostra-se
+    // o nome do perfil IAM (nome completo, senão o username), resolvido de uma vez para todas as etapas.
+    var nomes = iamUserProfileService.resolverNomes(java.util.stream.Stream.concat(
+            java.util.stream.Stream.of(entity.getCreatedBy()),
+            porEtapa.values().stream()
+                .flatMap(d -> java.util.stream.Stream.of(executor(d), d.getUtilizadorObservacaoResponsavel())))
+        .filter(Objects::nonNull)
+        .toList());
+    pedidoExecucao.setExecutadoPor(nomeUtilizador(nomes, entity.getCreatedBy()));
     var decisions = porEtapa.values().stream()
         .collect(Collectors.toMap(
             PedidoDecisaoEntity::getEtapa,
-            this::buildDecisionData
+            d -> buildDecisionData(d, nomes)
         ));
 
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_PEDIDO.name())).ifPresent(allDecisions::setAnaliseRhPedido);
@@ -274,7 +284,17 @@ public class EmprestimoReadService {
     return dto;
   }
 
-  private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
+  // Cada gravação cria uma decisão nova, e o utilizador de alteração só é preenchido quando ela é
+  // alterada depois; sem o de registo, "Executado Por" ficava vazio (ex.: após uma retificação).
+  private static String executor(PedidoDecisaoEntity obj) {
+    return obj.getLastModifiedBy() != null ? obj.getLastModifiedBy() : obj.getCreatedBy();
+  }
+
+  private static String nomeUtilizador(Map<String, String> nomes, String id) {
+    return id == null ? null : nomes.getOrDefault(id, id);
+  }
+
+  private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj, Map<String, String> nomes) {
     var baseDecision = new BaseDecisaoDTO();
     baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
@@ -285,15 +305,13 @@ public class EmprestimoReadService {
     baseDecision.setDataExecucao((obj.getLastModifiedDate() != null
         ? obj.getLastModifiedDate()
         : obj.getCreatedDate()).toLocalDate());
-    // Cada gravação cria uma decisão nova, e o utilizador de alteração só é preenchido quando ela é
-    // alterada depois; sem o de registo, "Executado Por" ficava vazio (ex.: após uma retificação).
-    baseDecision.setExecutadoPor(obj.getLastModifiedBy() != null ? obj.getLastModifiedBy() : obj.getCreatedBy());
+    baseDecision.setExecutadoPor(nomeUtilizador(nomes, executor(obj)));
 
     var responsavel = new BaseDecisaoDTO.Responsavel(
         obj.getParecerResponsavel(),
         obj.getObservacaoResponsavel(),
         obj.getDataObservacaoResponsavel(),
-        obj.getUtilizadorObservacaoResponsavel(),
+        nomeUtilizador(nomes, obj.getUtilizadorObservacaoResponsavel()),
         obj.getDataParecerResponsavel()
     );
 
