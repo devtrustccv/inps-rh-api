@@ -56,6 +56,7 @@ public class FaltaServiceWrite {
   private final FaltaDescontoService faltaDescontoService;
   private final FaltaValorCalculator faltaValorCalculator;
   private final SaldoLockService saldoLockService;
+  private final DiasUteisService diasUteisService;
 
 
   @Transactional
@@ -88,7 +89,14 @@ public class FaltaServiceWrite {
 
     boolean deveJustificar = Objects.equals(req.getJustificar(), "SIM");
 
-    var datas = expandirDias(req.getDataInicio(), req.getDataFim());
+    // Só os dias úteis contam como falta (segunda a sexta, sem feriados) — decisão do negócio 23/11/2026.
+    // Daqui em diante tudo usa esta lista: guard de duplicados, regra dos "mais de 3 dias" para ir a
+    // validação, horas por dia, síntese diária, faltas e desconto. Antes eram dias de calendário e um
+    // fim-de-semana no meio do período gerava faltas/descontos de sábado e domingo.
+    var datas = diasUteisService.diasUteis(req.getDataInicio(), req.getDataFim());
+    if (datas.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "O período escolhido não tem dias úteis — fins-de-semana e feriados não contam como falta.");
 
     // O guard vale para QUALQUER marcacao, com ou sem justificativo. Estava dentro de um
     // `if (deveJustificar)` e o ramo sem justificativo passava por cima de tudo: a sintese e
@@ -426,16 +434,6 @@ public class FaltaServiceWrite {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
     JustificarFaltaWriteService.garantirTipoDeFalta(paramSituacao);
     return paramSituacao;
-  }
-
-  private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
-    var dias = new ArrayList<LocalDate>();
-    var d = inicio;
-    while (!d.isAfter(fim)) {
-      dias.add(d);
-      d = d.plusDays(1);
-    }
-    return dias;
   }
 
   /** 1 quando o tipo de falta escolhido desconta salário (RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL). */
