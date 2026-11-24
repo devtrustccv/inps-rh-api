@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -214,8 +213,15 @@ public class FaltaReadService {
     dto.setDataInicio(dataInicio);
     dto.setDataFim(dataFim);
 
+    // Total Dias = dias com falta registada (só dias úteis — fins-de-semana e feriados do período
+    // não têm falta). Era Fim − Início em calendário, que contava sábados e domingos.
     if (dataInicio != null && dataFim != null) {
-      long dias = ChronoUnit.DAYS.between(dataInicio, dataFim) + 1;
+      long dias = faltas.stream()
+          .map(FaltaEntity::getDataInicio)
+          .filter(Objects::nonNull)
+          .map(LocalDateTime::toLocalDate)
+          .distinct()
+          .count();
       dto.setTotalDias((int) Math.max(dias, 1));
     }
 
