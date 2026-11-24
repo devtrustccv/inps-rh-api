@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.services.DirecaoSiglaService;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraLinhaDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraPedidoDTO;
@@ -58,6 +59,7 @@ public class HoraExtraReadService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final VHoraExtraMensalEntityRepository vHoraExtraMensalRepository;
   private final VHoraExtraPedidoEntityRepository vHoraExtraPedidoRepository;
+  private final DirecaoSiglaService direcaoSiglaService;
 
   @Transactional(readOnly = true)
   public WrapperListaHoraExtraDTO getListaHoraExtra(GetListaHoraExtraQuery query) {
@@ -92,8 +94,16 @@ public class HoraExtraReadService {
         .filter(i -> i.getPedidoId() != null)
         .collect(Collectors.groupingBy(VHoraExtraMensalEntity::getPedidoId));
 
+    // Coluna Direção com a sigla (GSI, DARH), como na Lista dos Colaboradores.
+    var siglas = direcaoSiglaService.siglaPorId();
     wrapper.setContent(page.getContent().stream()
-        .map(p -> toPedidoDTO(p, itensPorPedido.getOrDefault(p.getPedidoId(), List.of())))
+        .map(p -> {
+          var dto = toPedidoDTO(p, itensPorPedido.getOrDefault(p.getPedidoId(), List.of()));
+          dto.setDirecao(DirecaoSiglaService.sigla(siglas, dto.getDirecaoId(), dto.getDirecao()));
+          if (dto.getItens() != null)
+            dto.getItens().forEach(l -> l.setDirecao(DirecaoSiglaService.sigla(siglas, l.getDirecaoId(), l.getDirecao())));
+          return dto;
+        })
         .toList());
 
     return wrapper;

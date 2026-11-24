@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.services.DirecaoSiglaService;
 import cv.inps.rh.assiduidade.application.dto.FaltaListDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
@@ -33,7 +34,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +49,7 @@ public class FaltaReadService {
   private final DocumentoEntityRepository documentoEntityRepository;
 
   private final VfaltaMensalEntityRepository vfaltaMensalRepository;
+  private final DirecaoSiglaService direcaoSiglaService;
 
   @Transactional(readOnly = true)
   public WrapperListaFaltaDTO faltaReadService(GetListaFaltaQuery query) {
@@ -61,8 +62,14 @@ public class FaltaReadService {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<VfaltaMensalEntity> page = vfaltaMensalRepository.findAll(spec, pageable);
 
+    // Coluna Direção com a sigla (GSI, DARH), como na Lista dos Colaboradores.
+    var siglas = direcaoSiglaService.siglaPorId();
     List<FaltaListDTO> content = page.getContent().stream()
-        .map(this::toDTO)
+        .map(e -> {
+          var dto = toDTO(e);
+          dto.setDirecao(DirecaoSiglaService.sigla(siglas, e.getIdDirecao(), dto.getDirecao()));
+          return dto;
+        })
         .toList();
 
     var wrapper = new WrapperListaFaltaDTO();
@@ -206,8 +213,15 @@ public class FaltaReadService {
     dto.setDataInicio(dataInicio);
     dto.setDataFim(dataFim);
 
+    // Total Dias = dias com falta registada (só dias úteis — fins-de-semana e feriados do período
+    // não têm falta). Era Fim − Início em calendário, que contava sábados e domingos.
     if (dataInicio != null && dataFim != null) {
-      long dias = ChronoUnit.DAYS.between(dataInicio, dataFim) + 1;
+      long dias = faltas.stream()
+          .map(FaltaEntity::getDataInicio)
+          .filter(Objects::nonNull)
+          .map(LocalDateTime::toLocalDate)
+          .distinct()
+          .count();
       dto.setTotalDias((int) Math.max(dias, 1));
     }
 
