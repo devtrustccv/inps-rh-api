@@ -145,8 +145,13 @@ public class FuncionarioReadService {
           // "Estado do Registo" indica se o registo do colaborador está validado ou não
           // (maker-checker do registo) e tem fonte própria — RH_V_DOSSIE.ESTADO_VALIDACAO.
           // Não confundir com o "Estado do Colaborador" (A/I/C), acima.
-          dto.setEstadoRegisto(d.getEstadoValidacao());
-          dto.setEstadoRegistoDesc(Estado.fromCode(d.getEstadoValidacao())
+          // Colaborador inativo com o registo validado ('A') mostra o registo também inativo —
+          // cobre os inativados antes de a validação passar a gravar 'I'. Pendente/Correção ficam.
+          var estadoRegisto = Estado.I.name().equals(estadoColaborador)
+              && Estado.A.name().equals(d.getEstadoValidacao())
+              ? Estado.I.name() : d.getEstadoValidacao();
+          dto.setEstadoRegisto(estadoRegisto);
+          dto.setEstadoRegistoDesc(Estado.fromCode(estadoRegisto)
               .map(Estado::getDescription)
               .orElse("Desconhecido"));
           return dto;

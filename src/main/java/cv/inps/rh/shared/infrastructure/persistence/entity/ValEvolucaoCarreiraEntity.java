@@ -81,5 +81,7 @@ public class ValEvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "OBS_MOTIVO_ALTERACAO", length = 500)
   private String obsMotivoAlteracao;
 
+  @Column(name = "ORDEM_SERVICO_ID")
+  private Long ordemServicoId;
 
 }

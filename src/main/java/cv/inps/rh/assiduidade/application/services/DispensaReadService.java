@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.services.DirecaoSiglaService;
 import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
@@ -144,7 +145,7 @@ public class DispensaReadService {
     dto.setPedidoUuid(e.getPedidoId() != null ? e.getPedidoId().getUuid().toString() : null);
     var mob = e.getTiprelId() != null ? e.getTiprelId().getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
-    dto.setDirecao(inst != null ? inst.getNome() : null);
+    dto.setDirecao(DirecaoSiglaService.siglaOuNome(inst));
     var fun = e.getTiprelId() != null ? e.getTiprelId().getFunId() : null;
     dto.setNomeColaborador(fun != null ? fun.getNome() : null);
     dto.setDirecaoId(inst != null ? inst.getId() : null);
