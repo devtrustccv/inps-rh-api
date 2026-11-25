@@ -30,7 +30,7 @@ public class VMapaFeriaEntity  {
 
 
     @NotNull(message = "anoReferente is mandatory")
-    @Column(name="ano_referente", nullable = false)
+    @Column(name="ano_referente", nullable = false, columnDefinition = "varchar2(4)")
     private Integer anoReferente;
 
 

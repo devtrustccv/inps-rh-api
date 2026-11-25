@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Schema validate (simulado) — entities vs BD de dev (schemas INPSRH, INPSSIGOF, SIPSGLOBAL)
--- Gerado a 2026-11-25 (develop 885d2b9d + blocos 1 e 2 dos tipos). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
+-- Gerado a 2026-11-25 (develop 885d2b9d + blocos 1, 2 e 3 dos tipos). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
 -- (o validate do Hibernate para no 1.o: aqui foi INPSSIGOF.RH_TIPO_MOVIMENTOS.ENT_ID, que esta na seccao 4).
 -- Como foi gerado: DDL esperado pelas entities (schema-generation scripts.action=create, sem tocar na BD)
 -- comparado com ALL_TAB_COLUMNS / ALL_SEQUENCES. Regras de tipo confirmadas com o driver e o
@@ -12,8 +12,10 @@
 -- AssiduidadeSinteseDiario, Dispensa e Falta; validate real das 3 tabelas passou.
 -- Bloco 2 resolvido (7 colunas CHAR(n)): columnDefinition = "char(n)" em Substituicao, RhVCarreira,
 -- RhVMobilidade, VfaltaMensal e ProcSalCcPag/Remun (o Java continua String/enum); validate real passou.
+-- Bloco 3 resolvido (8 colunas VARCHAR2 com Integer no Java): columnDefinition = "varchar2(n)" nas 4 flags
+-- de ParamSituacao e no ano das 4 vistas de ferias (o Java continua Integer); validate real passou.
 -- Tabelas esperadas: 147 | sequencias esperadas: 113
--- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 23 tipo(s) incompativel(is), 1 sequencia(s) em falta
+-- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 15 tipo(s) incompativel(is), 1 sequencia(s) em falta
 -- NAO APLICADO. Rever antes de correr; os tipos seguem a convencao da casa (DATE, NUMBER, VARCHAR2(n)).
 -- =============================================================================
 
@@ -38,19 +40,11 @@ CREATE SEQUENCE SEQ_DIRECAO START WITH 1 INCREMENT BY 1 NOCACHE;
 -- -----------------------------------------------------------------------------
 -- RH_T_AVD.AVALIACAO_FINAL: BD=NUMBER(5,2), entity espera float(53)  (AvaliacaoEntity)
 -- RH_T_IAM_USER_PROFILE.ID: BD=VARCHAR2(36), entity espera raw(16)  (IAMUserProfileEntity)
--- RH_T_PARAM_SITUACAO.FLG_ABONO_BENEFICIO: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
--- RH_T_PARAM_SITUACAO.FLG_AUSENCIA: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
--- RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
--- RH_T_PARAM_SITUACAO.FLG_SITUACAO_LABORAL: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
 -- RH_V_DOSSIE.DURACAO_CONTRATO: BD=NUMBER, entity espera varchar2(255 char)  (RhVDossieEntity)
 -- RH_V_DOSSIE.NIF: BD=NUMBER, entity espera varchar2(255 char)  (RhVDossieEntity)
--- RH_V_FERIAS_MAPA.ANO_REFERENTE: BD=VARCHAR2(4), entity espera number(10,0)  (VMapaFeriaEntity)
--- RH_V_FERIAS_MENSAL.ANO: BD=VARCHAR2(4), entity espera number(10,0)  (VFeriasMensalEntity)
 -- RH_V_FERIAS_MENSAL.ID_COLABORADOR: BD=NUMBER, entity espera varchar2(255 char)  (VFeriasMensalEntity)
--- RH_V_FERIAS_VER_MAPA.ANO_REFERENTE: BD=VARCHAR2(4), entity espera number(10,0)  (VFeriasDetalheColaboradorEntity)
 -- RH_V_HIST_LABORAL.ULTIMO_PROC: BD=CHAR(0), entity espera number(10,0)  (RhVHistLaboralEntity)
 -- RH_V_HORA_EXTRA_MENSAL.FUNCIONARIO_ID: BD=NUMBER, entity espera varchar2(255 char)  (VHoraExtraMensalEntity)
--- RH_V_MAPA_FERIAS_DETALHE.ANO_REFERENTE: BD=VARCHAR2(4), entity espera number(10,0)  (VMapaFeriasDetalheEntity)
 -- RH_V_MOVIMENTOS_PICAGEM.FUNCIONARIO_UUID: BD=CHAR(0), entity espera varchar2(255 char)  (MovimentoEntity)
 -- RH_V_PROC_SAL_CC_PAG.OBS: BD=VARCHAR2(0), entity espera clob  (ProcSalCcPagEntity)
 -- RH_V_PROC_SAL_CC_REMUN.ENT_REF: BD=VARCHAR2(0), entity espera clob  (ProcSalCcRemunEntity)

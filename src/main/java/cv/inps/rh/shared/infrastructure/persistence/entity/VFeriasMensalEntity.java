@@ -105,7 +105,7 @@ public class VFeriasMensalEntity  {
     private Integer totalGozado;
 
 
-    @Column(name="ano")
+    @Column(name="ano", columnDefinition = "varchar2(4)")
     private Integer ano;
 
 

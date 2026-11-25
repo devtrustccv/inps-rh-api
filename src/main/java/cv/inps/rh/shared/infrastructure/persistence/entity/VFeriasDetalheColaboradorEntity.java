@@ -57,7 +57,7 @@ public class VFeriasDetalheColaboradorEntity  {
     private Long anoId;
 
 
-    @Column(name="ano_referente")
+    @Column(name="ano_referente", columnDefinition = "varchar2(4)")
     private Integer anoReferente;
 
 
