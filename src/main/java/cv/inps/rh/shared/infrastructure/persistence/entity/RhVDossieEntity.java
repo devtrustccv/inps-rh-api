@@ -112,7 +112,7 @@ public class RhVDossieEntity  {
   private LocalDate dataFimContrato;
 
   @Column(name = "DURACAO_CONTRATO")
-  private String duracaoContrato;
+  private Long duracaoContrato;
 
   @Column(name = "LOCAL_TRABALHO_DESC")
   private String localTrabalhoDesc;
@@ -154,7 +154,7 @@ public class RhVDossieEntity  {
   private Long locNascId;
 
   @Column(name = "NIF")
-  private String nif;
+  private Long nif;
 
   @Column(name = "U_SEG_INPS")
   private String uSegInps;

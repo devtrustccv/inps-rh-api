@@ -104,7 +104,7 @@ public class VHoraExtraMensalEntity  {
 
     @NotBlank(message = "funcionarioId is mandatory")
     @Column(name="funcionario_id", nullable = false)
-    private String funcionarioId;
+    private Long funcionarioId;
 
 
     @Column(name="funcionario_uuid")

@@ -50,7 +50,7 @@ public class VFeriasMensalEntity  {
 
 
     @Column(name="id_colaborador")
-    private String idColaborador;
+    private Long idColaborador;
 
 
     @Column(name="direcao_id")

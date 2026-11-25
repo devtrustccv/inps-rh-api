@@ -21,12 +21,13 @@
     },
     {
       "name": "funcionario_id",
-      "type": "string",
+      "type": "long",
       "length": 255,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false
+      "skipFieldRevision": false,
+      "objectType": "java"
     },
     {
       "name": "funcionario_uuid",
