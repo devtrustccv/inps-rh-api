@@ -1,6 +1,6 @@
 # Processamento Salarial — alterações de API para o front-end
 
-**Última actualização:** 2026-10-25 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
+**Última actualização:** 2026-11-25 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
 `/fos`)
 
 Changelog das alterações feitas ao backend do Processamento Salarial. Cada secção diz o que mudou no
@@ -97,3 +97,32 @@ os numéricos para somas ou ordenação.
 Cada linha de `content[]` traz `valorFormatado` (mesmo formato: `1234567` → `"1 234 567"`), além de `valor`.
 
 **Ação front:** mostrar `valorFormatado` na coluna Valor do Detalhe.
+
+---
+
+## 3. Importação de Movimentos — validar com o id da lista e decisão única (25/11/2026)
+
+### Porquê
+A lista devolvia em `movimentoId` o id numérico (`"4"`), mas o validar procura pelo uuid: validar a partir do
+ecrã dava sempre `400 "Invalid UUID string: 4"`. E o movimento ficava `A` desde a importação, por isso podia ser
+validado várias vezes — cada vez criava outra remuneração/desconto e outra ligação ao vínculo.
+
+### `GET /colaborador/movimentos`
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `content[].movimentoId` | id numérico (`"4"`) | **uuid** (`"01a214ac-bc0b-…"`) |
+
+O ecrã não tem de mudar nada se já reenvia o `movimentoId` da lista no path do validar.
+
+### `POST /colaborador/movimentos/{movimentoId}/validar`
+- `{movimentoId}` = o `movimentoId` da lista (uuid).
+- `validacao` só aceita **`SIM`** ou **`NAO`**; `CORRIGIR` (e qualquer outro) dá `400` — antes `CORRIGIR` era tratado
+  como `SIM`.
+- Estados (spec, Importação Movimentos): importado fica **`P`**; `SIM` → **`A`**; `NAO` → **`I`**.
+- Decidir de novo um movimento já `A` ou `I` dá `400` "Este movimento já foi validado." / "… já foi rejeitado.",
+  sem gravar nada.
+
+### Fora desta alteração (spec, por implementar)
+O `CODIGO` por ficheiro e o registo em `RH_T_VALIDACAO` na importação continuam por fazer; a lista também não
+devolve ainda o estado nem o nome do ficheiro (`nomeFicheiro` vem vazio).

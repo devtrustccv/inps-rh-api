@@ -33,7 +33,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,7 +123,8 @@ public class MovimentoService {
         mov.setDataFim(dataFim);
         mov.setSituacao(formatter.formatCellValue(row.getCell(8)));
         mov.setNomeFicheiro(fileName);
-        mov.setEstado(Estado.A.name());
+        // Spec PROCESSAMENTO SALARIAL (Importação Movimentos): importado fica P; a validação passa a A/I.
+        mov.setEstado(Estado.P.name());
         movimentos.add(mov);
       }
 
@@ -184,7 +184,9 @@ public class MovimentoService {
     response.setContent(importsSaved.stream()
         .map(obj -> {
           var movRowDTO = new MovRowDTO();
-          movRowDTO.setMovimentoId(obj.getId().toString());
+          // O validar (POST colaborador/movimentos/{movimentoId}/validar) procura pelo uuid; com o id
+          // numérico o front levava 400 "Invalid UUID string".
+          movRowDTO.setMovimentoId(obj.getUuid().toString());
           movRowDTO.setNomeFicheiro("");
           movRowDTO.setFuncionarioId(obj.getFuncionario().getId().toString());
           movRowDTO.setNomeFuncionario(obj.getFuncionario().getNome());
@@ -205,6 +207,10 @@ public class MovimentoService {
   public void validarMovimento(String movimentoId, ValidacaoMovimentoImportadoDTO data) {
 
     var mov = importacaoMovimentoEntityRepository.findByUuidOrThrow(UUID.fromString(movimentoId));
+    // Só se decide uma vez: validar de novo criava outra vez as definições e as ligações ao vínculo.
+    if (!Estado.P.name().equals(mov.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "Este movimento já foi %s.".formatted(Estado.I.name().equals(mov.getEstado()) ? "rejeitado" : "validado"));
     mov.setTpMovRetencao(data.getMovimentoRetencao());
     mov.setTpMovRem(data.getMovimentoRemuneracao());
     mov.setPercentagem(data.getPercentagem());
@@ -218,7 +224,8 @@ public class MovimentoService {
     var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid());
     var validation = data.getValidacao();
 
-    if (!Arrays.stream(EstadoValidacao.values()).map(EstadoValidacao::name).toList().contains(validation))
+    // Só SIM ou NAO: a importação não tem ciclo de correção, e CORRIGIR caía no ramo do SIM.
+    if (!EstadoValidacao.SIM.name().equals(validation) && !EstadoValidacao.NAO.name().equals(validation))
       throw IgrpResponseStatusException.badRequest("Invalid validation flag: %s".formatted(validation));
 
     if (validation.equals(EstadoValidacao.NAO.name())) {
@@ -226,6 +233,9 @@ public class MovimentoService {
       importacaoMovimentoEntityRepository.save(mov);
       return;
     }
+
+    mov.setEstado(Estado.A.name());
+    importacaoMovimentoEntityRepository.save(mov);
 
     if (StringUtils.hasText(mov.getTpMovRem())) {
 
