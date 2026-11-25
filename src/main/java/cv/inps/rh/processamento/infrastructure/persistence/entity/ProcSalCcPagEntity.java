@@ -224,7 +224,6 @@ public class ProcSalCcPagEntity {
   @Column(name = "BANCO_BEN_ID")
   private Long bancoBenId;
 
-  @Lob
   @Column(name = "OBS")
   private String obs;
 

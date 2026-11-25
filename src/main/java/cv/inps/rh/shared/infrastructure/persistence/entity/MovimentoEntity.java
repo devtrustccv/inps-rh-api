@@ -42,7 +42,7 @@ public class MovimentoEntity {
   @Column(name = "id_colaborador")
   private Long idColaborador;
 
-  @Column(name = "funcionario_uuid")
+  @Column(name = "funcionario_uuid", columnDefinition = "char(36)")
   private UUID funcionarioUuid;
 
 

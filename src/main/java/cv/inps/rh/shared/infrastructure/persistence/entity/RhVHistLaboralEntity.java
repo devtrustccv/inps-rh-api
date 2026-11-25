@@ -202,7 +202,7 @@ public class RhVHistLaboralEntity  {
   private String ilha;
 
 
-  @Column(name="ultimo_proc")
+  @Column(name="ultimo_proc", columnDefinition = "char(1)")
   private Integer ultimoProc;
 
 

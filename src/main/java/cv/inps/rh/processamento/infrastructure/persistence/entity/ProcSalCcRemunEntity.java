@@ -198,15 +198,12 @@ public class ProcSalCcRemunEntity {
   @Column(name = "IAC_DESCRICAO", length = 200)
   private String iacDescricao;
 
-  @Lob
   @Column(name = "NIB_REF")
   private String nibRef;
 
-  @Lob
   @Column(name = "ENTIDADE_REF")
   private String entidadeRef;
 
-  @Lob
   @Column(name = "ENT_REF")
   private String entRef;
 
