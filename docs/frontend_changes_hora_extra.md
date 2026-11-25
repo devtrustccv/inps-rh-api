@@ -144,3 +144,28 @@ POST /api/v1/assiduidade/hora-extra
 | `GET /hora-extra/{pedidoId}` (response) | `percentagemReferente` | ❌ não existia | `String` |
 | `GET /hora-extra/{pedidoId}` (response) | `valorDiario` | `Integer` | `BigDecimal` |
 | `GET /hora-extra/calculo-valor` | — | ❌ não existia | **Novo endpoint** |
+
+---
+
+## 7. Horas diárias: máximo passa de 24 para 23 · horas na síntese corrigidas (2026-11-25)
+
+### Porquê
+As horas diárias da hora extra vão para `RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_EXTRAS`, que é
+`INTERVAL DAY(0) TO SECOND(0)` e só admite 0–23h. Até agora gravavam-se como **minutos** (2 h ficavam `00:02`),
+por isso 24 não rebentava; com as horas certas, 24 já não cabe na coluna.
+
+### `POST /api/v1/assiduidade/hora-extra` · `POST /api/v1/assiduidade/hora-extra/{pedidoId}` (ajuste)
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `horaExtra[].horasDiaria` | 1 a 24 | **1 a 23** — 24 dá `400` "As horas diárias da hora extra têm de estar entre 1 e 23" |
+
+O front deve limitar o campo a 23.
+
+### Valores que mudam na leitura (sem mudança de contrato)
+- `GET /hora-extra` → `itens[].horasTrabalho` passa a vir em horas (ex.: `2`), em vez de `0.0333…` (minutos).
+- `GET /movimento-resumos` → `totalHoraExtra` passa a somar as horas de **todos os dias** do período
+  (ex.: 3 dias × 2 h = `06:00`), em vez de `00:01`/`00:02`.
+- A síntese acompanha a hora extra: ajustar as horas na validação ou no reenvio de uma correção atualiza-as, e
+  **rejeitar** (`validar: NAO`) tira-as — uma hora extra rejeitada deixa de contar no `totalHoraExtra` do resumo e
+  aparece na lista com `horasTrabalho` `0`. Duas horas extra no mesmo dia somam.
