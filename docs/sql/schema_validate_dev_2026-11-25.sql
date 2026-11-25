@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Schema validate (simulado) — entities vs BD de dev (schemas INPSRH, INPSSIGOF, SIPSGLOBAL)
--- Gerado a 2026-11-25 (develop 910b3fe3). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
+-- Gerado a 2026-11-25 (develop 885d2b9d + bloco 1 dos tipos). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
 -- (o validate do Hibernate para no 1.o: aqui foi INPSSIGOF.RH_TIPO_MOVIMENTOS.ENT_ID, que esta na seccao 4).
 -- Como foi gerado: DDL esperado pelas entities (schema-generation scripts.action=create, sem tocar na BD)
 -- comparado com ALL_TAB_COLUMNS / ALL_SEQUENCES. Regras de tipo confirmadas com o driver e o
@@ -8,8 +8,10 @@
 -- NUMBER vs float/varchar2 e VARCHAR2 vs clob/number dao erro).
 -- RH_T_PAG_TIPREL / RH_T_REMUN_TIPREL ja nao aparecem: as entities foram removidas (910b3fe3);
 -- a tabela usada e RH_T_TIPREL_REM_PAG.
+-- Bloco 1 resolvido (11 colunas de horas INTERVAL): IntervalDsStringJdbcType nas entities
+-- AssiduidadeSinteseDiario, Dispensa e Falta; validate real das 3 tabelas passou.
 -- Tabelas esperadas: 147 | sequencias esperadas: 113
--- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 41 tipo(s) incompativel(is), 1 sequencia(s) em falta
+-- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 30 tipo(s) incompativel(is), 1 sequencia(s) em falta
 -- NAO APLICADO. Rever antes de correr; os tipos seguem a convencao da casa (DATE, NUMBER, VARCHAR2(n)).
 -- =============================================================================
 
@@ -32,18 +34,7 @@ CREATE SEQUENCE SEQ_DIRECAO START WITH 1 INCREMENT BY 1 NOCACHE;
 -- 4. Tipos incompativeis (validate rebenta: 'wrong column type encountered')
 --    Decidir caso a caso: mudar a BD ou o mapeamento da entity. Sem DDL automatico.
 -- -----------------------------------------------------------------------------
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORA_PRIMEIRA_ENTRADA: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORA_PRIMEIRA_SAIDA_ALMOCO: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORA_ULTIMA_ENTRADA_ALMOCO: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORA_ULTIMA_SAIDA: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_ALMOCO: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_AUSENCIA: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_EXTRAS: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
--- RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_TRABALHADAS: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (AssiduidadeSinteseDiarioEntity)
 -- RH_T_AVD.AVALIACAO_FINAL: BD=NUMBER(5,2), entity espera float(53)  (AvaliacaoEntity)
--- RH_T_DISPENSA.HORA_FIM: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (DispensaEntity)
--- RH_T_DISPENSA.HORA_INICIO: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (DispensaEntity)
--- RH_T_FALTA.HORAS_AUSENCIA: BD=INTERVAL DAY(0) TO SECOND(0), entity espera varchar2(255 char)  (FaltaEntity)
 -- RH_T_IAM_USER_PROFILE.ID: BD=VARCHAR2(36), entity espera raw(16)  (IAMUserProfileEntity)
 -- RH_T_PARAM_SITUACAO.FLG_ABONO_BENEFICIO: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
 -- RH_T_PARAM_SITUACAO.FLG_AUSENCIA: BD=VARCHAR2(1), entity espera number(10,0)  (ParamSituacaoEntity)
