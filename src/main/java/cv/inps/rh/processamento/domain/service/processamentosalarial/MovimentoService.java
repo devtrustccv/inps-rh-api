@@ -33,7 +33,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -144,16 +147,29 @@ public class MovimentoService {
     importacaoMovimentoEntityRepository.saveAll(movimentos);
   }
 
-  private FuncionarioEntity parseFuncionario(String uuid, List<String> erros) {
+  /**
+   * Coluna A do ficheiro: número de colaborador (RH_T_FUNCIONARIOS.ID_COLABORADOR) — é o que o ficheiro
+   * de ginásio/cantina traz (spec: "Num_fun"). O número não é único na BD: se der mais de um colaborador,
+   * a linha dá erro em vez de escolher um.
+   */
+  private FuncionarioEntity parseFuncionario(String numero, List<String> erros) {
+    long idColaborador;
     try {
-      var funcionario = funcionarioEntityRepository.findByUuid(UUID.fromString(uuid));
-      if (funcionario.isEmpty())
-        erros.add("colaborador não encontrado (" + uuid + ")");
-      return funcionario.orElse(null);
-    } catch (IllegalArgumentException e) {
-      erros.add("identificador do colaborador inválido (" + uuid + ")");
+      idColaborador = new BigDecimal(numero.trim()).longValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      erros.add("número de colaborador inválido (" + numero + ")");
       return null;
     }
+    var funcionarios = funcionarioEntityRepository.findAllByIdColaborador(idColaborador);
+    if (funcionarios.isEmpty()) {
+      erros.add("colaborador não encontrado (número " + idColaborador + ")");
+      return null;
+    }
+    if (funcionarios.size() > 1) {
+      erros.add("o número de colaborador " + idColaborador + " corresponde a " + funcionarios.size() + " colaboradores");
+      return null;
+    }
+    return funcionarios.getFirst();
   }
 
   public MovimentosImportadosDTO getMovimentos(GetMovimentosImportadosQuery request) {
@@ -179,6 +195,17 @@ public class MovimentoService {
       importsSaved = importacaoMovimentoEntityRepository.findAll(pageRequest);
     }
 
+    // Nome dos tipos de movimento da página (spec: INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME), numa só consulta.
+    var idsTipoMovimento = importsSaved.stream()
+        .flatMap(m -> java.util.stream.Stream.of(m.getTpMovRetencao(), m.getTpMovRem()))
+        .map(MovimentoService::idTipoMovimento)
+        .filter(Objects::nonNull)
+        .distinct()
+        .toList();
+    Map<Long, String> nomeTipoMovimento = new HashMap<>();
+    tipoMovimentoEntityRepository.findAllById(idsTipoMovimento)
+        .forEach(tm -> nomeTipoMovimento.put(tm.getId(), tm.getDescricao()));
+
     var response = new MovimentosImportadosDTO();
     PageMapper.fillPagination(importsSaved, response);
     response.setContent(importsSaved.stream()
@@ -187,7 +214,9 @@ public class MovimentoService {
           // O validar (POST colaborador/movimentos/{movimentoId}/validar) procura pelo uuid; com o id
           // numérico o front levava 400 "Invalid UUID string".
           movRowDTO.setMovimentoId(obj.getUuid().toString());
-          movRowDTO.setNomeFicheiro("");
+          movRowDTO.setNomeFicheiro(obj.getNomeFicheiro());
+          movRowDTO.setMovimentoRetencaoDesc(nomeTipoMovimento.get(idTipoMovimento(obj.getTpMovRetencao())));
+          movRowDTO.setMovimentoRemuneracaoDesc(nomeTipoMovimento.get(idTipoMovimento(obj.getTpMovRem())));
           movRowDTO.setFuncionarioId(obj.getFuncionario().getId().toString());
           movRowDTO.setNomeFuncionario(obj.getFuncionario().getNome());
           movRowDTO.setMovimentoRetencao(obj.getTpMovRetencao());
@@ -202,6 +231,17 @@ public class MovimentoService {
         .toList());
 
     return response;
+  }
+
+  /** TP_MOV_* é texto com o id do tipo de movimento; vazio ou não numérico → null. */
+  private static Long idTipoMovimento(String valor) {
+    if (!StringUtils.hasText(valor))
+      return null;
+    try {
+      return Long.valueOf(valor.trim());
+    } catch (NumberFormatException e) {
+      return null;
+    }
   }
 
   public void validarMovimento(String movimentoId, ValidacaoMovimentoImportadoDTO data) {

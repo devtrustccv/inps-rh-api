@@ -123,6 +123,27 @@ O ecrã não tem de mudar nada se já reenvia o `movimentoId` da lista no path d
 - Decidir de novo um movimento já `A` ou `I` dá `400` "Este movimento já foi validado." / "… já foi rejeitado.",
   sem gravar nada.
 
-### Fora desta alteração (spec, por implementar)
-O `CODIGO` por ficheiro e o registo em `RH_T_VALIDACAO` na importação continuam por fazer; a lista também não
-devolve ainda o estado nem o nome do ficheiro (`nomeFicheiro` vem vazio).
+### Lista — nome do ficheiro e nomes dos movimentos (spec, Lista Importados)
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `content[].nomeFicheiro` | sempre `""` | nome do ficheiro importado (ex.: `movimentos_2026_12.xlsx`) |
+| `content[].movimentoRetencaoDesc` | ❌ não existia | nome do tipo de movimento de retenção (ou `null`) |
+| `content[].movimentoRemuneracaoDesc` | ❌ não existia | nome do tipo de movimento de remuneração (ou `null`) |
+
+`movimentoRetencao` / `movimentoRemuneracao` continuam a trazer o **id** do tipo de movimento (é o que o formulário
+de validação reenvia); o ecrã mostra os `…Desc`.
+
+### `POST /colaborador/importar-movimento` — coluna A passa a ser o Nº de Colaborador
+
+| Coluna A do Excel | Antes | Depois |
+|---|---|---|
+| Identificação do colaborador | UUID do funcionário | **Número de colaborador** (`RH_T_FUNCIONARIOS.ID_COLABORADOR`), como o ficheiro de ginásio/cantina traz |
+
+Erros novos por linha (400, nada gravado): `colaborador não encontrado (número N)`,
+`o número de colaborador N corresponde a K colaboradores` (o número não é único na BD),
+`número de colaborador inválido (x)`. Modelo actualizado em `docs/modelos/importacao_movimentos_modelo.xlsx`.
+
+### Fora desta alteração (spec, por implementar — precisam de colunas na BD)
+`CODIGO` por ficheiro, registo em `RH_T_VALIDACAO` na importação, `NOME_FUNCIONARIO` e `TIPREL_ID` (Vínculo).
+A lista também não devolve o estado.

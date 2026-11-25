@@ -34,6 +34,9 @@ public interface FuncionarioEntityRepository extends
 
   Optional<FuncionarioEntity> findByUuid(UUID uuid);
 
+  /** Número de colaborador (RH_T_FUNCIONARIOS.ID_COLABORADOR); não é único na BD, por isso devolve lista. */
+  List<FuncionarioEntity> findAllByIdColaborador(Long idColaborador);
+
   default FuncionarioEntity findByUuidOrThrow(UUID uuid) {
     return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "FuncionarioEntity not found for id: " + uuid));
   }

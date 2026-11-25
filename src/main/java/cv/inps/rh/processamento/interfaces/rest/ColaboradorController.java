@@ -114,8 +114,8 @@ public class ColaboradorController {
 
             Colunas:
 
-            - Coluna A (índice 0): UUID do Funcionário — obrigatório
-              - UUID de um funcionário existente (RH_T_FUNCIONARIOS.UUID).
+            - Coluna A (índice 0): Nº de Colaborador — obrigatório
+              - Número de colaborador (RH_T_FUNCIONARIOS.ID_COLABORADOR); tem de existir e ser de um só colaborador.
 
             - Coluna B (índice 1): Nome do Funcionário — informativo
               - Não é lido pelo sistema; serve só de referência para quem preenche, mas a coluna tem de existir nesta posição.
@@ -144,7 +144,7 @@ public class ColaboradorController {
 
             Cada linha válida origina um registo em RH_T_IMPORTACAO_MOVIMENTO, associado ao funcionário da coluna A.
 
-            A importação é tudo ou nada: se alguma linha tiver erro (UUID inválido ou inexistente, número ou data
+            A importação é tudo ou nada: se alguma linha tiver erro (nº de colaborador inválido, inexistente ou de mais de um colaborador, número ou data
             inválidos, Data de Fim anterior à Data de Início), o pedido devolve 400 com a lista de erros por linha
             (ex: "Linha 3: Valor inválido (abc)") e nenhuma linha é gravada. Um ficheiro que não seja Excel, ou sem
             movimentos, também devolve 400.

@@ -38,6 +38,14 @@ public class MovRowDTO {
   private String movimentoRemuneracao;
 
 
+  /** Nome do tipo de movimento de retenção (spec: INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME). */
+  private String movimentoRetencaoDesc;
+
+
+  /** Nome do tipo de movimento de remuneração. */
+  private String movimentoRemuneracaoDesc;
+
+
   private BigDecimal percentagem;
 
 
