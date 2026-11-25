@@ -1,51 +1,21 @@
 -- =============================================================================
 -- Schema validate (simulado) — entities vs BD de dev (schemas INPSRH, INPSSIGOF, SIPSGLOBAL)
--- Gerado a 2026-11-25 (develop ab2bf9dc). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
+-- Gerado a 2026-11-25 (develop 910b3fe3). Equivale aos erros que ddl-auto=validate daria, todos de uma vez
 -- (o validate do Hibernate para no 1.o: aqui foi INPSSIGOF.RH_TIPO_MOVIMENTOS.ENT_ID, que esta na seccao 4).
 -- Como foi gerado: DDL esperado pelas entities (schema-generation scripts.action=create, sem tocar na BD)
 -- comparado com ALL_TAB_COLUMNS / ALL_SEQUENCES. Regras de tipo confirmadas com o driver e o
 -- OracleLegacyDialect reais (DATE aceita timestamp e date; CHAR vs varchar2, INTERVAL vs varchar2,
 -- NUMBER vs float/varchar2 e VARCHAR2 vs clob/number dao erro).
--- Tabelas esperadas: 149 | sequencias esperadas: 115
--- Erros: 2 tabela(s) em falta, 3 coluna(s) em falta, 41 tipo(s) incompativel(is), 1 sequencia(s) em falta
+-- RH_T_PAG_TIPREL / RH_T_REMUN_TIPREL ja nao aparecem: as entities foram removidas (910b3fe3);
+-- a tabela usada e RH_T_TIPREL_REM_PAG.
+-- Tabelas esperadas: 147 | sequencias esperadas: 113
+-- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 41 tipo(s) incompativel(is), 1 sequencia(s) em falta
 -- NAO APLICADO. Rever antes de correr; os tipos seguem a convencao da casa (DATE, NUMBER, VARCHAR2(n)).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
 -- 1. Tabelas em falta
 -- -----------------------------------------------------------------------------
--- entity: PagTiprelEntity
-CREATE TABLE RH_T_PAG_TIPREL (
-    DATA_ALTERACAO DATE,
-    DATA_REGISTO DATE NOT NULL,
-    ID NUMBER NOT NULL,
-    PAG_ID NUMBER NOT NULL,
-    TIPREL_ID NUMBER,
-    USER_ALTERACAO_ID NUMBER(16),
-    USER_REGISTO_ID NUMBER(16) NOT NULL,
-    ESTADO VARCHAR2(255),
-    OBS VARCHAR2(4000),
-    USER_ALTERACAO_NAME VARCHAR2(200),
-    USER_REGISTO_NAME VARCHAR2(200) NOT NULL,
-    UUID VARCHAR2(255)
-);
-
--- entity: RemuneracaoTiprelEntity
-CREATE TABLE RH_T_REMUN_TIPREL (
-    DATA_ALTERACAO DATE,
-    DATA_REGISTO DATE NOT NULL,
-    ID NUMBER NOT NULL,
-    REM_ID NUMBER,
-    TIPREL_ID NUMBER,
-    USER_ALTERACAO_ID NUMBER(16),
-    USER_REGISTO_ID NUMBER(16) NOT NULL,
-    ESTADO VARCHAR2(255) NOT NULL,
-    OBS VARCHAR2(4000),
-    USER_ALTERACAO_NAME VARCHAR2(200),
-    USER_REGISTO_NAME VARCHAR2(200) NOT NULL,
-    UUID VARCHAR2(255)
-);
-
 -- -----------------------------------------------------------------------------
 -- 2. Colunas em falta
 -- -----------------------------------------------------------------------------

@@ -1,12 +1,13 @@
 -- =============================================================================
 -- Schema diff (Hibernate scripts.action=update) — entities vs BD de dev
--- Gerado a 2026-11-25 (develop ab2bf9dc). SQL que o ddl-auto=update executaria; NAO APLICADO.
+-- Gerado a 2026-11-25 (develop ab2bf9dc; atualizado para 910b3fe3). SQL que o ddl-auto=update executaria; NAO APLICADO.
 -- So mostra o que FALTA (tabelas, colunas, sequencias, FKs); tipos diferentes nao aparecem aqui
 -- (ver schema_validate_dev_2026-11-25.sql). Tipos tal como o Hibernate os propoe (timestamp/255 char),
 -- nao na convencao da casa.
 --
 -- Em falta de verdade: RH_T_EVOLUCAO_CARREIRA (DATA_ALTERACAO, USER_ALTERACAO_NAME),
--- RH_T_PAG_TIPREL, RH_T_REMUN_TIPREL, RH_T_VAL_EVOLUCAO_CARREIRA.ORDEM_SERVICO_ID, SEQ_DIRECAO.
+-- RH_T_VAL_EVOLUCAO_CARREIRA.ORDEM_SERVICO_ID, SEQ_DIRECAO.
+-- (RH_T_PAG_TIPREL / RH_T_REMUN_TIPREL retiradas: entities removidas em 910b3fe3, usa-se RH_T_TIPREL_REM_PAG.)
 -- As "add constraint ... foreign key" sao FKs que o Hibernate gostaria de ter: o validate nao as
 -- verifica e nao partem nada (muitas apontam para SIPSGLOBAL).
 -- =============================================================================
@@ -17,37 +18,7 @@
     alter table rh_t_evolucao_carreira 
        add data_alteracao timestamp(6);
 
-    create table rh_t_pag_tiprel (
-        id number(19,0) not null,
-        user_registo_name varchar2(255 char) not null,
-        user_registo_id number(19,0) not null,
-        data_registo timestamp(6) not null,
-        user_alteracao_name varchar2(255 char),
-        user_alteracao_id number(19,0),
-        data_alteracao timestamp(6),
-        estado varchar2(255 char) check (estado in ('I','A','E','P','C')),
-        obs varchar2(4000 char),
-        uuid varchar2(255 char),
-        pag_id number(19,0) not null,
-        tiprel_id number(19,0),
-        primary key (id)
-    );
 
-    create table rh_t_remun_tiprel (
-        id number(19,0) not null,
-        user_registo_name varchar2(255 char) not null,
-        user_registo_id number(19,0) not null,
-        data_registo timestamp(6) not null,
-        user_alteracao_name varchar2(255 char),
-        user_alteracao_id number(19,0),
-        data_alteracao timestamp(6),
-        estado varchar2(255 char) not null check (estado in ('I','A','E','P','C')),
-        obs varchar2(4000 char),
-        uuid varchar2(255 char),
-        rem_id number(19,0),
-        tiprel_id number(19,0),
-        primary key (id)
-    );
 
     alter table rh_t_val_evolucao_carreira 
        add ordem_servico_id number(19,0);
@@ -129,15 +100,7 @@
        foreign key (mob_id) 
        references rh_t_mobilidade;
 
-    alter table rh_t_pag_tiprel 
-       add constraint FKs23jfqto74aa4dlwbxpvmkiit 
-       foreign key (pag_id) 
-       references rh_t_def_pagamentos;
 
-    alter table rh_t_pag_tiprel 
-       add constraint FKhg1ap0pyf6ujl8xv5bc8myde2 
-       foreign key (tiprel_id) 
-       references rh_t_tipos_relacionamento;
 
     alter table rh_t_param_local_trab 
        add constraint FKegvle4iuxia78lsp4xxnqxuw7 
@@ -174,15 +137,7 @@
        foreign key (rhb_id) 
        references rh_t_dados_bancarios;
 
-    alter table rh_t_remun_tiprel 
-       add constraint FKr64g7veh6bkyaj2eruulj9cyb 
-       foreign key (rem_id) 
-       references rh_t_def_remuneracoes;
 
-    alter table rh_t_remun_tiprel 
-       add constraint FKqkvondngp1sywlk6o0o2s1nd7 
-       foreign key (tiprel_id) 
-       references rh_t_tipos_relacionamento;
 
     alter table rh_t_responsavel 
        add constraint FKa2rjjqmow3dwgprwp9umbxmcp 
