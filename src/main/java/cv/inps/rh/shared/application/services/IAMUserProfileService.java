@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Ponto central de acesso ao perfil IAM ({@code t_iam_user_profile}) e de tradução de identidade.
@@ -347,7 +346,7 @@ public class IAMUserProfileService {
     }
 
     var entity = new IAMUserProfileEntity();
-    entity.setId(UUID.fromString(sub));
+    entity.setId(sub);
     entity.setSub(sub);
     entity.setUsername(username);
     entity.setEmail(email);

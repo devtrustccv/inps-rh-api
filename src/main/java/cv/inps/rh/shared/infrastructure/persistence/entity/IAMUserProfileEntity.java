@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -29,7 +28,7 @@ public class IAMUserProfileEntity extends AuditEntity {
 
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "username is mandatory")
     @Column(name = "username", unique = true, nullable = false)
