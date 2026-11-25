@@ -2,6 +2,7 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.processamento.application.dto.MovRowDTO;
 import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
 import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
@@ -47,10 +48,9 @@ public class MovimentoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
-  private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
-  private final PagTiprelEntityRepository pagTiprelEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   private static BigDecimal parseNumero(Cell cell, DataFormatter formatter, String campo, List<String> erros) {
     if (cell == null || cell.getCellType() == CellType.BLANK)
@@ -241,14 +241,7 @@ public class MovimentoService {
       remunerationDefinition.setDataFim(mov.getDataFim());
       remunerationDefinition.setFunId(fun);
       var saved = definicaoRemuneracaoEntityRepository.save(remunerationDefinition);
-
-      var remunerationRelType = new RemuneracaoTiprelEntity();
-      remunerationRelType.setEstado(Estado.A);
-      remunerationRelType.setObs(saved.getObs());
-      remunerationRelType.setUuid(UuidCreator.getTimeOrderedEpoch());
-      remunerationRelType.setRemId(saved);
-      remunerationRelType.setTiprelId(currentRelation);
-      remuneracaoTiprelEntityRepository.save(remunerationRelType);
+      tipoRelRemPagHelper.associarLista(currentRelation, List.of(saved), List.of());
     }
 
     if (StringUtils.hasText(mov.getTpMovRetencao())) {
@@ -264,14 +257,7 @@ public class MovimentoService {
       paymentDefinition.setPercentagem(mov.getPercentagem());
       paymentDefinition.setFunId(fun);
       var saved = defPagamentoEntityRepository.save(paymentDefinition);
-
-      var relPaymentType = new PagTiprelEntity();
-      relPaymentType.setPagId(saved);
-      relPaymentType.setTiprelId(currentRelation);
-      relPaymentType.setEstado(Estado.A);
-      relPaymentType.setObs(saved.getObs());
-      relPaymentType.setUuid(UuidCreator.getTimeOrderedEpoch());
-      pagTiprelEntityRepository.save(relPaymentType);
+      tipoRelRemPagHelper.associarLista(currentRelation, List.of(), List.of(saved));
     }
   }
 
