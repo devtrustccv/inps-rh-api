@@ -67,7 +67,7 @@ public class MovimentoEntity {
 
 
   @Column(name = "work_code")
-  private short workCode;
+  private Short workCode;
 
 
   @Column(name = "dt_registo")

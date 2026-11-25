@@ -3,6 +3,7 @@ package cv.inps.rh.assiduidade.application.services;
 import cv.inps.rh.assiduidade.application.dto.PicagemListDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaPicagemDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaPicagemQuery;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MovimentoEntityRepository;
@@ -47,10 +48,18 @@ public class PicagemService {
                 "%" + query.getColaborador().toLowerCase() + "%"));
       }
 
-      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+      // RH_MOVIMENTOS.ID_COLABORADOR é o número de colaborador (RH_T_FUNCIONARIOS.ID_COLABORADOR),
+      // não o id interno. A vista não traz o uuid do funcionário (FUNCIONARIO_UUID é '' fixo), por isso
+      // o filtro vai ao funcionário pelo uuid e compara o número de colaborador.
+      if (StringUtils.hasText(query.getFuncionarioUuid()) && cq != null) {
         try {
           var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
-          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+          Subquery<Long> fun = cq.subquery(Long.class);
+          var f = fun.from(FuncionarioEntity.class);
+          fun.select(f.get("id")).where(
+              cb.equal(f.get("uuid"), funcUuid),
+              cb.equal(f.get("idColaborador"), root.get("idColaborador")));
+          predicates.add(cb.exists(fun));
         } catch (IllegalArgumentException ignored) {
           // Ignore invalid UUIDs
         }
@@ -83,7 +92,8 @@ public class PicagemService {
         var tr = sub.from(TiposRelacionamentoEntity.class);
         var conds = new ArrayList<Predicate>();
 
-        conds.add(cb.equal(tr.get("funId").get("id"),
+        // contrato do funcionário com este número de colaborador (não o id interno)
+        conds.add(cb.equal(tr.get("funId").get("idColaborador"),
             root.get("idColaborador")));
 
         conds.add(cb.equal(tr.get("estActAdm"), 1));
