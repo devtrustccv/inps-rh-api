@@ -84,7 +84,7 @@ public class RhVMobilidadeEntity {
   private LocalDate dataFim;
 
 
-  @Column(name = "estado")
+  @Column(name = "estado", columnDefinition = "char(1)")
   private String estado;
 
 

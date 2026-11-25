@@ -65,7 +65,7 @@ public class SubstituicaoEntity extends AuditEntity {
 
 
     @Enumerated(EnumType.STRING)
-    @Column(name="estado")
+    @Column(name="estado", columnDefinition = "char(1)")
     private Estado estado;
 
 

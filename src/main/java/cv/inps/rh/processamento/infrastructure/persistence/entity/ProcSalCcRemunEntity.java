@@ -29,7 +29,7 @@ public class ProcSalCcRemunEntity {
   private Long ccId;
 
   @Size(max = 4)
-  @Column(name = "TIPO", length = 4)
+  @Column(name = "TIPO", length = 4, columnDefinition = "char(4)")
   private String tipo;
 
   @Size(max = 150)

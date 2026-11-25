@@ -29,7 +29,7 @@ public class ProcSalCcPagEntity {
   private Long ccId;
 
   @Size(max = 3)
-  @Column(name = "TIPO", length = 3)
+  @Column(name = "TIPO", length = 3, columnDefinition = "char(3)")
   private String tipo;
 
   @Size(max = 150)
