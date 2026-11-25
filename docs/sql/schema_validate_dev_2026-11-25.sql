@@ -38,14 +38,16 @@
 -- -----------------------------------------------------------------------------
 -- 2. Colunas em falta
 -- -----------------------------------------------------------------------------
+-- Script para o DBA: schema_validate_ddl_pendente.sql (ponto 1 remete para progressao_promocao_ordem_servico_ddl.sql).
 ALTER TABLE RH_T_EVOLUCAO_CARREIRA ADD (DATA_ALTERACAO DATE);  -- entity: EvolucaoCarreiraEntity
 ALTER TABLE RH_T_EVOLUCAO_CARREIRA ADD (USER_ALTERACAO_NAME VARCHAR2(200));  -- entity: EvolucaoCarreiraEntity
-ALTER TABLE RH_T_VAL_EVOLUCAO_CARREIRA ADD (ORDEM_SERVICO_ID NUMBER);  -- entity: ValEvolucaoCarreiraEntity
+ALTER TABLE RH_T_VAL_EVOLUCAO_CARREIRA ADD (ORDEM_SERVICO_ID NUMBER);  -- entity: ValEvolucaoCarreiraEntity (+ FK, ver progressao_promocao_ordem_servico_ddl.sql)
 
 -- -----------------------------------------------------------------------------
 -- 3. Sequencias em falta
 -- -----------------------------------------------------------------------------
-CREATE SEQUENCE SEQ_DIRECAO START WITH 1 INCREMENT BY 1 NOCACHE;
+-- SEQ_DIRECAO: nao comecar em 1 (RH_T_DIRECAO ja tem ids 1..8 e ate 100011079); comeca em MAX(ID)+1,
+-- ver schema_validate_ddl_pendente.sql.
 
 -- -----------------------------------------------------------------------------
 -- 4. Tipos incompativeis (validate rebenta: 'wrong column type encountered')
