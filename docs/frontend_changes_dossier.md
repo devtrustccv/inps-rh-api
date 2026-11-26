@@ -212,3 +212,11 @@ devolvem `O colaborador substituto|substituído (<nome>) não tem vencimento ati
 registo seguia sem diferença, sem aviso.
 
 **Ação front:** nenhuma no contrato; mostrar a mensagem do 400.
+
+## 13. Contrato em correção — GET devolve os subsídios e encargos manuais (26/11/2026)
+
+`GET api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}` com o contrato em correção (estado `C`, depois de um
+CORRIGIR) passa a devolver em `subsidios` e `encargosDescontos` as linhas manuais do contrato (as que estão pendentes),
+como já fazia com o contrato pendente (`P`). Antes vinham `[]`; o ecrã reenviava sem elas e o backend eliminava-as (`E`).
+
+**Ação front:** nenhuma — o reenvio deve mandar as linhas como vêm do GET, cada uma com o seu `id`.
