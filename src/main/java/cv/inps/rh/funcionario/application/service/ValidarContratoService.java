@@ -196,11 +196,14 @@ public class ValidarContratoService {
       // Subsidios (def_remuneracoes) seguem o periodo e a moeda do contrato (o SubsidioReqDTO
       // nao tem datas nem moeda -> senao ficariam com NOW/moeda null). Encargos ja recebem o
       // default do contrato no ValidarDadosContratuaisService.
+      // Só os def DESTE contrato (P/C: os manuais do registo e os novos do sync). A coleção é a do
+      // funcionário e traz também os de contratos anteriores (I de um contrato desativado ou de
+      // registos rejeitados, A de contratos mais antigos) — esses mantêm as suas datas.
       if (contrato != null) {
         var ci = contrato.getDataInicio();
         var cf = contrato.getDataFim();
         funcionario.getDefinicoesRenumeracoes().forEach(r -> {
-          if (r != null && r.getEstado() != Estado.E) {
+          if (r != null && (r.getEstado() == Estado.P || r.getEstado() == Estado.C)) {
             r.setDataInicio(ci); r.setDataFim(cf);
             if (r.getMoeda() == null) r.setMoeda(dadosContratuais.getMoeda());
           }
