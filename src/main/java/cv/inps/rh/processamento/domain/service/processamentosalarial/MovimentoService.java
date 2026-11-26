@@ -9,6 +9,8 @@ import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
 import cv.inps.rh.processamento.application.queries.GetMovimentosImportadosQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -53,6 +55,7 @@ public class MovimentoService {
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   private static BigDecimal parseNumero(Cell cell, DataFormatter formatter, String campo, List<String> erros) {
     if (cell == null || cell.getCellType() == CellType.BLANK)
@@ -126,6 +129,11 @@ public class MovimentoService {
         mov.setDataFim(dataFim);
         mov.setSituacao(formatter.formatCellValue(row.getCell(8)));
         mov.setNomeFicheiro(fileName);
+        mov.setNomeFuncionario(StringUtils.hasText(formatter.formatCellValue(row.getCell(1)))
+            ? formatter.formatCellValue(row.getCell(1)).trim() : null);
+        // Vínculo do colaborador no momento da importação ("Vínculo (Situação)" da lista); sem contrato
+        // atual fica vazio — a validação continua a usar o contrato atual nesse momento (spec: est_act_adm=1).
+        mov.setTiprel(funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid()));
         // Spec PROCESSAMENTO SALARIAL (Importação Movimentos): importado fica P; a validação passa a A/I.
         mov.setEstado(Estado.P.name());
         movimentos.add(mov);
@@ -144,7 +152,35 @@ public class MovimentoService {
     if (movimentos.isEmpty())
       throw IgrpResponseStatusException.badRequest("O ficheiro não tem movimentos para importar");
 
+    // Spec: CODIGO = identificador do ficheiro, igual em todas as linhas; uma RH_T_VALIDACAO por ficheiro
+    // (REFERENCIA_ID = CODIGO, sem colaborador nem vínculo).
+    Long codigo = importacaoMovimentoEntityRepository.nextCodigo();
+    movimentos.forEach(m -> m.setCodigo(codigo));
     importacaoMovimentoEntityRepository.saveAll(movimentos);
+
+    var validacao = new ValidacaoEntity();
+    validacao.setTipoAccao(TipoAcao.INSERT.name());
+    validacao.setReferenciaName(Referencia.IMPORTACAO_MOVIMENTO.name());
+    validacao.setReferenciaId(codigo);
+    validacao.setEstado(Estado.P);
+    validacao.setUuid(UuidCreator.getTimeOrderedEpoch());
+    validacao.setObs("Ficheiro: " + fileName);
+    validacaoEntityRepository.save(validacao);
+  }
+
+  /**
+   * A validação do ficheiro fica P enquanto houver linhas por decidir e passa a A quando todas estiverem
+   * decididas (validadas ou rejeitadas) — a decisão é linha a linha, a RH_T_VALIDACAO é uma por ficheiro.
+   */
+  private void fecharValidacaoSeDecidido(Long codigo) {
+    if (codigo == null || importacaoMovimentoEntityRepository.countByCodigoAndEstado(codigo, Estado.P.name()) > 0)
+      return;
+    validacaoEntityRepository.findFirstByReferenciaNameAndReferenciaIdAndEstado(
+            Referencia.IMPORTACAO_MOVIMENTO.name(), codigo, Estado.P)
+        .ifPresent(v -> {
+          v.setEstado(Estado.A);
+          validacaoEntityRepository.save(v);
+        });
   }
 
   /**
@@ -226,11 +262,25 @@ public class MovimentoService {
           movRowDTO.setDataInicio(obj.getDataInicio());
           movRowDTO.setDataFim(obj.getDataFim());
           movRowDTO.setSituacao(obj.getSituacao());
+          movRowDTO.setCodigo(obj.getCodigo());
+          movRowDTO.setVinculoId(obj.getTiprel() != null ? obj.getTiprel().getId() : null);
+          movRowDTO.setEstado(obj.getEstado());
+          movRowDTO.setEstadoDesc(descricaoEstado(obj.getEstado()));
           return movRowDTO;
         })
         .toList());
 
     return response;
+  }
+
+  private static String descricaoEstado(String estado) {
+    if (!StringUtils.hasText(estado))
+      return null;
+    try {
+      return Estado.valueOf(estado).getDescription();
+    } catch (IllegalArgumentException e) {
+      return estado;
+    }
   }
 
   /** TP_MOV_* é texto com o id do tipo de movimento; vazio ou não numérico → null. */
@@ -271,11 +321,13 @@ public class MovimentoService {
     if (validation.equals(EstadoValidacao.NAO.name())) {
       mov.setEstado(Estado.I.name());
       importacaoMovimentoEntityRepository.save(mov);
+      fecharValidacaoSeDecidido(mov.getCodigo());
       return;
     }
 
     mov.setEstado(Estado.A.name());
     importacaoMovimentoEntityRepository.save(mov);
+    fecharValidacaoSeDecidido(mov.getCodigo());
 
     if (StringUtils.hasText(mov.getTpMovRem())) {
 

@@ -1,0 +1,31 @@
+-- =============================================================================
+-- Importação de Movimentos — CODIGO por ficheiro, nome do funcionário, vínculo e validação (2026-11-26)
+--
+-- Spec PROCESSAMENTO SALARIAL (23/10, Importação Movimentos > Upload Ficheiro / Lista Importados):
+--   RH_T_IMPORTACAO_MOVIMENTO.CODIGO          = identificador do ficheiro, igual em todas as linhas dele
+--   RH_T_IMPORTACAO_MOVIMENTO.NOME_FUNCIONARIO = nome que vem no ficheiro
+--   RH_T_IMPORTACAO_MOVIMENTO.TIPREL_ID        = vínculo do colaborador na importação ("Vínculo (Situação)")
+--   RH_T_VALIDACAO com REFERENCIA_NAME = 'IMPORTACAO_MOVIMENTO' e REFERENCIA_ID = CODIGO
+--
+-- APLICADO EM: desenvolvimento (2026-11-26). POR APLICAR EM: staging, produção (Flyway desligado).
+-- =============================================================================
+
+ALTER TABLE RH_T_IMPORTACAO_MOVIMENTO ADD (CODIGO NUMBER);
+ALTER TABLE RH_T_IMPORTACAO_MOVIMENTO ADD (NOME_FUNCIONARIO VARCHAR2(300));
+ALTER TABLE RH_T_IMPORTACAO_MOVIMENTO ADD (TIPREL_ID NUMBER);
+
+ALTER TABLE RH_T_IMPORTACAO_MOVIMENTO
+    ADD CONSTRAINT FK_IMP_MOV_TIPREL
+        FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID);
+
+CREATE INDEX IDX_IMP_MOV_CODIGO ON RH_T_IMPORTACAO_MOVIMENTO (CODIGO);
+
+-- Um valor por ficheiro importado (o Java pede o NEXTVAL uma vez por upload).
+CREATE SEQUENCE RH_SEQ_IMP_MOV_CODIGO START WITH 1 INCREMENT BY 1 NOCACHE;
+
+-- Domínio da RH_T_VALIDACAO.REFERENCIA_NAME
+INSERT INTO RH_T_DOMAINS (DOMINIO, VALOR, DESCRICAO, REFERENCIA, ESTADO, DATA_REGISTO, USER_REGISTO_ID, USER_REGISTO_NAME)
+SELECT 'ACCAO_REFERENTE', 'IMPORTACAO_MOVIMENTO', TO_CHAR(UNISTR('Importa\00E7\00E3o de Movimentos')), 'VALIDACAO', 'A', SYSDATE, 1, 'script' FROM DUAL
+ WHERE NOT EXISTS (SELECT 1 FROM RH_T_DOMAINS WHERE DOMINIO = 'ACCAO_REFERENTE' AND REFERENCIA = 'VALIDACAO' AND VALOR = 'IMPORTACAO_MOVIMENTO');
+
+COMMIT;

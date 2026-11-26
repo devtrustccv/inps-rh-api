@@ -35,7 +35,8 @@ public enum Referencia {
   SOAT("Soat"),
   EMPRESTIMO("Empréstimo"),
   DECLARACAO("Declaração"),
-  AUMENTO_SALARIAL("Aumento Salarial");
+  AUMENTO_SALARIAL("Aumento Salarial"),
+  IMPORTACAO_MOVIMENTO("Importação de Movimentos");
 
   private final String descricao;
 

@@ -27,6 +27,9 @@ public interface ValidacaoEntityRepository extends JpaRepository<ValidacaoEntity
 
   Optional<ValidacaoEntity> findByUuid(UUID uuid);
 
+  /** Validação de um registo identificado só pelo REFERENCIA_ID (ex.: CODIGO do ficheiro de movimentos). */
+  Optional<ValidacaoEntity> findFirstByReferenciaNameAndReferenciaIdAndEstado(String referenciaName, Long referenciaId, Estado estado);
+
   default ValidacaoEntity findByUuidOrThrow(UUID uuid) {
     return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("ValidacaoEntity not found for id: " + uuid));
   }

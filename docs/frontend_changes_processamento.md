@@ -1,6 +1,6 @@
 # Processamento Salarial — alterações de API para o front-end
 
-**Última actualização:** 2026-11-25 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
+**Última actualização:** 2026-11-26 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
 `/fos`)
 
 Changelog das alterações feitas ao backend do Processamento Salarial. Cada secção diz o que mudou no
@@ -144,6 +144,31 @@ Erros novos por linha (400, nada gravado): `colaborador não encontrado (número
 `o número de colaborador N corresponde a K colaboradores` (o número não é único na BD),
 `número de colaborador inválido (x)`. Modelo actualizado em `docs/modelos/importacao_movimentos_modelo.xlsx`.
 
-### Fora desta alteração (spec, por implementar — precisam de colunas na BD)
-`CODIGO` por ficheiro, registo em `RH_T_VALIDACAO` na importação, `NOME_FUNCIONARIO` e `TIPREL_ID` (Vínculo).
-A lista também não devolve o estado.
+### Ficheiro com `CODIGO`, vínculo, estado e validação (26/11/2026)
+
+**`POST /colaborador/importar-movimento`** — cada upload passa a ter um `CODIGO` (igual em todas as linhas do
+ficheiro), guarda o nome da coluna B e o vínculo atual do colaborador, e cria **uma** validação pendente para o
+ficheiro em `RH_T_VALIDACAO` (`REFERENCIA_NAME = IMPORTACAO_MOVIMENTO`, `REFERENCIA_ID = CODIGO`, sem colaborador).
+
+**`GET /colaborador/movimentos`** — campos novos em `content[]`:
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `codigo` | Long | identificador do ficheiro (agrupa as linhas do mesmo upload) |
+| `vinculoId` | Long | vínculo do colaborador na importação ("Vínculo (Situação)"; `null` se não tinha contrato atual) |
+| `estado` | String | `P` pendente · `A` validado · `I` rejeitado |
+| `estadoDesc` | String | descrição do estado |
+
+O ecrã deve mostrar o validar só nas linhas `P` (as outras dão `400`).
+
+**Validação do ficheiro** — fica `P` enquanto houver linhas por decidir e passa a `A` quando todas estiverem
+decididas (validadas ou rejeitadas). A validação continua a ser feita linha a linha no ecrã da importação.
+
+⚠️ **Lista geral de validações** (`GET /api/v1/funcionarios/validacoes`): a validação pendente do ficheiro aparece
+lá com `referenciaName = "IMPORTACAO_MOVIMENTO"`, `referenciaId` = `codigo`, `idFuncionario = 0` e
+`nomeColaborador` vazio. Ao abrir, o ecrã deve levar para a lista de movimentos importados filtrada por esse
+`codigo` (ou não tratar esta referência ali).
+
+### Fora desta alteração
+Os campos "??" da spec para o desconto (`RHB_ID`, `REFERENCIA`, `NM_ENTIDADE`, `NU_CONTA`, `NIB`, `ENT_ID`)
+ficam vazios até serem definidos.

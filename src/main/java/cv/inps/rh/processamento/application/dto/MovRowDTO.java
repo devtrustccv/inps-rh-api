@@ -60,4 +60,20 @@ public class MovRowDTO {
 
   private String situacao;
 
+
+  /** Identificador do ficheiro importado (igual em todas as linhas do mesmo upload). */
+  private Long codigo;
+
+
+  /** Vínculo do colaborador na importação (RH_T_TIPOS_RELACIONAMENTO.ID). */
+  private Long vinculoId;
+
+
+  /** Estado do movimento: P pendente, A validado, I rejeitado. */
+  private String estado;
+
+
+  /** Descrição do estado. */
+  private String estadoDesc;
+
 }
