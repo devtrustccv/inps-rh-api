@@ -325,7 +325,6 @@ public class MovimentoService {
     importacaoMovimentoEntityRepository.save(mov);
 
     var fun = mov.getFuncionario();
-    var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid());
     var validation = data.getValidacao();
 
     // Só SIM ou NAO: a importação não tem ciclo de correção, e CORRIGIR caía no ramo do SIM.
@@ -338,6 +337,10 @@ public class MovimentoService {
       fecharValidacaoSeDecidido(mov.getCodigo());
       return;
     }
+
+    // O contrato atual só é preciso para o SIM (é a ele que se ligam a remuneração/o desconto); rejeitar
+    // não pode depender dele — antes, um colaborador sem contrato atual nem podia ter a linha rejeitada.
+    var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid());
 
     mov.setEstado(Estado.A.name());
     importacaoMovimentoEntityRepository.save(mov);
