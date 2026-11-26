@@ -30,7 +30,8 @@ public interface DefinicaoRemuneracaoEntityRepository extends
 
   /**
    * Vencimento ativo hoje do contrato (select do analista para a substituição): remuneração SAL/REM
-   * em A ligada ao tiprel por RH_T_TIPREL_REM_PAG, já iniciada e não terminada. O mais recente primeiro
+   * em A ligada ao tiprel por RH_T_TIPREL_REM_PAG, sem TIPO (B.TIPO IS NULL, pedido do analista), já
+   * iniciada e não terminada. O mais recente primeiro
    * (data de início, depois o último registado) — normalmente vem um só.
    */
   @Query(value = """
@@ -42,6 +43,7 @@ public interface DefinicaoRemuneracaoEntityRepository extends
          AND d.short_desc = 'SAL'
          AND d.tipo = 'REM'
          AND b.estado = 'A'
+         AND b.tipo IS NULL
          AND b.data_inicio <= SYSDATE
          AND (b.data_fim IS NULL OR b.data_fim >= TRUNC(SYSDATE))
        ORDER BY b.data_inicio DESC, b.id DESC

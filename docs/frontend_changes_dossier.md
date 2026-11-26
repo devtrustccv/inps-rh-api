@@ -198,7 +198,7 @@ Usar `nacionalidadeDesc` para mostrar o texto.
 ## 12. Substituição — salário pelo vencimento ativo (26/11/2026)
 
 O cálculo da substituição passa a usar o **salário que o colaborador recebe hoje** — o vencimento ativo (`SAL`, tipo
-`REM`, estado `A`, já iniciado e não terminado) em `RH_T_DEF_REMUNERACOES` ligado ao contrato atual — em vez do
+`REM`, estado `A`, sem `TIPO` (`TIPO IS NULL`), já iniciado e não terminado) em `RH_T_DEF_REMUNERACOES` ligado ao contrato atual — em vez do
 `RH_T_TIPOS_RELACIONAMENTO.SALARIO` gravado na contratação, que fica desatualizado depois de um aumento (indicação do
 analista). Com mais do que um vencimento ativo usa o mais recente.
 
