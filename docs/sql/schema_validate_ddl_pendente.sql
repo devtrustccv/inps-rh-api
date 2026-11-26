@@ -2,9 +2,9 @@
 -- ddl-auto=validate — DDL que falta na BD para o validate passar inteiro (2026-11-25)
 --
 -- Os tipos incompativeis ficaram todos resolvidos do lado do Java (blocos 1 a 6, ver
--- schema_validate_dev_2026-11-25.sql). O que sobra e da BD: 3 colunas e 1 sequencia.
+-- schema_validate_dev_2026-11-25.sql). O que sobra e da BD: 3 colunas.
 --
--- POR APLICAR EM: desenvolvimento, staging, producao (Flyway desligado).
+-- POR APLICAR EM: staging, producao (Flyway desligado). Em desenvolvimento ja aplicado (2026-11-26).
 -- Nota: a BD de desenvolvimento e a mesma do QA.
 -- =============================================================================
 
@@ -16,6 +16,8 @@
 -- RH_T_ORDEM_SERVICO). Aplicar esse; nao esta repetido aqui para nao correr duas vezes.
 -- Em uso: o ProgressaoPromocaoWriteService grava ValEvolucaoCarreiraEntity e as leituras da
 -- progressao/promocao tambem; sem a coluna, a entity rebenta com ORA-00904 (a tabela esta vazia em dev).
+-- ATENCAO: a coluna e NUMBER (id de RH_T_ORDEM_SERVICO). Em dev chegou a ser criada como VARCHAR2(100) e foi
+-- corrigida (2026-11-26) com MODIFY (ORDEM_SERVICO_ID NUMBER); a FK desse script ainda nao foi criada em dev.
 -- -----------------------------------------------------------------------------
 
 
@@ -30,16 +32,6 @@ ALTER TABLE RH_T_EVOLUCAO_CARREIRA ADD (USER_ALTERACAO_NAME VARCHAR2(200));
 
 
 -- -----------------------------------------------------------------------------
--- 3. SEQ_DIRECAO  (DirecaoEntity, @SequenceGenerator sequenceName = "SEQ_DIRECAO")
---
--- O Java nao cria direcoes hoje (so le), mas o validate exige a sequencia.
--- NAO usar START WITH 1: RH_T_DIRECAO ja tem ids baixos (1..8 em dev) e ids altos (ate 100011079);
--- a sequencia comeca acima do maior id existente em cada ambiente.
+-- 3. SEQ_DIRECAO — JA NAO E PRECISA (2026-11-26)
+-- A DirecaoEntity ficou sem gerador de id: nem o RH nem os packages da BD criam direcoes.
 -- -----------------------------------------------------------------------------
-DECLARE
-    v_inicio NUMBER;
-BEGIN
-    SELECT NVL(MAX(ID), 0) + 1 INTO v_inicio FROM RH_T_DIRECAO;
-    EXECUTE IMMEDIATE 'CREATE SEQUENCE SEQ_DIRECAO START WITH ' || v_inicio || ' INCREMENT BY 1 NOCACHE';
-END;
-/

@@ -28,7 +28,10 @@
 -- vez de UPDATE. Com String le o valor gravado e faz UPDATE; perfis novos ficam com id = sub. Sem mexer
 -- nos dados (os perfis em hex continuam validos). validate real das 2 tabelas passou.
 -- Tabelas esperadas: 147 | sequencias esperadas: 113
--- Erros: 0 tabela(s) em falta, 3 coluna(s) em falta, 0 tipo(s) incompativel(is), 1 sequencia(s) em falta
+-- Erros: 0 tabela(s) em falta, 0 coluna(s) em falta, 0 tipo(s) incompativel(is), 0 sequencia(s) em falta
+-- 2026-11-26: em dev a app arranca com ddl-auto=validate (todas as entities). Aplicado em dev: colunas de
+-- auditoria de RH_T_EVOLUCAO_CARREIRA e RH_T_VAL_EVOLUCAO_CARREIRA.ORDEM_SERVICO_ID (NUMBER; a FK ficou por fazer).
+-- SEQ_DIRECAO deixou de ser precisa: DirecaoEntity ficou sem gerador de id (direcoes so de leitura).
 -- NAO APLICADO. Rever antes de correr; os tipos seguem a convencao da casa (DATE, NUMBER, VARCHAR2(n)).
 -- =============================================================================
 
@@ -38,16 +41,13 @@
 -- -----------------------------------------------------------------------------
 -- 2. Colunas em falta
 -- -----------------------------------------------------------------------------
--- Script para o DBA: schema_validate_ddl_pendente.sql (ponto 1 remete para progressao_promocao_ordem_servico_ddl.sql).
-ALTER TABLE RH_T_EVOLUCAO_CARREIRA ADD (DATA_ALTERACAO DATE);  -- entity: EvolucaoCarreiraEntity
-ALTER TABLE RH_T_EVOLUCAO_CARREIRA ADD (USER_ALTERACAO_NAME VARCHAR2(200));  -- entity: EvolucaoCarreiraEntity
-ALTER TABLE RH_T_VAL_EVOLUCAO_CARREIRA ADD (ORDEM_SERVICO_ID NUMBER);  -- entity: ValEvolucaoCarreiraEntity (+ FK, ver progressao_promocao_ordem_servico_ddl.sql)
+-- Nenhuma em dev (2026-11-26). Para staging/producao: schema_validate_ddl_pendente.sql e
+-- progressao_promocao_ordem_servico_ddl.sql.
 
 -- -----------------------------------------------------------------------------
 -- 3. Sequencias em falta
 -- -----------------------------------------------------------------------------
--- SEQ_DIRECAO: nao comecar em 1 (RH_T_DIRECAO ja tem ids 1..8 e ate 100011079); comeca em MAX(ID)+1,
--- ver schema_validate_ddl_pendente.sql.
+-- Nenhuma.
 
 -- -----------------------------------------------------------------------------
 -- 4. Tipos incompativeis (validate rebenta: 'wrong column type encountered')
