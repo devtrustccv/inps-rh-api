@@ -194,3 +194,21 @@ parar à coluna de texto `NACIONALIDADE`. **Sem breaking change:** o campo conti
 **Ação front:** só o tipo — tratar `nacionalidade` como **número** no modelo e no combo (o GET já não
 devolve string; uma comparação `=== "1238"` deixa de bater). O nome do campo e o envio não mudam.
 Usar `nacionalidadeDesc` para mostrar o texto.
+
+## 12. Substituição — salário pelo vencimento ativo (26/11/2026)
+
+O cálculo da substituição passa a usar o **salário que o colaborador recebe hoje** — o vencimento ativo (`SAL`, tipo
+`REM`, estado `A`, já iniciado e não terminado) em `RH_T_DEF_REMUNERACOES` ligado ao contrato atual — em vez do
+`RH_T_TIPOS_RELACIONAMENTO.SALARIO` gravado na contratação, que fica desatualizado depois de um aumento (indicação do
+analista). Com mais do que um vencimento ativo usa o mais recente.
+
+| Endpoint | O que muda |
+|---|---|
+| `GET api/v1/funcionarios/substituicoes/calcular` | `valorSubstituto` / `valorSubstituido` vêm do vencimento ativo |
+| `POST api/v1/funcionarios/{idFuncionario}/substituicoes` (registar) | a decisão "vai a validação" e o detalhe mensal usam o vencimento ativo |
+
+**Novo erro (400):** se o substituto ou o substituído não tiver vencimento ativo, tanto o `calcular` como o registar
+devolvem `O colaborador substituto|substituído (<nome>) não tem vencimento ativo.` — antes o `calcular` mostrava 0 e o
+registo seguia sem diferença, sem aviso.
+
+**Ação front:** nenhuma no contrato; mostrar a mensagem do 400.
