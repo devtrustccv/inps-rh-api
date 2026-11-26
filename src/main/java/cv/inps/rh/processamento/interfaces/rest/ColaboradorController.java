@@ -140,11 +140,12 @@ public class ColaboradorController {
               - Mesmos formatos da Data de Início; não pode ser anterior à Data de Início.
 
             - Coluna I (índice 8): Situação — opcional
-              - Texto livre.
+              - Texto livre, até 50 caracteres.
 
             Cada linha válida origina um registo em RH_T_IMPORTACAO_MOVIMENTO, associado ao funcionário da coluna A.
 
-            A importação é tudo ou nada: se alguma linha tiver erro (nº de colaborador inválido, inexistente ou de mais de um colaborador, número ou data
+            A importação é tudo ou nada: se alguma linha tiver erro (nº de colaborador inválido, inexistente ou de mais de um colaborador, ID de tipo de movimento não inteiro,
+            situação com mais de 50 caracteres, número ou data
             inválidos, Data de Fim anterior à Data de Início), o pedido devolve 400 com a lista de erros por linha
             (ex: "Linha 3: Valor inválido (abc)") e nenhuma linha é gravada. Um ficheiro que não seja Excel, ou sem
             movimentos, também devolve 400.

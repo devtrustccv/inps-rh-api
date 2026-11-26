@@ -43,11 +43,13 @@ public class ImportacaoMovimentoEntity extends AuditEntity {
   @JoinColumn(name = "FUN_ID", nullable = false)
   private FuncionarioEntity funcionario;
 
+  /** Id do tipo de movimento de retenção (INPSSIGOF.RH_TIPO_MOVIMENTOS.ID). */
   @Column(name = "TP_MOV_RETENCAO")
-  private String tpMovRetencao;
+  private Long tpMovRetencao;
 
+  /** Id do tipo de movimento de remuneração (INPSSIGOF.RH_TIPO_MOVIMENTOS.ID). */
   @Column(name = "TP_MOV_REM")
-  private String tpMovRem;
+  private Long tpMovRem;
 
   @Column(name = "PERCENTAGEM")
   private BigDecimal percentagem;

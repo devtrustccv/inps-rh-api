@@ -110,6 +110,11 @@ public class MovimentoService {
         var valor = parseNumero(row.getCell(5), formatter, "Valor", errosLinha);
         var dataInicio = parseData(formatter.formatCellValue(row.getCell(6)), "Data Início", errosLinha);
         var dataFim = parseData(formatter.formatCellValue(row.getCell(7)), "Data Fim", errosLinha);
+        var tpMovRetencao = parseTipoMovimento(formatter.formatCellValue(row.getCell(2)), "Mov. Retenção", errosLinha);
+        var tpMovRem = parseTipoMovimento(formatter.formatCellValue(row.getCell(3)), "Mov. Remuneração", errosLinha);
+        var situacao = formatter.formatCellValue(row.getCell(8));
+        if (situacao.length() > 50)   // RH_T_IMPORTACAO_MOVIMENTO.SITUACAO é VARCHAR2(50)
+          errosLinha.add("Situação com mais de 50 caracteres");
         if (dataInicio != null && dataFim != null && dataFim.isBefore(dataInicio))
           errosLinha.add("Data Fim anterior à Data Início");
 
@@ -121,13 +126,13 @@ public class MovimentoService {
         var mov = new ImportacaoMovimentoEntity();
         mov.setUuid(UuidCreator.getTimeOrderedEpoch());
         mov.setFuncionario(funcionario);
-        mov.setTpMovRetencao(formatter.formatCellValue(row.getCell(2)));
-        mov.setTpMovRem(formatter.formatCellValue(row.getCell(3)));
+        mov.setTpMovRetencao(tpMovRetencao);
+        mov.setTpMovRem(tpMovRem);
         mov.setPercentagem(percentagem);
         mov.setValor(valor);
         mov.setDataInicio(dataInicio);
         mov.setDataFim(dataFim);
-        mov.setSituacao(formatter.formatCellValue(row.getCell(8)));
+        mov.setSituacao(situacao);
         mov.setNomeFicheiro(fileName);
         mov.setNomeFuncionario(StringUtils.hasText(formatter.formatCellValue(row.getCell(1)))
             ? formatter.formatCellValue(row.getCell(1)).trim() : null);
@@ -234,7 +239,6 @@ public class MovimentoService {
     // Nome dos tipos de movimento da página (spec: INPSSIGOF.RH_TIPOS_MOVIMENTO.NOME), numa só consulta.
     var idsTipoMovimento = importsSaved.stream()
         .flatMap(m -> java.util.stream.Stream.of(m.getTpMovRetencao(), m.getTpMovRem()))
-        .map(MovimentoService::idTipoMovimento)
         .filter(Objects::nonNull)
         .distinct()
         .toList();
@@ -251,12 +255,13 @@ public class MovimentoService {
           // numérico o front levava 400 "Invalid UUID string".
           movRowDTO.setMovimentoId(obj.getUuid().toString());
           movRowDTO.setNomeFicheiro(obj.getNomeFicheiro());
-          movRowDTO.setMovimentoRetencaoDesc(nomeTipoMovimento.get(idTipoMovimento(obj.getTpMovRetencao())));
-          movRowDTO.setMovimentoRemuneracaoDesc(nomeTipoMovimento.get(idTipoMovimento(obj.getTpMovRem())));
+          movRowDTO.setMovimentoRetencaoDesc(nomeTipoMovimento.get(obj.getTpMovRetencao()));
+          movRowDTO.setMovimentoRemuneracaoDesc(nomeTipoMovimento.get(obj.getTpMovRem()));
           movRowDTO.setFuncionarioId(obj.getFuncionario().getId().toString());
           movRowDTO.setNomeFuncionario(obj.getFuncionario().getNome());
-          movRowDTO.setMovimentoRetencao(obj.getTpMovRetencao());
-          movRowDTO.setMovimentoRemuneracao(obj.getTpMovRem());
+          // O contrato com o front continua texto (o id do tipo de movimento).
+          movRowDTO.setMovimentoRetencao(Objects.toString(obj.getTpMovRetencao(), null));
+          movRowDTO.setMovimentoRemuneracao(Objects.toString(obj.getTpMovRem(), null));
           movRowDTO.setPercentagem(obj.getPercentagem());
           movRowDTO.setValor(obj.getValor());
           movRowDTO.setDataInicio(obj.getDataInicio());
@@ -283,13 +288,17 @@ public class MovimentoService {
     }
   }
 
-  /** TP_MOV_* é texto com o id do tipo de movimento; vazio ou não numérico → null. */
-  private static Long idTipoMovimento(String valor) {
+  /**
+   * Id do tipo de movimento vindo do ficheiro ou do formulário (TP_MOV_* é NUMBER na BD): vazio → null;
+   * não inteiro → erro, em vez de deixar a BD rebentar ao gravar.
+   */
+  private static Long parseTipoMovimento(String valor, String campo, List<String> erros) {
     if (!StringUtils.hasText(valor))
       return null;
     try {
-      return Long.valueOf(valor.trim());
-    } catch (NumberFormatException e) {
+      return new BigDecimal(valor.trim()).longValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      erros.add(campo + " inválido (" + valor.trim() + ")");
       return null;
     }
   }
@@ -301,8 +310,13 @@ public class MovimentoService {
     if (!Estado.P.name().equals(mov.getEstado()))
       throw IgrpResponseStatusException.badRequest(
           "Este movimento já foi %s.".formatted(Estado.I.name().equals(mov.getEstado()) ? "rejeitado" : "validado"));
-    mov.setTpMovRetencao(data.getMovimentoRetencao());
-    mov.setTpMovRem(data.getMovimentoRemuneracao());
+    var erros = new ArrayList<String>();
+    var tpMovRetencao = parseTipoMovimento(data.getMovimentoRetencao(), "Mov. Retenção", erros);
+    var tpMovRem = parseTipoMovimento(data.getMovimentoRemuneracao(), "Mov. Remuneração", erros);
+    if (!erros.isEmpty())
+      throw IgrpResponseStatusException.badRequest(String.join("; ", erros));
+    mov.setTpMovRetencao(tpMovRetencao);
+    mov.setTpMovRem(tpMovRem);
     mov.setPercentagem(data.getPercentagem());
     mov.setValor(data.getValor());
     mov.setDataInicio(data.getDataInicio());
@@ -329,7 +343,7 @@ public class MovimentoService {
     importacaoMovimentoEntityRepository.save(mov);
     fecharValidacaoSeDecidido(mov.getCodigo());
 
-    if (StringUtils.hasText(mov.getTpMovRem())) {
+    if (mov.getTpMovRem() != null) {
 
       var remunerationDefinition = new DefinicaoRemuneracaoEntity();
       remunerationDefinition.setPercentagem(mov.getPercentagem());
@@ -337,7 +351,7 @@ public class MovimentoService {
       remunerationDefinition.setEstado(Estado.A);
       remunerationDefinition.setObs("Registo referente ao ficheiro:" + mov.getNomeFicheiro());
       remunerationDefinition.setUuid(UuidCreator.getTimeOrderedEpoch());
-      remunerationDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRem())));
+      remunerationDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(mov.getTpMovRem()));
       remunerationDefinition.setMoeda("CVE");
       remunerationDefinition.setDataInicio(mov.getDataInicio());
       remunerationDefinition.setDataFim(mov.getDataFim());
@@ -346,10 +360,10 @@ public class MovimentoService {
       tipoRelRemPagHelper.associarLista(currentRelation, List.of(saved), List.of());
     }
 
-    if (StringUtils.hasText(mov.getTpMovRetencao())) {
+    if (mov.getTpMovRetencao() != null) {
 
       var paymentDefinition = new DefPagamentoEntity();
-      paymentDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRetencao())));
+      paymentDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(mov.getTpMovRetencao()));
       paymentDefinition.setValor(mov.getValor());
       paymentDefinition.setDataInicio(mov.getDataInicio());
       paymentDefinition.setDataFim(mov.getDataFim());

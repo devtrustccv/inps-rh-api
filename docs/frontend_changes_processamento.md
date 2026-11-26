@@ -169,6 +169,14 @@ lá com `referenciaName = "IMPORTACAO_MOVIMENTO"`, `referenciaId` = `codigo`, `i
 `nomeColaborador` vazio. Ao abrir, o ecrã deve levar para a lista de movimentos importados filtrada por esse
 `codigo` (ou não tratar esta referência ali).
 
+### Tipos de movimento numéricos e situação até 50 caracteres (26/11/2026)
+`RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO` / `TP_MOV_REM` passaram a `NUMBER` e `SITUACAO` a `VARCHAR2(50)` na BD.
+- **Importar:** as colunas C e D do Excel têm de ser o **id inteiro** do tipo de movimento (ou vazias); outro valor dá
+  erro na linha (`Mov. Retenção inválido (x)` / `Mov. Remuneração inválido (x)`). A coluna I (Situação) aceita até 50
+  caracteres; mais dá `Situação com mais de 50 caracteres`. Tudo ou nada, como antes.
+- **Validar:** `movimentoRetencao` / `movimentoRemuneracao` continuam texto no JSON, mas têm de ser o id inteiro (ou
+  vazio/`null`); outro valor dá `400` e a linha fica `P`.
+
 ### Fora desta alteração
 Os campos "??" da spec para o desconto (`RHB_ID`, `REFERENCIA`, `NM_ENTIDADE`, `NU_CONTA`, `NIB`, `ENT_ID`)
 ficam vazios até serem definidos.
