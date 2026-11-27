@@ -72,12 +72,24 @@ public class RegistarColaboradorService {
 
   private final ColaboradorValidationRules colaboradorValidationRules;
 
+  private final ValidarRegistoColaboradorService validarRegistoColaboradorService;
+
   @Transactional
   public SuccessResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
 
     var dadosPessoais = dto.getDadosPessoais();
     var dadosContratuais = dto.getDadosContratuais();
+
+    // QA 27/11 (B1): a mesma pessoa com um registo rejeitado -> reaproveita esse registo (reaberto como
+    // correção e reenviado com estes dados) em vez de criar outro (UQ_UNICO_DOC não o permitiria).
+    if (dadosPessoais != null && dadosPessoais.getTipoDocumentoId() != null && dadosPessoais.getNumDocumento() != null) {
+      var rejeitados = funcionarioEntityRepository.findRegistoRejeitadoPorDocumento(
+          dadosPessoais.getTipoDocumentoId(), dadosPessoais.getNumDocumento());
+      if (!rejeitados.isEmpty()) {
+        return validarRegistoColaboradorService.reaproveitarRegistoRejeitado(rejeitados.get(0), dto);
+      }
+    }
 
     colaboradorValidationRules.validarDadosPessoais(dadosPessoais, null);
 

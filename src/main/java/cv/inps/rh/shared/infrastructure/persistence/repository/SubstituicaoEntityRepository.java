@@ -74,4 +74,8 @@ public interface SubstituicaoEntityRepository extends
       java.time.LocalDate novoInicio
   );
 
+
+  /** Substituição mais recente em que o funcionário é o SUBSTITUTO (Ordem de Serviço de substituição). */
+  java.util.Optional<SubstituicaoEntity> findFirstBySubstitutoTiprelId_FunId_UuidAndEstadoInOrderByIdDesc(
+      java.util.UUID funcionarioUuid, java.util.Collection<cv.inps.rh.shared.application.constants.Estado> estados);
 }

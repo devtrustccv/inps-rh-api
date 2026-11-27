@@ -86,6 +86,7 @@ public class NovoContratoService {
       throw IgrpResponseStatusException.badRequest(
           "funcionario possui validacao de contrato pendente");
     }
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CONTRATO); // grupo relação laboral (QA 27/11)
 
     // D2 (DOSSIÊ, Novo Contrato): "o botão Novo Contrato só deve ficar visível caso NÃO exista um
     // contrato ativo". Enforçado no backend via query: um contrato em vigor (estado A e ainda dentro

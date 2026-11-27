@@ -71,8 +71,13 @@ public class SubstituicaoWriteService {
 
   /** Caso de uso: mês completo do período conta sempre como 30 dias (Fev 28 / Ago 31 → 30). */
   private static final int DIAS_MES_COMPLETO = 30;
-  /** Caso de uso: só se cria DEF_REMUNERACOES se o total de dias da substituição for ≥ 15. */
+  /** Caso de uso (Substituição): a diferença de um mês só se regista se os dias NESSE MÊS forem
+   *  SUPERIORES a 15 (B22, QA 27/11 — antes era o total do período ≥ 15). */
   private static final int LIMIAR_DIAS_DEF = 15;
+
+  private static boolean mesComDireito(int nrDias) {
+    return nrDias > LIMIAR_DIAS_DEF;
+  }
 
   @Transactional
   public SuccessResponseDTO registrar(RegistarSubstituicaoCommand command) {
@@ -103,6 +108,8 @@ public class SubstituicaoWriteService {
               + "Valide ou rejeite essa substituição antes de registar uma nova.");
     }
 
+    funcionarioRules.garantirColaboradorAtivoParaMovimentos(funcionarioSubstituto); // B20 (QA 27/11)
+
     var substitutoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
     var substituidoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid());
 
@@ -131,8 +138,9 @@ public class SubstituicaoWriteService {
     // RH_T_DEF_REMUNERACOES (mesmo limiar de registarDiferencaDef), logo não há nada a validar — fica
     // logo ACTIVA, sem validação nem DEF; só o detalhe mensal é registado.
     var meses = repartirPorMes(dto.getDataInicio(), dto.getDataFim(), salarioSubstituto, salarioSubstituido);
-    int totalDias = meses.stream().mapToInt(MesSubstituicao::nrDias).sum();
-    boolean vaiParaValidacao = temDiferencaSalarial && totalDias >= LIMIAR_DIAS_DEF;
+    // Caso de uso: só vai a validação se existir pelo menos um mês com direito a diferença (> 15 dias).
+    boolean vaiParaValidacao = temDiferencaSalarial
+        && meses.stream().anyMatch(m -> mesComDireito(m.nrDias()));
 
     var substituicao = new SubstituicaoEntity();
     substituicao.setSubstitutoTiprelId(substitutoTiprel);
@@ -241,9 +249,20 @@ public class SubstituicaoWriteService {
     // Maker reenvia a correção (C -> P): as edições acima já foram aplicadas; reabre para validação
     // (sem consolidar — isso só na validação SIM). 'validar' é nulo aqui (garantido pelo guard acima).
     if (substituicao.getEstado() == Estado.C) {
+      validarSobreposicao(funcionarioSubstituto, funcionarioSubstituido,
+          substituicao.getDataInicio(), substituicao.getDataFim(), substituicao.getId());
       substituicao.setEstado(Estado.P);
       var validacaoReaberta = funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
       substituicaoEntityRepository.save(substituicao);
+      // B14 (QA 26/11): o período pode ter mudado — refaz o detalhe mensal com as datas e os
+      // vencimentos atuais, para o validador aprovar os números do período corrigido.
+      substituicaoDetalheEntityRepository.deleteAll(substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId()));
+      substituicaoDetalheEntityRepository.flush();
+      var salSubstituto = vencimentoAtivoHelper.vencimentoAtual(substituicao.getSubstitutoTiprelId(), "substituto");
+      var salSubstituido = vencimentoAtivoHelper.vencimentoAtual(substituicao.getSubstituidoTiprelId(), "substituído");
+      registarDetalheMensal(substituicao,
+          repartirPorMes(substituicao.getDataInicio(), substituicao.getDataFim(), salSubstituto, salSubstituido),
+          salSubstituto, salSubstituido);
       // Reenvio de correcao: congelar() funde com o detalhe ja existente, preservando o "antes"
       // ORIGINAL (o ultimo aprovado) em vez do estado pendente que o checker devolveu.
       detalheAlteracoes.congelar(validacaoReaberta,
@@ -263,9 +282,11 @@ public class SubstituicaoWriteService {
         validarSobreposicao(funcionarioSubstituto, funcionarioSubstituido,
             substituicao.getDataInicio(), substituicao.getDataFim(), substituicao.getId());
 
+        // A OS de substituição nomeia o SUBSTITUTO ("É indicado o colaborador ... para substituir ..."):
+        // é dele (antes ficava no substituído e o PDF regenerado saía com a pessoa errada — QA B15).
         ordemServicoWriteService.criar(
-            funcionarioSubstituido,
-            funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()),
+            funcionarioSubstituto,
+            substituicao.getSubstitutoTiprelId(),
             dto.getTipoOrdemServico());
 
         // Caso de uso: o DETALHE mensal foi criado NO REGISTO (estado P). Ao aprovar (SIM) passa a A,
@@ -273,6 +294,15 @@ public class SubstituicaoWriteService {
         // desse detalhe (os mesmos números que foram aprovados), com o limiar dos 15 dias e o merge do
         // mês já processado. A rejeição (NAO, abaixo) reverte o detalhe P→I.
         var substitutoTiprel = substituicao.getSubstitutoTiprelId();
+        // B16 (QA 26/11): havendo diferença a pagar e o vínculo sem movimento REM_SUBSTITUICAO, a
+        // aprovação não pode passar em silêncio (ficava aprovada sem pagamento).
+        boolean haDiferencaAPagar = substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId()).stream()
+            .anyMatch(dd -> dd.getValorDiferenca() != null && dd.getValorDiferenca().signum() > 0
+                && dd.getNrDias() != null && mesComDireito(dd.getNrDias()));
+        if (haDiferencaAPagar && tipoMovimentoSubstituicao(substitutoTiprel) == null)
+          throw IgrpResponseStatusException.badRequest(
+              "O vínculo do substituto não tem o movimento de diferença de substituição (REM_SUBSTITUICAO) parametrizado. "
+                  + "Peça ao administrador para o parametrizar antes de aprovar.");
         substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId())
             .stream().filter(dd -> dd.getEstado() == Estado.P)
             .forEach(dd -> dd.setEstado(Estado.A));
@@ -300,7 +330,8 @@ public class SubstituicaoWriteService {
       // A validação vive no SUBSTITUTO (ver registrar(): setFunId(funcionarioSubstituto)). Procurar
       // pelo substituto — antes procurava pelo substituído e a validação nunca era encontrada,
       // ficando presa em P mesmo após aprovar.
-      funcionarioRules.getValidacaoPendente(funcionarioSubstituto.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
+      // B8 (QA 26/11): a validação DESTA substituição (por referência), não "a" pendente do substituto.
+      funcionarioRules.getValidacaoPendenteByReferenciaUuid(substituicao.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
           .ifPresent(v -> v.setEstado(estado));
 
     }
@@ -450,13 +481,13 @@ public class SubstituicaoWriteService {
         .sorted((a, b) -> a.getMesAno().compareTo(b.getMesAno()))
         .toList();
 
-    int totalDias = detalhes.stream().mapToInt(d -> d.getNrDias() != null ? d.getNrDias() : 0).sum();
-    if (totalDias < LIMIAR_DIAS_DEF) return; // Caso 2: sem def
 
     LocalDate dataInicio = substituicao.getDataInicio();
     LocalDate dataFim = substituicao.getDataFim();
     BigDecimal arrastar = BigDecimal.ZERO;
     for (var d : detalhes) {
+      // B22: só os meses com mais de 15 dias de substituição têm direito a diferença.
+      if (d.getNrDias() == null || !mesComDireito(d.getNrDias())) continue;
       BigDecimal valorMes = d.getValorDiferenca() != null ? d.getValorDiferenca() : BigDecimal.ZERO;
       YearMonth mes = YearMonth.parse(d.getMesAno(), DateTimeFormatter.ofPattern("yyyyMM"));
 

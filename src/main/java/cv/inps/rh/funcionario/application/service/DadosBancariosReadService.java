@@ -26,7 +26,8 @@ public class DadosBancariosReadService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
 
     // Mostra A + P + I (tudo menos eliminados). O parametro validacao e ignorado por agora.
-    var estados = List.of(Estado.A, Estado.P, Estado.I);
+    // C também: dados bancários devolvidos para correção têm de aparecer ao maker (B3, QA 26/11).
+    var estados = List.of(Estado.A, Estado.P, Estado.I, Estado.C);
 
     var dadosBancarios  = dadosBancariosEntityRepository.findByFuncionarioIdAndEstados(
         funcionario.getUuid(), estados

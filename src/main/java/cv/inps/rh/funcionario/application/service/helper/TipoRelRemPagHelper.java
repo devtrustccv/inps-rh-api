@@ -26,6 +26,16 @@ public class TipoRelRemPagHelper {
    * Usar em registos iniciais e em validações.
    */
   public void associarNovos(TiposRelacionamentoEntity tipoRel, FuncionarioEntity saved) {
+    // QA 27/11: um def eliminado (E) no reenvio de uma correção deixava a ligação ao tiprel (o registo
+    // já liga os def no POST). E nunca é uma ligação válida; I fica (é histórico).
+    if (tipoRel != null && tipoRel.getId() != null) {
+      var orfas = tipoRelRemPagEntityRepository.findByTiprelId_Id(tipoRel.getId()).stream()
+          .filter(a -> (a.getRemId() != null && a.getRemId().getEstado() == Estado.E)
+              || (a.getPagId() != null && a.getPagId().getEstado() == Estado.E))
+          .toList();
+      if (!orfas.isEmpty()) tipoRelRemPagEntityRepository.deleteAll(orfas);
+    }
+
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
@@ -147,7 +157,20 @@ public class TipoRelRemPagHelper {
       Set<Long> excluirRemIds,
       Set<Long> excluirPagIds) {
     transferirParaNovoTipoRelacionamento(tipoRelAtual, novoTipoRel, novasRemuneracoes, novosPagamentos,
-        excluirRemIds, excluirPagIds, java.time.LocalDate.now());
+        excluirRemIds, excluirPagIds, referenciaEmVigor(novoTipoRel));
+  }
+
+  /**
+   * Data de referência do critério "expirado": os def em vigor NA VÉSPERA do início do tiprel novo
+   * transitam. Se essa véspera já passou (movimento retroativo — ex.: mobilidade a 01/06 registada
+   * a 26/11), usa-se a véspera; senão hoje. Antes usava-se sempre hoje e os def que acabavam entre o
+   * início do movimento e hoje (vencimento, fixos, IUR/INPS) não transitavam (QA B6/B10).
+   */
+  static java.time.LocalDate referenciaEmVigor(TiposRelacionamentoEntity novoTipoRel) {
+    var hoje = java.time.LocalDate.now();
+    if (novoTipoRel == null || novoTipoRel.getDataInicio() == null) return hoje;
+    var vespera = novoTipoRel.getDataInicio().minusDays(1);
+    return vespera.isBefore(hoje) ? vespera : hoje;
   }
 
   /**

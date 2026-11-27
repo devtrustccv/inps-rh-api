@@ -51,6 +51,8 @@ public class RenumeracoesWriteService {
     // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há remunerações a registar.
     funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    funcionarioRules.garantirColaboradorAtivoParaMovimentos(funcionario); // B20 (QA 27/11)
+    garantirDentroDoContrato(tipoRel, request.getDataInicio());
 
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setPercentagem(request.getPercentagem());
@@ -62,7 +64,7 @@ public class RenumeracoesWriteService {
     remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
+    remuneracao.setTmId(movimentoValido(request.getMovimentoId(), TIPOS_RENDIMENTO, "rendimento"));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     remuneracao.setFunId(funcionario);
@@ -95,6 +97,33 @@ public class RenumeracoesWriteService {
     return new SuccessResponseDTO(true, remuneracao.getUuid().toString(), "Remuneração registada.", List.of());
   }
 
+  /** Mesmos tipos das listas do ecrã (ParametrizacaoService): rendimento REM/ABA, desconto PAG/IMP. */
+  private static final java.util.Set<String> TIPOS_RENDIMENTO = java.util.Set.of("REM", "ABA");
+  private static final java.util.Set<String> TIPOS_DESCONTO = java.util.Set.of("PAG", "IMP");
+
+  /** B7 (QA 26/11): só movimentos ACTIVO e do tipo certo (antes aceitava qualquer id). */
+  private cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity movimentoValido(
+      Long movimentoId, java.util.Set<String> tipos, String oque) {
+    var tm = tipoMovimentoEntityRepository.findByIdOrThrow(movimentoId);
+    if (!"ACTIVO".equalsIgnoreCase(tm.getEstado()))
+      throw IgrpResponseStatusException.badRequest("O movimento indicado está inativo.");
+    if (tm.getTipo() == null || !tipos.contains(tm.getTipo().toUpperCase()))
+      throw IgrpResponseStatusException.badRequest("O movimento indicado não é um movimento de " + oque + ".");
+    return tm;
+  }
+
+  /** B20: o movimento não pode começar depois do fim do contrato/relação laboral atual. */
+  private static void garantirDentroDoContrato(cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity tipoRel,
+      String dataInicioStr) {
+    var dataInicio = DateFormatter.stringToLocalDate(dataInicioStr);
+    if (dataInicio == null || tipoRel == null) return;
+    var contrato = tipoRel.getContrVinculoId();
+    var fim = contrato != null ? contrato.getDataFim() : null;
+    if (fim != null && dataInicio.isAfter(fim))
+      throw IgrpResponseStatusException.badRequest(
+          "A Data de Início não pode ser posterior ao fim do contrato (" + DateFormatter.localDateToString(fim) + ").");
+  }
+
   public SuccessResponseDTO novoPagamento(String funcionarioId, NovoPagamentoRequestDTO request) {
     validarRemuneracaoOuPagamento(request);
 
@@ -102,6 +131,8 @@ public class RenumeracoesWriteService {
     // Vínculo atual sem salário (FLG_SALARIO=NAO) → não há descontos a registar.
     funcionarioRules.garantirVinculoAtualComSalario(funcionario.getUuid());
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    funcionarioRules.garantirColaboradorAtivoParaMovimentos(funcionario); // B20 (QA 27/11)
+    garantirDentroDoContrato(tipoRel, request.getDataInicio());
 
     var pagamento = new DefPagamentoEntity();
     pagamento.setPercentagem(request.getPercentagem());
@@ -113,7 +144,7 @@ public class RenumeracoesWriteService {
     // OBS = exatamente a observação do formulário.
     pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
+    pagamento.setTmId(movimentoValido(request.getMovimentoId(), TIPOS_DESCONTO, "desconto"));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setFunId(funcionario);
@@ -215,7 +246,7 @@ public class RenumeracoesWriteService {
         var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
         var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-        funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO)
+        funcionarioRules.getValidacaoPendenteByReferenciaUuid(remuneracao.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO)
             .ifPresent(v -> {
               v.setEstado(novoEstado);
               validacaoEntityRepository.save(v);
@@ -302,7 +333,7 @@ public class RenumeracoesWriteService {
         var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
         var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-        funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO)
+        funcionarioRules.getValidacaoPendenteByReferenciaUuid(pagamento.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO)
             .ifPresent(v -> {
               v.setEstado(novoEstado);
               validacaoEntityRepository.save(v);

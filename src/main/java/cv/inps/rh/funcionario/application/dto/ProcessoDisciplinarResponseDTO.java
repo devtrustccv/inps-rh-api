@@ -39,4 +39,24 @@ public class ProcessoDisciplinarResponseDTO  {
 
   private String dataFim ;
 
+
+  // B18: campos do formulário (o ecrã de validação/edição pré-preenche-se com eles; antes vinha vazio).
+  private String estado ;
+  private String vinculoReferente ;
+  private String numeroProcesso ;
+  private String entidade ;
+  private String tipoProcesso ;
+  private String penaDisciplinar ;
+  private String dataInicioPd ;
+  private String dataFimPd ;
+  private String dataInicioPena ;
+  private String dataFimPena ;
+  @com.fasterxml.jackson.annotation.JsonProperty("numeroBO")
+  private String numeroBO ;
+  @com.fasterxml.jackson.annotation.JsonProperty("datPublicacaoBO")
+  private String datPublicacaoBO ;
+  private String numeroOrdemServico ;
+  private String dataOrdemServico ;
+  private String numeroOfa ;
+  private String dataEmissaoOfa ;
 }

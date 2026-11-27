@@ -68,7 +68,8 @@ public class RenumeracoesReadService {
       }
 
       // Mostra A + P + I (tudo menos eliminados). O parametro validacao e ignorado por agora.
-      var estadosPermitidos = EnumSet.of(Estado.A, Estado.P, Estado.I);
+      // C (devolvido para correção) também: sem ele o maker não via o item para reenviar (B9, QA 26/11).
+      var estadosPermitidos = EnumSet.of(Estado.A, Estado.P, Estado.I, Estado.C);
 
       if (StringUtils.hasText(query.getEstado())) {
         try {

@@ -126,10 +126,12 @@ public class ProcessoDisciplinarWriteService {
     }
 
     if (request.getValidar() != null && Estado.P.name().equals(process.getEstado())) {
-      var novoEstado = "S".equals(request.getValidar()) ? Estado.A : Estado.I;
+      // Aceita "SIM"/"NAO" (ecrã) e "S"/"N" (B19: só "S" aprovava, o ecrã envia "SIM").
+      var novoEstado = ValidationUtil.isAprovado(request.getValidar()) ? Estado.A : Estado.I;
       process.setEstado(novoEstado.name());
 
-      funcionarioRules.getValidacaoPendente(process.getFunId().getUuid(), TipoAcao.INSERT, Referencia.PROCESSO_DISCIPLINAR)
+      // Validação DESTE processo (por referência), não "a" pendente do funcionário (B8: com 2 → 500).
+      funcionarioRules.getValidacaoPendenteByReferenciaUuid(process.getUuid(), TipoAcao.INSERT, Referencia.PROCESSO_DISCIPLINAR)
           .ifPresent(v -> {
             v.setEstado(novoEstado);
             validacaoEntityRepository.save(v);
@@ -152,6 +154,10 @@ public class ProcessoDisciplinarWriteService {
     process.setDateFimPena(DateFormatter.stringToLocalDate(request.getDataFimPena()));
     process.setDataOrdemServ(DateFormatter.stringToLocalDate(request.getDataOrdemServico()));
     process.setNumOrdemServ(ValidationUtil.trimToNull(request.getNumeroOrdemServico()));
+    process.setNumBo(ValidationUtil.trimToNull(request.getNumeroBO()));
+    process.setDataPublBo(DateFormatter.stringToLocalDate(request.getDatPublicacaoBO()));
+    process.setNumOfa(ValidationUtil.trimToNull(request.getNumeroOfa()));
+    process.setDataEmissOfa(DateFormatter.stringToLocalDate(request.getDataEmissaoOfa()));
   }
 
   public SuccessResponseDTO deleteProcessoDisciplinar(String processoDisciplinarId) {
