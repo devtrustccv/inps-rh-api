@@ -52,6 +52,19 @@ public class ProcessoDisciplinarRequestDTO  {
 
   private String dataOrdemServico ;
 
+  // BO / OFA (o ecrã envia estes nomes; sem eles o backend descartava-os — B17).
+  @com.fasterxml.jackson.annotation.JsonProperty("numeroBO")
+  private String numeroBO ;
+
+  @com.fasterxml.jackson.annotation.JsonProperty("datPublicacaoBO")
+  private String datPublicacaoBO ;
+
+  @com.fasterxml.jackson.annotation.JsonProperty("numeroOfa")
+  private String numeroOfa ;
+
+  @com.fasterxml.jackson.annotation.JsonProperty("dataEmissaoOfa")
+  private String dataEmissaoOfa ;
+
 
   private String validar ;
 

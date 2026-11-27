@@ -58,7 +58,8 @@ public class PagamentosDescontoReadService {
       }
 
       // Mostra A + P + I (tudo menos eliminados). O parametro validacao e ignorado por agora.
-      var estadosPermitidos = EnumSet.of(Estado.A, Estado.P, Estado.I);
+      // C também: desconto devolvido para correção tem de aparecer ao maker (B9, QA 26/11).
+      var estadosPermitidos = EnumSet.of(Estado.A, Estado.P, Estado.I, Estado.C);
 
       if (StringUtils.hasText(query.getEstado())) {
         try {

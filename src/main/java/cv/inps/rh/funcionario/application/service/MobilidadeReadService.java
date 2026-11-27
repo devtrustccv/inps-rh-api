@@ -91,6 +91,12 @@ public class MobilidadeReadService {
       if (estadoTabela == Estado.P || estadoTabela == Estado.C) {
         dto.setEstado(estadoTabela.getCode());
         dto.setEstadoDesc(estadoTabela.getDescription());
+      } else if (estadoTabela == Estado.A) {
+        // M7 (QA 27/11): a vista marca I pela data; na BD a mobilidade continua A (aprovada). Mostra-se o
+        // estado da tabela, e "Terminada" quando já passou a data de fim (antes aparecia "Inactivo").
+        dto.setEstado(Estado.A.getCode());
+        boolean terminada = m.getDataFim() != null && m.getDataFim().isBefore(java.time.LocalDate.now());
+        dto.setEstadoDesc(terminada ? "Terminada" : Estado.A.getDescription());
       }
       dto.setTipoMobilidade(m.getTipoSituacao());
       dto.setTipoMobilidadeDesc(m.getTipoSituacaoDesc());

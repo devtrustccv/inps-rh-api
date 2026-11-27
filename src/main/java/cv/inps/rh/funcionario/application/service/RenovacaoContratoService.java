@@ -152,6 +152,7 @@ public class RenovacaoContratoService {
 
     var idFunc = IdentificadorUnico.from(idFuncionario);
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.RENOVACAO_CONTRATO); // grupo relação laboral (QA 27/11)
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     if (tipoRelacionamentoAtual == null)

@@ -47,11 +47,8 @@ public class ColaboradorValidationRules {
   }
 
   private void validarDocumentoUnico(DadosPessoaisReqDTO dp, UUID uuidExistente) {
-    boolean duplicado = (uuidExistente == null)
-        ? funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(
-            dp.getTipoDocumentoId(), dp.getNumDocumento())
-        : funcionarioEntityRepository.existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(
-            dp.getTipoDocumentoId(), dp.getNumDocumento(), uuidExistente);
+    boolean duplicado = funcionarioEntityRepository.existeDocumentoAtivo(
+        dp.getTipoDocumentoId(), dp.getNumDocumento(), uuidExistente);
 
     if (duplicado) {
       throw IgrpResponseStatusException.conflict(
@@ -69,9 +66,7 @@ public class ColaboradorValidationRules {
       throw IgrpResponseStatusException.badRequest("O NIF deve ter exactamente " + NIF_LENGTH + " dígitos.");
     }
 
-    boolean duplicado = (uuidExistente == null)
-        ? funcionarioEntityRepository.existsByNifAndEstadoNot(nif, Estado.E)
-        : funcionarioEntityRepository.existsByNifAndUuidNotAndEstadoNot(nif, uuidExistente, Estado.E);
+    boolean duplicado = funcionarioEntityRepository.existeNifAtivo(nif, uuidExistente);
 
     if (duplicado) {
       throw IgrpResponseStatusException.conflict(

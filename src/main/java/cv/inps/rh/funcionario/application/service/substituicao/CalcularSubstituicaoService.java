@@ -57,7 +57,11 @@ public class CalcularSubstituicaoService {
       LocalDate diaInicio = dataInicio.isAfter(inicioMes) ? dataInicio : inicioMes;
       LocalDate diaFim    = dataFim.isBefore(fimMes)      ? dataFim    : fimMes;
 
-      int nrDias = (int) (diaFim.toEpochDay() - diaInicio.toEpochDay() + 1);
+      // B12 (QA 27/11): mesma regra do registo — mês inteiramente no período conta 30 dias (spec
+      // Processamento Salarial: "1 mês tem 30 dias"); parcial usa os dias reais. Antes o ecrã mostrava
+      // 31 dias e o registo gravava 30, e o validador aprovava um valor diferente do gravado.
+      boolean mesCompleto = diaInicio.equals(inicioMes) && diaFim.equals(fimMes);
+      int nrDias = mesCompleto ? 30 : (int) (diaFim.toEpochDay() - diaInicio.toEpochDay() + 1);
 
       BigDecimal valorReceber = calcularSubstituicaoRepository.calcularValorReceber(nrDias, valorDe, valorPara);
 

@@ -306,6 +306,52 @@ public class FuncionarioRules {
    * desta referência (INSERT tem precedência sobre UPDATE), e passa essa validação a C. O caller
    * passa a própria entidade a Estado.C e grava ambas. Devolve a validação já em C.
    */
+  /**
+   * Ações que mudam a RELAÇÃO LABORAL atual (tiprel). Regra decidida a 27/11 (QA dossiê): só uma de
+   * cada vez por colaborador — enquanto uma está pendente (P) ou em correção (C), as outras do grupo
+   * são bloqueadas. O registo do colaborador pendente também bloqueia.
+   */
+  public static final java.util.Set<Referencia> GRUPO_RELACAO_LABORAL = java.util.EnumSet.of(
+      Referencia.REGISTO_COLABORADOR, Referencia.CONTRATO, Referencia.RENOVACAO_CONTRATO,
+      Referencia.MOBILIDADE, Referencia.CARREIRA, Referencia.ESTADO_COLABORADOR,
+      Referencia.SITUACAO_LABORAL, Referencia.REGIME, Referencia.ALTERACAO_ESCALAO,
+      Referencia.GESTAO_LABORAL);
+
+  /**
+   * Bloqueia uma ação do grupo "relação laboral" se existir OUTRA ação do grupo pendente/em correção.
+   * A própria referência é ignorada: o caso "mesmo tipo" continua com o guard e a mensagem de cada
+   * módulo (não muda status/mensagem que o frontend já trata).
+   */
+  public void garantirSemAcaoLaboralPendente(UUID funUuid, Referencia propria) {
+    var outras = GRUPO_RELACAO_LABORAL.stream()
+        .filter(r -> r != propria).map(Referencia::name).toList();
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoInAndReferenciaNameIn(funUuid, List.of(Estado.P, Estado.C), outras)
+        .stream().findFirst()
+        .ifPresent(v -> {
+          var desc = Referencia.fromString(v.getReferenciaName()).map(Referencia::getDescricao).orElse(v.getReferenciaName());
+          var onde = Estado.C.equals(v.getEstado()) ? "em correção" : "pendente de validação";
+          throw IgrpResponseStatusException.badRequest(
+              "Existe uma alteração de " + desc + " " + onde + " para este colaborador. "
+                  + "Valide-a ou rejeite-a antes de registar outra alteração da relação laboral.");
+        });
+  }
+
+  /**
+   * B20: movimentos de dinheiro (rendimentos, descontos, substituições) não se registam para um
+   * colaborador cessado/inativo nem com uma alteração de situação laboral pendente.
+   */
+  public void garantirColaboradorAtivoParaMovimentos(cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funcionario) {
+    if (Estado.I.equals(funcionario.getEstado()))
+      throw IgrpResponseStatusException.badRequest(
+          "O colaborador está inativo (cessado): não é possível registar movimentos.");
+    var pendente = validacaoEntityRepository.findByFunId_UuidAndEstadoInAndReferenciaNameIn(funcionario.getUuid(),
+        List.of(Estado.P, Estado.C), List.of(Referencia.ESTADO_COLABORADOR.name(), Referencia.SITUACAO_LABORAL.name()));
+    if (!pendente.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Existe uma alteração da situação laboral do colaborador por validar: valide-a ou rejeite-a antes de registar movimentos.");
+  }
+
   public ValidacaoEntity devolverParaCorrecao(UUID referenciaUuid, Estado estadoEntidade, Referencia referenciaName) {
     if (estadoEntidade != Estado.P) {
       throw IgrpResponseStatusException.badRequest(

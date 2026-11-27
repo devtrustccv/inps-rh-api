@@ -50,6 +50,22 @@ public class ProcessoDisciplinarReadService {
     response.setProcessoDisciplinar(processType.get(obj.getTpProcesso()));
     response.setDataInicio(DateFormatter.localDateToString(obj.getDateInicPd()));
     response.setDataFim(DateFormatter.localDateToString(obj.getDateFimPd()));
+    response.setEstado(obj.getEstado());
+    ofNullable(obj.getTiprelId()).ifPresent(r -> response.setVinculoReferente(r.getUuid().toString()));
+    response.setNumeroProcesso(obj.getNumProceso());
+    response.setEntidade(obj.getEntidade());
+    response.setTipoProcesso(obj.getTpProcesso());
+    response.setPenaDisciplinar(obj.getPenaDiscp());
+    response.setDataInicioPd(DateFormatter.localDateToString(obj.getDateInicPd()));
+    response.setDataFimPd(DateFormatter.localDateToString(obj.getDateFimPd()));
+    response.setDataInicioPena(DateFormatter.localDateToString(obj.getDateInicPena()));
+    response.setDataFimPena(DateFormatter.localDateToString(obj.getDateFimPena()));
+    response.setNumeroBO(obj.getNumBo());
+    response.setDatPublicacaoBO(DateFormatter.localDateToString(obj.getDataPublBo()));
+    response.setNumeroOrdemServico(obj.getNumOrdemServ());
+    response.setDataOrdemServico(DateFormatter.localDateToString(obj.getDataOrdemServ()));
+    response.setNumeroOfa(obj.getNumOfa());
+    response.setDataEmissaoOfa(DateFormatter.localDateToString(obj.getDataEmissOfa()));
     ofNullable(obj.getTiprelId()).ifPresent(r -> {
       ofNullable(r.getMobId()).ifPresent(mob -> {
         ofNullable(mob.getInstidId()).ifPresent(i -> response.setDirecao(i.getNome()));

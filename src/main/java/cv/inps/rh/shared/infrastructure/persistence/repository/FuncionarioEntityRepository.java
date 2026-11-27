@@ -106,6 +106,62 @@ public interface FuncionarioEntityRepository extends
   );
 
 
+
+  /**
+   * B1 (QA 26/11): unicidade de documento/NIF IGNORA colaboradores eliminados (E) e aqueles cujo
+   * REGISTO foi rejeitado (validação REGISTO_COLABORADOR em I) — senão uma pessoa rejeitada nunca mais
+   * podia ser registada. Um colaborador cessado (registo aprovado) continua a contar.
+   */
+  @org.springframework.data.jpa.repository.Query("""
+      select count(f) > 0 from FuncionarioEntity f
+       where f.tipoDocumentoId.id = :tipo and f.numDocumento = :num
+         and f.estado <> cv.inps.rh.shared.application.constants.Estado.E
+         and (:uuid is null or f.uuid <> :uuid)
+         and not (f.estado = cv.inps.rh.shared.application.constants.Estado.I
+              and exists (select v.id from ValidacaoEntity v
+                           where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                             and v.estado = cv.inps.rh.shared.application.constants.Estado.I)
+              and not exists (select v.id from ValidacaoEntity v
+                               where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                                 and v.estado <> cv.inps.rh.shared.application.constants.Estado.I))""")
+  boolean existeDocumentoAtivo(@org.springframework.data.repository.query.Param("tipo") Long tipo,
+      @org.springframework.data.repository.query.Param("num") String num,
+      @org.springframework.data.repository.query.Param("uuid") UUID uuid);
+
+  /**
+   * QA 27/11 (B1): registo de colaborador rejeitado (funcionário I cuja validação REGISTO_COLABORADOR
+   * está I e nunca teve outra) com este documento. É reaproveitado por um novo registo da mesma pessoa
+   * (a constraint UQ_UNICO_DOC não deixa criar outra linha com o mesmo documento).
+   */
+  @org.springframework.data.jpa.repository.Query("""
+      select f from FuncionarioEntity f
+       where f.tipoDocumentoId.id = :tipo and f.numDocumento = :num
+         and f.estado = cv.inps.rh.shared.application.constants.Estado.I
+         and exists (select v.id from ValidacaoEntity v
+                      where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                        and v.estado = cv.inps.rh.shared.application.constants.Estado.I)
+         and not exists (select v.id from ValidacaoEntity v
+                          where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                            and v.estado <> cv.inps.rh.shared.application.constants.Estado.I)
+       order by f.id desc""")
+  java.util.List<FuncionarioEntity> findRegistoRejeitadoPorDocumento(
+      @org.springframework.data.repository.query.Param("tipo") Long tipo,
+      @org.springframework.data.repository.query.Param("num") String num);
+
+  @org.springframework.data.jpa.repository.Query("""
+      select count(f) > 0 from FuncionarioEntity f
+       where f.nif = :nif
+         and f.estado <> cv.inps.rh.shared.application.constants.Estado.E
+         and (:uuid is null or f.uuid <> :uuid)
+         and not (f.estado = cv.inps.rh.shared.application.constants.Estado.I
+              and exists (select v.id from ValidacaoEntity v
+                           where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                             and v.estado = cv.inps.rh.shared.application.constants.Estado.I)
+              and not exists (select v.id from ValidacaoEntity v
+                               where v.funId = f and v.referenciaName = 'REGISTO_COLABORADOR'
+                                 and v.estado <> cv.inps.rh.shared.application.constants.Estado.I))""")
+  boolean existeNifAtivo(@org.springframework.data.repository.query.Param("nif") Long nif,
+      @org.springframework.data.repository.query.Param("uuid") UUID uuid);
 }
 
 

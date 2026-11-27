@@ -65,4 +65,8 @@ public interface ValidacaoEntityRepository extends JpaRepository<ValidacaoEntity
       @Param("referenciaIds") List<String> referenciaIds,
       @Param("estadoAtual") Estado estadoAtual
   );
+
+  /** Validações de um funcionário em certos estados e referências (guard "uma ação laboral de cada vez"). */
+  List<ValidacaoEntity> findByFunId_UuidAndEstadoInAndReferenciaNameIn(UUID funUuid, java.util.Collection<Estado> estados,
+      java.util.Collection<String> referencias);
 }

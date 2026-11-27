@@ -39,7 +39,8 @@ public class SubstituicaoReadService {
 
     // Inversão (UX): o dossiê mostra as substituições onde o funcionário é o SUBSTITUTO (quem
     // substitui). Inclui pendentes (A/P/I).
-    var estados = List.of(Estado.A, Estado.P, Estado.I);
+    // C também: o maker tem de ver a substituição devolvida para a corrigir (B13, QA 26/11).
+    var estados = List.of(Estado.A, Estado.P, Estado.I, Estado.C);
 
     var pageResult = substituicaoEntityRepository
         .findBySubstitutoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario, estados, pageable)

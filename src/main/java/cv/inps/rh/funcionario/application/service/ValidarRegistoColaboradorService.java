@@ -32,6 +32,7 @@ public class ValidarRegistoColaboradorService {
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegistoColaboradorService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioMapper funcionarioMapper;
   private final ContactoMapper contactoMapper;
   private final FamiliarMapper familiarMapper;
@@ -327,7 +328,43 @@ public class ValidarRegistoColaboradorService {
 
   }
 
+  /**
+   * QA 27/11 (B1): novo registo de uma pessoa cujo registo anterior foi rejeitado. O registo rejeitado
+   * é reaberto em C (a validação rejeitada fica I, como histórico, e abre-se uma validação nova em C) e
+   * recebe o payload pelo fluxo de reenvio da correção (C -> P): os elementos dos arrays sem id são
+   * criados, os do registo rejeitado que não vêm são eliminados (E). O "Detalhe de alterações" mostra a
+   * diferença para o registo rejeitado. A resposta traz um alerta a dizer que o registo foi reaproveitado.
+   */
+  @Transactional
+  public SuccessResponseDTO reaproveitarRegistoRejeitado(FuncionarioEntity rejeitado,
+      cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO dto) {
+    mudaEstado(rejeitado, Estado.C, false);
+    var tiprel = funcionarioRules.getTipoRelacionamentoAtual(rejeitado.getUuid());
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(),
+        Referencia.REGISTO_COLABORADOR.name(), Estado.C);
+    validacao.setFunId(rejeitado);
+    validacao.setTiprelId(tiprel);
+    validacao.setReferenciaId(rejeitado.getId());
+    validacao.setReferenciaUuid(rejeitado.getUuid());
+    validacaoEntityRepository.save(validacao);
+    funcionarioEntityRepository.saveAndFlush(rejeitado);
+
+    dto.setValidar(null);
+    var resposta = validarRegistoColaborador(
+        new ValidarRegistoColaboradorCommand(dto, rejeitado.getUuid().toString()));
+
+    var alertas = new java.util.ArrayList<String>();
+    alertas.add(("Já existia um registo rejeitado deste colaborador (documento %s). Foi reaproveitado com os "
+        + "dados agora submetidos e voltou para validação.").formatted(rejeitado.getNumDocumento()));
+    if (resposta.getAlertas() != null) alertas.addAll(resposta.getAlertas());
+    return new SuccessResponseDTO(true, rejeitado.getUuid().toString(), "Colaborador registado com sucesso.", alertas);
+  }
+
   private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+    mudaEstado(funcionarioEntity, estado, true);
+  }
+
+  private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado, boolean comValidacao) {
     if (funcionarioEntity == null)
       return;
     // Origem = estado in-flight actual do registo (P quando o checker decide, C quando o maker
@@ -436,8 +473,10 @@ public class ValidarRegistoColaboradorService {
         situacaoLaboral.setEstado(estado);
     }
 
-    funcionarioRules.getValidacao(funcionarioEntity.getUuid(), estadoOrigem, TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
-        .ifPresent(v -> v.setEstado(estado));
+    if (comValidacao) {
+      funcionarioRules.getValidacao(funcionarioEntity.getUuid(), estadoOrigem, TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
+          .ifPresent(v -> v.setEstado(estado));
+    }
 
   }
 
