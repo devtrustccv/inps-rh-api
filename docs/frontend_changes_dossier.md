@@ -291,3 +291,24 @@ em vez de 409, o registo rejeitado é **reaproveitado**. Os dados submetidos sub
 - O documento ou NIF de um registo pendente, em correção ou aprovado (incluindo cessado) continua a dar 409.
 
 **Ação front:** mostrar os `alertas` da resposta do registo (já são mostrados para contactos duplicados).
+
+### 14.9 Duração do contrato conta o último dia
+Quando `duracaoMeses` não vem no pedido (registo, correção, novo contrato), o backend calcula-a a partir das datas
+contando o último dia: 01/03 a 31/08 = **6** meses (antes 5). O ecrã faz o mesmo: Data Fim = início + N meses − 1 dia
+(01/03 + 6 → 31/08) e Duração = meses entre o início e o dia a seguir à Data Fim.
+
+### 14.10 Cessação exige Data Fim
+`PATCH .../situacao-laboral` com uma situação que cessa o colaborador (estado `C`) **sem `dataFim`** → 400
+"A data fim (data da cessação) é obrigatória para cessar o colaborador." — no registo e no SIM (antes o SIM dava 500).
+A `dataFim` é a data da cessação (fecha relação, contrato, histórico e def). O modal Ativar/Inativar marca-a como
+obrigatória quando o Estado é "Cessado".
+
+### 14.11 Mobilidade de Direção — Unidade só quando a nova Direção tem unidades
+`POST .../mobilidades` com `DIRECAO`:
+- nova Direção **com** unidades ativas → continua a exigir `SECAO` + `seccaoDestino` dessa Direção (400 se faltar ou se
+  for de outra Direção);
+- nova Direção **sem** unidades → aceita sem Unidade (pode vir `DIRECAO` ou `DIRECAO,SECAO` com `seccaoDestino` null) e a
+  Unidade da mobilidade fica vazia (não herda a da Direção anterior); enviar uma Unidade dá 400
+  "A nova Direção não tem Unidades; não indique a Unidade.".
+
+O ecrã não muda: com uma Direção sem unidades a lista "Unidade (Depois)" vem vazia e basta deixá-la em branco.

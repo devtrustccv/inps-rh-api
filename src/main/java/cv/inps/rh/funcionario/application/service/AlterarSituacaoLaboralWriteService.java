@@ -99,6 +99,8 @@ public class AlterarSituacaoLaboralWriteService {
 
     // CHECKER: aprovar (SIM) ou rejeitar (NAO).
     if (dto.getValidar() != null) {
+      // B26: aprovar uma cessação precisa da data (só no SIM; rejeitar não aplica datas).
+      if (EstadoValidacao.SIM.equals(dto.getValidar())) guardDataFimObrigatoriaEmCessacao(param, dto);
       return validar(dto, funcionario, param, motivo);
     }
 
@@ -117,6 +119,7 @@ public class AlterarSituacaoLaboralWriteService {
     }
     guardComboInativarAtivar(estaPorCorrigir, param, funcionario);
     guardDataFimObrigatoriaEmAusencia(param, dto);
+    guardDataFimObrigatoriaEmCessacao(param, dto);
 
     var dataInicio = DateFormatter.stringToLocalDate(ValidationUtil.trimToNull(dto.getDataInicio()));
     if (dataInicio == null) {
@@ -634,6 +637,16 @@ public class AlterarSituacaoLaboralWriteService {
     if (Integer.valueOf(1).equals(param.getFlgAusencia()) && ValidationUtil.trimToNull(dto.getDataFim()) == null) {
       throw IgrpResponseStatusException.badRequest(
           "A data fim é obrigatória para situações de ausência (ex.: Licença Sem Vencimento).");
+    }
+  }
+
+  /**
+   * QA 27/11 (B26): na cessação a Data Fim é a data da cessação (fecha tiprel, contrato, histórico e def).
+   * Sem ela o pedido era aceite e o SIM rebentava com NullPointerException (500).
+   */
+  private void guardDataFimObrigatoriaEmCessacao(ParamSituacaoEntity param, AlterarSituacaoLaboralRequest dto) {
+    if (cessaContrato(param) && ValidationUtil.trimToNull(dto.getDataFim()) == null) {
+      throw IgrpResponseStatusException.badRequest("A data fim (data da cessação) é obrigatória para cessar o colaborador.");
     }
   }
 }

@@ -124,7 +124,8 @@ public class ValidarDadosContratuaisService {
     // Deriva a duração (meses) a partir das datas quando o frontend não a envia.
     // A Data de Fim é a fonte de verdade do prazo; a duração fica coerente com ela.
     if (dc.getDataFim() != null && dc.getDuracaoMeses() == null)
-      dc.setDuracaoMeses((int) ChronoUnit.MONTHS.between(dc.getDataInicio(), dc.getDataFim()));
+      // QA 27/11 (F14): o último dia conta — 01/03 a 31/08 são 6 meses (antes dava 5).
+      dc.setDuracaoMeses((int) ChronoUnit.MONTHS.between(dc.getDataInicio(), dc.getDataFim().plusDays(1)));
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO

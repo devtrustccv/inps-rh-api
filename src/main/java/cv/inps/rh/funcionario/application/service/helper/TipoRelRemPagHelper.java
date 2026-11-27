@@ -26,6 +26,16 @@ public class TipoRelRemPagHelper {
    * Usar em registos iniciais e em validações.
    */
   public void associarNovos(TiposRelacionamentoEntity tipoRel, FuncionarioEntity saved) {
+    // QA 27/11: um def eliminado (E) no reenvio de uma correção deixava a ligação ao tiprel (o registo
+    // já liga os def no POST). E nunca é uma ligação válida; I fica (é histórico).
+    if (tipoRel != null && tipoRel.getId() != null) {
+      var orfas = tipoRelRemPagEntityRepository.findByTiprelId_Id(tipoRel.getId()).stream()
+          .filter(a -> (a.getRemId() != null && a.getRemId().getEstado() == Estado.E)
+              || (a.getPagId() != null && a.getPagId().getEstado() == Estado.E))
+          .toList();
+      if (!orfas.isEmpty()) tipoRelRemPagEntityRepository.deleteAll(orfas);
+    }
+
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
