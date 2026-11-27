@@ -11,14 +11,13 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface IAMUserProfileEntityRepository extends
-    JpaRepository<IAMUserProfileEntity, UUID>,
+    JpaRepository<IAMUserProfileEntity, String>,
     JpaSpecificationExecutor<IAMUserProfileEntity> {
 
-  default IAMUserProfileEntity findByIdOrThrow(UUID id) {
+  default IAMUserProfileEntity findByIdOrThrow(String id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("IAMUserProfileEntity not found for id: " + id));
   }

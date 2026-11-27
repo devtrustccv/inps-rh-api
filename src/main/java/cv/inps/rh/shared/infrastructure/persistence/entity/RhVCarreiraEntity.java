@@ -68,7 +68,7 @@ public class RhVCarreiraEntity {
   @Column(name = "SALARIO")
   private BigDecimal salario;
 
-  @Column(name = "ESTADO_CARREIRA")
+  @Column(name = "ESTADO_CARREIRA", columnDefinition = "char(1)")
   private String estadoCarreira;
 
   @Column(name = "TIPO_SITUACAO")

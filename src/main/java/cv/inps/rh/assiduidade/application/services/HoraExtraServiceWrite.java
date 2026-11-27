@@ -40,6 +40,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class HoraExtraServiceWrite {
 
+  /** RH_ASSIDUIDADE_SINTESE_DIARIA.FORMA — registo criado à mão pelo RH (igual à falta). */
+  private static final String FORMA_MANUAL = "MANUAL";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(HoraExtraServiceWrite.class);
 
   private final HoraExtraEntityRepository horaExtraRepository;
@@ -100,8 +103,7 @@ public class HoraExtraServiceWrite {
       if (tipoRelAtual == null)
         throw IgrpResponseStatusException.badRequest("Tipo de relacionamento atual do colaborador inválido");
 
-      var sintese = buildSinteseDia(funcionario, dto.getDataInicio(), dto.getHorasDiaria());
-      sintese = sinteseRepository.save(sintese);
+      var sintese = obterOuCriarSintese(funcionario, dto.getDataInicio());
 
       BigDecimal valorDiario = calcularValorHoraExtra(
           tipoRelAtual.getId(), dto.getDataInicio(), dto.getDataFim(),
@@ -119,6 +121,7 @@ public class HoraExtraServiceWrite {
       he.setEstado(Estado.P);
       he.setUuid(UuidCreator.getTimeOrderedEpoch());
       he = horaExtraRepository.save(he);
+      recalcularHorasExtrasNaSintese(funcionario, he.getDataInicio(), he.getDataFim());
 
       if (firstHoraExtraId == null) {
         firstHoraExtraId = he.getId();
@@ -334,6 +337,9 @@ public class HoraExtraServiceWrite {
       // corrigiu horas ou percentagem, o valor recalculado acima é o que o procedimento vai ler.
       if (estado == Estado.A)
         horaExtraRepository.save(he);
+
+      // SIM com horas ajustadas → síntese com as horas novas; NAO → a hora extra deixa de contar.
+      recalcularHorasExtrasNaSintese(he);
     }
 
     funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.HORA_EXTRA)
@@ -373,11 +379,14 @@ public class HoraExtraServiceWrite {
     return ajustes;
   }
 
-  /** Hora extra de 0 (ou negativa, ou mais de um dia) não tem valor a pagar — gravava-se na mesma. */
+  /**
+   * Hora extra de 0 (ou negativa) não tem valor a pagar — gravava-se na mesma. O máximo é 23: as horas
+   * vão para RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_EXTRAS, INTERVAL DAY(0) TO SECOND(0), que só admite 0-23h.
+   */
   private static void exigirHorasDiariasValidas(Long horasDiaria) {
-    if (horasDiaria <= 0 || horasDiaria > 24)
+    if (horasDiaria <= 0 || horasDiaria > 23)
       throw IgrpResponseStatusException.badRequest(
-          "As horas diárias da hora extra têm de estar entre 1 e 24 (recebido: " + horasDiaria + ").");
+          "As horas diárias da hora extra têm de estar entre 1 e 23 (recebido: " + horasDiaria + ").");
   }
 
   /**
@@ -467,6 +476,8 @@ public class HoraExtraServiceWrite {
       he.setEstado(Estado.P);
     }
     horaExtraRepository.saveAll(horasExtra);
+    // Reenvio com horas ajustadas → a síntese acompanha.
+    horasExtra.forEach(this::recalcularHorasExtrasNaSintese);
 
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
@@ -486,34 +497,62 @@ public class HoraExtraServiceWrite {
     return resp;
   }
 
-  private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Long horasExtra) {
-    var e = new AssiduidadeSinteseDiarioEntity();
-    e.setFuncionarioId(fun);
-    e.setData(dia);
-    e.setMes(dia.getMonthValue());
-    e.setAno(dia.getYear());
-    e.setHorasExtras(formatHorasToInterval(horasExtra));
-    e.setEstado(Estado.A.name());
-    return e;
+  /** Horas extra que não contam na síntese: rejeitadas e eliminadas. P, C e A contam. */
+  private static final List<Estado> HORA_EXTRA_NAO_CONTA = List.of(Estado.I, Estado.E);
+
+  /**
+   * Síntese do dia (RH_T_HORA_EXTRA.SINTESE_DIARIO_ID só guarda uma, a do 1.º dia do período).
+   *
+   * <p>Um dia tem uma síntese, venha do relógio, de uma falta ou daqui: se já existe, reaproveita-se;
+   * senão cria-se uma MANUAL, como a falta. Antes criava-se sempre uma nova, o que duplicava a síntese
+   * de dias já existentes (e a vista do resumo somava as duas).
+   */
+  private AssiduidadeSinteseDiarioEntity obterOuCriarSintese(FuncionarioEntity fun, LocalDate dia) {
+    var existentes = sinteseRepository.findAllByFuncionarioIdAndData(fun, dia);
+    if (existentes != null && !existentes.isEmpty())
+      return existentes.getFirst();
+    var sintese = new AssiduidadeSinteseDiarioEntity();
+    sintese.setFuncionarioId(fun);
+    sintese.setData(dia);
+    sintese.setMes(dia.getMonthValue());
+    sintese.setAno(dia.getYear());
+    sintese.setFlagRececao("1");
+    sintese.setForma(FORMA_MANUAL);
+    sintese.setEstado(Estado.A.name());
+    return sinteseRepository.save(sintese);
   }
 
   /**
-   * Converte um valor em minutos para string no formato Oracle INTERVAL "+0
-   * HH:MM:00"
+   * Recalcula RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_EXTRAS em cada dia do período: soma das horas diárias
+   * das horas extra do funcionário que cobrem o dia e não estão rejeitadas/eliminadas. É o mesmo cálculo
+   * no registo, no ajuste (validação e reenvio) e na rejeição — assim a síntese acompanha a hora extra e
+   * duas horas extra no mesmo dia somam em vez de uma apagar a outra. Só se mexe em HORAS_EXTRAS.
    */
-  private String formatHorasToInterval(Long minutosTotais) {
-    if (minutosTotais == null || minutosTotais < 0) {
-      return "+0 00:00:00";
+  private void recalcularHorasExtrasNaSintese(FuncionarioEntity fun, LocalDate inicio, LocalDate fim) {
+    for (var dia = inicio; !dia.isAfter(fim); dia = dia.plusDays(1)) {
+      long soma = horaExtraRepository.somaHorasDiariasNoDia(fun.getId(), dia, HORA_EXTRA_NAO_CONTA);
+      var existentes = sinteseRepository.findAllByFuncionarioIdAndData(fun, dia);
+      if (soma == 0 && (existentes == null || existentes.isEmpty()))
+        continue;
+      var sintese = obterOuCriarSintese(fun, dia);
+      if (soma > 23) {
+        LOGGER.warn("Horas extra sobrepostas somam {}h em {} (fun={}); a síntese só admite até 23h.",
+            soma, dia, fun.getId());
+        soma = 23;
+      }
+      sintese.setHorasExtras(soma > 0 ? formatHorasToInterval(soma) : null);
+      sinteseRepository.save(sintese);
     }
+  }
 
-    long hours = minutosTotais / 60;
-    long minutes = minutosTotais % 60;
+  private void recalcularHorasExtrasNaSintese(HoraExtraEntity he) {
+    recalcularHorasExtrasNaSintese(he.getTiprelId().getFunId(), he.getDataInicio(), he.getDataFim());
+  }
 
-    // Garante dois dígitos
-    String hh = hours < 10 ? "0" + hours : String.valueOf(hours);
-    String mm = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
-
-    return "+0 " + hh + ":" + mm + ":00";
+  /** Horas inteiras (1-23, ver exigirHorasDiariasValidas) no formato Oracle INTERVAL "+0 HH:00:00". */
+  private static String formatHorasToInterval(Long horas) {
+    long h = horas == null || horas < 0 ? 0 : horas;
+    return String.format("+0 %02d:00:00", h);
   }
 
 }

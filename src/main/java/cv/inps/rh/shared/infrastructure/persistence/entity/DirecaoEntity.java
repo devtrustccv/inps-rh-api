@@ -21,9 +21,9 @@ import java.time.LocalDateTime;
 @Table(name = "RH_T_DIRECAO")
 public class DirecaoEntity {
 
+    // Só leitura: nem o RH nem os packages da BD criam direções, por isso não há gerador de id
+    // (a SEQ_DIRECAO nunca existiu na BD e o ddl-auto=validate exigia-a).
     @Id
-    @SequenceGenerator(name = "seq_direcao", sequenceName = "SEQ_DIRECAO", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_direcao")
     @Column(name = "ID", unique = true, nullable = false)
     private Long id;
 

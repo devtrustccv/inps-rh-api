@@ -89,7 +89,10 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     // filtrar por "def.estado == tiprel.estado" (daria vazio). Filtra-se por 'A', EXCETO quando o
     // tiprel está PENDENTE (P): aí mostram-se os def P (preview). Isto também exclui os E/I
     // (eliminados/inactivos — ex.: manuais substituídos pelo sync), que não são 'A'.
-    var estadoAlvo = tiposRelacionamento.getEstado() == Estado.P ? Estado.P : Estado.A;
+    // Em correção (C) também é preview: o CORRIGIR passa o tiprel a C mas os def continuam P (ou C).
+    // Sem isto o GET devolvia os manuais vazios, o frontend reenviava sem eles e o sync eliminava-os.
+    var emValidacao = tiposRelacionamento.getEstado() == Estado.P || tiposRelacionamento.getEstado() == Estado.C;
+    var estadosAlvo = emValidacao ? java.util.EnumSet.of(Estado.P, Estado.C) : java.util.EnumSet.of(Estado.A);
     // Vista ATUAL (est_act_adm=1): mostra só os def EM VIGOR — o MESMO predicado "não-terminado" da
     // cópia da renovação: data_fim NULL ou >= hoje. Exclui os expirados (ex.: diferenças de meses já
     // passados) e mantém os futuros. A vista INICIAL não filtra período (mostra o estado inicial).
@@ -97,11 +100,11 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     var hoje = LocalDate.now();
 
     var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId())
-        .stream().filter(r -> r.getEstado() == estadoAlvo)
+        .stream().filter(r -> estadosAlvo.contains(r.getEstado()))
         .filter(r -> !atual || emVigor(r.getDataFim(), hoje))
         .toList();
     var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId())
-        .stream().filter(p -> p.getEstado() == estadoAlvo)
+        .stream().filter(p -> estadosAlvo.contains(p.getEstado()))
         .filter(p -> !atual || emVigor(p.getDataFim(), hoje))
         .toList();
 

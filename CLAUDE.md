@@ -34,7 +34,7 @@ Documentação funcional do domínio em [docs/](docs/) — consultar antes de im
 - **Open-in-view desligado** (`spring.jpa.open-in-view=false`) — carregar associações explicitamente no service layer; não confiar em lazy loading no controller.
 - **Batch inserts** configurados (batch_size=50, order_inserts/updates) — em operações bulk, usar `saveAll` e liberar a sessão periodicamente.
 - **Dialecto Oracle** — evitar SQL ANSI-only; sem `LIMIT`: usar `Pageable` (ou `ROWNUM` em SQL nativo). A BD de dev é **Oracle 11g XE**, onde `FETCH FIRST n ROWS ONLY` dá ORA-00933.
-- **Flyway desligado por padrão** (`spring.flyway.enabled=false`); migrations em `classpath:db/migration` quando habilitado.
+- **Flyway desligado por padrão** (`spring.flyway.enabled=${ENABLE_FLYWAY:false}`); `src/main/resources/db/migration/` existe mas está vazia (as antigas V1–V5 estão em [scripts/migrations/](scripts/migrations/) só como referência). Hoje o esquema muda por scripts SQL aplicados à mão (`docs/sql/`, `scripts/`). Para passar a usar: nenhum ambiente tem `flyway_schema_history`, por isso o 1.º arranque com `ENABLE_FLYWAY=true` faz a baseline sozinho na **versão 0** (`baseline-on-migrate=true`, `baseline-version=0`) e a 1.ª migration nova é `V1__...`.
 - **Swagger UI** em `/swagger-ui.html` (controlado por `ENABLE_SWAGGER`).
 - **Enum exposer do IGRP** expõe enums automaticamente em `api/v1/enums` (controlado por `igrp.enum.exposer.enabled`).
 

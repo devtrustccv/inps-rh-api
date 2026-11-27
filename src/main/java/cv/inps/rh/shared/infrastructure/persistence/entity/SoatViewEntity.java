@@ -78,7 +78,6 @@ public class SoatViewEntity {
   @Column(name = "DIAS_TRAB_MES")
   private Long diasTrabMes;
 
-  @Lob
   @Column(name = "DIAS_TRAB_SEMANA")
   private String diasTrabSemana;
 
@@ -113,7 +112,6 @@ public class SoatViewEntity {
   @Column(name = "ESTAGIARIO_APRENDIZ", length = 4)
   private String estagiarioAprendiz;
 
-  @Lob
   @Column(name = "SITUACAO")
   private String situacao;
 

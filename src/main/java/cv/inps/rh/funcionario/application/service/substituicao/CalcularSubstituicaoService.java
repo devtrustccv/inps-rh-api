@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseItemDTO;
 import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.VencimentoAtivoHelper;
 import cv.inps.rh.funcionario.domain.repository.ICalcularSubstituicaoRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class CalcularSubstituicaoService {
 
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
   private final FuncionarioRules funcionarioRules;
+  private final VencimentoAtivoHelper vencimentoAtivoHelper;
 
   @Transactional(readOnly = true)
   public CalcularSubstituicaoResponseDTO calcular(CalcularSubstituicaoQuery query) {
@@ -38,8 +40,9 @@ public class CalcularSubstituicaoService {
     var tiprelDe   = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(query.getFuncionarioDeId()));
     var tiprelPara = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(query.getFuncionarioParaId()));
 
-    BigDecimal valorDe   = tiprelDe.getSalario()  != null ? tiprelDe.getSalario()  : BigDecimal.ZERO;
-    BigDecimal valorPara = tiprelPara.getSalario() != null ? tiprelPara.getSalario() : BigDecimal.ZERO;
+    // Salário recebido hoje (vencimento ativo), como no registo da substituição — não o do contrato.
+    BigDecimal valorDe   = vencimentoAtivoHelper.vencimentoAtual(tiprelDe, "substituto");
+    BigDecimal valorPara = vencimentoAtivoHelper.vencimentoAtual(tiprelPara, "substituído");
 
     List<CalcularSubstituicaoResponseItemDTO> items = new ArrayList<>();
 

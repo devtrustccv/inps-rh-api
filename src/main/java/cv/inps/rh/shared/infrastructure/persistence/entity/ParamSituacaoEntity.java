@@ -32,7 +32,7 @@ public class ParamSituacaoEntity extends AuditEntity {
     private Long id;
 
 
-    @Column(name="flg_falta_deconto_sal")
+    @Column(name="flg_falta_deconto_sal", columnDefinition = "varchar2(1)")
     private Integer flgFaltaDecontoSal;
 
 
@@ -76,11 +76,11 @@ public class ParamSituacaoEntity extends AuditEntity {
     private String classificacaoArea;
 
 
-    @Column(name="flg_abono_beneficio")
+    @Column(name="flg_abono_beneficio", columnDefinition = "varchar2(1)")
     private Integer flgAbonoBeneficio;
 
 
-    @Column(name="flg_situacao_laboral")
+    @Column(name="flg_situacao_laboral", columnDefinition = "varchar2(1)")
     private Integer flgSituacaoLaboral;
 
 
@@ -109,7 +109,7 @@ public class ParamSituacaoEntity extends AuditEntity {
     private Integer numDiasNdescontoRh;
 
 
-    @Column(name="flg_ausencia")
+    @Column(name="flg_ausencia", columnDefinition = "varchar2(1)")
     private Integer flgAusencia;
 
 

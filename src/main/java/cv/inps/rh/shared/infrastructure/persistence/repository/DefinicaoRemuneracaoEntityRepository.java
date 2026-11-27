@@ -28,6 +28,28 @@ public interface DefinicaoRemuneracaoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DefinicaoRemuneracaoEntity not found for id: " + id));
   }
 
+  /**
+   * Vencimento ativo hoje do contrato (select do analista para a substituição): remuneração SAL/REM
+   * em A ligada ao tiprel por RH_T_TIPREL_REM_PAG, sem TIPO (B.TIPO IS NULL, pedido do analista), já
+   * iniciada e não terminada. O mais recente primeiro
+   * (data de início, depois o último registado) — normalmente vem um só.
+   */
+  @Query(value = """
+      SELECT b.VALOR
+        FROM rh_t_def_remuneracoes b
+        JOIN rh_t_tiprel_rem_pag c ON c.rem_id = b.id
+        JOIN inpssigof.rh_tipo_movimentos d ON d.id = b.tm_id
+       WHERE c.tiprel_id = :tiprelId
+         AND d.short_desc = 'SAL'
+         AND d.tipo = 'REM'
+         AND b.estado = 'A'
+         AND b.tipo IS NULL
+         AND b.data_inicio <= SYSDATE
+         AND (b.data_fim IS NULL OR b.data_fim >= TRUNC(SYSDATE))
+       ORDER BY b.data_inicio DESC, b.id DESC
+      """, nativeQuery = true)
+  List<java.math.BigDecimal> vencimentosAtivosHoje(@Param("tiprelId") Long tiprelId);
+
   @Query(value = """
       SELECT * FROM (
           SELECT dr.*, ROWNUM rnum

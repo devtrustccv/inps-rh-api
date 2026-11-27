@@ -64,6 +64,7 @@ public class SubstituicaoWriteService {
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
   private final cv.inps.rh.shared.application.detalhe.DetalheAlteracoes detalheAlteracoes;
   private final cv.inps.rh.funcionario.application.service.detalhe.DossierCampos dossierCampos;
+  private final cv.inps.rh.funcionario.application.service.helper.VencimentoAtivoHelper vencimentoAtivoHelper;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -119,8 +120,10 @@ public class SubstituicaoWriteService {
     // P e segue para validação, onde a diferença é registada em RH_T_DEF_REMUNERACOES (DOSSIÊ 16/07:
     // "ao validar o registo logo deve fazer um registo em RH_T_DEF_REMUNERACAO") — aqui só se cria a
     // validação pendente.
-    var salarioSubstituto = substitutoTiprel.getSalario();
-    var salarioSubstituido = substituidoTiprel.getSalario();
+    // Salário recebido hoje (vencimento ativo em RH_T_DEF_REMUNERACOES), não o gravado no contrato:
+    // depois de um aumento ou de um vencimento fechado, o do contrato já não é o que se paga (analista).
+    var salarioSubstituto = vencimentoAtivoHelper.vencimentoAtual(substitutoTiprel, "substituto");
+    var salarioSubstituido = vencimentoAtivoHelper.vencimentoAtual(substituidoTiprel, "substituído");
     boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
         && salarioSubstituto.compareTo(salarioSubstituido) < 0;
 

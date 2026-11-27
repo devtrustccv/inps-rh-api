@@ -1,6 +1,6 @@
 # Processamento Salarial — alterações de API para o front-end
 
-**Última actualização:** 2026-10-25 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
+**Última actualização:** 2026-11-26 · **Base dos endpoints:** sem `api/v1` (`/processamento-salarial`, `/pesquisa`,
 `/fos`)
 
 Changelog das alterações feitas ao backend do Processamento Salarial. Cada secção diz o que mudou no
@@ -97,3 +97,86 @@ os numéricos para somas ou ordenação.
 Cada linha de `content[]` traz `valorFormatado` (mesmo formato: `1234567` → `"1 234 567"`), além de `valor`.
 
 **Ação front:** mostrar `valorFormatado` na coluna Valor do Detalhe.
+
+---
+
+## 3. Importação de Movimentos — validar com o id da lista e decisão única (25/11/2026)
+
+### Porquê
+A lista devolvia em `movimentoId` o id numérico (`"4"`), mas o validar procura pelo uuid: validar a partir do
+ecrã dava sempre `400 "Invalid UUID string: 4"`. E o movimento ficava `A` desde a importação, por isso podia ser
+validado várias vezes — cada vez criava outra remuneração/desconto e outra ligação ao vínculo.
+
+### `GET /colaborador/movimentos`
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `content[].movimentoId` | id numérico (`"4"`) | **uuid** (`"01a214ac-bc0b-…"`) |
+
+O ecrã não tem de mudar nada se já reenvia o `movimentoId` da lista no path do validar.
+
+### `POST /colaborador/movimentos/{movimentoId}/validar`
+- `{movimentoId}` = o `movimentoId` da lista (uuid).
+- `validacao` só aceita **`SIM`** ou **`NAO`**; `CORRIGIR` (e qualquer outro) dá `400` — antes `CORRIGIR` era tratado
+  como `SIM`.
+- Estados (spec, Importação Movimentos): importado fica **`P`**; `SIM` → **`A`**; `NAO` → **`I`**.
+- Decidir de novo um movimento já `A` ou `I` dá `400` "Este movimento já foi validado." / "… já foi rejeitado.",
+  sem gravar nada.
+
+### Lista — nome do ficheiro e nomes dos movimentos (spec, Lista Importados)
+
+| Campo | Antes | Depois |
+|---|---|---|
+| `content[].nomeFicheiro` | sempre `""` | nome do ficheiro importado (ex.: `movimentos_2026_12.xlsx`) |
+| `content[].movimentoRetencaoDesc` | ❌ não existia | nome do tipo de movimento de retenção (ou `null`) |
+| `content[].movimentoRemuneracaoDesc` | ❌ não existia | nome do tipo de movimento de remuneração (ou `null`) |
+
+`movimentoRetencao` / `movimentoRemuneracao` continuam a trazer o **id** do tipo de movimento (é o que o formulário
+de validação reenvia); o ecrã mostra os `…Desc`.
+
+### `POST /colaborador/importar-movimento` — coluna A passa a ser o Nº de Colaborador
+
+| Coluna A do Excel | Antes | Depois |
+|---|---|---|
+| Identificação do colaborador | UUID do funcionário | **Número de colaborador** (`RH_T_FUNCIONARIOS.ID_COLABORADOR`), como o ficheiro de ginásio/cantina traz |
+
+Erros novos por linha (400, nada gravado): `colaborador não encontrado (número N)`,
+`o número de colaborador N corresponde a K colaboradores` (o número não é único na BD),
+`número de colaborador inválido (x)`. Modelo actualizado em `docs/modelos/importacao_movimentos_modelo.xlsx`.
+
+### Ficheiro com `CODIGO`, vínculo, estado e validação (26/11/2026)
+
+**`POST /colaborador/importar-movimento`** — cada upload passa a ter um `CODIGO` (igual em todas as linhas do
+ficheiro), guarda o nome da coluna B e o vínculo atual do colaborador, e cria **uma** validação pendente para o
+ficheiro em `RH_T_VALIDACAO` (`REFERENCIA_NAME = IMPORTACAO_MOVIMENTO`, `REFERENCIA_ID = CODIGO`, sem colaborador).
+
+**`GET /colaborador/movimentos`** — campos novos em `content[]`:
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `codigo` | Long | identificador do ficheiro (agrupa as linhas do mesmo upload) |
+| `vinculoId` | Long | vínculo do colaborador na importação ("Vínculo (Situação)"; `null` se não tinha contrato atual) |
+| `estado` | String | `P` pendente · `A` validado · `I` rejeitado |
+| `estadoDesc` | String | descrição do estado |
+
+O ecrã deve mostrar o validar só nas linhas `P` (as outras dão `400`).
+
+**Validação do ficheiro** — fica `P` enquanto houver linhas por decidir e passa a `A` quando todas estiverem
+decididas (validadas ou rejeitadas). A validação continua a ser feita linha a linha no ecrã da importação.
+
+⚠️ **Lista geral de validações** (`GET /api/v1/funcionarios/validacoes`): a validação pendente do ficheiro aparece
+lá com `referenciaName = "IMPORTACAO_MOVIMENTO"`, `referenciaId` = `codigo`, `idFuncionario = 0` e
+`nomeColaborador` vazio. Ao abrir, o ecrã deve levar para a lista de movimentos importados filtrada por esse
+`codigo` (ou não tratar esta referência ali).
+
+### Tipos de movimento numéricos e situação até 50 caracteres (26/11/2026)
+`RH_T_IMPORTACAO_MOVIMENTO.TP_MOV_RETENCAO` / `TP_MOV_REM` passaram a `NUMBER` e `SITUACAO` a `VARCHAR2(50)` na BD.
+- **Importar:** as colunas C e D do Excel têm de ser o **id inteiro** do tipo de movimento (ou vazias); outro valor dá
+  erro na linha (`Mov. Retenção inválido (x)` / `Mov. Remuneração inválido (x)`). A coluna I (Situação) aceita até 50
+  caracteres; mais dá `Situação com mais de 50 caracteres`. Tudo ou nada, como antes.
+- **Validar:** `movimentoRetencao` / `movimentoRemuneracao` continuam texto no JSON, mas têm de ser o id inteiro (ou
+  vazio/`null`); outro valor dá `400` e a linha fica `P`.
+
+### Fora desta alteração
+Os campos "??" da spec para o desconto (`RHB_ID`, `REFERENCIA`, `NM_ENTIDADE`, `NU_CONTA`, `NIB`, `ENT_ID`)
+ficam vazios até serem definidos.

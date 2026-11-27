@@ -29,7 +29,7 @@ public class ProcSalCcPagEntity {
   private Long ccId;
 
   @Size(max = 3)
-  @Column(name = "TIPO", length = 3)
+  @Column(name = "TIPO", length = 3, columnDefinition = "char(3)")
   private String tipo;
 
   @Size(max = 150)
@@ -224,7 +224,6 @@ public class ProcSalCcPagEntity {
   @Column(name = "BANCO_BEN_ID")
   private Long bancoBenId;
 
-  @Lob
   @Column(name = "OBS")
   private String obs;
 

@@ -29,7 +29,7 @@ public class ProcSalCcRemunEntity {
   private Long ccId;
 
   @Size(max = 4)
-  @Column(name = "TIPO", length = 4)
+  @Column(name = "TIPO", length = 4, columnDefinition = "char(4)")
   private String tipo;
 
   @Size(max = 150)
@@ -198,15 +198,12 @@ public class ProcSalCcRemunEntity {
   @Column(name = "IAC_DESCRICAO", length = 200)
   private String iacDescricao;
 
-  @Lob
   @Column(name = "NIB_REF")
   private String nibRef;
 
-  @Lob
   @Column(name = "ENTIDADE_REF")
   private String entidadeRef;
 
-  @Lob
   @Column(name = "ENT_REF")
   private String entRef;
 

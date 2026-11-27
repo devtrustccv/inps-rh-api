@@ -95,7 +95,7 @@ public class TipoMovimentoEntity  {
 
 
     @Column(name="ent_id")
-    private String entId;
+    private Long entId;
 
 
     @Column(name="tipo_sal")

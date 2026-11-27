@@ -6,6 +6,8 @@ package cv.inps.rh.shared.infrastructure.persistence.entity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
+import cv.inps.rh.shared.infrastructure.persistence.type.IntervalDsStringJdbcType;
+import org.hibernate.annotations.JdbcType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,35 +51,43 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     private Integer ano;
 
 
-  @Column(name="hora_primeira_entrada")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_primeira_entrada", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaPrimeiraEntrada;
 
 
-  @Column(name="hora_ultima_saida")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_ultima_saida", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaUltimaSaida;
 
 
-  @Column(name="horas_trabalhadas")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "horas_trabalhadas", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horasTrabalhadas;
 
 
-  @Column(name="hora_primeira_saida_almoco")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_primeira_saida_almoco", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaPrimeiraSaidaAlmoco;
 
 
-  @Column(name="hora_ultima_entrada_almoco")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_ultima_entrada_almoco", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaUltimaEntradaAlmoco;
 
 
-  @Column(name="horas_almoco")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "horas_almoco", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horasAlmoco;
 
 
-  @Column(name="horas_extras")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "horas_extras", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horasExtras;
 
 
-  @Column(name="horas_ausencia")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "horas_ausencia", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horasAusencia;
 
 

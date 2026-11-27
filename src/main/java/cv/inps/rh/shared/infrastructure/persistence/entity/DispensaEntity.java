@@ -7,6 +7,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
+import cv.inps.rh.shared.infrastructure.persistence.type.IntervalDsStringJdbcType;
+import org.hibernate.annotations.JdbcType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -69,11 +71,13 @@ public class DispensaEntity extends AuditEntity {
     private LocalDate dataFim;
 
 
-  @Column(name="hora_inicio")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_inicio", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaInicio;
 
 
-  @Column(name="hora_fim")
+  @JdbcType(IntervalDsStringJdbcType.class)
+  @Column(name = "hora_fim", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horaFim;
 
 

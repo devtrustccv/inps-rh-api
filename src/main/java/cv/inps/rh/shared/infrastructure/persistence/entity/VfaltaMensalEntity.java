@@ -118,11 +118,11 @@ public class VfaltaMensalEntity  {
     private String estMensal;
 
 
-  @Column(name="est_proc")
+  @Column(name="est_proc", columnDefinition = "char(4)")
     private String estProc;
 
 
-  @Column(name="flg_desc_sal")
+  @Column(name="flg_desc_sal", columnDefinition = "char(1)")
     private String flgDescSal;
 
 

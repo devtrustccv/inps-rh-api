@@ -7,6 +7,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
+import cv.inps.rh.shared.infrastructure.persistence.type.IntervalDsStringJdbcType;
+import org.hibernate.annotations.JdbcType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -74,7 +76,8 @@ public class FaltaEntity extends AuditEntity {
     private String despachoRh;
 
 
-    @Column(name="horas_ausencia")
+    @JdbcType(IntervalDsStringJdbcType.class)
+    @Column(name = "horas_ausencia", columnDefinition = IntervalDsStringJdbcType.DDL)
     private String horasAusencia;
 
 

@@ -43,11 +43,13 @@ public class ImportacaoMovimentoEntity extends AuditEntity {
   @JoinColumn(name = "FUN_ID", nullable = false)
   private FuncionarioEntity funcionario;
 
+  /** Id do tipo de movimento de retenção (INPSSIGOF.RH_TIPO_MOVIMENTOS.ID). */
   @Column(name = "TP_MOV_RETENCAO")
-  private String tpMovRetencao;
+  private Long tpMovRetencao;
 
+  /** Id do tipo de movimento de remuneração (INPSSIGOF.RH_TIPO_MOVIMENTOS.ID). */
   @Column(name = "TP_MOV_REM")
-  private String tpMovRem;
+  private Long tpMovRem;
 
   @Column(name = "PERCENTAGEM")
   private BigDecimal percentagem;
@@ -63,4 +65,17 @@ public class ImportacaoMovimentoEntity extends AuditEntity {
 
   @Column(name = "SITUACAO")
   private String situacao;
+
+  /** Identificador do ficheiro importado: igual em todas as linhas do mesmo upload (RH_SEQ_IMP_MOV_CODIGO). */
+  @Column(name = "CODIGO")
+  private Long codigo;
+
+  /** Nome do colaborador tal como vem no ficheiro (coluna B). */
+  @Column(name = "NOME_FUNCIONARIO", length = 300)
+  private String nomeFuncionario;
+
+  /** Vínculo atual do colaborador no momento da importação ("Vínculo (Situação)" da lista). */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "TIPREL_ID")
+  private TiposRelacionamentoEntity tiprel;
 }
