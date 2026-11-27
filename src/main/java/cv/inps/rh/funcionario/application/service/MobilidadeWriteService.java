@@ -100,6 +100,7 @@ public class MobilidadeWriteService {
     if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)){
       throw IgrpResponseStatusException.badRequest("Funcionário tem uma mobilidade pendente por validar");
     }
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.MOBILIDADE); // grupo relação laboral (QA 27/11)
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     garantirInicioPosteriorAoAtual(mobilidadeDto.getDataInicio(), tipoRelacionamentoAtual, null);
@@ -190,6 +191,18 @@ public class MobilidadeWriteService {
    */
   private void aplicarCamposMobilidade(MobilidadeEntity me, MobilidadeDTO dto,
       java.util.EnumSet<TipoMobilidade> selecionados, MobilidadeEntity anterior) {
+    // M8 (QA 27/11): mudar de Direção sem indicar a Unidade deixava o colaborador na direção nova com a
+    // unidade da direção anterior. Mudar de Direção exige também a nova Unidade, e ela tem de pertencer
+    // à nova direção.
+    if (selecionados.contains(TipoMobilidade.DIRECAO)) {
+      if (!selecionados.contains(TipoMobilidade.SECAO) || dto.getSeccaoDestino() == null)
+        throw IgrpResponseStatusException.badRequest(
+            "Ao mudar de Direção indique também a nova Unidade (escolha a mobilidade de Unidade).");
+      var secao = entityManager.find(cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity.class, dto.getSeccaoDestino());
+      if (secao != null && secao.getInstId() != null && dto.getDirecaoDestino() != null
+          && !java.util.Objects.equals(secao.getInstId().getId(), dto.getDirecaoDestino()))
+        throw IgrpResponseStatusException.badRequest("A Unidade escolhida não pertence à nova Direção.");
+    }
     for (var tipo : TipoMobilidade.values()) {
       if (selecionados.contains(tipo)) {
         var id = tipo.depoisId(dto);
@@ -375,7 +388,10 @@ public class MobilidadeWriteService {
         novoTipoRelacionamento.setMobId(mobilidade);
         novoTipoRelacionamento.setEstado(Estado.A);
         novoTipoRelacionamento.setDataInicio(dataEfetiva);
-        novoTipoRelacionamento.setDataFim(null);
+        // M4 (QA 26/11): o tiprel novo herda o fim do contrato em vigor (contrato a termo); a renovação
+        // prolonga-o depois. Sem contrato/fim (indeterminado) fica em aberto, como antes.
+        var contratoMob = novoTipoRelacionamento.getContrVinculoId();
+        novoTipoRelacionamento.setDataFim(contratoMob != null ? contratoMob.getDataFim() : null);
         // Spec: TIPO_SITUACAO = referente ao tipo de mobilidade. Lê-se da mobilidade já actualizada
         // (não do DTO) para o payload de validação não precisar de reenviar o tipo.
         var tipoMobilidade = mobilidade.getTipoSituacao();

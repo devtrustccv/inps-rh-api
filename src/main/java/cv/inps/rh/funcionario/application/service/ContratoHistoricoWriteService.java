@@ -233,6 +233,44 @@ public class ContratoHistoricoWriteService {
     contratoHistoricoEntityRepository.save(pendente);
   }
 
+  /** M5 (QA 27/11): na cessação, a versão em vigor do histórico passa a terminar na data da cessação
+   *  (a lista "Gestão Contratual" mostrava o fim previsto). A DURACAO fica: é o termo previsto. */
+  public void fecharPorCessacao(ContratoEntity contrato, java.time.LocalDate fim) {
+    historicoActual(contrato).ifPresent(h -> {
+      h.setDataFim(fim);
+      contratoHistoricoEntityRepository.save(h);
+    });
+  }
+
+  /** Termo previsto do contrato em vigor = início da versão + DURACAO meses − 1 dia (null se indeterminado). */
+  public java.time.LocalDate fimPrevisto(ContratoEntity contrato) {
+    var h = historicoActual(contrato).orElse(null);
+    if (h == null || h.getDataInicio() == null || h.getDuracao() == null || h.getDuracao() <= 0) return null;
+    return h.getDataInicio().plusMonths(h.getDuracao()).minusDays(1);
+  }
+
+  /** B21 (QA 27/11): reativação abre uma NOVA versão do histórico [inicio, fim] — o período da
+   *  cessação fica visível como hiato entre a versão anterior e esta. */
+  public ContratoHistoricoEntity registrarReativacao(ContratoEntity contrato, java.time.LocalDate inicio,
+      java.time.LocalDate fim) {
+    var atual = historicoActual(contrato).orElse(null);
+    var ultima = contratoHistoricoEntityRepository.findTopByContratoId_IdOrderByVersaoDesc(contrato.getId()).orElse(null);
+    var h = buildBase(contrato);
+    h.setDataInicio(inicio);
+    h.setDataFim(fim);
+    h.setDuracao(fim == null ? null
+        : (int) java.time.temporal.ChronoUnit.MONTHS.between(inicio, fim.plusDays(1)));
+    h.setVersao(ultima != null && ultima.getVersao() != null ? ultima.getVersao() + 1 : 1);
+    h.setEstado(Estado.A);
+    h.setEstActAdm(1);
+    h.setObs("REATIVACAO");
+    if (atual != null) {
+      atual.setEstActAdm(0);
+      contratoHistoricoEntityRepository.save(atual);
+    }
+    return contratoHistoricoEntityRepository.save(h);
+  }
+
   private ContratoHistoricoEntity buildBase(ContratoEntity contrato) {
     var h = new ContratoHistoricoEntity();
     h.setContratoId(contrato);

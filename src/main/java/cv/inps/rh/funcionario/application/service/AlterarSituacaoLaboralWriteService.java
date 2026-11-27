@@ -62,6 +62,9 @@ public class AlterarSituacaoLaboralWriteService {
   private final AusenciaEntityRepository ausenciaEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ValidacaoDetalheEntityRepository validacaoDetalheEntityRepository;
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository defPagamentoEntityRepository;
 
   @Transactional
   public SuccessResponseDTO execute(AlterarSituacaoLaboralCommand command) {
@@ -100,6 +103,13 @@ public class AlterarSituacaoLaboralWriteService {
     }
 
     // MAKER: guards do registo/reenvio.
+    if (!estaPorCorrigir) {
+      // M9 (QA 27/11): com uma alteração já pendente, avisa em vez de responder "sem alterações".
+      if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR))
+        throw IgrpResponseStatusException.badRequest(
+            "Já existe uma alteração de situação laboral pendente de validação para este colaborador.");
+      funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.ESTADO_COLABORADOR); // grupo relação laboral (QA 27/11)
+    }
     // Spec (LSV): o motivo só é obrigatório se a situação tiver motivos — LIC_SV não tem nenhum.
     if (dto.getMotivoId() == null
         && paramSituacaoDetalheEntityRepository.existsBySituacaoId_IdAndEstado(dto.getSituacaoLaboralId(), Estado.A)) {
@@ -208,7 +218,7 @@ public class AlterarSituacaoLaboralWriteService {
       if (cessaContrato(param)) {
         aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
       } else if (ativaContrato(param)) {
-        aplicarEfeitosReativacao(funcionario, tiprelAtual);
+        aplicarEfeitosReativacao(dto, funcionario, tiprelAtual);
       }
       ordemServicoWriteService.criar(funcionario, tiprelAtual, dto.getTipoOrdemServico());
     } else {
@@ -352,10 +362,21 @@ public class AlterarSituacaoLaboralWriteService {
     var carreira = tiprelAtual.getCarreiraId();
     if (carreira != null) carreira.setDataFim(dataFim);
     var contrato = tiprelAtual.getContrVinculoId();
-    if (contrato != null) contrato.setDataFim(dataFim);
+    if (contrato != null) {
+      contrato.setDataFim(dataFim);
+      contratoHistoricoWriteService.fecharPorCessacao(contrato, dataFim); // M5
+    }
 
-    funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFim));
-    funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(dataFim));
+    // Só os def DA RELAÇÃO ATUAL ainda em vigor (A/P, sem fim ou com fim posterior). Antes fechava TODOS
+    // os def do colaborador, reescrevendo o fim de def antigos já terminados (histórico).
+    funcionarioRules.getRemuneracoesAssociados(tiprelAtual.getId()).stream()
+        .filter(r -> (r.getEstado() == Estado.A || r.getEstado() == Estado.P)
+            && (r.getDataFim() == null || r.getDataFim().isAfter(dataFim)))
+        .forEach(r -> r.setDataFim(dataFim));
+    funcionarioRules.getPagamentosDescontosAssociados(tiprelAtual.getId()).stream()
+        .filter(p -> (p.getEstado() == Estado.A || p.getEstado() == Estado.P)
+            && (p.getDataFim() == null || p.getDataFim().isAfter(dataFim)))
+        .forEach(p -> p.setDataFim(dataFim));
   }
 
   /**
@@ -371,19 +392,73 @@ public class AlterarSituacaoLaboralWriteService {
    * Reabrir (null) é o menos errado — deixar a data da cessação descreveria um contrato terminado por um
    * evento que foi revertido. Ver o achado da edição in-place no handoff.
    */
-  private void aplicarEfeitosReativacao(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprelAtual) {
+  private void aplicarEfeitosReativacao(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      TiposRelacionamentoEntity tiprelAtual) {
+    // B21 (QA 27/11): a reativação abre uma NOVA relação a partir da data de reativação, até ao termo
+    // previsto do contrato (contrato a termo) ou em aberto (indeterminado). A relação cessada fica
+    // fechada na data da cessação — o hiato fica no histórico. Antes anulava DATA_FIM em toda a cadeia
+    // (o contrato a termo ficava sem fim e o período da cessação desaparecia).
     funcionario.setEstado(Estado.A);
-    tiprelAtual.setDataFim(null);
+    var inicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
+    if (inicio == null) inicio = LocalDate.now();
+    var fimCessacao = tiprelAtual.getDataFim();
+    var contrato = tiprelAtual.getContrVinculoId();
+    LocalDate termo = contrato != null ? contratoHistoricoWriteService.fimPrevisto(contrato) : null;
+    if (termo != null && termo.isBefore(inicio)) termo = null; // termo já passado: fica em aberto
 
+    var novo = dadosContratuaisMapper.clone(tiprelAtual);
+    novo.setDataInicio(inicio);
+    novo.setDataFim(termo);
+    novo.setEstActAdm(1);
+    novo.setEstado(Estado.A);
+    novo.setTipoSituacao("REATIVACAO");
+    novo.setReferente(REFERENTE_SITUACAO);
+    novo.setTiprelId(tiprelAtual);
+    novo = tiposRelacionamentoEntityRepository.saveAndFlush(novo);
+    tiprelAtual.setEstActAdm(0);
+
+    if (contrato != null) {
+      contrato.setDataFim(termo);
+      contratoHistoricoWriteService.registrarReativacao(contrato, inicio, termo);
+    }
+    var carreira = tiprelAtual.getCarreiraId();
+    if (carreira != null) carreira.setDataFim(termo);
     var mobilidade = tiprelAtual.getMobId();
     if (mobilidade != null) mobilidade.setDataFim(null);
-    var carreira = tiprelAtual.getCarreiraId();
-    if (carreira != null) carreira.setDataFim(null);
-    var contrato = tiprelAtual.getContrVinculoId();
-    if (contrato != null) contrato.setDataFim(null);
 
-    funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(null));
-    funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(null));
+    // Os def que a cessação fechou (A, fim = data da cessação) renascem como CÓPIAS para o novo período,
+    // ligadas à nova relação; os originais mantêm o fim da cessação (histórico).
+    final var novoTiprel = novo;
+    final var fimNovo = termo;
+    final var inicioNovo = inicio;
+    var novasRem = new java.util.ArrayList<cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity>();
+    var novosPag = new java.util.ArrayList<cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity>();
+    funcionarioRules.getRemuneracoesAssociados(tiprelAtual.getId()).stream()
+        .filter(r -> r.getEstado() == Estado.A && java.util.Objects.equals(r.getDataFim(), fimCessacao))
+        .forEach(r -> {
+          var c = new cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity();
+          c.setPercentagem(r.getPercentagem()); c.setValor(r.getValor()); c.setEstado(Estado.A);
+          c.setObs(r.getObs()); c.setUuid(UuidCreator.getTimeOrderedEpoch()); c.setTmId(r.getTmId());
+          c.setMoeda(r.getMoeda()); c.setTipo(r.getTipo()); c.setFlgBloquear(r.getFlgBloquear());
+          c.setFunId(r.getFunId()); c.setDataInicio(inicioNovo); c.setDataFim(fimNovo);
+          novasRem.add(definicaoRemuneracaoEntityRepository.save(c));
+        });
+    funcionarioRules.getPagamentosDescontosAssociados(tiprelAtual.getId()).stream()
+        .filter(p -> p.getEstado() == Estado.A && java.util.Objects.equals(p.getDataFim(), fimCessacao))
+        .forEach(p -> {
+          var c = new cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity();
+          c.setPercentagem(p.getPercentagem()); c.setValor(p.getValor()); c.setEstado(Estado.A);
+          c.setObs(p.getObs()); c.setUuid(UuidCreator.getTimeOrderedEpoch()); c.setTmId(p.getTmId());
+          c.setMoeda(p.getMoeda()); c.setTipo(p.getTipo()); c.setFlgBloquear(p.getFlgBloquear());
+          c.setNib(p.getNib()); c.setNif(p.getNif()); c.setNmEntidade(p.getNmEntidade());
+          c.setRhbId(p.getRhbId()); c.setEntId(p.getEntId());
+          c.setFunId(p.getFunId()); c.setDataInicio(inicioNovo); c.setDataFim(fimNovo);
+          novosPag.add(defPagamentoEntityRepository.save(c));
+        });
+    var assoc = new java.util.ArrayList<TipoRelRemPagEntity>();
+    novasRem.forEach(r -> { var x = new TipoRelRemPagEntity(); x.setTiprelId(novoTiprel); x.setRemId(r); assoc.add(x); });
+    novosPag.forEach(p -> { var x = new TipoRelRemPagEntity(); x.setTiprelId(novoTiprel); x.setPagId(p); assoc.add(x); });
+    tipoRelRemPagEntityRepository.saveAll(assoc);
   }
 
   /**

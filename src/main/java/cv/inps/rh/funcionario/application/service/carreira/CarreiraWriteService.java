@@ -121,6 +121,7 @@ public class CarreiraWriteService {
 
     if (carreiraEntityRepository.existsByContrVinculoIdFunIdAndEstado(funcionario, Estado.P))
       throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CARREIRA); // grupo relação laboral (QA 27/11)
 
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
@@ -313,6 +314,7 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CARREIRA); // grupo relação laboral (QA 27/11)
     var contratoAtual = funcionarioRules.getContratoAtual(funcionario.getUuid());
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, fonte);
@@ -340,6 +342,7 @@ public class CarreiraWriteService {
    * TIPREL_REM_PAG). Despromove o atual anterior (est=0, flg=0) — fica parqueado, sem data_fim.
    */
   private void marcarParaProcessar(FuncionarioEntity funcionario, CarreiraEntity carreira, CarreiraNovoDTO dto) {
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CARREIRA); // grupo relação laboral (QA 27/11)
     var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
     var tiprelDestaCarreira = tiposRelacionamentoEntityRepository
@@ -487,9 +490,13 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.badRequest("Não há carreira pendente para validar.");
     }
     var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
+    // INSERT (registo/progressão) ou UPDATE (proposta de edição — M3/B11). Antes só se procurava a
+    // INSERT e a UPDATE ficava pendente para sempre.
     var validation = funcionarioRules
         .getValidacaoPendenteByReferenciaUuid(carreira.getUuid(), TipoAcao.INSERT, Referencia.CARREIRA)
+        .or(() -> funcionarioRules.getValidacaoPendenteByReferenciaUuid(carreira.getUuid(), TipoAcao.UPDATE, Referencia.CARREIRA))
         .orElse(null);
+    boolean propostaEdicao = validation != null && TipoAcao.UPDATE.name().equals(validation.getTipoAccao());
 
     if (!aprovado) {
       // Rejeição: carreira/tiprel/def pendentes -> I. O vínculo/carreira atuais nunca foram tocados no
@@ -514,6 +521,8 @@ public class CarreiraWriteService {
       }
       return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira rejeitada.", List.of());
     }
+
+    if (propostaEdicao) return aprovarPropostaEdicao(carreira, tiprelPendente, validation);
 
     // === Aprovado: ATIVAR o pendente (carreira/tiprel/def P->A) + consolidar (est_act_adm=flg,
     // despromoção, fecho do track na progressão). Nada é CRIADO aqui — foi tudo criado no registo. ===
@@ -828,6 +837,14 @@ public class CarreiraWriteService {
     boolean mudouChave = mudouChaveCarreira(carreira, dto);
     boolean revalidar = correcaoRegisto || (mudouChave && !Estado.P.equals(carreira.getEstado()));
 
+    // M3/B11 (QA 26/11): editar a CHAVE (cargo/carreira PCCS/escalão) de uma carreira JÁ APROVADA não
+    // altera a aprovada — cria uma PROPOSTA pendente (carreira + tiprel + salário em P). O SIM troca a
+    // aprovada pela proposta; o NAO só inativa a proposta (o aprovado nunca foi tocado). Antes a edição
+    // era in place e a rejeição deixava a carreira aprovada em I com os valores rejeitados.
+    if (revalidar && !correcaoRegisto && Estado.A.equals(carreira.getEstado())) {
+      return editarComoProposta(funcionario, carreira, relacionamento, dto);
+    }
+
     // Correção reenviada pelo maker (C -> P): reactiva a validação INSERT que o checker deixou em C —
     // não cria uma UPDATE nova.
     ValidacaoEntity validacaoCorrecao = correcaoRegisto
@@ -989,6 +1006,139 @@ public class CarreiraWriteService {
 
     return new SuccessResponseDTO(true, carreira.getUuid().toString(),
         correcaoRegisto ? "Correção reenviada para validação." : "Carreira actualizada.", List.of());
+  }
+
+  /**
+   * Edição da chave de uma carreira aprovada como PROPOSTA pendente (M3/B11). Mesmo período da
+   * aprovada (é uma correção, não uma progressão no tempo). Validação UPDATE ancorada na carreira
+   * proposta; a ligação à aprovada é a lineage do tiprel proposto (TIPREL_ID = tiprel aprovado).
+   */
+  private SuccessResponseDTO editarComoProposta(FuncionarioEntity funcionario, CarreiraEntity aprovada,
+      TiposRelacionamentoEntity tiprelAprovado, CarreiraNovoDTO dto) {
+    if (carreiraEntityRepository.existsByContrVinculoIdFunIdAndEstado(funcionario, Estado.P))
+      throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
+    if (tiprelAprovado == null)
+      throw IgrpResponseStatusException.badRequest("Carreira sem relação laboral associada.");
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CARREIRA); // grupo relação laboral (QA 27/11)
+
+    var tipoCarreira = dto.getTipoCarreira() != null ? dto.getTipoCarreira() : aprovada.getTipoSituacao();
+    var obs = "CARREIRA_EDITAR";
+
+    var proposta = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
+    proposta.setObs(obs);
+    proposta.setTipoSituacao(tipoCarreira);
+    proposta.setContrVinculoId(aprovada.getContrVinculoId());
+    proposta.setDataInicio(aprovada.getDataInicio());
+    proposta.setDataFim(aprovada.getDataFim());
+    proposta.setEstActAdm(0);
+    proposta.setFlgProcessa(dto.getFlgProcessa() != null ? dto.getFlgProcessa() : aprovada.getFlgProcessa());
+    carreiraEntityRepository.save(proposta);
+
+    var tiprelProposto = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
+    tiprelProposto.setObs(obs);
+    tiprelProposto.setTipoSituacao(tipoCarreira);
+    tiprelProposto.setDataInicio(tiprelAprovado.getDataInicio());
+    tiprelProposto.setDataFim(tiprelAprovado.getDataFim());
+    tiprelProposto.setTiprelId(tiprelAprovado);
+    tiprelProposto.setContrVinculoId(tiprelAprovado.getContrVinculoId());
+    tiprelProposto.setCarreiraId(proposta);
+    tiprelProposto.setFunId(funcionario);
+    tiprelProposto.setMobId(tiprelAprovado.getMobId());
+    tiprelProposto.setRegimeId(tiprelAprovado.getRegimeId());
+    tiprelProposto.setSituacLaboralId(tiprelAprovado.getSituacLaboralId());
+    tiprelProposto.setEstActAdm(0);
+    tiprelProposto.setFlgProcessa(tiprelAprovado.getFlgProcessa());
+    tiprelProposto.setReferente("CARREIRA");
+    if (dto.getCargoPosicaoId() != null)
+      tiprelProposto.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargoPosicaoId()));
+    tiposRelacionamentoEntityRepository.save(tiprelProposto);
+
+    // Salário proposto (P) se o valor muda; o aprovado fica intacto até ao SIM.
+    Long salarioTmId = salarioTmIdDoContrato(aprovada.getContrVinculoId());
+    var salarioAprovado = salarioTmId == null ? null :
+        funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelAprovado.getId()).stream()
+            .filter(r -> r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
+            .findFirst().orElse(null);
+    if (salarioAprovado != null && dto.getSalario() != null
+        && (salarioAprovado.getValor() == null || salarioAprovado.getValor().compareTo(dto.getSalario()) != 0)) {
+      var salarioNovo = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obs);
+      salarioNovo.setDataInicio(salarioAprovado.getDataInicio());
+      salarioNovo.setDataFim(salarioAprovado.getDataFim());
+      salarioNovo.setTmId(salarioAprovado.getTmId());
+      salarioNovo.setFlgBloquear(salarioAprovado.getFlgBloquear());
+      definicaoRemuneracaoEntityRepository.save(salarioNovo);
+      tipoRelRemPagHelper.associarLista(tiprelProposto, List.of(salarioNovo), List.of());
+    }
+
+    var validation = new ValidacaoEntity();
+    validation.setTipoAccao(TipoAcao.UPDATE.name());
+    validation.setReferenciaName(Referencia.CARREIRA.name());
+    validation.setReferenciaId(proposta.getId());
+    validation.setReferenciaUuid(proposta.getUuid());
+    validation.setTiprelId(tiprelProposto);
+    validation.setEstado(Estado.P);
+    validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+    validation.setFunId(funcionario);
+    validacaoEntityRepository.save(validation);
+    var campos = dossierCampos.carreira();
+    detalheAlteracoes.congelar(validation, cv.inps.rh.funcionario.application.service.detalhe.DossierCampos.T_CARREIRA,
+        campos, detalheAlteracoes.capturar(campos, aprovada), detalheAlteracoes.capturar(campos, proposta));
+
+    return new SuccessResponseDTO(true, proposta.getUuid().toString(),
+        "Alteração da carreira enviada para validação.", List.of());
+  }
+
+  /**
+   * SIM de uma proposta de edição (validação UPDATE): a proposta substitui a aprovada no mesmo
+   * período. A aprovada (carreira/tiprel e o salário substituído) passa a I; os restantes def da
+   * aprovada (subsídios/descontos/fixos) re-associam-se ao tiprel proposto; a proposta herda o
+   * "atual" (EST_ACT_ADM) da aprovada.
+   */
+  private SuccessResponseDTO aprovarPropostaEdicao(CarreiraEntity proposta, TiposRelacionamentoEntity tiprelProposto,
+      ValidacaoEntity validation) {
+    var tiprelAprovado = tiprelProposto != null ? tiprelProposto.getTiprelId() : null;
+    var aprovada = tiprelAprovado != null ? tiprelAprovado.getCarreiraId() : null;
+    if (tiprelAprovado == null || aprovada == null)
+      throw IgrpResponseStatusException.badRequest("Proposta de edição sem carreira aprovada de origem.");
+
+    // Salário substituído = o salário A do aprovado, se a proposta trouxe um salário novo.
+    Long salarioTmId = salarioTmIdDoContrato(aprovada.getContrVinculoId());
+    var temSalarioNovo = salarioTmId != null && funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelProposto.getId()).stream()
+        .anyMatch(r -> r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId));
+    var excluir = new java.util.HashSet<Long>();
+    if (temSalarioNovo) {
+      funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelAprovado.getId()).stream()
+          .filter(r -> r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
+          .forEach(r -> { r.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(r); excluir.add(r.getId()); });
+    }
+    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelAprovado, tiprelProposto,
+        List.of(), List.of(), excluir, java.util.Collections.emptySet());
+
+    Integer act = tiprelAprovado.getEstActAdm();
+    tiprelAprovado.setEstActAdm(0);
+    tiprelAprovado.setFlgProcessa(0);
+    tiprelAprovado.setEstado(Estado.I);
+    tiposRelacionamentoEntityRepository.save(tiprelAprovado);
+    Integer actCarr = aprovada.getEstActAdm();
+    aprovada.setEstActAdm(0);
+    aprovada.setFlgProcessa(0);
+    aprovada.setEstado(Estado.I);
+    carreiraEntityRepository.save(aprovada);
+
+    proposta.setEstActAdm(actCarr);
+    proposta.setEstado(Estado.A);
+    carreiraEntityRepository.save(proposta);
+    tiprelProposto.setEstActAdm(act);
+    tiprelProposto.setEstado(Estado.A);
+    tiposRelacionamentoEntityRepository.save(tiprelProposto);
+    funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelProposto.getId())
+        .forEach(o -> { o.setEstado(Estado.A); definicaoRemuneracaoEntityRepository.save(o); });
+    funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelProposto.getId())
+        .forEach(o -> { o.setEstado(Estado.A); defPagamentoEntityRepository.save(o); });
+
+    validation.setEstado(Estado.A);
+    validacaoEntityRepository.save(validation);
+    return new SuccessResponseDTO(true, proposta.getUuid().toString(), "Carreira validada.", List.of());
   }
 
   /** Regra: uma carreira tem carreira PCCS e escalão, e por isso obrigatoriamente salário. */

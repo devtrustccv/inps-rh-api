@@ -220,3 +220,74 @@ CORRIGIR) passa a devolver em `subsidios` e `encargosDescontos` as linhas manuai
 como já fazia com o contrato pendente (`P`). Antes vinham `[]`; o ecrã reenviava sem elas e o backend eliminava-as (`E`).
 
 **Ação front:** nenhuma — o reenvio deve mandar as linhas como vêm do GET, cada uma com o seu `id`.
+
+## 14. Correções do QA do dossiê (27/11/2026)
+
+### 14.1 Uma alteração da relação laboral de cada vez (novo 400)
+Mobilidade, renovação, novo contrato, desativar/ativar contrato, carreira (nova, progressão, edição que vai a validação,
+marcar "processa salário") e situação laboral passam a ser bloqueadas se o colaborador tiver **outra** destas alterações
+pendente (`P`) ou em correção (`C`):
+`Existe uma alteração de <Mobilidade|Renovação de Contrato|...> pendente de validação|em correção para este colaborador. Valide-a ou rejeite-a antes de registar outra alteração da relação laboral.`
+O caso "mesmo tipo" mantém a mensagem e o status de sempre (ex.: 409 `Existe um registo de carreira por validar!`).
+Rendimentos, descontos, substituições, PD, banco, agregado e académicos continuam livres.
+
+**Situação laboral:** com uma alteração já pendente, novo envio devolve 400
+`Já existe uma alteração de situação laboral pendente de validação para este colaborador.` (antes 200 "sem alterações").
+
+### 14.2 Movimentos de dinheiro (novo 400)
+`POST .../{id}/remuneracao`, `POST .../{id}/pagamento`, `POST .../{id}/substituicoes`:
+- colaborador cessado → `O colaborador está inativo (cessado): não é possível registar movimentos.`
+- situação laboral pendente → `Existe uma alteração da situação laboral do colaborador por validar: ...`
+- rendimento/desconto com `dataInicio` depois do fim do contrato → `A Data de Início não pode ser posterior ao fim do contrato (dd-MM-yyyy).`
+- movimento inativo → `O movimento indicado está inativo.`; tipo errado → `O movimento indicado não é um movimento de rendimento|desconto.`
+
+### 14.3 Listas mostram itens em correção (`C`)
+`GET api/v1/funcionarios/renumeracoes`, a lista de pagamentos/descontos, `GET api/v1/funcionarios/substituicoes` e os
+dados bancários passam a incluir o estado `C`, para o maker abrir e reenviar.
+
+**Ação front:** permitir abrir/editar a linha em `C` (reenvio com `validar=null`/`validacao=null`).
+
+### 14.4 Processo disciplinar
+- `POST/PUT .../processo-disciplinar`: passam a ser gravados `numeroBO`, `datPublicacaoBO`, `numeroOfa`, `dataEmissaoOfa`
+  (o ecrã já os enviava; eram descartados).
+- `GET api/v1/funcionarios/processo-disciplinar/{id}` devolve também os campos do formulário: `estado`, `vinculoReferente`
+  (uuid do tiprel), `numeroProcesso`, `entidade`, `tipoProcesso`, `penaDisciplinar`, `dataInicioPd`, `dataFimPd`,
+  `dataInicioPena`, `dataFimPena`, `numeroBO`, `datPublicacaoBO`, `numeroOrdemServico`, `dataOrdemServico`, `numeroOfa`,
+  `dataEmissaoOfa` (datas `dd-MM-yyyy`). Os campos antigos mantêm-se.
+- Validar aceita `SIM`/`NAO` (antes só `S` aprovava — `SIM` rejeitava). Valor desconhecido → 400.
+
+**Ação front:** pré-preencher o formulário de edição/validação com estes campos.
+
+### 14.5 Carreira — editar a chave vai como proposta
+`PUT api/v1/funcionarios/{funcionarioId}/carreiras/{carreiraId}` numa carreira **aprovada** mudando cargo, carreira PCCS ou
+escalão: a carreira aprovada **não é alterada**; é criada uma carreira **proposta** pendente. Resposta:
+`id` = uuid da **proposta**, mensagem `Alteração da carreira enviada para validação.`. A validação (UPDATE) fica ancorada
+na proposta (`referenciaUuid`), por isso o ecrã de validação abre a proposta. SIM troca a aprovada pela proposta; NAO só
+inativa a proposta. Se `tipoCarreira` não vier, mantém o tipo da carreira aprovada.
+
+### 14.6 Substituição
+- Mês inteiramente no período conta **30 dias** também no `GET .../substituicoes/calcular` (regra do Processamento
+  Salarial "1 mês tem 30 dias"); o ecrã passa a mostrar o mesmo que é gravado.
+- Só meses com **mais de 15 dias** geram diferença (antes: total do período ≥ 15). Sem nenhum mês > 15 dias, não vai a validação.
+- Reenvio de correção recalcula o detalhe mensal com o novo período.
+- SIM sem o movimento `REM_SUBSTITUICAO` parametrizado no vínculo do substituto → 400 (antes aprovava sem pagamento).
+- A Ordem de Serviço fica no **substituto** e usa o motivo e o período da substituição.
+
+### 14.7 Cessação e reativação
+- Cessação aprovada: a versão em vigor do histórico do contrato passa a terminar na data da cessação; só os def da relação
+  atual ainda em vigor são fechados.
+- Reativação aprovada: cria uma **nova relação laboral** e uma **nova versão do histórico** a partir da data de reativação
+  até ao termo previsto do contrato (contrato a termo) ou em aberto; os def renascem como novas linhas para esse período.
+  A cessação fica visível como intervalo no histórico (antes anulava as datas de fim de toda a cadeia).
+
+### 14.8 Registar colaborador com registo rejeitado da mesma pessoa
+`POST api/v1/funcionarios` com o mesmo **tipo + número de documento** de um registo de colaborador **rejeitado** (NAO):
+em vez de 409, o registo rejeitado é **reaproveitado**. Os dados submetidos substituem os do rejeitado e ele volta a
+`P` para validação.
+- Resposta 200 com `id` = uuid do registo **rejeitado** (é o mesmo colaborador) e um alerta em `alertas`:
+  `Já existia um registo rejeitado deste colaborador (documento X). Foi reaproveitado com os dados agora submetidos e voltou para validação.`
+- A validação rejeitada fica no histórico (`I`); é aberta uma validação nova. O "Detalhe de alterações" mostra a
+  diferença para o registo rejeitado.
+- O documento ou NIF de um registo pendente, em correção ou aprovado (incluindo cessado) continua a dar 409.
+
+**Ação front:** mostrar os `alertas` da resposta do registo (já são mostrados para contactos duplicados).

@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.commands.AlterarEstadoContratoCommand;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -75,6 +76,7 @@ public class AlterarEstadoContratoService {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Só é possível "
             + (estadoAlvo == Estado.I ? "desativar" : "ativar") + " o contrato atual do funcionário."));
 
+    funcionarioRules.garantirSemAcaoLaboralPendente(funcionario.getUuid(), Referencia.CONTRATO); // grupo relação laboral (QA 27/11)
     if (estadoAlvo == Estado.I) {
       validarDesativacao(contrato, tiprel);
     } else {
